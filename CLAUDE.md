@@ -86,21 +86,15 @@ Read this before the schema. It maps what the user sees in the app to the data m
 ## Current files (the working set)
 
 ```
-data-from-client/
-  leicht_units__767_.html            # ⭐ LIVE APP BUILD v767 (17.6 MB). Raw catalog in <script id="DATA">
-                                     #   (DB.families/programs/altnames/rules). The FULL v767 export was
-                                     #   generated FROM this file by driving its own renderer (see below).
-  d4k-design-book-json-data/         # MAIN catalog (what the backend ingests)
-    leicht-catalog-v584-full.json    #   superset: meta, programs, priceFieldLegend, ruleTables,
-                                     #   categories, products[1338] → skus[16,309]
-    leicht-products.ndjson           #   products-only subset
-    leicht-catalog-v584-SCHEMA.md    #   field-by-field schema of the above
-    leicht-catalog-v584-QA.md / -report.html
-  new-exported data/                 # ACCESSORY-PANEL export (supplements the main catalog)
-    Dash4_AccessoryPanel_Export.json #   18,327 units → accessoryPanel tabs/sections/cards (~59 MB)
-    Dash4_AccessoryPanel_Export.json.gz
-    Dash4_AccessoryPanel_SAMPLE.json #   3 pretty-printed units
-    Dash4_AccessoryPanel_Export_Spec.md  # client's own notes on how they built it (v728 headless run)
+data-from-client/                    # NOTE (2026-07-08): all client data JSON deleted — only the HTML
+                                     #   build is kept here now. Everything the backend needs is the
+                                     #   in-house export under docs/ (export-v767.json). The old client
+                                     #   files below (v584 catalog, accessory-panel export, ts-structure
+                                     #   export) are GONE from disk; recover from git history if needed.
+  leicht_units__767_.html            # ⭐ LIVE APP BUILD v767 (17.6 MB) — THE ONLY FILE STILL HERE.
+                                     #   Raw catalog in <script id="DATA"> (DB.families/programs/altnames/
+                                     #   rules). The FULL v767 export was generated FROM this file by
+                                     #   driving its own renderer (see below).
 
 docs/
   export-schema.ts                   # ⭐ THE CONTRACT — canonical normalized export schema (see below)
