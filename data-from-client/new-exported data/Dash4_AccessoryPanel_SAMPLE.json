@@ -1,0 +1,1085 @@
+{
+  "meta": {
+    "generated": "2026-07-06T06:42:44.154506Z",
+    "source": "leicht_units v728 (headless parity run of openDetail)",
+    "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
+    "unitCount": 18327,
+    "unitsWithPanel": 12288,
+    "note": "3 representative units — floor door, sink, dishwasher front."
+  },
+  "units": {
+    "T6080S": {
+      "code": "T6080S",
+      "fid": "XSPL_TS",
+      "label": "Floor unit · S",
+      "cat": "Base",
+      "sub": "Doors",
+      "W": 600,
+      "H": 795,
+      "D": 560,
+      "hc": 80,
+      "alterations": [
+        "BFA6058",
+        "BFC6058",
+        "BFCG6058",
+        "CBSET60581",
+        "CBSET60581U",
+        "CBSET60582",
+        "CBSET60582U",
+        "CBSET60583",
+        "CBSET60583U",
+        "EBF6058",
+        "EBFF6058",
+        "EBFM6058",
+        "HBF6058",
+        "HBFF6058",
+        "HBFM6058",
+        "LBFS60581",
+        "LBFS60581U",
+        "LBFS60582",
+        "LBFS60582U",
+        "LBFS60583",
+        "LBFS60583U",
+        "LBFS60584",
+        "LBFS60584U",
+        "LBNS60581",
+        "LBNS60581U",
+        "LBNS60582",
+        "LBNS60582U",
+        "LBNS60583",
+        "LBNS60583U",
+        "LBNS60584",
+        "LBNS60584U",
+        "SMNK200",
+        "SMNT",
+        "SMVK100",
+        "SMVK160",
+        "SMVK200",
+        "MPTSCH155"
+      ],
+      "accessories": [
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705"
+      ],
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Compatible Accessories",
+            "count": 9,
+            "notes": [
+              "Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "BFA6058",
+                    "name": "Plastic Cutlery Tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/BFA6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "BFC6058",
+                    "name": "Plastic Tray, Adjustable",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/BFC6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "BFCG6058",
+                    "name": "Plastic Cutlery Tray with Spice Tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/BFCG6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "EBF6058",
+                    "name": "Q-Box Cutlery Tray – Depth 58 cm",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/EBF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "EBFF6058",
+                    "name": "Foil Tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/EBFF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "EBFM6058",
+                    "name": "Knife Holder",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/EBFM6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "HBF6058",
+                    "name": "Standard Cutlery Tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/HBF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "HBFF6058",
+                    "name": "Cutlery Tray with Foil Compartment",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/HBFF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "HBFM6058",
+                    "name": "Cutlery Tray with Knife Holder",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/HBFM6058.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Q-Box",
+            "count": 3,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "EBF6058",
+                    "name": "Cutlery tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/EBF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "EBFF6058",
+                    "name": "Cutlery tray with 3 foil",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/EBFF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "EBFM6058",
+                    "name": "Cutlery tray with knife holder",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/EBFM6058.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Plastic",
+            "count": 3,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "BFA6058",
+                    "name": "Cutlery tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/BFA6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "BFC6058",
+                    "name": "Cutlery tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/BFC6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "BFCG6058",
+                    "name": "Cutlery tray with spice tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/BFCG6058.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "L-Box oak",
+            "count": 8,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "LBFS60581",
+                    "name": "L-Box in oak drawer-set 1",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBFS60581.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBFS60581"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBFS60581U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "LBFS60582",
+                    "name": "L-Box in oak drawer-set 2",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBFS60582.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBFS60582"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBFS60582U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "LBFS60583",
+                    "name": "L-Box in oak drawer-set 3",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBFS60583.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBFS60583"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBFS60583U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "LBFS60584",
+                    "name": "L-Box in oak drawer-set 4",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBFS60584.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBFS60584"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBFS60584U"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "L-Box walnut",
+            "count": 8,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "LBNS60581",
+                    "name": "L-Box in walnut drawer-set 1",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBNS60581.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBNS60581"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBNS60581U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "LBNS60582",
+                    "name": "L-Box in walnut drawer-set 2",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBNS60582.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBNS60582"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBNS60582U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "LBNS60583",
+                    "name": "L-Box in walnut drawer-set 3",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBNS60583.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBNS60583"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBNS60583U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "LBNS60584",
+                    "name": "L-Box in walnut drawer-set 4",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/LBNS60584.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "LBNS60584"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "LBNS60584U"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Beech",
+            "count": 3,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "HBF6058",
+                    "name": "Cutlery tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/HBF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "HBFF6058",
+                    "name": "Cutlery tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/HBFF6058.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "HBFM6058",
+                    "name": "Cutlery tray",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/HBFM6058.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Other",
+            "count": 6,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "SMVK100",
+                    "name": "Connecting cable",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/SMVK100.jpg",
+                    "variants": [
+                      {
+                        "label": "1 m",
+                        "code": "SMVK100"
+                      },
+                      {
+                        "label": "1.6 m",
+                        "code": "SMVK160"
+                      },
+                      {
+                        "label": "2 m",
+                        "code": "SMVK200"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "SMNK200",
+                    "name": "Power connection cable",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/SMNK200.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "SMNT",
+                    "name": "Power supply unit",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/SMNT.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "MPTSCH155",
+                    "name": "MPTSCH155",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/MPTSCH155.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Pullouts",
+            "count": 6,
+            "notes": [
+              "Fitted behind doors or pullouts. Behind doors the actual width is ≈2.5 cm below nominal (spacer at hinge side) and wide-angle hinges MP..SCH155 are required. M8 variant = type + U."
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "IGS6058",
+                    "name": "Inner drawer · metal front",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/IGS6058.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "IGS6058"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "IGS6058U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "IGZ6058",
+                    "name": "Inner pullout · metal front",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/IGZ6058.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "IGZ6058"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "IGZ6058U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "IGZU6058",
+                    "name": "Inner pullout · Front finish matching cabinet front",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/IGZU6058.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "IGZU6058"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "IGZU6058U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "MPIGSU60",
+                    "name": "Exchange 1.6 cm front panel — inner drawers",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/MPIGSU60.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "MPIGSU60"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "MPIGZU60"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "IGZEU6058",
+                    "name": "Inner pullout · Front finish matching cabinet front + Spacer",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/IGZEU6058.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3 + Spac",
+                        "code": "IGZEU6058"
+                      },
+                      {
+                        "label": "M8 + Spac",
+                        "code": "IGZEU6058U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "ANIGE",
+                    "name": "Exchange wide-angle hinge — standard hinge + spacer strip (ANIGE)",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANIGE.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Alterations",
+            "count": 7,
+            "notes": [
+              "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "ANST",
+                    "name": "Cupboard Depth Alteration",
+                    "desc": "Carcase depth altered to a non-standard size.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSH",
+                    "name": "Cupboard Height Alteration",
+                    "desc": "Carcase height altered to a non-standard size.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSHT",
+                    "name": "Cupboard Height & Depth Alteration",
+                    "desc": "Height and depth both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSB",
+                    "name": "Cupboard Width Alteration",
+                    "desc": "Carcase width altered outside the standard grid.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBH",
+                    "name": "Cupboard Width & Height Alteration",
+                    "desc": "Width and height both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBT",
+                    "name": "Cupboard Width & Depth Alteration",
+                    "desc": "Width and depth both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBHT",
+                    "name": "Cupboard Width, Height & Depth Alteration",
+                    "desc": "Width, height and depth all altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "TSPA807368BTZW": {
+      "code": "TSPA807368BTZW",
+      "fid": "SNK7",
+      "label": "Instant Hot Sink Blender — 30 cm door",
+      "cat": "Base",
+      "sub": "Sinks",
+      "W": 800,
+      "H": 730,
+      "D": 660,
+      "hc": 73,
+      "alterations": [],
+      "accessories": [
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "250",
+        "410",
+        "412",
+        "413",
+        "415",
+        "417",
+        "418",
+        "419",
+        "421",
+        "422",
+        "424",
+        "431",
+        "433",
+        "438",
+        "439",
+        "441",
+        "453",
+        "454",
+        "455",
+        "468",
+        "469",
+        "476",
+        "486",
+        "488",
+        "491",
+        "493",
+        "494",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "750"
+      ],
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Compatible Accessories",
+            "count": 2,
+            "notes": [
+              "Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "HFO3",
+                    "name": "Opening support for sink and trash pullout cupboards",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/HFO3.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "MPRU",
+                    "name": "Sink unit with back panel",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/MPRU.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Overview",
+            "count": 0,
+            "notes": [
+              "Instant Hot Sink Blender — 30 cm door. This sink unit can be set up for standard or deep-sink installation, fitted with a matching visible-side panel, and — for door sinks — modified for extra-deep basins. Use the tabs for the relevant codes."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Installation",
+            "count": 3,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "Standard installation",
+                "notes": [
+                  "Standard carcass depth (56 cm) — no alteration code required."
+                ],
+                "cards": []
+              },
+              {
+                "heading": "Alterations & back panel",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "ANTSP63US",
+                    "name": "Deep Sink Installation Package",
+                    "desc": "Cupboard depth 63 cm with offset back panel (basis: sink base unit with back panel, 68 cm depth). Not in combination with AN TOSO.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANTSP63US.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANTSPZAUS",
+                    "name": "Sink Pullout Alteration",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANTSPZAUS.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "MPRU",
+                    "name": "Back Panel with Hose Access Cover",
+                    "desc": "No back panel as standard. MPRU adds a back panel with a removable cover for the on-site hose cutout. Required when a sink installation needs a finished back panel and service access.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/MPRU.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Visible Sides",
+            "count": 3,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "Recommended for selected unit",
+                "notes": [
+                  "Matches this unit's carcass depth: 660 mm = 66 cm."
+                ],
+                "cards": [
+                  {
+                    "code": "FS7366",
+                    "name": "Visible Carcass Side — 66 cm",
+                    "desc": "Carcase height H73 · carcass depth 66 cm (660 mm). Matches the selected unit specification.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/FS7366.jpg",
+                    "variants": []
+                  }
+                ]
+              },
+              {
+                "heading": "Alternative — deep installation",
+                "notes": [
+                  "Same deep result from a standard carcass with the deep package. Use both codes together."
+                ],
+                "cards": [
+                  {
+                    "code": "FS7361",
+                    "name": "Visible Carcass Side — 61 cm",
+                    "desc": "Carcase height H73 · side depth 61 cm. Deep installation route — pair with ANTSP63US.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/FS7361.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANTSP63US",
+                    "name": "Deep Installation Package",
+                    "desc": "Cupboard depth 63 cm with offset back panel. Pair with FS7361.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANTSP63US.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Sink Compatibility",
+            "count": 0,
+            "notes": [
+              "No hinge modification — this is a drawer / pullout sink unit. The deep-basin hinge modification (ANSVVO275) applies to door sink units only."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Accessories",
+            "count": 0,
+            "notes": [
+              "Door-mounted accessories (waste bins, cleaning pullouts, towel rails) require a hinged door — they are not compatible with drawer / pullout sink construction."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Alterations",
+            "count": 7,
+            "notes": [
+              "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "ANST",
+                    "name": "Cupboard Depth Alteration",
+                    "desc": "Carcase depth altered to a non-standard size.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSH",
+                    "name": "Cupboard Height Alteration",
+                    "desc": "Carcase height altered to a non-standard size.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSHT",
+                    "name": "Cupboard Height & Depth Alteration",
+                    "desc": "Height and depth both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSB",
+                    "name": "Cupboard Width Alteration",
+                    "desc": "Carcase width altered outside the standard grid.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBH",
+                    "name": "Cupboard Width & Height Alteration",
+                    "desc": "Width and height both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBT",
+                    "name": "Cupboard Width & Depth Alteration",
+                    "desc": "Width and depth both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBHT",
+                    "name": "Cupboard Width, Height & Depth Alteration",
+                    "desc": "Width, height and depth all altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "GFT4580G": {
+      "code": "GFT4580G",
+      "fid": "GFT_DW_G",
+      "label": "Front for semi-integrated Dishwasher · 2 parts hinged",
+      "cat": "Base",
+      "sub": "Appliance housing",
+      "W": 450,
+      "H": 792,
+      "D": 20,
+      "hc": 80,
+      "alterations": [],
+      "accessories": [
+        "201",
+        "202",
+        "203",
+        "204",
+        "205",
+        "226",
+        "228",
+        "250",
+        "272",
+        "283",
+        "286",
+        "486",
+        "613",
+        "654",
+        "669",
+        "684",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "726",
+        "728",
+        "750",
+        "783",
+        "786"
+      ],
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Pullouts",
+            "count": 4,
+            "notes": [
+              "Fitted behind doors or pullouts. Behind doors the actual width is ≈2.5 cm below nominal (spacer at hinge side) and wide-angle hinges MP..SCH155 are required. M8 variant = type + U."
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "IGS4558",
+                    "name": "Inner drawer · metal front",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/IGS4558.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "IGS4558"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "IGS4558U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "IGZ4558",
+                    "name": "Inner pullout · metal front",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/IGZ4558.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "IGZ4558"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "IGZ4558U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "IGZU4558",
+                    "name": "Inner pullout · Front finish matching cabinet front",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/IGZU4558.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "IGZU4558"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "IGZU4558U"
+                      }
+                    ]
+                  },
+                  {
+                    "code": "MPIGSU45",
+                    "name": "Exchange 1.6 cm front panel — inner drawers",
+                    "desc": "",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/MPIGSU45.jpg",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "code": "MPIGSU45"
+                      },
+                      {
+                        "label": "M8",
+                        "code": "MPIGZU45"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Alterations",
+            "count": 7,
+            "notes": [
+              "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "notes": [],
+                "cards": [
+                  {
+                    "code": "ANST",
+                    "name": "Cupboard Depth Alteration",
+                    "desc": "Carcase depth altered to a non-standard size.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSH",
+                    "name": "Cupboard Height Alteration",
+                    "desc": "Carcase height altered to a non-standard size.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSHT",
+                    "name": "Cupboard Height & Depth Alteration",
+                    "desc": "Height and depth both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSB",
+                    "name": "Cupboard Width Alteration",
+                    "desc": "Carcase width altered outside the standard grid.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBH",
+                    "name": "Cupboard Width & Height Alteration",
+                    "desc": "Width and height both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBT",
+                    "name": "Cupboard Width & Depth Alteration",
+                    "desc": "Width and depth both altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                    "variants": []
+                  },
+                  {
+                    "code": "ANSBHT",
+                    "name": "Cupboard Width, Height & Depth Alteration",
+                    "desc": "Width, height and depth all altered.",
+                    "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                    "variants": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;margin-right:5px\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\"/><path d=\"M21 15l-5-5L5 21\"/></svg>Inspiration",
+            "count": 0,
+            "notes": [
+              "Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style."
+            ],
+            "sections": []
+          }
+        ]
+      }
+    }
+  }
+}

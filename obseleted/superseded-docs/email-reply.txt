@@ -1,0 +1,42 @@
+Subject: Accessory Panel export — checked, 3 fixes needed (schema attached)
+
+Hi Shimon,
+
+Thank you for the new export. I checked the full file and also opened the live v765 UI to compare
+side by side. The export is very good — the shape is right, coverage is strong (12,288 units with a
+panel, 220,367 cards), and every card has a working image URL. The Installation, Visible Sides, and
+Pullouts tabs match the UI exactly, including the L3/M3 and M8 pullout buttons.
+
+Three things need a fix:
+
+1) Alterations sub-tabs are missing.
+   In the UI, the Alterations tab is split into two sub-tabs: "Standard" and "Unit Specific"
+   (for example: Standard 7, Unit Specific 15). In the export, all the cards are in one flat list
+   with no heading. No cards are lost — but we cannot show the two sub-tabs. Please keep the two
+   groups: "Standard" for the general ANS… codes, "Unit Specific" for the unit's own codes.
+
+2) One tab label has HTML inside it.
+   The "Inspiration" tab label came out as raw SVG markup (the icon code) instead of plain text.
+   It should just be "Inspiration". Please strip all HTML from every tab label.
+
+3) The Configure pills are missing.
+   The top of the detail screen has Width / Height / Depth / Programme pills. Clicking a pill opens
+   another unit (another code) — for example, on TK6080BZ2, clicking Width 70 opens TK7080BZ2.
+   The export does not include this yet. Please add a "configure" object per unit with each pill's
+   target code (details in the schema).
+
+To make this easy and avoid guesswork, I wrote a full field-by-field schema:
+"Dash4_AccessoryPanel_SCHEMA.md" (attached). It lists every field with a plain-English description,
+the three fixes above, and one worked example. Please give it to Claude together with the HTML so the
+next export follows it exactly.
+
+One more note: the v765 UI added a few new detail-screen parts (a "Catalog" button, a toe-kick
+installed-height line, a "My Note" box, an "Ask the Expert" button, and an "Engineering" list of
+Yes/No capability flags like Suspended install / SensoMatic / Tip-Softclose / Opening system P1 /
+68 cm depth). Most of these we build on our side from the main catalog. The only one to check is the
+"Engineering" flags — if those come from the unit's own flags, let me know and we will handle it.
+
+Everything else looks great. Once these three fixes are in, we are ready to load it.
+
+Best,
+[Your name]

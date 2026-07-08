@@ -1,0 +1,16 @@
+{
+  "name": "leicht-catalog-api",
+  "version": "1.0.0",
+  "description": "Small REST API + Swagger docs over the extracted LEICHT catalog (leicht_catalog.json).",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "puppeteer-core": "^23.11.1",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

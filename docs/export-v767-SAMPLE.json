@@ -1,0 +1,4557 @@
+{
+  "meta": {
+    "generated": "2026-07-08T06:55:43.252Z",
+    "source": "leicht_units v767 (headless DOM extraction via openDetail)",
+    "schemaVersion": "1.0.0",
+    "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
+    "counts": {
+      "items": 18375,
+      "cabinets": 16915,
+      "accessories": 1460,
+      "categories": 14,
+      "programmes": 120
+    },
+    "note": "SAMPLE subset of export-v767.json — 10 items exercising every schema object."
+  },
+  "categories": [
+    {
+      "id": "base",
+      "name": "Base",
+      "itemCount": 6935,
+      "subcategories": [
+        {
+          "id": "doors",
+          "name": "Doors",
+          "itemCount": 218,
+          "sections": [
+            "Standard Door Cabinets",
+            "Door + Drawer Combinations",
+            "Specialty Door Solutions",
+            "Niche & Decorative Applications",
+            "Hot Water Units"
+          ]
+        },
+        {
+          "id": "special-height",
+          "name": "Special Height",
+          "itemCount": 866,
+          "sections": [
+            "Doors",
+            "Fixed Blender",
+            "Drawers & Pullouts",
+            "Sink",
+            "Appliances",
+            "Fillers",
+            "Sideboard",
+            "Glass",
+            "Panels",
+            "Back panels"
+          ]
+        },
+        {
+          "id": "drawers-pullouts",
+          "name": "Drawers & Pullouts",
+          "itemCount": 511,
+          "sections": [
+            "Accessories",
+            "Pullout Units – ZIS",
+            "Pullout Units – SZIS",
+            "Drawer Units",
+            "Pullout Units – Z3",
+            "Pullout Units – Z2X",
+            "Pullout Units – S2Z",
+            "Pullout Units – Z2"
+          ]
+        },
+        {
+          "id": "trash-pullout",
+          "name": "Trash Pullout",
+          "itemCount": 66,
+          "sections": [
+            "Waste Bin Units"
+          ]
+        },
+        {
+          "id": "sinks",
+          "name": "Sinks",
+          "itemCount": 1444,
+          "sections": [
+            "Fronts & Panels · USA Sink Alterations",
+            "Alterations & Modifications",
+            "Instant Hot Sink Units",
+            "Sink Units with Drawers",
+            "Sink Units",
+            "Sink Units with Trash Pullout",
+            "Sink without drill fronts",
+            "Towel Rails",
+            "Sink Equipment & Care"
+          ]
+        },
+        {
+          "id": "cooktops-downdrafts",
+          "name": "Cooktops & Downdrafts",
+          "itemCount": 2682,
+          "sections": [
+            "Cooktop Units",
+            "Cooktop Unit with Drawers",
+            "Accessories & Modifications",
+            "Downdraft & Cooktop Units - Three Drawers",
+            "Downdraft & Cooktop Units - Single Drawer",
+            "Downdraft & Cooktop Units - Two Drawers"
+          ]
+        },
+        {
+          "id": "appliance-housing",
+          "name": "Appliance housing",
+          "itemCount": 373,
+          "sections": [
+            "Wine Units",
+            "Oven & Base Housings",
+            "Appliance Fronts · DW (center handle)",
+            "Appliance Doors · L/R semi integrated",
+            "Appliance Fronts · L/R, semi integrated, and Kyoto",
+            "Front for Dishwasher Appliances · Original handle D61",
+            "Dishwasher Fronts · Semi integrated",
+            "Appliance Fronts · 80 cm DW & 20 cm open unit",
+            "Front for Built-in Appliances · Original handle D61 For handle lights"
+          ]
+        },
+        {
+          "id": "corners",
+          "name": "Corners",
+          "itemCount": 144,
+          "sections": [
+            "Functional Corner Storage",
+            "Standard Corner Cabinets (Most Common)",
+            "Corner Sink Cabinets",
+            "Special / Construction Modules"
+          ]
+        },
+        {
+          "id": "fillers",
+          "name": "Fillers",
+          "itemCount": 86,
+          "sections": [
+            "Corner & Angle Solutions",
+            "Profile Fillers",
+            "Installation Accessories",
+            "Standard Adjustments",
+            "Primary Fillers (Daily Use)"
+          ]
+        },
+        {
+          "id": "function-cabinets",
+          "name": "Function Cabinets",
+          "itemCount": 106,
+          "sections": [
+            "Pull-Out Storage",
+            "Towel Units",
+            "Specialty Function Cabinets",
+            "Open Storage & Shelving"
+          ]
+        },
+        {
+          "id": "open-lights",
+          "name": "Open & Lights",
+          "itemCount": 105,
+          "sections": [
+            "Open Shelf Units (Most Used)",
+            "Glass Units",
+            "Open Shelf Alterations",
+            "Lighting"
+          ]
+        },
+        {
+          "id": "accessories-surround",
+          "name": "Accessories & Surround",
+          "itemCount": 334,
+          "sections": [
+            "Back & Side Panels",
+            "Connections & Accessories",
+            "End Panels",
+            "Support Panel with Plinth",
+            "Visible Carcase Sides",
+            "Primo 45° Mitre End Panels",
+            "Contino 45° Mitre End Panels",
+            "Avance 45° Mitre End Panels"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tall",
+      "name": "Tall",
+      "itemCount": 4114,
+      "subcategories": [
+        {
+          "id": "panels-fillers-surrounds",
+          "name": "Panels, Fillers & Surrounds",
+          "itemCount": 504,
+          "sections": [
+            "Tall Fillers",
+            "Tall Blenders",
+            "Tall Angle Blenders",
+            "Tall Corner Blenders",
+            "Rear Panels in Front Finish",
+            "Tall Visible Carcase Side",
+            "Depth Extensions",
+            "Tall End Panels",
+            "Support Panel with Plinth",
+            "Wall Blenders",
+            "Carcase Side Extension"
+          ]
+        },
+        {
+          "id": "appliance-housing",
+          "name": "Appliance Housing",
+          "itemCount": 566,
+          "sections": [
+            "Appliance Doors & Fronts",
+            "Accessories & Modifications",
+            "Niche 57.1–72 cm",
+            "Niche 33–57 cm",
+            "Niche 72.1–128 cm",
+            "Housing Units",
+            "Slide-away Door Housing",
+            "Dishwasher Housings & Supports",
+            "Fridge & Freezer Housing",
+            "Fridge Housings · Integrated",
+            "Washing Machine Housings"
+          ]
+        },
+        {
+          "id": "drawers-accessories",
+          "name": "Drawers & Accessories",
+          "itemCount": 56,
+          "sections": [
+            "Walk-In Closet",
+            "-"
+          ]
+        },
+        {
+          "id": "passage-doors",
+          "name": "Passage Doors",
+          "itemCount": 102,
+          "sections": [
+            "Niche Doors",
+            "Passage Door Accessories",
+            "Passage Doors"
+          ]
+        },
+        {
+          "id": "tall-storage",
+          "name": "Tall Storage",
+          "itemCount": 711,
+          "sections": [
+            "Pantry Units",
+            "Fixed Shelf Units",
+            "Pharmacy",
+            "Storage Units",
+            "Storage Center",
+            "Pullout Utility Unit",
+            "Interior+",
+            "Breakfast",
+            "Pullouts",
+            "Wardrobe & Utility"
+          ]
+        },
+        {
+          "id": "modular-housing-units",
+          "name": "Modular Housing Units",
+          "itemCount": 976,
+          "sections": [
+            "Step 1 — Housing Cabinet (HGM)",
+            "Step 3 — Appliance Niche (MGN)",
+            "Step 4 — Top Modules (MO)",
+            "Step 2 — Bottom Modules (MU)",
+            "Step 2 — Bottom Modules (MU) · 73/86 cm",
+            "Step 2 — Bottom Modules (MU) · 80 cm"
+          ]
+        },
+        {
+          "id": "modular-storage-units",
+          "name": "Modular Storage Units",
+          "itemCount": 48,
+          "sections": [
+            "Tall Modular Storage Units"
+          ]
+        },
+        {
+          "id": "display-open-storage",
+          "name": "Display & Open Storage",
+          "itemCount": 464,
+          "sections": [
+            "Tall End Shelf Units",
+            "Open Shelf Units",
+            "Vero Glass Units",
+            "Programmed Glass Tall Units"
+          ]
+        },
+        {
+          "id": "top-cupboard",
+          "name": "Top Cupboard",
+          "itemCount": 143
+        },
+        {
+          "id": "corner",
+          "name": "Corner",
+          "itemCount": 110
+        },
+        {
+          "id": "sliding-fold-away-doors",
+          "name": "Sliding & Fold-Away Doors",
+          "itemCount": 143,
+          "sections": [
+            "Slide Away",
+            "Sliding Doors",
+            "Side panels",
+            "Fold-away Doors"
+          ]
+        },
+        {
+          "id": "closet-wardrobe",
+          "name": "Closet & Wardrobe",
+          "itemCount": 291,
+          "sections": [
+            "Wardrobe Storage",
+            "Closet Accessories",
+            "Shoe Storage",
+            "Laundry Closet",
+            "Walk-In Closet",
+            "Sideboards"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wall",
+      "name": "Wall",
+      "itemCount": 1116,
+      "subcategories": [
+        {
+          "id": "fillers",
+          "name": "Fillers",
+          "itemCount": 158,
+          "sections": [
+            "Angle & Special Fillers",
+            "Corner Wall Fillers",
+            "Filler Accessories",
+            "Standard Wall Fillers",
+            "Visible Carcase Sides",
+            "End Panels"
+          ]
+        },
+        {
+          "id": "ventilation-micro",
+          "name": "Ventilation & Micro",
+          "itemCount": 182,
+          "sections": [
+            "Microwave Housing",
+            "Fold-Up Door Units",
+            "Extractor Units · Flap Doors",
+            "Extractor Units · Standard Doors",
+            "Extractor Units · Swing Flap Doors",
+            "Extractor Box Accessories (not functioning)"
+          ]
+        },
+        {
+          "id": "corner",
+          "name": "Corner",
+          "itemCount": 76,
+          "sections": [
+            "Corner Wall Units",
+            "Diagonal Corner Wall Units",
+            "Corner Fillers & Angle Blenders"
+          ]
+        },
+        {
+          "id": "glass-unit",
+          "name": "Glass unit",
+          "itemCount": 134,
+          "sections": [
+            "Vero Glass Wall Units",
+            "Accent Glass Units",
+            "Glass Units in Program Finish"
+          ]
+        },
+        {
+          "id": "lift-up",
+          "name": "Lift-Up",
+          "itemCount": 179,
+          "sections": [
+            "Flap Units",
+            "Swing Flap Units",
+            "Fold-Up Units"
+          ]
+        },
+        {
+          "id": "interior",
+          "name": "Interior+",
+          "itemCount": 37
+        },
+        {
+          "id": "open-shelf",
+          "name": "Open shelf",
+          "itemCount": 85
+        },
+        {
+          "id": "wall-unit",
+          "name": "Wall unit",
+          "itemCount": 265,
+          "sections": [
+            "Sliding Door Wall Units",
+            "Standard Wall Units",
+            "Corner Wall Units"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "midway",
+      "name": "Midway",
+      "itemCount": 237,
+      "subcategories": [
+        {
+          "id": "cabinets-slide-away",
+          "name": "Cabinets & Slide Away",
+          "itemCount": 57,
+          "sections": [
+            "Sliding & Slide-Away Doors",
+            "Corner Units",
+            "Midway Units"
+          ]
+        },
+        {
+          "id": "drawers-pull-outs",
+          "name": "Drawers & Pull-outs",
+          "itemCount": 13,
+          "sections": [
+            "Pullout Trays"
+          ]
+        },
+        {
+          "id": "accessory-surround",
+          "name": "Accessory surround",
+          "itemCount": 41,
+          "sections": [
+            "Blenders & Fillers",
+            "Visible Sides & Panels"
+          ]
+        },
+        {
+          "id": "glass-unit",
+          "name": "Glass unit",
+          "itemCount": 5,
+          "sections": [
+            "Glass Door Units"
+          ]
+        },
+        {
+          "id": "appliances",
+          "name": "Appliances",
+          "itemCount": 8,
+          "sections": [
+            "Appliance Niches"
+          ]
+        },
+        {
+          "id": "roller-shutter",
+          "name": "Roller Shutter",
+          "itemCount": 64,
+          "sections": [
+            "Roller Shutter Units",
+            "Glass Roller Shutter"
+          ]
+        },
+        {
+          "id": "open-shelf",
+          "name": "Open shelf",
+          "itemCount": 38,
+          "sections": [
+            "Shelf Alterations",
+            "Open Shelf Units"
+          ]
+        },
+        {
+          "id": "lighting",
+          "name": "Lighting",
+          "itemCount": 11,
+          "sections": [
+            "Midway Lighting"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lighting",
+      "name": "Lighting",
+      "itemCount": 212,
+      "subcategories": [
+        {
+          "id": "led",
+          "name": "LED",
+          "itemCount": 107,
+          "sections": [
+            "Interior & Spot",
+            "Linear Lights",
+            "Silicon Light",
+            "LED Accessories",
+            "Power & Cable",
+            "Control & Switch"
+          ]
+        },
+        {
+          "id": "budget-lights",
+          "name": "Budget lights",
+          "itemCount": 3
+        },
+        {
+          "id": "lights-service",
+          "name": "Lights Service",
+          "itemCount": 6
+        },
+        {
+          "id": "light-bridge",
+          "name": "Light Bridge",
+          "itemCount": 12,
+          "sections": [
+            "Light Bridge System"
+          ]
+        },
+        {
+          "id": "control-switch",
+          "name": "Control & Switch",
+          "itemCount": 6,
+          "sections": [
+            "Control & Switch"
+          ]
+        },
+        {
+          "id": "niche-shelf",
+          "name": "Niche Shelf",
+          "itemCount": 78
+        }
+      ]
+    },
+    {
+      "id": "closet-wardrobe",
+      "name": "Closet & Wardrobe",
+      "itemCount": 2,
+      "subcategories": [
+        {
+          "id": "shelf-units",
+          "name": "Shelf units",
+          "itemCount": 2
+        }
+      ]
+    },
+    {
+      "id": "panels-surround",
+      "name": "Panels & surround",
+      "itemCount": 1199,
+      "subcategories": [
+        {
+          "id": "wall-cladding",
+          "name": "Wall Cladding",
+          "itemCount": 13
+        },
+        {
+          "id": "ceiling-blenders",
+          "name": "Ceiling Blenders",
+          "itemCount": 22,
+          "sections": [
+            "Ceiling Blenders",
+            "Style Cornice",
+            "Top Shelf with Cornice",
+            "Adjustments"
+          ]
+        },
+        {
+          "id": "side-panels-w",
+          "name": "Side panels W",
+          "itemCount": 661,
+          "sections": [
+            "Fronts – Avance / Contino",
+            "Fronts – Primo",
+            "Recessed Handle Panels",
+            "Special Side Panels",
+            "Niches",
+            "Side Panels",
+            "Processing / Accessories",
+            "Curved Side Panels"
+          ]
+        },
+        {
+          "id": "plinth",
+          "name": "Plinth",
+          "itemCount": 44,
+          "sections": [
+            "Standard Plinth",
+            "Flush Plinth",
+            "Diagonal Plinth",
+            "Side Plinth",
+            "Waterproof Plinth"
+          ]
+        },
+        {
+          "id": "surround",
+          "name": "Surround",
+          "itemCount": 8,
+          "sections": [
+            "Panels & Edges",
+            "Profiles & Accessories"
+          ]
+        },
+        {
+          "id": "open-shelf-units",
+          "name": "Open Shelf Units",
+          "itemCount": 56,
+          "sections": [
+            "W2W / B2W (16 mm)",
+            "W3W / B3W (28 mm)",
+            "Shared Shelf Unit Components",
+            "Slide-in Shelf Unit",
+            "Add-On Shelf Units"
+          ]
+        },
+        {
+          "id": "plinth-accessories",
+          "name": "Plinth Accessories",
+          "itemCount": 74,
+          "sections": [
+            "Retrofit Recessed Plinth",
+            "Side Plinth",
+            "Plinth Drawers"
+          ]
+        },
+        {
+          "id": "shelves-b",
+          "name": "Shelves B",
+          "itemCount": 87,
+          "sections": [
+            "Shelf Boards (B-System)",
+            "Shelf Boards"
+          ]
+        },
+        {
+          "id": "pilasters",
+          "name": "Pilasters",
+          "itemCount": 97
+        },
+        {
+          "id": "benches-tables",
+          "name": "Benches & Tables",
+          "itemCount": 61,
+          "sections": [
+            "Benches",
+            "Tables",
+            "Table Tops & Extensions"
+          ]
+        },
+        {
+          "id": "fios-frame-shelves",
+          "name": "FIOS Frame Shelves",
+          "itemCount": 76,
+          "sections": [
+            "Wall Units",
+            "Floor Units",
+            "Tall Units",
+            "FIOS Alterations"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wall-cladding",
+      "name": "Wall cladding",
+      "itemCount": 28,
+      "subcategories": [
+        {
+          "id": "niche-panels",
+          "name": "Niche panels",
+          "itemCount": 28
+        }
+      ]
+    },
+    {
+      "id": "accessories-interior",
+      "name": "Accessories & interior",
+      "itemCount": 2387,
+      "subcategories": [
+        {
+          "id": "shelves",
+          "name": "Shelves",
+          "itemCount": 97,
+          "sections": [
+            "Vero-glass Shelf",
+            "-"
+          ]
+        },
+        {
+          "id": "domo-rail",
+          "name": "Domo Rail",
+          "itemCount": 12,
+          "sections": [
+            "-"
+          ]
+        },
+        {
+          "id": "further-accessories",
+          "name": "Further accessories",
+          "itemCount": 94,
+          "sections": [
+            "Interior Organization",
+            "Electrical & Power",
+            "Fittings & Hardware",
+            "Care & Maintenance",
+            "Towel Rails",
+            "Surcharges & Alterations",
+            "Wardrobe & Utility",
+            "Ventilation"
+          ]
+        },
+        {
+          "id": "inner-drawers-pullouts",
+          "name": "Inner drawers & pullouts",
+          "itemCount": 994,
+          "sections": [
+            "L3 / M3 · Inner Drawers",
+            "M8 · Inner Drawers",
+            "L3 / M3 · Inner Pull-outs",
+            "M8 · Inner Pull-outs",
+            "1.6 cm Front Panel"
+          ]
+        },
+        {
+          "id": "anti-slip-mats",
+          "name": "Anti slip mats",
+          "itemCount": 175,
+          "sections": [
+            "-"
+          ]
+        },
+        {
+          "id": "q-box-q-vario",
+          "name": "Q-Box / Q-Vario",
+          "itemCount": 104,
+          "sections": [
+            "Q-Vario Pullout Accessories",
+            "Modular Drawer Components",
+            "Q-Vario Pullout Systems",
+            "Accessories",
+            "Containers & Storage",
+            "Q-Box Drawer Inserts"
+          ]
+        },
+        {
+          "id": "combo",
+          "name": "Combo",
+          "itemCount": 391,
+          "sections": [
+            "Standard Drawer Components",
+            "Cooktop Drawers",
+            "Pullout Systems",
+            "Pullout Components",
+            "Standard Drawer Sets"
+          ]
+        },
+        {
+          "id": "wire-accessories-drop-in-trays",
+          "name": "Wire accessories / Drop-in trays",
+          "itemCount": 2
+        },
+        {
+          "id": "slicer-folding-steps",
+          "name": "Slicer / Folding steps",
+          "itemCount": 3
+        },
+        {
+          "id": "interior",
+          "name": "Interior+",
+          "itemCount": 3
+        },
+        {
+          "id": "beech-equipment",
+          "name": "Beech equipment",
+          "itemCount": 28,
+          "sections": [
+            "Drawer Accessories",
+            "Pullout Accessories",
+            "Drawer Inserts"
+          ]
+        },
+        {
+          "id": "l-box-in-oak",
+          "name": "L-Box in oak",
+          "itemCount": 205,
+          "sections": [
+            "Individual L-Box Components",
+            "L-Box Drawer Sets",
+            "Accessories",
+            "Containers"
+          ]
+        },
+        {
+          "id": "l-box-in-walnut",
+          "name": "L-Box in walnut",
+          "itemCount": 205,
+          "sections": [
+            "Individual L-Box Components",
+            "L-Box Drawer Sets",
+            "Accessories",
+            "Containers"
+          ]
+        },
+        {
+          "id": "plastic-equipment",
+          "name": "Plastic equipment",
+          "itemCount": 66,
+          "sections": [
+            "Accessories",
+            "Plastic Variable Partitioning",
+            "Standard Cutlery Trays",
+            "Cooktop Drawers"
+          ]
+        },
+        {
+          "id": "worktop-socket",
+          "name": "Worktop socket",
+          "itemCount": 3
+        },
+        {
+          "id": "cable-management",
+          "name": "Cable management",
+          "itemCount": 5
+        }
+      ]
+    },
+    {
+      "id": "alteration",
+      "name": "Alteration",
+      "itemCount": 148,
+      "subcategories": [
+        {
+          "id": "accessory",
+          "name": "Accessory",
+          "itemCount": 52,
+          "sections": [
+            "Carcass & Structure",
+            "Wall Unit Alterations",
+            "Tall Unit Alterations",
+            "Fronts & Doors",
+            "Drawers & Mechanisms"
+          ]
+        },
+        {
+          "id": "cabinet-modifications",
+          "name": "Cabinet Modifications",
+          "itemCount": 19,
+          "sections": [
+            "Tall Unit Alterations",
+            "Carcass & Structure",
+            "Fronts & Doors",
+            "Wall Unit Alterations"
+          ]
+        },
+        {
+          "id": "slide-away",
+          "name": "Slide-Away",
+          "itemCount": 1,
+          "sections": [
+            "Drawers & Mechanisms"
+          ]
+        },
+        {
+          "id": "drawers-pull-outs",
+          "name": "Drawers & Pull-outs",
+          "itemCount": 46,
+          "sections": [
+            "Drawers & Mechanisms",
+            "Tall Unit Alterations",
+            "Hinges"
+          ]
+        },
+        {
+          "id": "fillers",
+          "name": "Fillers",
+          "itemCount": 1,
+          "sections": [
+            "Sink, Fillers & Panels"
+          ]
+        },
+        {
+          "id": "front-combination",
+          "name": "Front Combination",
+          "itemCount": 9,
+          "sections": [
+            "Front Combinations"
+          ]
+        },
+        {
+          "id": "glass-unit",
+          "name": "Glass unit",
+          "itemCount": 1,
+          "sections": [
+            "Tall Unit Alterations"
+          ]
+        },
+        {
+          "id": "open-shelf",
+          "name": "Open shelf",
+          "itemCount": 9,
+          "sections": [
+            "Shelves & Openings",
+            "Wall Unit Alterations"
+          ]
+        },
+        {
+          "id": "sink",
+          "name": "Sink",
+          "itemCount": 1,
+          "sections": [
+            "Sink, Fillers & Panels"
+          ]
+        },
+        {
+          "id": "ventilation",
+          "name": "Ventilation",
+          "itemCount": 6,
+          "sections": [
+            "Tall Unit Alterations",
+            "Ventilator Grilles"
+          ]
+        },
+        {
+          "id": "side-panel-modifications",
+          "name": "Side Panel Modifications",
+          "itemCount": 3,
+          "sections": [
+            "Sink, Fillers & Panels"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "handles",
+      "name": "Handles",
+      "itemCount": 774,
+      "subcategories": [
+        {
+          "id": "electric",
+          "name": "Electric",
+          "itemCount": 14,
+          "sections": [
+            "Connecting Set"
+          ]
+        },
+        {
+          "id": "extra-charge",
+          "name": "Extra charge",
+          "itemCount": 43
+        },
+        {
+          "id": "vertical-handle",
+          "name": "Vertical Handle",
+          "itemCount": 25
+        },
+        {
+          "id": "sink-knob",
+          "name": "Sink knob",
+          "itemCount": 6
+        },
+        {
+          "id": "foldable-inlet-handle",
+          "name": "Foldable inlet handle",
+          "itemCount": 1
+        },
+        {
+          "id": "grip-profile",
+          "name": "Grip profile",
+          "itemCount": 26
+        },
+        {
+          "id": "grip-profile-pair",
+          "name": "Grip profile pair",
+          "itemCount": 2
+        },
+        {
+          "id": "handle-screws",
+          "name": "Handle screws",
+          "itemCount": 10
+        },
+        {
+          "id": "inset-handle",
+          "name": "Inset handle",
+          "itemCount": 22
+        },
+        {
+          "id": "inset-handle-with-bar",
+          "name": "Inset handle with bar",
+          "itemCount": 12
+        },
+        {
+          "id": "led-handle-profile",
+          "name": "LED-handle profile",
+          "itemCount": 36
+        },
+        {
+          "id": "metal-bow-handle-bossa",
+          "name": "Metal bow handle BOSSA",
+          "itemCount": 2
+        },
+        {
+          "id": "metal-flap-handle",
+          "name": "Metal flap handle",
+          "itemCount": 2
+        },
+        {
+          "id": "metal-knob",
+          "name": "Metal knob",
+          "itemCount": 5
+        },
+        {
+          "id": "solid-wood-grip-profile",
+          "name": "Solid wood grip profile",
+          "itemCount": 18
+        },
+        {
+          "id": "avance-contino-caps",
+          "name": "Avance Contino Caps",
+          "itemCount": 43
+        },
+        {
+          "id": "bar-handle",
+          "name": "Bar handle",
+          "itemCount": 144
+        },
+        {
+          "id": "metal-grip-profile",
+          "name": "Metal grip profile",
+          "itemCount": 36
+        },
+        {
+          "id": "metal-bow-handle",
+          "name": "Metal bow handle",
+          "itemCount": 327
+        }
+      ]
+    },
+    {
+      "id": "service",
+      "name": "Service",
+      "itemCount": 631,
+      "subcategories": [
+        {
+          "id": "legacy-lighting",
+          "name": "Legacy Lighting",
+          "itemCount": 167,
+          "sections": [
+            "Linear LED Lights"
+          ]
+        },
+        {
+          "id": "waste-systems",
+          "name": "Waste Systems",
+          "itemCount": 123
+        },
+        {
+          "id": "care-consumables",
+          "name": "Care & Consumables",
+          "itemCount": 28
+        },
+        {
+          "id": "hinges-hardware",
+          "name": "Hinges & Hardware",
+          "itemCount": 58,
+          "sections": [
+            "Hinges",
+            "Electric & Remote",
+            "Dampers & Supports"
+          ]
+        },
+        {
+          "id": "drawer-systems",
+          "name": "Drawer Systems",
+          "itemCount": 254
+        },
+        {
+          "id": "storage-accessories",
+          "name": "Storage Accessories",
+          "itemCount": 1
+        }
+      ]
+    },
+    {
+      "id": "sink",
+      "name": "Sink",
+      "itemCount": 64,
+      "subcategories": [
+        {
+          "id": "accessories-modifications",
+          "name": "Accessories & Modifications",
+          "itemCount": 15,
+          "sections": [
+            "-"
+          ]
+        },
+        {
+          "id": "faucets",
+          "name": "Faucets",
+          "itemCount": 49,
+          "sections": [
+            "FRANKE Twister",
+            "FRANKE Atlas Neo",
+            "FRANKE",
+            "FRANKE Active L",
+            "FRANKE Eos Neo",
+            "FRANKE Lina XL",
+            "FRANKE Lina",
+            "FRANKE Orbit",
+            "FRANKE Pescara",
+            "Stainless Steel Sinks",
+            "Silgranit & Fragranit Sinks",
+            "BLANCO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "countertops",
+      "name": "Countertops",
+      "itemCount": 571,
+      "subcategories": [
+        {
+          "id": "worktops",
+          "name": "Worktops",
+          "itemCount": 7
+        },
+        {
+          "id": "laminate-worktops-edge-styles",
+          "name": "Laminate · Worktops & Edge Styles",
+          "itemCount": 44
+        },
+        {
+          "id": "laminate-processing",
+          "name": "Laminate · Processing",
+          "itemCount": 40
+        },
+        {
+          "id": "laminate-accessories",
+          "name": "Laminate · Accessories",
+          "itemCount": 27
+        },
+        {
+          "id": "compact-material-worktops",
+          "name": "Compact Material · Worktops",
+          "itemCount": 10
+        },
+        {
+          "id": "compact-material-processing",
+          "name": "Compact Material · Processing",
+          "itemCount": 12
+        },
+        {
+          "id": "compact-material-processing-kps",
+          "name": "Compact Material · Processing (KPS)",
+          "itemCount": 11,
+          "sections": [
+            "Cornice Shelf (KPS)"
+          ]
+        },
+        {
+          "id": "compact-material-processing-kpk",
+          "name": "Compact Material · Processing (KPK)",
+          "itemCount": 8,
+          "sections": [
+            "Cornice Shelf (KPK)"
+          ]
+        },
+        {
+          "id": "compact-material-niche-panels",
+          "name": "Compact Material · Niche Panels",
+          "itemCount": 6
+        },
+        {
+          "id": "compact-material-side-panels",
+          "name": "Compact Material · Side Panels",
+          "itemCount": 32
+        },
+        {
+          "id": "natural-stone-worktops",
+          "name": "Natural Stone · Worktops",
+          "itemCount": 12
+        },
+        {
+          "id": "natural-stone-processing",
+          "name": "Natural Stone · Processing",
+          "itemCount": 14
+        },
+        {
+          "id": "natural-stone-niche-panels",
+          "name": "Natural Stone · Niche Panels",
+          "itemCount": 8
+        },
+        {
+          "id": "natural-stone-side-panels",
+          "name": "Natural Stone · Side Panels",
+          "itemCount": 33
+        },
+        {
+          "id": "solid-wood-worktops",
+          "name": "Solid Wood · Worktops",
+          "itemCount": 21
+        },
+        {
+          "id": "solid-wood-processing",
+          "name": "Solid Wood · Processing",
+          "itemCount": 30
+        },
+        {
+          "id": "solid-wood-side-panels",
+          "name": "Solid Wood · Side Panels",
+          "itemCount": 72
+        },
+        {
+          "id": "glass-worktops",
+          "name": "Glass · Worktops",
+          "itemCount": 6
+        },
+        {
+          "id": "glass-processing",
+          "name": "Glass · Processing",
+          "itemCount": 39
+        },
+        {
+          "id": "glass-niche-panels",
+          "name": "Glass · Niche Panels",
+          "itemCount": 11
+        },
+        {
+          "id": "glass-side-panels",
+          "name": "Glass · Side Panels",
+          "itemCount": 15
+        },
+        {
+          "id": "porcelain-ceramic-worktops",
+          "name": "Porcelain Ceramic · Worktops",
+          "itemCount": 20
+        },
+        {
+          "id": "porcelain-ceramic-processing",
+          "name": "Porcelain Ceramic · Processing",
+          "itemCount": 6
+        },
+        {
+          "id": "porcelain-ceramic-processing-1-2-cm",
+          "name": "Porcelain Ceramic · Processing (1.2 cm)",
+          "itemCount": 7
+        },
+        {
+          "id": "porcelain-ceramic-processing-2-2-4-1-6-cm",
+          "name": "Porcelain Ceramic · Processing (2.2 / 4.1 / 6 cm)",
+          "itemCount": 7
+        },
+        {
+          "id": "porcelain-ceramic-niche-panels",
+          "name": "Porcelain Ceramic · Niche Panels",
+          "itemCount": 8
+        },
+        {
+          "id": "porcelain-ceramic-side-panels",
+          "name": "Porcelain Ceramic · Side Panels",
+          "itemCount": 56
+        },
+        {
+          "id": "glass-backsplash",
+          "name": "Glass · Backsplash",
+          "itemCount": 4
+        },
+        {
+          "id": "porcelain-ceramic-accessories",
+          "name": "Porcelain Ceramic · Accessories",
+          "itemCount": 1
+        },
+        {
+          "id": "solid-wood-accessories",
+          "name": "Solid Wood · Accessories",
+          "itemCount": 2
+        },
+        {
+          "id": "natural-stone-accessories",
+          "name": "Natural Stone · Accessories",
+          "itemCount": 2
+        }
+      ]
+    }
+  ],
+  "programmes": [
+    {
+      "id": "201",
+      "name": "ROCCA 01",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 51
+    },
+    {
+      "id": "202",
+      "name": "ROCCA 02",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 52
+    },
+    {
+      "id": "203",
+      "name": "ROCCA 03",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 53
+    },
+    {
+      "id": "204",
+      "name": "ROCCA 04",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 54
+    },
+    {
+      "id": "205",
+      "name": "ROCCA 05",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 55
+    },
+    {
+      "id": "210",
+      "name": "LAIKA",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 6
+    }
+  ],
+  "items": [
+    {
+      "sku": "T4573VE",
+      "kind": "cabinet",
+      "familyId": "F333",
+      "name": "Vero-glass floor unit · With Lights",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "Base",
+      "subcategory": "Open & Lights",
+      "section": "Glass Units",
+      "active": true,
+      "widthMm": 450,
+      "heightMm": 730,
+      "depthMm": 560,
+      "heightClass": 73,
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "configure": {
+        "width": [
+          {
+            "label": "45",
+            "value": 450,
+            "unit": "mm",
+            "sku": "T4573VE",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "50",
+            "value": 500,
+            "unit": "mm",
+            "sku": "T5073VE",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "T6073VE",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "value": 730,
+            "unit": "mm",
+            "sku": "T4573VE",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "H80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "T4580VE",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "H86",
+            "value": 860,
+            "unit": "mm",
+            "sku": "T4586VE",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "depth": [
+          {
+            "label": "36",
+            "value": 360,
+            "unit": "mm",
+            "sku": "T4573VE",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "58",
+            "value": 580,
+            "unit": "mm",
+            "sku": "T4573VE",
+            "selected": true,
+            "available": true
+          }
+        ],
+        "programme": [
+          {
+            "label": "P",
+            "tier": "P",
+            "opening": false,
+            "sku": "T4573VE",
+            "selected": true,
+            "available": false
+          }
+        ],
+        "optionRows": [
+          {
+            "label": "Ty",
+            "options": [
+              {
+                "label": "Lights",
+                "sku": "T4573VE",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "No Lights",
+                "sku": "T4573VENL",
+                "selected": false,
+                "available": true
+              }
+            ]
+          }
+        ],
+        "note": "Depth is carcass; full depth = carcass + front + 2 mm (select a programme to see it)."
+      },
+      "description": {
+        "title": "Vero-glass floor unit",
+        "bullets": [
+          "1 glass door with anodised aluminium frame and integrated handle",
+          "2 adjustable shelves",
+          "2 vertical, dynamic lights for cupboard sides",
+          "Light temperature 2700K or variable of 2700 to 5000K with dimmer possible",
+          "Power capacity 20 W per cupboard",
+          "Energy efficiency class F"
+        ]
+      },
+      "specification": {
+        "widthMm": 450,
+        "heightMm": 730,
+        "depthMm": 560,
+        "depthKind": "carcass",
+        "modifiers": "—",
+        "carcaseLine": "73",
+        "weightKg": 28.5,
+        "volumeM3": 0.2,
+        "catalogPage": {
+          "priceGroupRef": "20.27",
+          "pdfPage": 237
+        }
+      },
+      "restrictions": [
+        "No 45 degree chamfered edge",
+        "Vero glass front"
+      ],
+      "programmeAvailability": {
+        "excluded": false,
+        "programmes": [],
+        "note": "No programme exclusions."
+      },
+      "engineering": [
+        {
+          "key": "suspended",
+          "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "sensomatic",
+          "label": "SensoMatic possible (drawers & pullouts)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "tipSoftclose",
+          "label": "Tip-Softclose possible",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "openingP1",
+          "label": "Opening system P1",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "depth68",
+          "label": "68 cm carcase depth available",
+          "ok": false,
+          "value": "No"
+        }
+      ],
+      "planningNotes": [
+        "Cupboard interior colour = cupboard exterior colour.",
+        "Please indicate colour of the frame on the order!",
+        "Change of handle or glass not possible.",
+        "Possible colours for the interior, see chapter 11.",
+        "With carcase depth 56 cm, cable overhang 50 cm.",
+        "Cable outlet on both carcase sides at the top.",
+        "The light is operated with power supply unit L24 NT...",
+        "Either a controller set L24 CF, L24 CB or L24 CSH can be used to control lights, see chapter 91.",
+        "Two slots on the power supply unit or controller are required per cupboard!",
+        "The protruding Vero-framed door handle requires the door hinge opposite with directly adjacent cupboards with wide angle hinges (or with inner drawers / pullouts)."
+      ],
+      "didYouKnow": {
+        "text": "This cabinet can also be ordered 36 cm deep — same front, deeper carcase."
+      },
+      "catalog": {
+        "available": true,
+        "page": 237,
+        "priceGroupRef": "20.27"
+      },
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Compatible Accessories",
+            "count": 3,
+            "notes": [
+              "Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."
+            ],
+            "sections": [
+              {
+                "heading": "Lighting · Control & Switch",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "L24CB",
+                    "label": "Bluetooth LED dynamic light control"
+                  },
+                  {
+                    "sku": "L24CF",
+                    "label": "Radio LED dynamic light control (with 1-channel remote)"
+                  },
+                  {
+                    "sku": "L24CSH",
+                    "label": "Smart Home LED dynamic light control"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Finish interior",
+            "count": 19,
+            "notes": [
+              "Interior colour = cupboard exterior colour. Indicate the frame colour on the order. Change of handle or glass is not possible. Possible colours for the interior — see chapter 11.",
+              "Allowed visible side finishes for each interior finish."
+            ],
+            "sections": [
+              {
+                "heading": "Visible-side combinations",
+                "notes": [],
+                "cards": []
+              }
+            ],
+            "swatches": [
+              {
+                "code": "032",
+                "label": "032",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+032.jpg"
+              },
+              {
+                "code": "100",
+                "label": "100",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+100.jpg"
+              },
+              {
+                "code": "103",
+                "label": "103",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+103.jpg"
+              },
+              {
+                "code": "120",
+                "label": "120",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+120.jpg"
+              },
+              {
+                "code": "122",
+                "label": "122",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+122.jpg"
+              },
+              {
+                "code": "126",
+                "label": "126",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+126.jpg"
+              },
+              {
+                "code": "130",
+                "label": "130",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+130.jpg"
+              },
+              {
+                "code": "134",
+                "label": "134",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+134.jpg"
+              },
+              {
+                "code": "136",
+                "label": "136",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+136.jpg"
+              },
+              {
+                "code": "137",
+                "label": "137",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+137.jpg"
+              },
+              {
+                "code": "138",
+                "label": "138",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+138.jpg"
+              },
+              {
+                "code": "139",
+                "label": "139",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+139.jpg"
+              },
+              {
+                "code": "142",
+                "label": "142",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+142.jpg"
+              },
+              {
+                "code": "273",
+                "label": "273",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+273.jpg"
+              },
+              {
+                "code": "277",
+                "label": "277",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+277.jpg"
+              },
+              {
+                "code": "279",
+                "label": "279",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+279.jpg"
+              },
+              {
+                "code": "284",
+                "label": "284",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+284.jpg"
+              },
+              {
+                "code": "285",
+                "label": "285",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+285.jpg"
+              },
+              {
+                "code": "286",
+                "label": "286",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+286.jpg"
+              }
+            ],
+            "visibleSideCombos": [
+              {
+                "interior": "K 273 / K 284",
+                "allowed": [
+                  "K",
+                  "KH",
+                  "KG",
+                  "FF",
+                  "FS",
+                  "FG",
+                  "H",
+                  "MC",
+                  "ME",
+                  "PF",
+                  "VM 152",
+                  "VM 284",
+                  "VM 286"
+                ]
+              },
+              {
+                "interior": "K",
+                "allowed": [
+                  "K",
+                  "FF",
+                  "FS"
+                ]
+              },
+              {
+                "interior": "KH",
+                "allowed": [
+                  "KH"
+                ]
+              },
+              {
+                "interior": "KG",
+                "allowed": [
+                  "KG",
+                  "FG"
+                ]
+              },
+              {
+                "interior": "FF",
+                "allowed": [
+                  "K 273",
+                  "K 284",
+                  "K",
+                  "KH",
+                  "KG",
+                  "FF",
+                  "FS",
+                  "FG",
+                  "PF"
+                ]
+              },
+              {
+                "interior": "FS",
+                "allowed": [
+                  "K 273",
+                  "K 284",
+                  "FS"
+                ]
+              },
+              {
+                "interior": "FG",
+                "allowed": [
+                  "K 273",
+                  "K 284",
+                  "FG"
+                ]
+              },
+              {
+                "interior": "MC",
+                "allowed": [
+                  "K 273",
+                  "K 284",
+                  "MC"
+                ]
+              },
+              {
+                "interior": "ME",
+                "allowed": [
+                  "K 273",
+                  "K 284",
+                  "ME"
+                ]
+              },
+              {
+                "interior": "PF",
+                "allowed": [
+                  "PF"
+                ]
+              },
+              {
+                "interior": "KM",
+                "allowed": [
+                  "KM"
+                ]
+              },
+              {
+                "interior": "VM",
+                "allowed": [
+                  "VM"
+                ]
+              },
+              {
+                "interior": "H",
+                "allowed": [
+                  "H"
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Options",
+            "count": 6,
+            "notes": [
+              "Extra-charge interior styles — state on the order:"
+            ],
+            "sections": [],
+            "options": [
+              "MPK/KH/KG",
+              "MPFF/PF/VM",
+              "MPFS/ME",
+              "MPKM",
+              "MPFG/MC",
+              "MPH"
+            ]
+          },
+          {
+            "label": "Accessories",
+            "count": 0,
+            "notes": [],
+            "sections": []
+          },
+          {
+            "label": "Electrical",
+            "count": 4,
+            "notes": [
+              "LED controls / power supply — USA-approved only."
+            ],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "L24CB",
+                    "label": "Bluetooth LED dynamic light control"
+                  },
+                  {
+                    "sku": "L24CF",
+                    "label": "Radio LED dynamic light control"
+                  },
+                  {
+                    "sku": "L24CSH",
+                    "label": "Zigbee LED dynamic light control"
+                  },
+                  {
+                    "sku": "L24NT75US",
+                    "label": "USA Approved LED Power Supply Unit"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Shelves",
+            "count": 1,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANGF",
+                    "label": "Exchange glass shelves — supplied instead of adjustable shelves"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Alterations",
+            "count": 7,
+            "notes": [
+              "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+            ],
+            "sections": [
+              {
+                "heading": "Standard",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANST",
+                    "label": "Cupboard Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSH",
+                    "label": "Cupboard Height Alteration"
+                  },
+                  {
+                    "sku": "ANSHT",
+                    "label": "Cupboard Height & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSB",
+                    "label": "Cupboard Width Alteration"
+                  },
+                  {
+                    "sku": "ANSBH",
+                    "label": "Cupboard Width & Height Alteration"
+                  },
+                  {
+                    "sku": "ANSBT",
+                    "label": "Cupboard Width & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSBHT",
+                    "label": "Cupboard Width, Height & Depth Alteration"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "relatedGroups": [
+        {
+          "key": "compatibleAccessories",
+          "heading": "Compatible Accessories",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "L24CB"
+            },
+            {
+              "sku": "L24CF"
+            },
+            {
+              "sku": "L24CSH"
+            }
+          ]
+        },
+        {
+          "key": "completeThisCabinet",
+          "heading": "Complete this cabinet",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "FW3WVE4558",
+              "label": "Vero W3 side-panel shelf · 55 cm deep · W45"
+            }
+          ]
+        }
+      ],
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 94200
+        }
+      ]
+    },
+    {
+      "sku": "ATK6080BZIZ",
+      "kind": "cabinet",
+      "familyId": "F1571",
+      "name": "Cooktop Unit · Top Blender · BZIZ",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "A"
+      ],
+      "category": "Base",
+      "subcategory": "Cooktops & Downdrafts",
+      "section": "Cooktop Units",
+      "active": true,
+      "widthMm": 600,
+      "heightMm": 795,
+      "depthMm": 560,
+      "heightClass": 80,
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 945
+      },
+      "configure": {
+        "width": [
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "ATK6080BZIZ",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "70",
+            "value": 700,
+            "unit": "mm",
+            "sku": "ATK7080BZIZ",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "height": [],
+        "depth": [
+          {
+            "label": "58",
+            "value": 580,
+            "unit": "mm",
+            "sku": "ATK6080BZIZ",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "63",
+            "value": 630,
+            "unit": "mm",
+            "sku": "ATK6080BZIZ",
+            "selected": false,
+            "available": true,
+            "note": "63 cm depth (alteration)"
+          },
+          {
+            "label": "68",
+            "value": 680,
+            "unit": "mm",
+            "sku": "ATK6080BZIZ",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "programme": [
+          {
+            "label": "A",
+            "tier": "A",
+            "opening": false,
+            "sku": "ATK6080BZIZ",
+            "selected": true,
+            "available": true
+          }
+        ],
+        "note": "Depth is carcass; full depth = carcass + front + 2 mm (select a programme to see it)."
+      },
+      "description": {
+        "title": "Hob unit",
+        "bullets": [
+          "1 blender",
+          "1 pullout",
+          "1 inner pullout"
+        ]
+      },
+      "specification": {
+        "widthMm": 600,
+        "heightMm": 795,
+        "depthMm": 560,
+        "depthKind": "carcass",
+        "modifiers": "—",
+        "carcaseLine": "80",
+        "weightKg": 46.4,
+        "volumeM3": 0.29,
+        "catalogPage": {
+          "priceGroupRef": "26.05",
+          "pdfPage": 287
+        }
+      },
+      "restrictions": [
+        "Cupboards 45 degree chamfered edge on both sides",
+        "No fronts ROCCA"
+      ],
+      "programmeAvailability": {
+        "excluded": true,
+        "programmes": [],
+        "note": "Excluded from 10 programme(s)."
+      },
+      "engineering": [
+        {
+          "key": "suspended",
+          "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "sensomatic",
+          "label": "SensoMatic possible (drawers & pullouts)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "tipSoftclose",
+          "label": "Tip-Softclose possible",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "openingP1",
+          "label": "Opening system P1",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "depth68",
+          "label": "68 cm carcase depth available",
+          "ok": false,
+          "value": "No"
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "planningNotes": [
+        "Control panel on top."
+      ],
+      "didYouKnow": {
+        "text": "This cabinet can also be ordered 63 / 68 cm deep — same front, deeper carcase. 63 cm = the 68 cm cabinet with a factory depth alteration."
+      },
+      "catalog": {
+        "available": true,
+        "page": 287,
+        "priceGroupRef": "26.05"
+      },
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Compatible Accessories",
+            "count": 7,
+            "notes": [
+              "Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."
+            ],
+            "sections": [
+              {
+                "heading": "Base · Cooktops & Downdrafts",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANBLBO",
+                    "label": "Blender factory drilled"
+                  },
+                  {
+                    "sku": "ANBLBO3",
+                    "label": "Blender factory drilled"
+                  },
+                  {
+                    "sku": "ANMU2S",
+                    "label": "Cutout floor unit side"
+                  },
+                  {
+                    "sku": "ANTILGER",
+                    "label": "Unit with plinth motor or custom design"
+                  },
+                  {
+                    "sku": "ANTKSP",
+                    "label": "Ventilation gap below"
+                  }
+                ]
+              },
+              {
+                "heading": "Base · Drawers & Pullouts",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANISIZ",
+                    "label": "Inner pullout exchange"
+                  }
+                ]
+              },
+              {
+                "heading": "Base · Accessories & Surround",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "FSUE8058",
+                    "label": "Visible carcase side"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Overview",
+            "count": 0,
+            "notes": [
+              "Cooktop Unit · Top Blender · BZIZ. This cooktop / downdraft unit can be set up for standard or deep installation when the appliance, ventilation routing or service clearances need extra carcase depth. Use the tabs for the relevant codes."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Installation",
+            "count": 1,
+            "notes": [
+              "Standard carcass depth (56 cm) — no alteration code required."
+            ],
+            "sections": [
+              {
+                "heading": "Standard installation",
+                "notes": [],
+                "cards": []
+              },
+              {
+                "heading": "Deep countertop / deep carcass installation",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANTSP63US",
+                    "label": "Deep Countertop / Deep Carcass Installation Package"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Visible Sides",
+            "count": 3,
+            "notes": [
+              "Matches this unit's carcass depth: 560 mm = 56 cm.",
+              "Same deep result from a standard carcass with the deep package. Use both codes together."
+            ],
+            "sections": [
+              {
+                "heading": "Recommended for selected unit",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "FS8056",
+                    "label": "Visible Carcass Side — 56 cm"
+                  }
+                ]
+              },
+              {
+                "heading": "Alternative — deep installation",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "FS8061",
+                    "label": "Visible Carcass Side — 61 cm"
+                  },
+                  {
+                    "sku": "ANTSP63US",
+                    "label": "Deep Installation Package"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Q-Box",
+            "count": 6,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "EBF6058",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "EBF6048",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "EBFF6058",
+                    "label": "Cutlery tray with 3 foil"
+                  },
+                  {
+                    "sku": "EBFF6048",
+                    "label": "Cutlery tray with 3 foil"
+                  },
+                  {
+                    "sku": "EBFM6058",
+                    "label": "Cutlery tray with knife holder"
+                  },
+                  {
+                    "sku": "EBFM6048",
+                    "label": "Cutlery tray with knife holder"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Plastic",
+            "count": 5,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "BFA6058",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "BFC6058",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "BFC6048",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "BFAN6058",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "BFCG6058",
+                    "label": "Cutlery tray with spice tray"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "L-Box oak",
+            "count": 8,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "LBFS60581",
+                    "label": "L-Box in oak drawer-set 1",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBFS60581"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBFS60581U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "LBFS60582",
+                    "label": "L-Box in oak drawer-set 2",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBFS60582"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBFS60582U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "LBFS60583",
+                    "label": "L-Box in oak drawer-set 3",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBFS60583"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBFS60583U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "LBFS60584",
+                    "label": "L-Box in oak drawer-set 4",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBFS60584"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBFS60584U"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "L-Box walnut",
+            "count": 8,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "LBNS60581",
+                    "label": "L-Box in walnut drawer-set 1",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBNS60581"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBNS60581U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "LBNS60582",
+                    "label": "L-Box in walnut drawer-set 2",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBNS60582"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBNS60582U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "LBNS60583",
+                    "label": "L-Box in walnut drawer-set 3",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBNS60583"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBNS60583U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "LBNS60584",
+                    "label": "L-Box in walnut drawer-set 4",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBNS60584"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBNS60584U"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Combo",
+            "count": 6,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "CBSET60581",
+                    "label": "Combo drawer-set 1",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "CBSET60581"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "CBSET60581U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "CBSET60582",
+                    "label": "Combo drawer-set 2",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "CBSET60582"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "CBSET60582U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "CBSET60583",
+                    "label": "Combo drawer-set 3",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "CBSET60583"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "CBSET60583U"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Beech",
+            "count": 3,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "HBF6058",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "HBFF6058",
+                    "label": "Cutlery tray"
+                  },
+                  {
+                    "sku": "HBFM6058",
+                    "label": "Cutlery tray"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Other",
+            "count": 11,
+            "notes": [],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANBLBO",
+                    "label": "Blender factory drilled"
+                  },
+                  {
+                    "sku": "ANBLBO3",
+                    "label": "Blender factory drilled"
+                  },
+                  {
+                    "sku": "ANISIZ",
+                    "label": "Inner pullout exchange · 1 pullout → 1 inner drawer"
+                  },
+                  {
+                    "sku": "ANMU2S",
+                    "label": "Cutout floor unit side"
+                  },
+                  {
+                    "sku": "ANTILGER",
+                    "label": "Unit with plinth motor or"
+                  },
+                  {
+                    "sku": "ANTKSP",
+                    "label": "Ventilation gap below"
+                  },
+                  {
+                    "sku": "FSUE8058",
+                    "label": "Visible carcase side with"
+                  },
+                  {
+                    "sku": "IGMN",
+                    "label": "Catch for inner drawers and"
+                  },
+                  {
+                    "sku": "ANSZ",
+                    "label": "Drawer pan instead of pullout"
+                  },
+                  {
+                    "sku": "ANSZBL",
+                    "label": "Pullout with drawer pan and inner blender"
+                  },
+                  {
+                    "sku": "ANRWA",
+                    "label": "Removable back panel"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Pullouts",
+            "count": 4,
+            "notes": [
+              "Fitted behind doors or pullouts. Behind doors the actual width is ≈2.5 cm below nominal (spacer at hinge side) and wide-angle hinges MP..SCH155 are required. M8 variant = type + U."
+            ],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "IGS6058",
+                    "label": "Inner drawer · metal front",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "IGS6058"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "IGS6058U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "IGZ6058",
+                    "label": "Inner pullout · metal front",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "IGZ6058"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "IGZ6058U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "IGZU6058",
+                    "label": "Inner pullout · Front finish matching cabinet front",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "IGZU6058"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "IGZU6058U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "MPIGSU60",
+                    "label": "Exchange 1.6 cm front panel — inner drawers",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "MPIGSU60"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "MPIGZU60"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Alterations",
+            "count": 7,
+            "notes": [
+              "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+            ],
+            "sections": [
+              {
+                "heading": "Standard",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANST",
+                    "label": "Cupboard Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSH",
+                    "label": "Cupboard Height Alteration"
+                  },
+                  {
+                    "sku": "ANSHT",
+                    "label": "Cupboard Height & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSB",
+                    "label": "Cupboard Width Alteration"
+                  },
+                  {
+                    "sku": "ANSBH",
+                    "label": "Cupboard Width & Height Alteration"
+                  },
+                  {
+                    "sku": "ANSBT",
+                    "label": "Cupboard Width & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSBHT",
+                    "label": "Cupboard Width, Height & Depth Alteration"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "relatedGroups": [
+        {
+          "key": "compatibleAccessories",
+          "heading": "Compatible Accessories",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "ANBLBO"
+            },
+            {
+              "sku": "ANBLBO3"
+            },
+            {
+              "sku": "ANISIZ"
+            },
+            {
+              "sku": "ANMU2S"
+            },
+            {
+              "sku": "ANTILGER"
+            },
+            {
+              "sku": "ANTKSP"
+            },
+            {
+              "sku": "FSUE8058"
+            }
+          ]
+        }
+      ],
+      "finishes": [
+        {
+          "finishCode": "21",
+          "price": 84400
+        },
+        {
+          "finishCode": "22",
+          "price": 92200
+        },
+        {
+          "finishCode": "23",
+          "price": 95000
+        },
+        {
+          "finishCode": "24",
+          "price": 99900
+        },
+        {
+          "finishCode": "25",
+          "price": 109600
+        },
+        {
+          "finishCode": "26",
+          "price": 119100
+        },
+        {
+          "finishCode": "27",
+          "price": 123400
+        },
+        {
+          "finishCode": "60",
+          "price": 197400
+        }
+      ]
+    },
+    {
+      "sku": "CT1573",
+      "kind": "cabinet",
+      "familyId": "F805",
+      "name": "Floor unit",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P",
+        "C"
+      ],
+      "category": "Base",
+      "subcategory": "Doors",
+      "section": "Standard Door Cabinets",
+      "active": true,
+      "widthMm": 150,
+      "heightMm": 730,
+      "depthMm": 560,
+      "heightClass": 73,
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "configure": {
+        "width": [
+          {
+            "label": "15",
+            "value": 150,
+            "unit": "mm",
+            "sku": "CT1573",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "20",
+            "value": 200,
+            "unit": "mm",
+            "sku": "CT2073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "30",
+            "value": 300,
+            "unit": "mm",
+            "sku": "CT3073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "40",
+            "value": 400,
+            "unit": "mm",
+            "sku": "CT4073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "45",
+            "value": 450,
+            "unit": "mm",
+            "sku": "CT4573",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "50",
+            "value": 500,
+            "unit": "mm",
+            "sku": "CT5073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "CT6073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "70",
+            "value": 700,
+            "unit": "mm",
+            "sku": "CT7073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "CT8073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "90",
+            "value": 900,
+            "unit": "mm",
+            "sku": "CT9073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "100",
+            "value": 1000,
+            "unit": "mm",
+            "sku": "CT10073",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "120",
+            "value": 1200,
+            "unit": "mm",
+            "sku": "CT12073",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "value": 730,
+            "unit": "mm",
+            "sku": "CT1573",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "H80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "CT1580",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "H86",
+            "value": 860,
+            "unit": "mm",
+            "sku": "CT1586",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "depth": [
+          {
+            "label": "36",
+            "value": 360,
+            "unit": "mm",
+            "sku": "CT1573",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "48",
+            "value": 480,
+            "unit": "mm",
+            "sku": "CT1573",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "58",
+            "value": 580,
+            "unit": "mm",
+            "sku": "CT1573",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "63",
+            "value": 630,
+            "unit": "mm",
+            "sku": "CT1573",
+            "selected": false,
+            "available": true,
+            "note": "63 cm depth (alteration)"
+          },
+          {
+            "label": "68",
+            "value": 680,
+            "unit": "mm",
+            "sku": "CT1573",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "programme": [
+          {
+            "label": "P",
+            "tier": "P",
+            "opening": false,
+            "sku": "T1573",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "C",
+            "tier": "C",
+            "opening": false,
+            "sku": "CT1573",
+            "selected": true,
+            "available": true
+          }
+        ],
+        "note": "Depth is carcass; full depth = carcass + front + 2 mm (select a programme to see it)."
+      },
+      "description": {
+        "title": "Floor unit",
+        "bullets": [
+          "1 door",
+          "2 adjustable shelves"
+        ]
+      },
+      "specification": {
+        "widthMm": 150,
+        "heightMm": 730,
+        "depthMm": 560,
+        "depthKind": "carcass",
+        "modifiers": "—",
+        "carcaseLine": "73",
+        "weightKg": 23.9,
+        "volumeM3": 0.07,
+        "catalogPage": {
+          "priceGroupRef": "20.01",
+          "pdfPage": 183
+        }
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "Programmes CONTINO + K35",
+        "Cupboards 45 degree chamfered edge not on both sides",
+        "Programmes KL73 / KL86 only XML",
+        "No fronts 15 cm",
+        "No fronts ROCCA"
+      ],
+      "programmeAvailability": {
+        "excluded": true,
+        "programmes": [],
+        "note": "Excluded from 38 programme(s)."
+      },
+      "engineering": [
+        {
+          "key": "suspended",
+          "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "sensomatic",
+          "label": "SensoMatic possible (drawers & pullouts)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "tipSoftclose",
+          "label": "Tip-Softclose possible",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "openingP1",
+          "label": "Opening system P1",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "depth68",
+          "label": "68 cm carcase depth available",
+          "ok": false,
+          "value": "No"
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "didYouKnow": {
+        "text": "This cabinet can also be ordered 36 / 48 / 63 / 68 cm deep — same front, deeper carcase. 63 cm = the 68 cm cabinet with a factory depth alteration."
+      },
+      "catalog": {
+        "available": true,
+        "page": 183,
+        "priceGroupRef": "20.01"
+      },
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Compatible Accessories",
+            "count": 1,
+            "notes": [
+              "Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."
+            ],
+            "sections": [
+              {
+                "heading": "Base · Accessories & Surround",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "FSUE7358",
+                    "label": "Visible carcase side"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Alterations",
+            "count": 9,
+            "notes": [],
+            "sections": [
+              {
+                "heading": "Standard",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANST",
+                    "label": "Cupboard Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSH",
+                    "label": "Cupboard Height Alteration"
+                  },
+                  {
+                    "sku": "ANSHT",
+                    "label": "Cupboard Height & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSB",
+                    "label": "Cupboard Width Alteration"
+                  },
+                  {
+                    "sku": "ANSBH",
+                    "label": "Cupboard Width & Height Alteration"
+                  },
+                  {
+                    "sku": "ANSBT",
+                    "label": "Cupboard Width & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSBHT",
+                    "label": "Cupboard Width, Height & Depth Alteration"
+                  }
+                ]
+              },
+              {
+                "heading": "Unit Specific",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "FSUE7358",
+                    "label": "Visible carcase side with"
+                  },
+                  {
+                    "sku": "MPTSCH155"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "relatedGroups": [
+        {
+          "key": "compatibleAccessories",
+          "heading": "Compatible Accessories",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "FSUE7358"
+            }
+          ]
+        }
+      ],
+      "finishes": [
+        {
+          "finishCode": "31",
+          "price": 23600
+        },
+        {
+          "finishCode": "32",
+          "price": 25400
+        },
+        {
+          "finishCode": "33",
+          "price": 27100
+        },
+        {
+          "finishCode": "34",
+          "price": 31300
+        },
+        {
+          "finishCode": "35",
+          "price": 33500
+        },
+        {
+          "finishCode": "36",
+          "price": 35800
+        },
+        {
+          "finishCode": "37",
+          "price": 39800
+        },
+        {
+          "finishCode": "38",
+          "price": 43300
+        },
+        {
+          "finishCode": "39",
+          "price": 47600
+        },
+        {
+          "finishCode": "70",
+          "price": 65000
+        },
+        {
+          "finishCode": "71",
+          "price": 69300
+        },
+        {
+          "finishCode": "72",
+          "price": 73600
+        },
+        {
+          "finishCode": "73",
+          "price": 77900
+        },
+        {
+          "finishCode": "74",
+          "price": 86600
+        },
+        {
+          "finishCode": "75",
+          "price": 90900
+        }
+      ]
+    },
+    {
+      "sku": "C1GFV607361S2Z",
+      "kind": "cabinet",
+      "familyId": "GFVO",
+      "name": "Front for Built-in Appliances · Original handle D61",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "C1"
+      ],
+      "category": "Base",
+      "subcategory": "Appliance housing",
+      "section": "Front for Dishwasher Appliances · Original handle D61",
+      "active": true,
+      "widthMm": 600,
+      "heightMm": 730,
+      "depthMm": 20,
+      "heightClass": 73,
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "appliance": {
+        "category": "Refrigerators",
+        "brand": "Gaggenau",
+        "nicheSize": "",
+        "subcategory": "Built-In ADA"
+      },
+      "configure": {
+        "width": [
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "C1GFV607361S2Z",
+            "selected": true,
+            "available": true
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "value": 730,
+            "unit": "mm",
+            "sku": "C1GFV607361S2Z",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "H80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "C1GFV608061S2Z",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "depth": [],
+        "programme": [
+          {
+            "label": "C",
+            "tier": "C",
+            "opening": false,
+            "sku": "C1GFV607361S2Z",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "C1",
+            "tier": "C1",
+            "opening": true,
+            "sku": "C11GFV607361S2Z",
+            "selected": true,
+            "available": true
+          }
+        ]
+      },
+      "description": {
+        "title": "Front for built-under appliance with drawer- and pullout partitioning with original recessed handle on front above",
+        "bullets": [
+          "If necessary, flush-with-carcase blender behind the front for fully integrated dishwasher, height 82 - 87 cm."
+        ]
+      },
+      "specification": {
+        "widthMm": 600,
+        "heightMm": 730,
+        "depthMm": 20,
+        "depthKind": "carcass",
+        "modifiers": "—",
+        "carcaseLine": "73",
+        "weightKg": 8,
+        "volumeM3": 0.03,
+        "catalogPage": {
+          "priceGroupRef": "20.11",
+          "pdfPage": 193
+        }
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "Programmes CONTINO + K35",
+        "No 45 degree chamfered edge",
+        "Programmes KL73 / KL86 only XML",
+        "No fronts ROCCA / KERA"
+      ],
+      "programmeAvailability": {
+        "excluded": true,
+        "programmes": [],
+        "note": "Excluded from 38 programme(s)."
+      },
+      "engineering": [
+        {
+          "key": "suspended",
+          "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "sensomatic",
+          "label": "SensoMatic possible (drawers & pullouts)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "tipSoftclose",
+          "label": "Tip-Softclose possible",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "openingP1",
+          "label": "Opening system P1",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "depth68",
+          "label": "68 cm carcase depth available",
+          "ok": false,
+          "value": "No"
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "planningNotes": [
+        "Requires ADA dishwasher.",
+        "With plinth height 10 cm possible.",
+        "Permitted appliances: Miele, Bosch, Siemens, Neff and Gaggenau, if necessary exchange spring set.",
+        "Worktop depth min.",
+        "63 cm.",
+        "Take into consideration extra deep visible sides.",
+        "Depending on the dishwasher, the Timelight / Infolight function can slip behind the plinth area with a double-up dishwasher-front.",
+        "Can work with Miele, or BSH with 12 cm legs."
+      ],
+      "catalog": {
+        "available": true,
+        "page": 193,
+        "priceGroupRef": "20.11"
+      },
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Overview",
+            "count": 0,
+            "notes": [],
+            "sections": []
+          },
+          {
+            "label": "Installation",
+            "count": 0,
+            "notes": [
+              "With plinth height 10 cm possible.Permitted appliances: Miele, Bosch, Siemens, Neff and Gaggenau, if necessary exchange spring set.Worktop depth min.63 cm.Take into consideration extra deep visible sides.Depending on the dishwasher, the Timelight / Infolight function can slip behind the plinth area with a double-up dishwasher-front."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Plinth Cover",
+            "count": 2,
+            "notes": [
+              "Plinth cover profile clipped onto 1.6 cm material. Available colours: K273 Platinum · K284 Carbon Grey."
+            ],
+            "sections": [
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "VSF135ADP",
+                    "label": "Dishwasher Plinth Cover · 135 cm"
+                  },
+                  {
+                    "sku": "VSF270ADP",
+                    "label": "Dishwasher Plinth Cover · 270 cm"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Inspiration",
+            "count": 0,
+            "notes": [
+              "C1GFV607361S2Z — Front for Built-in Appliances · Original handle D61 · W 600 × H 730 × D 20 mmExample of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style."
+            ],
+            "sections": [],
+            "inspiration": {
+              "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Units-stage/GVF.S2Z.jpg",
+              "fullScreen": true,
+              "item": {
+                "sku": "C1GFV607361S2Z"
+              }
+            }
+          }
+        ]
+      },
+      "finishes": [
+        {
+          "finishCode": "31",
+          "price": 31000
+        },
+        {
+          "finishCode": "32",
+          "price": 33000
+        },
+        {
+          "finishCode": "33",
+          "price": 36600
+        },
+        {
+          "finishCode": "34",
+          "price": 41100
+        },
+        {
+          "finishCode": "35",
+          "price": 45700
+        },
+        {
+          "finishCode": "36",
+          "price": 50300
+        },
+        {
+          "finishCode": "37",
+          "price": 59000
+        },
+        {
+          "finishCode": "38",
+          "price": 64200
+        },
+        {
+          "finishCode": "39",
+          "price": 70600
+        },
+        {
+          "finishCode": "70",
+          "price": 96300
+        },
+        {
+          "finishCode": "71",
+          "price": 102700
+        },
+        {
+          "finishCode": "72",
+          "price": 109100
+        },
+        {
+          "finishCode": "73",
+          "price": 115600
+        },
+        {
+          "finishCode": "74",
+          "price": 128400
+        },
+        {
+          "finishCode": "75",
+          "price": 134800
+        }
+      ]
+    },
+    {
+      "sku": "TSPA807368BTZW",
+      "kind": "cabinet",
+      "familyId": "SNK7",
+      "name": "Instant Hot Sink Blender — 30 cm door",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "Base",
+      "subcategory": "Sinks",
+      "section": "Instant Hot Sink Units",
+      "active": true,
+      "widthMm": 800,
+      "heightMm": 730,
+      "depthMm": 660,
+      "heightClass": 73,
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "configure": {
+        "width": [
+          {
+            "label": "80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "TSPA807368BTZW",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "90",
+            "value": 900,
+            "unit": "mm",
+            "sku": "TSPA907368BTZW",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "value": 730,
+            "unit": "mm",
+            "sku": "TSPA807368BTZW",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "H80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "TSPA808068BTZW",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "H86",
+            "value": 860,
+            "unit": "mm",
+            "sku": "TSPA808668BTZW",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "depth": [
+          {
+            "label": "58",
+            "value": 580,
+            "unit": "mm",
+            "sku": "TSPA8073BTZW",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "63",
+            "value": 630,
+            "unit": "mm",
+            "sku": "TSPA807368BTZW",
+            "selected": false,
+            "available": true,
+            "note": "63 cm depth (alteration)"
+          },
+          {
+            "label": "68",
+            "value": 680,
+            "unit": "mm",
+            "sku": "TSPA807368BTZW",
+            "selected": true,
+            "available": true
+          }
+        ],
+        "programme": [
+          {
+            "label": "P",
+            "tier": "P",
+            "opening": false,
+            "sku": "TSPA807368BTZW",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "A",
+            "tier": "A",
+            "opening": false,
+            "sku": "ATSPA807368BTZW",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "optionRows": [
+          {
+            "label": "Ty",
+            "options": [
+              {
+                "label": "BTZW",
+                "sku": "TSPA807368BTZW",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "BZW",
+                "sku": "TSPA807368BZW",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "BTBS",
+                "sku": "TSPA907368BTBS",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "BTZ",
+                "sku": "TSPA907368BTZ",
+                "selected": false,
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "description": {
+        "title": "Sink waste bin unit for hot",
+        "bullets": [
+          "water taps",
+          "no back panel",
+          "1 fixed blender",
+          "1 door 30 cm wide in front of compartment for taps accessories",
+          "1 middle side removable",
+          "1 pullout 50 cm wide",
+          "(depth 50 cm)",
+          "1 odour trap",
+          "1 frame with 3 waste bins, contents 1x 14 ltr., 1x 10 ltr. and 1x 10 ltr. with bio lid, in addition 2x 2.5 ltr.",
+          "1 metal water drip floor"
+        ]
+      },
+      "specification": {
+        "widthMm": 800,
+        "heightMm": 730,
+        "depthMm": 660,
+        "depthKind": "carcass",
+        "modifiers": "—",
+        "carcaseLine": "73",
+        "weightKg": 39.9,
+        "volumeM3": 0.42,
+        "catalogPage": {
+          "priceGroupRef": "20.23",
+          "pdfPage": 233
+        }
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "No 45 degree chamfered edge",
+        "Programmes KL73 / KL86 only XML",
+        "No fronts BAHIA",
+        "Fronts -Q handle 790, 791",
+        "no handle 605, 606",
+        "no handle 670, 671, 635, 636",
+        "No fronts ROCCA"
+      ],
+      "programmeAvailability": {
+        "excluded": true,
+        "programmes": [],
+        "note": "Excluded from 38 programme(s)."
+      },
+      "engineering": [
+        {
+          "key": "suspended",
+          "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "sensomatic",
+          "label": "SensoMatic possible (drawers & pullouts)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "tipSoftclose",
+          "label": "Tip-Softclose possible",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "openingP1",
+          "label": "Opening system P1",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "depth68",
+          "label": "68 cm carcase depth available",
+          "ok": false,
+          "value": "No"
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        }
+      ],
+      "planningNotes": [
+        "The compartment for taps accessories determines style left or right.",
+        "The true width for the installation of boilers and cartridges is 26.7 cm.",
+        "Please plan sink installation above pullout, available height 28 cm to carcase top edge!",
+        "Plan optional opening support HFO3.",
+        "If a rear panel is required for a sink unit, please always order this unit with the code MP RU."
+      ],
+      "catalog": {
+        "available": true,
+        "page": 233,
+        "priceGroupRef": "20.23"
+      },
+      "accessoryPanel": {
+        "tabs": [
+          {
+            "label": "Compatible Accessories",
+            "count": 2,
+            "notes": [
+              "Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."
+            ],
+            "sections": [
+              {
+                "heading": "Base · Sinks",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "HFO3",
+                    "label": "Opening support for sink and trash pullout cupboards"
+                  },
+                  {
+                    "sku": "MPRU",
+                    "label": "Sink unit with back panel"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Overview",
+            "count": 0,
+            "notes": [
+              "Instant Hot Sink Blender — 30 cm door. This sink unit can be set up for standard or deep-sink installation, fitted with a matching visible-side panel, and — for door sinks — modified for extra-deep basins. Use the tabs for the relevant codes."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Installation",
+            "count": 3,
+            "notes": [
+              "Standard carcass depth (56 cm) — no alteration code required."
+            ],
+            "sections": [
+              {
+                "heading": "Standard installation",
+                "notes": [],
+                "cards": []
+              },
+              {
+                "heading": "Alterations & back panel",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANTSP63US",
+                    "label": "Deep Sink Installation Package"
+                  },
+                  {
+                    "sku": "ANTSPZAUS",
+                    "label": "Sink Pullout Alteration"
+                  },
+                  {
+                    "sku": "MPRU",
+                    "label": "Back Panel with Hose Access Cover"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Visible Sides",
+            "count": 3,
+            "notes": [
+              "Matches this unit's carcass depth: 660 mm = 66 cm.",
+              "Same deep result from a standard carcass with the deep package. Use both codes together."
+            ],
+            "sections": [
+              {
+                "heading": "Recommended for selected unit",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "FS7366",
+                    "label": "Visible Carcass Side — 66 cm"
+                  }
+                ]
+              },
+              {
+                "heading": "Alternative — deep installation",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "FS7361",
+                    "label": "Visible Carcass Side — 61 cm"
+                  },
+                  {
+                    "sku": "ANTSP63US",
+                    "label": "Deep Installation Package"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "label": "Sink Compatibility",
+            "count": 0,
+            "notes": [
+              "No hinge modification — this is a drawer / pullout sink unit. The deep-basin hinge modification (ANSVVO275) applies to door sink units only."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Accessories",
+            "count": 0,
+            "notes": [
+              "Door-mounted accessories (waste bins, cleaning pullouts, towel rails) require a hinged door — they are not compatible with drawer / pullout sink construction."
+            ],
+            "sections": []
+          },
+          {
+            "label": "Alterations",
+            "count": 7,
+            "notes": [
+              "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+            ],
+            "sections": [
+              {
+                "heading": "Standard",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANST",
+                    "label": "Cupboard Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSH",
+                    "label": "Cupboard Height Alteration"
+                  },
+                  {
+                    "sku": "ANSHT",
+                    "label": "Cupboard Height & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSB",
+                    "label": "Cupboard Width Alteration"
+                  },
+                  {
+                    "sku": "ANSBH",
+                    "label": "Cupboard Width & Height Alteration"
+                  },
+                  {
+                    "sku": "ANSBT",
+                    "label": "Cupboard Width & Depth Alteration"
+                  },
+                  {
+                    "sku": "ANSBHT",
+                    "label": "Cupboard Width, Height & Depth Alteration"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "relatedGroups": [
+        {
+          "key": "compatibleAccessories",
+          "heading": "Compatible Accessories",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "HFO3"
+            },
+            {
+              "sku": "MPRU"
+            }
+          ]
+        }
+      ],
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 77200
+        },
+        {
+          "finishCode": "2",
+          "price": 79800
+        },
+        {
+          "finishCode": "3",
+          "price": 84400
+        },
+        {
+          "finishCode": "4",
+          "price": 93500
+        },
+        {
+          "finishCode": "5",
+          "price": 102700
+        },
+        {
+          "finishCode": "6",
+          "price": 113000
+        },
+        {
+          "finishCode": "7",
+          "price": 121300
+        },
+        {
+          "finishCode": "8",
+          "price": 129800
+        },
+        {
+          "finishCode": "50",
+          "price": 191900
+        },
+        {
+          "finishCode": "51",
+          "price": 204300
+        },
+        {
+          "finishCode": "52",
+          "price": 216700
+        },
+        {
+          "finishCode": "53",
+          "price": 229100
+        },
+        {
+          "finishCode": "54",
+          "price": 253900
+        },
+        {
+          "finishCode": "55",
+          "price": 266300
+        }
+      ]
+    },
+    {
+      "sku": "ZGR529032",
+      "kind": "cabinet",
+      "familyId": "HDL_MBH_529",
+      "name": "Metal bow handle No. 529",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "Handles",
+      "subcategory": "Metal bow handle",
+      "active": true,
+      "heightClass": null,
+      "configure": {
+        "width": [],
+        "height": [],
+        "depth": [],
+        "programme": [
+          {
+            "label": "P",
+            "tier": "P",
+            "opening": false,
+            "sku": "ZGR529032",
+            "selected": true,
+            "available": false
+          }
+        ],
+        "optionRows": [
+          {
+            "label": "Finish",
+            "options": [
+              {
+                "label": "032",
+                "sku": "ZGR529032",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "100",
+                "sku": "ZGR529100",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "103",
+                "sku": "ZGR529103",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "120",
+                "sku": "ZGR529120",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "122",
+                "sku": "ZGR529122",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "126",
+                "sku": "ZGR529126",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "130",
+                "sku": "ZGR529130",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "134",
+                "sku": "ZGR529134",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "136",
+                "sku": "ZGR529136",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "137",
+                "sku": "ZGR529137",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "138",
+                "sku": "ZGR529138",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "139",
+                "sku": "ZGR529139",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "142",
+                "sku": "ZGR529142",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "273",
+                "sku": "ZGR529273",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "277",
+                "sku": "ZGR529277",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "279",
+                "sku": "ZGR529279",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "282",
+                "sku": "ZGR529282",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "284",
+                "sku": "ZGR529284",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "285",
+                "sku": "ZGR529285",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "286",
+                "sku": "ZGR529286",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "307",
+                "sku": "ZGR529307",
+                "selected": false,
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "description": {
+        "title": "Metal bow handle",
+        "bullets": [
+          "No. 529. ... powder coated",
+          "Drill hole distance: 160 mm"
+        ]
+      },
+      "programmeAvailability": {
+        "excluded": false,
+        "programmes": [],
+        "note": "No programme exclusions."
+      },
+      "catalog": {
+        "available": true,
+        "page": 34,
+        "priceGroupRef": "32"
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 4000
+        }
+      ]
+    },
+    {
+      "sku": "HFO3",
+      "kind": "cabinet",
+      "familyId": "F33",
+      "name": "Opening support for sink and trash pullout cupboards",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "Base",
+      "subcategory": "Sinks",
+      "section": "Fronts & Panels · USA Sink Alterations",
+      "active": true,
+      "heightClass": null,
+      "description": {
+        "title": "Opening support for sink pullout cupboards",
+        "bullets": [
+          "Plinth base prepared for electrical unit",
+          "Operation using sensor in the plinth area",
+          "Integrated orientation light, can be switched off",
+          "110 - 230 volt",
+          "Intensity adjustable",
+          "Dimensions 16 x 30 x 3.5 cm",
+          "Cable length 200 cm, plug-in power supply internationally adaptable, colour grey",
+          "Water protection shelf is deleted"
+        ]
+      },
+      "programmeAvailability": {
+        "excluded": false,
+        "programmes": [],
+        "note": "No programme exclusions."
+      },
+      "engineering": [
+        {
+          "key": "suspended",
+          "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "sensomatic",
+          "label": "SensoMatic possible (drawers & pullouts)",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "tipSoftclose",
+          "label": "Tip-Softclose possible",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "openingP1",
+          "label": "Opening system P1",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "depth68",
+          "label": "68 cm carcase depth available",
+          "ok": false,
+          "value": "No"
+        }
+      ],
+      "planningNotes": [
+        "From cupboard width 40 cm.",
+        "Door gap enlargement not necessary.",
+        "Not in combination with AN SOS, AN SOS V, AN SOS V B."
+      ],
+      "catalog": {
+        "available": true,
+        "page": 230,
+        "priceGroupRef": "20.20"
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 20100
+        }
+      ]
+    },
+    {
+      "sku": "ANST",
+      "kind": "alteration",
+      "familyId": "F1959",
+      "name": "Cupboard depth alteration",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "Alteration",
+      "subcategory": "Cabinet Modifications",
+      "section": "Carcass & Structure",
+      "active": true,
+      "heightClass": null,
+      "description": {
+        "title": "Cupboard depth alteration",
+        "bullets": []
+      },
+      "programmeAvailability": {
+        "excluded": false,
+        "programmes": [],
+        "note": "No programme exclusions."
+      },
+      "planningNotes": [
+        "Extra charge = cupboard reduction / front reduction Base type is the next bigger order unit."
+      ],
+      "catalog": {
+        "available": true,
+        "page": 179,
+        "priceGroupRef": "14.01"
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 13700
+        }
+      ]
+    },
+    {
+      "sku": "LBFS60581U",
+      "kind": "cabinet",
+      "familyId": "ADD_LBFS_LBOXINOAKD",
+      "name": "Drawer Set 1",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "Accessories & interior",
+      "subcategory": "L-Box in oak",
+      "section": "L-Box Drawer Sets",
+      "active": true,
+      "widthMm": 600,
+      "heightMm": 0,
+      "depthMm": 580,
+      "heightClass": null,
+      "configure": {
+        "width": [
+          {
+            "label": "30",
+            "value": 300,
+            "unit": "mm",
+            "sku": "LBFS30581U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "40",
+            "value": 400,
+            "unit": "mm",
+            "sku": "LBFS40681U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "45",
+            "value": 450,
+            "unit": "mm",
+            "sku": "LBFS45681U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "50",
+            "value": 500,
+            "unit": "mm",
+            "sku": "LBFS50581U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "LBFS60581U",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "70",
+            "value": 700,
+            "unit": "mm",
+            "sku": "LBFS70681U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "LBFS80581U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "90",
+            "value": 900,
+            "unit": "mm",
+            "sku": "LBFS90681U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "100",
+            "value": 1000,
+            "unit": "mm",
+            "sku": "LBFS100581U",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "120",
+            "value": 1200,
+            "unit": "mm",
+            "sku": "LBFS120581U",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "height": [],
+        "depth": [
+          {
+            "label": "58",
+            "value": 580,
+            "unit": "mm",
+            "sku": "LBFS60581U",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "68",
+            "value": 680,
+            "unit": "mm",
+            "sku": "LBFS60681U",
+            "selected": false,
+            "available": true
+          }
+        ],
+        "programme": [
+          {
+            "label": "P",
+            "tier": "P",
+            "opening": false,
+            "sku": "LBFS60581U",
+            "selected": true,
+            "available": false
+          }
+        ],
+        "optionRows": [
+          {
+            "label": "Runner",
+            "options": [
+              {
+                "label": "L3 / M3",
+                "sku": "LBFS60581",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "M8",
+                "sku": "LBFS60581U",
+                "selected": true,
+                "available": true
+              }
+            ]
+          }
+        ]
+      },
+      "specification": {
+        "widthMm": 600,
+        "heightMm": 0,
+        "depthMm": 580,
+        "depthKind": "carcass",
+        "modifiers": "—"
+      },
+      "programmeAvailability": {
+        "excluded": false,
+        "programmes": [],
+        "note": "No programme exclusions."
+      }
+    },
+    {
+      "sku": "VSF135ADP",
+      "kind": "accessory",
+      "familyId": "XAG_Pa_370e98",
+      "name": "Plinth cover profile",
+      "programmeBadge": "ALL",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "Panels & surround",
+      "subcategory": "Plinth Accessories",
+      "active": true,
+      "widthMm": 1350,
+      "heightClass": null,
+      "description": {
+        "title": "Plinth cover profile can be clipped onto 1.6 cm thick material",
+        "bullets": [
+          "KF = Plastic coloured",
+          "273 platinum  284 carbon grey"
+        ]
+      },
+      "specification": {
+        "widthMm": 1350,
+        "heightMm": 0,
+        "depthMm": 0,
+        "modifiers": "—",
+        "catalogPage": {
+          "priceGroupRef": "70.02",
+          "pdfPage": 776
+        }
+      },
+      "programmeAvailability": {
+        "excluded": false,
+        "programmes": [],
+        "note": "No programme exclusions."
+      },
+      "planningNotes": [
+        "Please state colour."
+      ],
+      "catalog": {
+        "available": true,
+        "page": 776,
+        "priceGroupRef": "70.02"
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 1200
+        }
+      ]
+    }
+  ]
+}

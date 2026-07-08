@@ -1,0 +1,61 @@
+Subject: Design Book export — "Alterations & Accessories" panel data missing per unit
+
+Hi Shimon,
+
+Thanks again for the v584 export — units, programmes, pricing, categories, and rule
+tables all ingested cleanly.
+
+One area is blocking us: the "Possible Alterations & Accessories" panel on the product
+detail page. It isn't a simple list — it's five computed tabs (Overview, Installation,
+Visible Sides, Alterations, Pullouts), and each is built from the selected unit's
+dimensions. None of it survives in the current export: every SKU's relatedSkus and
+accessories come through empty, so we can't rebuild any tab.
+
+The target codes themselves exist as SKUs (e.g. FS8056, ANTSP63US, IGS6058, IGZ6058,
+MPIGSU60) — what's missing is the link from each unit to those codes, plus the text,
+variants, and images shown on each card.
+
+For each unit we need:
+
+1. Installation — standard (no code) vs the deep package (e.g. ANTSP63US), depth-driven.
+2. Visible Sides — the side panel matching the unit's carcass (e.g. H80 + 56 cm ->
+   FS8056), plus the "alternative — deep installation" pairing (side + deep package,
+   two codes together).
+3. Alterations — split into Standard (the 7 general width/height/depth codes) and
+   Unit-Specific (from the unit itself), with the counts the UI shows.
+4. Pullouts — inner drawers/pullouts matched to width + depth (e.g. IGS6058), including
+   the variant chips on each card (L3/M3 vs M8, where M8 = code + "U") and the fitment
+   note.
+5. Overview — the summary on the first tab.
+
+Per card we need: display name, short description, any variant options, and — importantly
+— the image URL. The codes exist but their skuData is empty, so name is partial and
+description/variants/images are absent. Please include the image URL on every card (the
+S3 thumbnail, https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg) so we
+don't have to guess which code maps to which drawing/photo. Also the per-tab notes shown
+above the cards (the depth-match line, the pullout fitment rule, etc.).
+
+A shape like this per unit drops straight in:
+
+  "accessoryPanel": {
+    "tabs": [
+      { "label": "...", "count": N, "notes": [...],
+        "sections": [
+          { "heading": "...", "notes": [...],
+            "cards": [ { "code", "name", "desc", "image",
+                         "variants": [ { "label": "L3/M3", "code": "..." } ] } ] }
+        ] }
+    ]
+  }
+
+All of this is already produced by the detail-panel logic in the source app — it just
+didn't make it into the JSON. I've written a step-by-step spec (attached:
+CLIENT-export-alterations-accessories-spec.md) that points Claude at the exact functions
+in the legacy HTML and lays out every rule and the output shape, so you can regenerate
+the export the same way you built it. If it's easier to run Node, the spec also notes a
+headless script that reproduces the panel with guaranteed parity.
+
+Happy to jump on a quick call if anything needs clarifying.
+
+Best,
+[Your name]

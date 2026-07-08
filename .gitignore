@@ -1,0 +1,15 @@
+# deps / logs / os junk
+node_modules/
+*.log
+server.log
+.DS_Store
+
+# Large raw data (>50MB) — committed as .gz instead. gunzip to use.
+obseleted/old-extraction-pipeline/leicht_items.json
+obseleted/old-extraction-pipeline/leicht_catalog.json
+docs/export-v767.json
+docs/export-v767.pre-functional.bak.json
+data-from-client/new-exported data/Dash4_AccessoryPanel_Export.json
+
+# Finder duplicate — not shipped at all (no .gz either)
+obseleted/duplicate-data/

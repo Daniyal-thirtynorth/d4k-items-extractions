@@ -1,0 +1,1522 @@
+[
+  {
+    "key": "CT1573||CT1573",
+    "detail": {
+      "available": true,
+      "resolved_by": "code",
+      "fid": "F805",
+      "title": "Floor unit L/R",
+      "subtitle": "Base · Doors",
+      "panel_code": "CT1573",
+      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/CT1573.jpg",
+      "price_text": null,
+      "description": [
+        "1 door",
+        "2 adjustable shelves"
+      ],
+      "configure": [
+        {
+          "axis": "Width",
+          "options": [
+            {
+              "label": "15",
+              "selected": true,
+              "available": true,
+              "code": "CT1573"
+            },
+            {
+              "label": "20",
+              "selected": false,
+              "available": true,
+              "code": "CT2073"
+            },
+            {
+              "label": "30",
+              "selected": false,
+              "available": true,
+              "code": "CT3073"
+            },
+            {
+              "label": "40",
+              "selected": false,
+              "available": true,
+              "code": "CT4073"
+            },
+            {
+              "label": "45",
+              "selected": false,
+              "available": true,
+              "code": "CT4573"
+            },
+            {
+              "label": "50",
+              "selected": false,
+              "available": true,
+              "code": "CT5073"
+            },
+            {
+              "label": "60",
+              "selected": false,
+              "available": true,
+              "code": "CT6073"
+            },
+            {
+              "label": "70",
+              "selected": false,
+              "available": true,
+              "code": "CT7073"
+            },
+            {
+              "label": "80",
+              "selected": false,
+              "available": true,
+              "code": "CT8073"
+            },
+            {
+              "label": "90",
+              "selected": false,
+              "available": true,
+              "code": "CT9073"
+            },
+            {
+              "label": "100",
+              "selected": false,
+              "available": true,
+              "code": "CT10073"
+            },
+            {
+              "label": "120",
+              "selected": false,
+              "available": true,
+              "code": "CT12073"
+            }
+          ]
+        },
+        {
+          "axis": "Height",
+          "options": [
+            {
+              "label": "H73",
+              "selected": true,
+              "available": true,
+              "code": "CT1573"
+            },
+            {
+              "label": "H80",
+              "selected": false,
+              "available": true,
+              "code": "CT1580"
+            },
+            {
+              "label": "H86",
+              "selected": false,
+              "available": true,
+              "code": "CT1586"
+            }
+          ]
+        },
+        {
+          "axis": "Depth",
+          "options": [
+            {
+              "label": "36",
+              "selected": false,
+              "available": true,
+              "depth": 36,
+              "code": "CT157336"
+            },
+            {
+              "label": "48",
+              "selected": false,
+              "available": true,
+              "depth": 48,
+              "code": "CT157348"
+            },
+            {
+              "label": "58",
+              "selected": true,
+              "available": true,
+              "depth": 58,
+              "code": "CT1573"
+            },
+            {
+              "label": "68",
+              "selected": false,
+              "available": true,
+              "depth": 68,
+              "code": "CT157368"
+            }
+          ]
+        },
+        {
+          "axis": "Programme",
+          "options": [
+            {
+              "label": "P",
+              "selected": false,
+              "available": true,
+              "tier": "P",
+              "code": "T1573"
+            },
+            {
+              "label": "C",
+              "selected": true,
+              "available": true,
+              "tier": "C",
+              "code": "CT1573"
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "heading": "Configure",
+          "chips": [
+            {
+              "text": "15",
+              "ok": true
+            },
+            {
+              "text": "20",
+              "ok": null
+            },
+            {
+              "text": "30",
+              "ok": null
+            },
+            {
+              "text": "40",
+              "ok": null
+            },
+            {
+              "text": "45",
+              "ok": null
+            },
+            {
+              "text": "50",
+              "ok": null
+            },
+            {
+              "text": "60",
+              "ok": null
+            },
+            {
+              "text": "70",
+              "ok": null
+            },
+            {
+              "text": "80",
+              "ok": null
+            },
+            {
+              "text": "90",
+              "ok": null
+            },
+            {
+              "text": "100",
+              "ok": null
+            },
+            {
+              "text": "120",
+              "ok": null
+            },
+            {
+              "text": "H73",
+              "ok": true
+            },
+            {
+              "text": "H80",
+              "ok": null
+            },
+            {
+              "text": "H86",
+              "ok": null
+            },
+            {
+              "text": "36",
+              "ok": null
+            },
+            {
+              "text": "48",
+              "ok": null
+            },
+            {
+              "text": "58",
+              "ok": true
+            },
+            {
+              "text": "68",
+              "ok": null
+            },
+            {
+              "text": "P",
+              "ok": null
+            },
+            {
+              "text": "C",
+              "ok": true
+            }
+          ]
+        },
+        {
+          "heading": "Description",
+          "list": [
+            "1 door",
+            "2 adjustable shelves"
+          ],
+          "notes": [
+            "Floor unit1 door2 adjustable shelves"
+          ]
+        },
+        {
+          "heading": "Handing",
+          "notes": [
+            "Available L/R — state hinge side on order. Diagram shows the Left version."
+          ]
+        },
+        {
+          "heading": "Specification",
+          "kv": [
+            {
+              "k": "Width",
+              "v": "150 mm"
+            },
+            {
+              "k": "Height",
+              "v": "730 mm"
+            },
+            {
+              "k": "Depth",
+              "v": "560 mm carcass"
+            },
+            {
+              "k": "Modifiers",
+              "v": "—"
+            },
+            {
+              "k": "Carcase line",
+              "v": "73"
+            },
+            {
+              "k": "Weight",
+              "v": "23.9 kg"
+            },
+            {
+              "k": "Volume",
+              "v": "0.07 m³"
+            },
+            {
+              "k": "Catalog page",
+              "v": "20.01 · PDF p.183"
+            }
+          ]
+        },
+        {
+          "heading": "Restrictions",
+          "notes": [
+            "No recessed handle vertical",
+            "Programmes CONTINO + K35",
+            "Cupboards 45 degree chamfered edge not on both sides",
+            "Programmes KL73 / KL86 only XML",
+            "No fronts 15 cm",
+            "No fronts ROCCA"
+          ]
+        },
+        {
+          "heading": "Programme availability"
+        },
+        {
+          "heading": "Possible alterations & accessories",
+          "tabs": [
+            {
+              "label": "Alterations",
+              "count": 8,
+              "sections": [
+                {
+                  "heading": "Standard",
+                  "notes": [
+                    "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+                  ],
+                  "cards": [
+                    {
+                      "code": "ANST",
+                      "name": "Cupboard Depth Alteration",
+                      "desc": "Carcase depth altered to a non-standard size.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSH",
+                      "name": "Cupboard Height Alteration",
+                      "desc": "Carcase height altered to a non-standard size.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSHT",
+                      "name": "Cupboard Height & Depth Alteration",
+                      "desc": "Height and depth both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSB",
+                      "name": "Cupboard Width Alteration",
+                      "desc": "Carcase width altered outside the standard grid.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBH",
+                      "name": "Cupboard Width & Height Alteration",
+                      "desc": "Width and height both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBT",
+                      "name": "Cupboard Width & Depth Alteration",
+                      "desc": "Width and depth both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBHT",
+                      "name": "Cupboard Width, Height & Depth Alteration",
+                      "desc": "Width, height and depth all altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                      "options": []
+                    }
+                  ]
+                },
+                {
+                  "heading": "Unit Specific",
+                  "notes": [],
+                  "cards": [
+                    {
+                      "code": "FSUE7358",
+                      "name": "Visible carcase side with",
+                      "desc": "",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/FSUE7358.jpg",
+                      "options": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Modifications — how to",
+          "recipes": [
+            {
+              "text": "Handle-less mechanical (760) — Tip-Softclose touch latch. eOpus: set handle 760",
+              "codes": [
+                "set handle 760"
+              ]
+            },
+            {
+              "text": "Handle-less electric (761) — SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)761 electric ALWAYS needs the SMNT transformer — not added automatically",
+              "codes": [
+                "set handle 761",
+                "+SMNK200US",
+                "+SMVK200",
+                "+SMNT (transformer)"
+              ]
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "label": "Alterations",
+          "count": 8,
+          "sections": [
+            {
+              "heading": "Standard",
+              "notes": [
+                "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+              ],
+              "cards": [
+                {
+                  "code": "ANST",
+                  "name": "Cupboard Depth Alteration",
+                  "desc": "Carcase depth altered to a non-standard size.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSH",
+                  "name": "Cupboard Height Alteration",
+                  "desc": "Carcase height altered to a non-standard size.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSHT",
+                  "name": "Cupboard Height & Depth Alteration",
+                  "desc": "Height and depth both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSB",
+                  "name": "Cupboard Width Alteration",
+                  "desc": "Carcase width altered outside the standard grid.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBH",
+                  "name": "Cupboard Width & Height Alteration",
+                  "desc": "Width and height both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBT",
+                  "name": "Cupboard Width & Depth Alteration",
+                  "desc": "Width and depth both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBHT",
+                  "name": "Cupboard Width, Height & Depth Alteration",
+                  "desc": "Width, height and depth all altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                  "options": []
+                }
+              ]
+            },
+            {
+              "heading": "Unit Specific",
+              "notes": [],
+              "cards": [
+                {
+                  "code": "FSUE7358",
+                  "name": "Visible carcase side with",
+                  "desc": "",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/FSUE7358.jpg",
+                  "options": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tab_count": 1,
+      "card_count": 8
+    }
+  },
+  {
+    "key": "T1573||T1573",
+    "detail": {
+      "available": true,
+      "resolved_by": "code",
+      "fid": "F805",
+      "title": "Floor unit L/R",
+      "subtitle": "Base · Doors",
+      "panel_code": "T1573",
+      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/T1573.jpg",
+      "price_text": null,
+      "description": [
+        "1 door",
+        "2 adjustable shelves"
+      ],
+      "configure": [
+        {
+          "axis": "Width",
+          "options": [
+            {
+              "label": "15",
+              "selected": true,
+              "available": true,
+              "code": "T1573"
+            },
+            {
+              "label": "20",
+              "selected": false,
+              "available": true,
+              "code": "T2073"
+            },
+            {
+              "label": "30",
+              "selected": false,
+              "available": true,
+              "code": "T3073"
+            },
+            {
+              "label": "40",
+              "selected": false,
+              "available": true,
+              "code": "T4073"
+            },
+            {
+              "label": "45",
+              "selected": false,
+              "available": true,
+              "code": "T4573"
+            },
+            {
+              "label": "50",
+              "selected": false,
+              "available": true,
+              "code": "T5073"
+            },
+            {
+              "label": "60",
+              "selected": false,
+              "available": true,
+              "code": "T6073"
+            },
+            {
+              "label": "70",
+              "selected": false,
+              "available": true,
+              "code": "T7073"
+            },
+            {
+              "label": "80",
+              "selected": false,
+              "available": true,
+              "code": "T8073"
+            },
+            {
+              "label": "90",
+              "selected": false,
+              "available": true,
+              "code": "T9073"
+            },
+            {
+              "label": "100",
+              "selected": false,
+              "available": true,
+              "code": "T10073"
+            },
+            {
+              "label": "120",
+              "selected": false,
+              "available": true,
+              "code": "T12073"
+            }
+          ]
+        },
+        {
+          "axis": "Height",
+          "options": [
+            {
+              "label": "H73",
+              "selected": true,
+              "available": true,
+              "code": "T1573"
+            },
+            {
+              "label": "H80",
+              "selected": false,
+              "available": true,
+              "code": "T1580"
+            },
+            {
+              "label": "H86",
+              "selected": false,
+              "available": true,
+              "code": "T1586"
+            }
+          ]
+        },
+        {
+          "axis": "Depth",
+          "options": [
+            {
+              "label": "36",
+              "selected": false,
+              "available": true,
+              "depth": 36,
+              "code": "T157336"
+            },
+            {
+              "label": "48",
+              "selected": false,
+              "available": true,
+              "depth": 48,
+              "code": "T157348"
+            },
+            {
+              "label": "58",
+              "selected": true,
+              "available": true,
+              "depth": 58,
+              "code": "T1573"
+            },
+            {
+              "label": "68",
+              "selected": false,
+              "available": true,
+              "depth": 68,
+              "code": "T157368"
+            }
+          ]
+        },
+        {
+          "axis": "Programme",
+          "options": [
+            {
+              "label": "P",
+              "selected": true,
+              "available": true,
+              "tier": "P",
+              "code": "T1573"
+            },
+            {
+              "label": "C",
+              "selected": false,
+              "available": true,
+              "tier": "C",
+              "code": "CT1573"
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "heading": "Configure",
+          "chips": [
+            {
+              "text": "15",
+              "ok": true
+            },
+            {
+              "text": "20",
+              "ok": null
+            },
+            {
+              "text": "30",
+              "ok": null
+            },
+            {
+              "text": "40",
+              "ok": null
+            },
+            {
+              "text": "45",
+              "ok": null
+            },
+            {
+              "text": "50",
+              "ok": null
+            },
+            {
+              "text": "60",
+              "ok": null
+            },
+            {
+              "text": "70",
+              "ok": null
+            },
+            {
+              "text": "80",
+              "ok": null
+            },
+            {
+              "text": "90",
+              "ok": null
+            },
+            {
+              "text": "100",
+              "ok": null
+            },
+            {
+              "text": "120",
+              "ok": null
+            },
+            {
+              "text": "H73",
+              "ok": true
+            },
+            {
+              "text": "H80",
+              "ok": null
+            },
+            {
+              "text": "H86",
+              "ok": null
+            },
+            {
+              "text": "36",
+              "ok": null
+            },
+            {
+              "text": "48",
+              "ok": null
+            },
+            {
+              "text": "58",
+              "ok": true
+            },
+            {
+              "text": "68",
+              "ok": null
+            },
+            {
+              "text": "P",
+              "ok": true
+            },
+            {
+              "text": "C",
+              "ok": null
+            }
+          ]
+        },
+        {
+          "heading": "Description",
+          "list": [
+            "1 door",
+            "2 adjustable shelves"
+          ],
+          "notes": [
+            "Floor unit1 door2 adjustable shelves"
+          ]
+        },
+        {
+          "heading": "Handing",
+          "notes": [
+            "Available L/R — state hinge side on order. Diagram shows the Left version."
+          ]
+        },
+        {
+          "heading": "Specification",
+          "kv": [
+            {
+              "k": "Width",
+              "v": "150 mm"
+            },
+            {
+              "k": "Height",
+              "v": "730 mm"
+            },
+            {
+              "k": "Depth",
+              "v": "560 mm carcass"
+            },
+            {
+              "k": "Modifiers",
+              "v": "—"
+            },
+            {
+              "k": "Carcase line",
+              "v": "73"
+            },
+            {
+              "k": "Weight",
+              "v": "17.3 kg"
+            },
+            {
+              "k": "Volume",
+              "v": "0.07 m³"
+            },
+            {
+              "k": "Catalog page",
+              "v": "20.01 · PDF p.211"
+            }
+          ]
+        },
+        {
+          "heading": "Restrictions",
+          "notes": [
+            "No recessed handle vertical",
+            "No fronts 15 cm",
+            "No handle position A",
+            "No inset handle 710",
+            "Cupboards 45 degree chamfered edge not on both sides",
+            "Programmes KL73 / KL86 only XML",
+            "No fronts BOSSA",
+            "no handle 597, 522, 523, 570, 571",
+            "No handle 306 handle position A",
+            "No inset handle 715, 716",
+            "No fronts -Q handle 790, 791",
+            "No griprail 660, 661, 662, 663",
+            "no handle 605, 606",
+            "No fronts ROCCA",
+            "no handle 670, 671, 635, 636",
+            "Metal bow handle 535 position B",
+            "no handle 590"
+          ]
+        },
+        {
+          "heading": "Programme availability"
+        },
+        {
+          "heading": "Possible alterations & accessories",
+          "tabs": [
+            {
+              "label": "Alterations",
+              "count": 7,
+              "sections": [
+                {
+                  "heading": null,
+                  "notes": [
+                    "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+                  ],
+                  "cards": [
+                    {
+                      "code": "ANST",
+                      "name": "Cupboard Depth Alteration",
+                      "desc": "Carcase depth altered to a non-standard size.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSH",
+                      "name": "Cupboard Height Alteration",
+                      "desc": "Carcase height altered to a non-standard size.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSHT",
+                      "name": "Cupboard Height & Depth Alteration",
+                      "desc": "Height and depth both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSB",
+                      "name": "Cupboard Width Alteration",
+                      "desc": "Carcase width altered outside the standard grid.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBH",
+                      "name": "Cupboard Width & Height Alteration",
+                      "desc": "Width and height both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBT",
+                      "name": "Cupboard Width & Depth Alteration",
+                      "desc": "Width and depth both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBHT",
+                      "name": "Cupboard Width, Height & Depth Alteration",
+                      "desc": "Width, height and depth all altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                      "options": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Modifications — how to",
+          "recipes": [
+            {
+              "text": "Handle-less mechanical (760) — Tip-Softclose touch latch. eOpus: set handle 760",
+              "codes": [
+                "set handle 760"
+              ]
+            },
+            {
+              "text": "Handle-less electric (761) — SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)761 electric ALWAYS needs the SMNT transformer — not added automatically",
+              "codes": [
+                "set handle 761",
+                "+SMNK200US",
+                "+SMVK200",
+                "+SMNT (transformer)"
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Planning notes",
+          "notes": [
+            "Because of the narrow front width, bow handles will be placed vertically."
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "label": "Alterations",
+          "count": 7,
+          "sections": [
+            {
+              "heading": null,
+              "notes": [
+                "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+              ],
+              "cards": [
+                {
+                  "code": "ANST",
+                  "name": "Cupboard Depth Alteration",
+                  "desc": "Carcase depth altered to a non-standard size.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSH",
+                  "name": "Cupboard Height Alteration",
+                  "desc": "Carcase height altered to a non-standard size.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSHT",
+                  "name": "Cupboard Height & Depth Alteration",
+                  "desc": "Height and depth both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSB",
+                  "name": "Cupboard Width Alteration",
+                  "desc": "Carcase width altered outside the standard grid.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBH",
+                  "name": "Cupboard Width & Height Alteration",
+                  "desc": "Width and height both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBT",
+                  "name": "Cupboard Width & Depth Alteration",
+                  "desc": "Width and depth both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBHT",
+                  "name": "Cupboard Width, Height & Depth Alteration",
+                  "desc": "Width, height and depth all altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                  "options": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tab_count": 1,
+      "card_count": 7
+    }
+  },
+  {
+    "key": "CT1580||CT1580",
+    "detail": {
+      "available": true,
+      "resolved_by": "code",
+      "fid": "F805",
+      "title": "Floor unit L/R",
+      "subtitle": "Base · Doors",
+      "panel_code": "CT1580",
+      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/CT1580.jpg",
+      "price_text": null,
+      "description": [
+        "1 door",
+        "2 adjustable shelves"
+      ],
+      "configure": [
+        {
+          "axis": "Width",
+          "options": [
+            {
+              "label": "15",
+              "selected": true,
+              "available": true,
+              "code": "CT1580"
+            },
+            {
+              "label": "20",
+              "selected": false,
+              "available": true,
+              "code": "CT2080"
+            },
+            {
+              "label": "30",
+              "selected": false,
+              "available": true,
+              "code": "CT3080"
+            },
+            {
+              "label": "40",
+              "selected": false,
+              "available": true,
+              "code": "CT4080"
+            },
+            {
+              "label": "45",
+              "selected": false,
+              "available": true,
+              "code": "CT4580"
+            },
+            {
+              "label": "50",
+              "selected": false,
+              "available": true,
+              "code": "CT5080"
+            },
+            {
+              "label": "60",
+              "selected": false,
+              "available": true,
+              "code": "CT6080"
+            },
+            {
+              "label": "70",
+              "selected": false,
+              "available": true,
+              "code": "CT7080"
+            },
+            {
+              "label": "80",
+              "selected": false,
+              "available": true,
+              "code": "CT8080"
+            },
+            {
+              "label": "90",
+              "selected": false,
+              "available": true,
+              "code": "CT9080"
+            },
+            {
+              "label": "100",
+              "selected": false,
+              "available": true,
+              "code": "CT10080"
+            },
+            {
+              "label": "120",
+              "selected": false,
+              "available": true,
+              "code": "CT12080"
+            }
+          ]
+        },
+        {
+          "axis": "Height",
+          "options": [
+            {
+              "label": "H73",
+              "selected": false,
+              "available": true,
+              "code": "CT1573"
+            },
+            {
+              "label": "H80",
+              "selected": true,
+              "available": true,
+              "code": "CT1580"
+            },
+            {
+              "label": "H86",
+              "selected": false,
+              "available": true,
+              "code": "CT1586"
+            }
+          ]
+        },
+        {
+          "axis": "Depth",
+          "options": [
+            {
+              "label": "36",
+              "selected": false,
+              "available": true,
+              "depth": 36,
+              "code": "CT158036"
+            },
+            {
+              "label": "48",
+              "selected": false,
+              "available": true,
+              "depth": 48,
+              "code": "CT158048"
+            },
+            {
+              "label": "58",
+              "selected": true,
+              "available": true,
+              "depth": 58,
+              "code": "CT1580"
+            },
+            {
+              "label": "68",
+              "selected": false,
+              "available": true,
+              "depth": 68,
+              "code": "CT158068"
+            }
+          ]
+        },
+        {
+          "axis": "Programme",
+          "options": [
+            {
+              "label": "P",
+              "selected": false,
+              "available": true,
+              "tier": "P",
+              "code": "T1580"
+            },
+            {
+              "label": "C",
+              "selected": true,
+              "available": true,
+              "tier": "C",
+              "code": "CT1580"
+            }
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "heading": "Configure",
+          "chips": [
+            {
+              "text": "15",
+              "ok": true
+            },
+            {
+              "text": "20",
+              "ok": null
+            },
+            {
+              "text": "30",
+              "ok": null
+            },
+            {
+              "text": "40",
+              "ok": null
+            },
+            {
+              "text": "45",
+              "ok": null
+            },
+            {
+              "text": "50",
+              "ok": null
+            },
+            {
+              "text": "60",
+              "ok": null
+            },
+            {
+              "text": "70",
+              "ok": null
+            },
+            {
+              "text": "80",
+              "ok": null
+            },
+            {
+              "text": "90",
+              "ok": null
+            },
+            {
+              "text": "100",
+              "ok": null
+            },
+            {
+              "text": "120",
+              "ok": null
+            },
+            {
+              "text": "H73",
+              "ok": null
+            },
+            {
+              "text": "H80",
+              "ok": true
+            },
+            {
+              "text": "H86",
+              "ok": null
+            },
+            {
+              "text": "36",
+              "ok": null
+            },
+            {
+              "text": "48",
+              "ok": null
+            },
+            {
+              "text": "58",
+              "ok": true
+            },
+            {
+              "text": "68",
+              "ok": null
+            },
+            {
+              "text": "P",
+              "ok": null
+            },
+            {
+              "text": "C",
+              "ok": true
+            }
+          ]
+        },
+        {
+          "heading": "Description",
+          "list": [
+            "1 door",
+            "2 adjustable shelves"
+          ],
+          "notes": [
+            "Floor unit1 door2 adjustable shelves"
+          ]
+        },
+        {
+          "heading": "Handing",
+          "notes": [
+            "Available L/R — state hinge side on order. Diagram shows the Left version."
+          ]
+        },
+        {
+          "heading": "Specification",
+          "kv": [
+            {
+              "k": "Width",
+              "v": "150 mm"
+            },
+            {
+              "k": "Height",
+              "v": "795 mm"
+            },
+            {
+              "k": "Depth",
+              "v": "560 mm carcass"
+            },
+            {
+              "k": "Modifiers",
+              "v": "—"
+            },
+            {
+              "k": "Carcase line",
+              "v": "80"
+            },
+            {
+              "k": "Weight",
+              "v": "23.9 kg"
+            },
+            {
+              "k": "Volume",
+              "v": "0.07 m³"
+            },
+            {
+              "k": "Catalog page",
+              "v": "22.01 · PDF p.217"
+            }
+          ]
+        },
+        {
+          "heading": "Restrictions",
+          "notes": [
+            "No recessed handle vertical",
+            "No fronts 15 cm",
+            "Programmes CONTINO + K35",
+            "Cupboards 45 degree chamfered edge not on both sides",
+            "No fronts ROCCA"
+          ]
+        },
+        {
+          "heading": "Programme availability"
+        },
+        {
+          "heading": "Possible alterations & accessories",
+          "tabs": [
+            {
+              "label": "Alterations",
+              "count": 8,
+              "sections": [
+                {
+                  "heading": "Standard",
+                  "notes": [
+                    "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+                  ],
+                  "cards": [
+                    {
+                      "code": "ANST",
+                      "name": "Cupboard Depth Alteration",
+                      "desc": "Carcase depth altered to a non-standard size.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSH",
+                      "name": "Cupboard Height Alteration",
+                      "desc": "Carcase height altered to a non-standard size.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSHT",
+                      "name": "Cupboard Height & Depth Alteration",
+                      "desc": "Height and depth both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSB",
+                      "name": "Cupboard Width Alteration",
+                      "desc": "Carcase width altered outside the standard grid.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBH",
+                      "name": "Cupboard Width & Height Alteration",
+                      "desc": "Width and height both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBT",
+                      "name": "Cupboard Width & Depth Alteration",
+                      "desc": "Width and depth both altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                      "options": []
+                    },
+                    {
+                      "code": "ANSBHT",
+                      "name": "Cupboard Width, Height & Depth Alteration",
+                      "desc": "Width, height and depth all altered.",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                      "options": []
+                    }
+                  ]
+                },
+                {
+                  "heading": "Unit Specific",
+                  "notes": [],
+                  "cards": [
+                    {
+                      "code": "FSUE8058",
+                      "name": "Visible carcase side with",
+                      "desc": "",
+                      "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/FSUE8058.jpg",
+                      "options": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Modifications — how to",
+          "recipes": [
+            {
+              "text": "Handle-less mechanical (760) — Tip-Softclose touch latch. eOpus: set handle 760",
+              "codes": [
+                "set handle 760"
+              ]
+            },
+            {
+              "text": "Handle-less electric (761) — SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)761 electric ALWAYS needs the SMNT transformer — not added automatically",
+              "codes": [
+                "set handle 761",
+                "+SMNK200US",
+                "+SMVK200",
+                "+SMNT (transformer)"
+              ]
+            }
+          ]
+        }
+      ],
+      "tabs": [
+        {
+          "label": "Alterations",
+          "count": 8,
+          "sections": [
+            {
+              "heading": "Standard",
+              "notes": [
+                "Showing all alterations. Select a programme — FS programmes (VERVE-FS, WAKUU-FS, AVENIDA, CARRÉ-FS) cannot be altered."
+              ],
+              "cards": [
+                {
+                  "code": "ANST",
+                  "name": "Cupboard Depth Alteration",
+                  "desc": "Carcase depth altered to a non-standard size.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANST.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSH",
+                  "name": "Cupboard Height Alteration",
+                  "desc": "Carcase height altered to a non-standard size.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSH.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSHT",
+                  "name": "Cupboard Height & Depth Alteration",
+                  "desc": "Height and depth both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSHT.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSB",
+                  "name": "Cupboard Width Alteration",
+                  "desc": "Carcase width altered outside the standard grid.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSB.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBH",
+                  "name": "Cupboard Width & Height Alteration",
+                  "desc": "Width and height both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBH.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBT",
+                  "name": "Cupboard Width & Depth Alteration",
+                  "desc": "Width and depth both altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBT.jpg",
+                  "options": []
+                },
+                {
+                  "code": "ANSBHT",
+                  "name": "Cupboard Width, Height & Depth Alteration",
+                  "desc": "Width, height and depth all altered.",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/ANSBHT.jpg",
+                  "options": []
+                }
+              ]
+            },
+            {
+              "heading": "Unit Specific",
+              "notes": [],
+              "cards": [
+                {
+                  "code": "FSUE8058",
+                  "name": "Visible carcase side with",
+                  "desc": "",
+                  "image": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/FSUE8058.jpg",
+                  "options": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tab_count": 1,
+      "card_count": 8
+    }
+  }
+]

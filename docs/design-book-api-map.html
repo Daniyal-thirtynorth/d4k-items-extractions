@@ -1,0 +1,709 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Book API ↔ UI Map</title>
+<style>
+  :root{
+    --paper:#f6f5f2;
+    --card:#ffffff;
+    --ink:#17201f;
+    --muted:#767b74;
+    --faint:#9aa097;
+    --hair:#e4e2dc;
+    --hair2:#eeece7;
+    --teal:#1f6b61;        /* doc primary accent */
+    --teal-ink:#12433c;
+    --clay:#b5642f;        /* POST / write */
+    --steel:#2f6a86;       /* UI "selected" state inside mockups */
+    --sage-bg:#e2ece1;
+    --sage-line:#7ea886;
+    --warn:#9a5a1f;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Arial, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px 96px;}
+
+  /* ---------- masthead ---------- */
+  .doc-head{
+    padding:56px 0 30px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:8px;
+  }
+  .brand{
+    font-size:12px;letter-spacing:.42em;text-transform:uppercase;
+    color:var(--teal-ink);font-weight:700;
+  }
+  .brand span{color:var(--faint);font-weight:600;}
+  h1{
+    font-size:38px;line-height:1.05;margin:18px 0 10px;
+    font-weight:750;letter-spacing:-.02em;text-wrap:balance;
+  }
+  .lede{max-width:62ch;color:#333c3a;font-size:16px;margin:0;}
+  .metaline{
+    display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:22px;
+    font-family:var(--mono);font-size:12.5px;color:var(--muted);
+  }
+  .metaline b{color:var(--ink);font-weight:600;}
+
+  /* ---------- print hint (screen only) ---------- */
+  .printbar{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    margin:26px 0 2px;padding:12px 16px;border:1px solid var(--hair);
+    background:#fff;border-radius:10px;font-size:13px;color:var(--muted);
+  }
+  .printbar strong{color:var(--ink);}
+  .printbtn{
+    font:inherit;font-size:13px;cursor:pointer;border:1px solid var(--teal);
+    color:#fff;background:var(--teal);padding:7px 14px;border-radius:8px;font-weight:600;
+  }
+  .printbtn:hover{background:var(--teal-ink);border-color:var(--teal-ink);}
+  .printbtn:focus-visible{outline:2px solid var(--clay);outline-offset:2px;}
+
+  /* ---------- section scaffold ---------- */
+  section{margin-top:52px;}
+  .eyebrow{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--teal);font-weight:600;margin:0 0 6px;
+  }
+  h2{font-size:23px;font-weight:700;letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance;}
+  .sec-intro{color:#3a423f;max-width:66ch;margin:0 0 22px;font-size:14.5px;}
+
+  .panel-grid{display:grid;grid-template-columns:1fr;gap:26px;}
+  @media(min-width:820px){
+    .panel-grid.split{grid-template-columns:minmax(0,420px) 1fr;align-items:start;}
+  }
+
+  /* ---------- endpoint chips ---------- */
+  .ep{
+    font-family:var(--mono);font-size:12.5px;font-weight:600;white-space:nowrap;
+    display:inline-flex;align-items:center;gap:7px;
+  }
+  .verb{
+    font-size:10.5px;font-weight:700;letter-spacing:.06em;color:#fff;
+    padding:2px 7px;border-radius:5px;
+  }
+  .verb.get{background:var(--teal);}
+  .verb.post{background:var(--clay);}
+  .path{color:var(--teal-ink);}
+
+  /* ---------- mapping table ---------- */
+  .maptable{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .maptable th{
+    text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);font-weight:600;
+    padding:0 12px 8px;border-bottom:1px solid var(--hair);
+  }
+  .maptable td{
+    padding:11px 12px;border-bottom:1px solid var(--hair2);vertical-align:top;
+  }
+  .maptable tr:last-child td{border-bottom:none;}
+  .maptable td:first-child{white-space:nowrap;}
+  .num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:19px;height:19px;border-radius:50%;background:var(--ink);color:#fff;
+    font-size:11px;font-weight:700;font-family:var(--mono);margin-right:8px;
+    vertical-align:baseline;
+  }
+  code, .param{
+    font-family:var(--mono);font-size:12.5px;background:#eef0ec;color:var(--teal-ink);
+    padding:1px 6px;border-radius:5px;white-space:nowrap;
+  }
+  .field{
+    font-family:var(--mono);font-size:12.5px;color:#4a5350;
+  }
+  .uiname{font-weight:650;color:var(--ink);}
+
+  /* =========================================================
+     UI RE-CREATIONS  (faithful to the live LEICHT Instrument)
+     ========================================================= */
+  .mock{
+    background:var(--card);border:1px solid var(--hair);border-radius:12px;
+    padding:0;overflow:hidden;font-size:13px;position:relative;
+    box-shadow:0 1px 0 rgba(23,32,31,.03), 0 10px 24px -20px rgba(23,32,31,.4);
+  }
+  .mock-cap{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);margin:0 0 8px;
+  }
+  .callout{
+    position:absolute;width:19px;height:19px;border-radius:50%;
+    background:var(--ink);color:#fff;font:700 11px/19px var(--mono);text-align:center;
+    box-shadow:0 0 0 3px var(--card);z-index:3;
+  }
+
+  /* pills — shared */
+  .pill{
+    display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid #d3d5cf;border-radius:8px;background:#fff;color:#3c433f;
+    font-size:12px;font-weight:600;padding:4px 10px;min-width:26px;line-height:1.3;
+  }
+  .pill.round{border-radius:999px;}
+  .pill.sel{background:var(--steel);border-color:var(--steel);color:#fff;}
+  .pill.sage{background:var(--sage-bg);border-color:var(--sage-line);color:#213a27;}
+  .pill.ghost{background:#fff;border-color:#d9dbd5;color:#565c58;}
+  .pill.dark{background:#2b3a38;border-color:#2b3a38;color:#fff;}
+  .lab{font-size:11px;color:var(--muted);font-weight:600;margin-right:8px;letter-spacing:.02em;}
+
+  /* --- filter bar mock --- */
+  .fbar{padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+  .frow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .grp-div{width:1px;height:20px;background:var(--hair);margin:0 6px;}
+  .chk{width:13px;height:13px;border:1.5px solid #b9bcb5;border-radius:3px;display:inline-block;}
+
+  /* --- programme bar mock --- */
+  .pbar{padding:14px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .selchip{
+    display:inline-flex;align-items:center;gap:8px;border:1px solid #cfd2cb;border-radius:9px;
+    padding:7px 12px;font-weight:600;color:var(--ink);background:#fff;font-size:12.5px;
+  }
+  .selchip .sq{width:11px;height:11px;background:#3c4b48;border-radius:2px;display:inline-block;}
+  .selchip .car{color:var(--faint);margin-left:2px;}
+
+  /* --- category rail mock --- */
+  .rail{padding:12px 0;}
+  .rail .rlab{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;padding:0 16px 8px;}
+  .rrow{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;font-size:14px;}
+  .rrow .rc{color:var(--faint);font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;}
+  .rrow.top{font-weight:650;}
+  .rrow.on{background:var(--steel);color:#fff;}
+  .rrow.on .rc{color:#d6e4ec;}
+  .rrow.sub{padding-left:28px;color:#4b524e;font-size:13.5px;}
+  .rrow.subon{padding-left:28px;background:#eef2f4;color:var(--steel);font-weight:600;}
+
+  /* --- grid card mock --- */
+  .gcard{width:300px;max-width:100%;border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:#fff;}
+  .gc-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;}
+  .gc-tag{border:1px solid #d3d5cf;border-radius:8px;padding:4px 11px;font-size:12px;font-weight:600;color:#3c433f;}
+  .gc-badge{border:1px solid #cdd0c9;border-radius:999px;padding:3px 12px;font-size:11.5px;font-weight:700;color:#57605c;letter-spacing:.02em;}
+  .gc-art{height:150px;background:#f4f3ef;display:flex;align-items:center;justify-content:center;color:#c3c6bf;font-size:12px;border-top:1px solid var(--hair2);border-bottom:2px solid var(--teal);position:relative;}
+  .gc-art svg{opacity:.9;}
+  .gc-body{padding:12px 14px 14px;}
+  .gc-title{font-size:15px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em;}
+  .gc-sub{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--faint);margin-bottom:12px;}
+  .gc-sub .code{font-family:var(--mono);color:var(--steel);font-weight:600;}
+  .gc-line{display:flex;align-items:center;gap:6px;margin:7px 0;flex-wrap:wrap;}
+  .gc-foot{display:flex;align-items:center;gap:8px;margin-top:12px;}
+  .icobtn{width:34px;height:30px;border:1px solid #d9dbd5;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;color:#8a908b;}
+  .dot{width:26px;height:26px;border-radius:999px;border:1px solid #cdd0c9;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#57605c;}
+  .dot.on{background:#2b3a38;border-color:#2b3a38;color:#fff;}
+
+  /* --- detail panel mock --- */
+  .detail{max-width:520px;}
+  .dp-crumb{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:16px 18px 0;}
+  .dp-title{font-size:20px;font-weight:750;letter-spacing:-.01em;padding:6px 18px 0;margin:0;}
+  .dp-codewrap{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;margin:12px 18px;border:1px solid var(--hair);border-radius:10px;}
+  .dp-code{font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:.02em;}
+  .dp-btns{display:flex;gap:8px;}
+  .dp-btn{border:1px solid #d3d5cf;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:#3c433f;background:#fff;}
+  .dp-sec{border-top:1px solid var(--hair2);padding:16px 18px;}
+  .dp-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:600;display:flex;justify-content:space-between;}
+  .cfg-row{display:flex;align-items:center;gap:8px;margin:9px 0;flex-wrap:wrap;}
+  .cfg-row .lab{min-width:74px;text-transform:uppercase;font-size:10.5px;letter-spacing:.08em;}
+  .spec-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--hair2);font-size:13.5px;}
+  .spec-row:last-child{border-bottom:none;}
+  .spec-row .k{color:#4b524e;}
+  .spec-row .v{font-weight:650;font-variant-numeric:tabular-nums;}
+  .spec-row .v small{color:var(--faint);font-weight:500;}
+  .tabs{display:flex;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--hair);padding-bottom:10px;margin-bottom:12px;}
+  .tab{font-size:13px;color:#6a716c;font-weight:600;position:relative;}
+  .tab .ct{font-family:var(--mono);font-size:11px;color:var(--faint);margin-left:3px;}
+  .tab.on{color:var(--ink);}
+  .tab.on:after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:2px;background:var(--ink);}
+  .mod{border-left:3px solid var(--clay);background:#fbfaf8;border-radius:0 8px 8px 0;padding:10px 12px;margin:8px 0;font-size:13px;line-height:1.5;}
+  .mod b{font-weight:700;}
+  .kps{font-family:var(--mono);font-size:11.5px;background:#f0f0eb;border:1px solid var(--hair);border-radius:5px;padding:1px 6px;}
+  .mod .warn{display:block;color:var(--warn);font-size:12px;margin-top:5px;}
+  .note-list{margin:0;padding-left:18px;color:#3f4744;font-size:13px;}
+  .note-list li{margin:3px 0;}
+  .avail-note{color:#3f4744;font-size:13.5px;}
+
+  /* callout ref list under a mock */
+  .reflist{list-style:none;margin:14px 0 0;padding:0;font-size:12.5px;color:var(--muted);display:grid;gap:4px;}
+  .reflist .num{width:16px;height:16px;font-size:9.5px;margin-right:6px;}
+
+  /* generic prose bits */
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;background:#eef0ec;border:1px solid var(--hair);border-radius:5px;padding:1px 7px;color:var(--teal-ink);}
+  .callout-box{border:1px solid var(--hair);border-left:3px solid var(--teal);background:#fff;border-radius:0 10px 10px 0;padding:14px 18px;margin:18px 0;font-size:13.5px;color:#39413e;}
+  .callout-box.warn{border-left-color:var(--clay);}
+  .callout-box b{color:var(--ink);}
+
+  /* endpoint reference table */
+  .reftable{width:100%;border-collapse:collapse;font-size:13px;}
+  .reftable th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 10px 9px;border-bottom:1.5px solid var(--ink);}
+  .reftable td{padding:12px 10px;border-bottom:1px solid var(--hair2);vertical-align:top;}
+  .reftable td:first-child{white-space:nowrap;}
+  .reftable tr:last-child td{border-bottom:none;}
+  .reftable .powers{color:var(--muted);font-size:12.5px;}
+
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--hair);font-size:12px;color:var(--faint);font-family:var(--mono);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+  /* ---------- print ---------- */
+  @media print{
+    :root{--paper:#fff;}
+    body{font-size:11.5pt;}
+    .wrap{max-width:none;padding:0;}
+    .printbar{display:none;}
+    section{page-break-inside:avoid;margin-top:30px;}
+    .doc-head{padding-top:0;}
+    .mock{box-shadow:none;}
+    a{color:inherit;text-decoration:none;}
+  }
+  @page{margin:16mm 14mm;}
+</style>
+
+<div class="wrap">
+
+  <header class="doc-head">
+    <div class="brand">LEICHT · Designer Instrument &nbsp;<span>Collection 2026/2 · IDM 3.0.1</span></div>
+    <h1>Design Book API — UI Element Map</h1>
+    <p class="lede">Every control in the LEICHT catalog browser, named as the user sees it and wired to the exact
+      <code>design-book</code> endpoint and field that powers it. Mock-ups reproduce the live Instrument 1:1.</p>
+    <div class="metaline">
+      <span>Backend&nbsp; <b>NestJS · /design-book</b></span>
+      <span>Endpoints&nbsp; <b>11</b></span>
+      <span>SKUs&nbsp; <b>16,393</b></span>
+      <span>Cards&nbsp; <b>1,338</b></span>
+      <span>Programmes&nbsp; <b>120</b></span>
+    </div>
+  </header>
+
+  <div class="printbar">
+    <span>📄 Built to print.&nbsp; <strong>Cmd/Ctrl + P → Save as PDF</strong> for the document with screenshots-as-mockups.</span>
+    <button class="printbtn" onclick="window.print()">Print / Save PDF</button>
+  </div>
+
+  <!-- reading key -->
+  <section id="key">
+    <p class="eyebrow">How to read this</p>
+    <h2>The wiring convention</h2>
+    <p class="sec-intro">Each section pairs a re-creation of one UI region with a table. Numbered markers
+      (<span class="num" style="margin:0">1</span> …) on the mock-up point to the matching row. A row names the
+      <span class="uiname">visible element</span>, the endpoint that serves it, and the request param or response
+      field involved.</p>
+    <table class="maptable">
+      <tr>
+        <td><span class="ep"><span class="verb get">GET</span></span></td>
+        <td>Read endpoint — lists, lookups, detail, config resolution.</td>
+      </tr>
+      <tr>
+        <td><span class="ep"><span class="verb post">POST</span></span></td>
+        <td>Write endpoint — catalog ingest / sync only.</td>
+      </tr>
+      <tr>
+        <td><span class="param">?param</span></td>
+        <td>Request query/path parameter the control sets.</td>
+      </tr>
+      <tr>
+        <td><span class="field">field.path</span></td>
+        <td>Response field the control renders.</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ============ 1. MASTHEAD ============ -->
+  <section id="masthead">
+    <p class="eyebrow">Region 01 · Header</p>
+    <h2>Masthead — collection &amp; live counts</h2>
+    <p class="sec-intro">The header line "16,384 units · 120 programmes" is the catalog's heartbeat: it comes
+      straight off the ingest run, not a client-side count.</p>
+
+    <div class="panel-grid split">
+      <div>
+        <p class="mock-cap">Live UI</p>
+        <div class="mock" style="padding:16px 18px;">
+          <span class="callout" style="top:12px;left:16px;">1</span>
+          <div style="font-size:13px;letter-spacing:.34em;font-weight:700;color:var(--teal-ink);">LEICHT</div>
+          <div style="font-size:9.5px;letter-spacing:.24em;color:var(--faint);margin-top:3px;">PRIMO · DESIGNER INSTRUMENT</div>
+          <div style="text-align:center;margin-top:-30px;font-size:12px;color:#59605b;line-height:1.5;">
+            Collection 2026/2 · IDM 3.0.1<br>
+            <b style="color:var(--ink);">16,384 units · 120 programmes</b>
+            <span class="callout" style="position:static;display:inline-flex;vertical-align:middle;margin-left:6px;">2</span>
+          </div>
+        </div>
+      </div>
+      <table class="maptable">
+        <tr><th>Element</th><th>Endpoint</th><th>Field</th></tr>
+        <tr>
+          <td><span class="num">1</span><span class="uiname">Collection line</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/meta</span></span></td>
+          <td><span class="field">meta.collection</span>, <span class="field">catalogVersion</span></td>
+        </tr>
+        <tr>
+          <td><span class="num">2</span><span class="uiname">Units · programmes count</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/stats</span></span></td>
+          <td><span class="field">activeSkus</span>, <span class="field">programs</span></td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 2. PROGRAMME BAR ============ -->
+  <section id="progbar">
+    <p class="eyebrow">Region 02 · World bar</p>
+    <h2>Programme selector, Mix &amp; ANTOSO</h2>
+    <p class="sec-intro">Choosing a kitchen line re-prices and re-gates the whole catalog. The dropdown is fed by the
+      programme table; Mix and ANTOSO read the rule tables shipped in <span class="tag">meta.ruleTables</span>.</p>
+
+    <div class="panel-grid split">
+      <div>
+        <p class="mock-cap">Live UI</p>
+        <div class="mock">
+          <div class="pbar">
+            <span class="callout" style="top:8px;left:14px;">1</span>
+            <span class="selchip"><span class="sq"></span> No programme · point range <span class="car">▾</span></span>
+            <span class="selchip" style="position:relative;">⊞ Mix<span class="callout" style="top:-8px;right:-8px;">2</span></span>
+            <span class="selchip" style="position:relative;">ANTOSO floating<span class="callout" style="top:-8px;right:-8px;">3</span></span>
+          </div>
+        </div>
+      </div>
+      <table class="maptable">
+        <tr><th>Element</th><th>Endpoint</th><th>Param / field</th></tr>
+        <tr>
+          <td><span class="num">1</span><span class="uiname">Programme dropdown</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/programs</span></span></td>
+          <td>lists <span class="field">key·name·family·priceField</span>; selection feeds <span class="param">?programKey</span> on lists &amp; prices detail</td>
+        </tr>
+        <tr>
+          <td><span class="num">2</span><span class="uiname">Mix (per-area line)</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/meta</span></span></td>
+          <td><span class="field">ruleTables.programs_special</span> + <span class="param">?programKey</span> per area</td>
+        </tr>
+        <tr>
+          <td><span class="num">3</span><span class="uiname">ANTOSO floating / wall</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/meta</span></span></td>
+          <td><span class="field">ruleTables.antoso</span></td>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 3. FILTER BAR ============ -->
+  <section id="filterbar">
+    <p class="eyebrow">Region 03 · Size bar</p>
+    <h2>Width · Height · Depth filters</h2>
+    <p class="sec-intro">The dimension chips are pure query parameters — they narrow both the card grid and the SKU
+      list. Values are in centimetres, matching the stored <span class="tag">widthCm / heightCm / depthCm</span>.</p>
+
+    <p class="mock-cap">Live UI</p>
+    <div class="mock" style="margin-bottom:6px;">
+      <div class="fbar">
+        <div class="frow">
+          <span class="lab">W</span>
+          <span class="pill sel">All</span>
+          <span class="pill">15</span><span class="pill">20</span><span class="pill">30</span>
+          <span class="pill">45</span><span class="pill">60</span><span class="pill">80</span>
+          <span class="pill">100</span><span class="pill">120</span><span class="pill">Corner</span>
+          <span class="callout" style="top:8px;left:34px;">1</span>
+        </div>
+        <div class="frow">
+          <span class="lab">H</span>
+          <span class="pill">All</span><span class="pill">73</span><span class="pill sel">80</span><span class="pill">86</span>
+          <span class="callout" style="top:52px;left:34px;">2</span>
+          <span class="grp-div"></span>
+          <span class="chk"></span> <span style="font-size:11px;color:var(--muted);letter-spacing:.02em;">GREY, DON'T HIDE</span>
+          <span class="callout" style="position:static;display:inline-flex;margin-left:4px;">4</span>
+          <span class="grp-div"></span>
+          <span class="lab">D</span>
+          <span class="pill">36</span><span class="pill">48</span><span class="pill sel">58</span><span class="pill">68</span><span class="pill">63</span>
+          <span class="callout" style="position:static;display:inline-flex;margin-left:4px;">3</span>
+        </div>
+      </div>
+    </div>
+
+    <table class="maptable">
+      <tr><th>Element</th><th>Endpoint</th><th>Param</th></tr>
+      <tr>
+        <td><span class="num">1</span><span class="uiname">Width chips</span></td>
+        <td><span class="ep"><span class="verb get">GET</span><span class="path">/cards</span></span> · <span class="ep"><span class="verb get">GET</span><span class="path">/items</span></span></td>
+        <td><span class="param">?widthCm=60</span> &nbsp;(<span class="param">All</span> = omit)</td>
+      </tr>
+      <tr>
+        <td><span class="num">2</span><span class="uiname">Height chips</span></td>
+        <td><span class="ep"><span class="verb get">GET</span><span class="path">/cards</span></span> · <span class="ep"><span class="verb get">GET</span><span class="path">/items</span></span></td>
+        <td><span class="param">?heightCm=80</span></td>
+      </tr>
+      <tr>
+        <td><span class="num">3</span><span class="uiname">Depth chips (carcass)</span></td>
+        <td><span class="ep"><span class="verb get">GET</span><span class="path">/items</span></span> · <span class="ep"><span class="verb get">GET</span><span class="path">/resolve</span></span></td>
+        <td><span class="param">?depthCm=58</span> → depth-encoded code</td>
+      </tr>
+      <tr>
+        <td><span class="num">4</span><span class="uiname">Grey, don't hide</span></td>
+        <td colspan="2"><span class="powers" style="color:var(--muted)">Client render flag — show off-programme units greyed instead of filtered. Pair with <span class="param">?active=false</span> to include inactive SKUs.</span></td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ============ 4. CATEGORY RAIL ============ -->
+  <section id="catrail">
+    <p class="eyebrow">Region 04 · Left rail</p>
+    <h2>Category tree &amp; counts</h2>
+    <p class="sec-intro">The navigation tree and every count next to it come from one call. Selecting a row sets the
+      category / subcategory filter on the grid.</p>
+
+    <div class="panel-grid split">
+      <div>
+        <p class="mock-cap">Live UI</p>
+        <div class="mock">
+          <div class="rail">
+            <div class="rlab">Category</div>
+            <div class="rrow top"><span>All categories</span><span class="rc">1632</span></div>
+            <div class="rrow on top"><span>Base</span><span class="rc">218</span><span class="callout" style="top:64px;right:-8px;">1</span></div>
+            <div class="rrow subon"><span>All Base</span><span class="rc">218</span></div>
+            <div class="rrow sub"><span>Sinks</span><span class="rc">24</span></div>
+            <div class="rrow sub"><span>Cooktops &amp; Downdrafts</span><span class="rc">31</span><span class="callout" style="top:150px;right:-8px;">2</span></div>
+            <div class="rrow sub"><span>Drawers &amp; Pullouts</span><span class="rc">30</span></div>
+            <div class="rrow top"><span>Tall</span><span class="rc">277</span></div>
+            <div class="rrow top"><span>Wall</span><span class="rc">68</span></div>
+          </div>
+        </div>
+      </div>
+      <table class="maptable">
+        <tr><th>Element</th><th>Endpoint</th><th>Param / field</th></tr>
+        <tr>
+          <td><span class="num">1</span><span class="uiname">Category row + count</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/categories</span></span></td>
+          <td><span class="field">category</span>, <span class="field">productCount</span>; click sets <span class="param">?category=Base</span></td>
+        </tr>
+        <tr>
+          <td><span class="num">2</span><span class="uiname">Subcategory / section</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/categories</span></span></td>
+          <td><span class="field">subcategories[].sections[]</span>; click sets <span class="param">?subcategory</span> · <span class="param">?section</span></td>
+        </tr>
+      </table>
+    </div>
+    <div class="callout-box warn">
+      <b>Count note.</b> The live rail shows <b>1632</b> cards (Base 218); the client v584 export we ingest holds
+      <b>1338</b> cards (Base 170). Per the locked decision the <b>export is source of truth</b> — the deployed UI is
+      a reference build and may split cards differently. <span class="field">/categories</span> reflects the export.
+    </div>
+  </section>
+
+  <!-- ============ 5. GRID CARD ============ -->
+  <section id="gridcard">
+    <p class="eyebrow">Region 05 · Result grid</p>
+    <h2>Product card (grid view)</h2>
+    <p class="sec-intro">Each grid tile is one configurable card: SKUs grouped by <span class="tag">cardId</span>.
+      The header label + programme badge, the W/H/D chips and the tier dots all come from
+      <span class="field">/cards</span>; clicking any chip resolves to a real order code via
+      <span class="field">/resolve</span>.</p>
+
+    <div class="panel-grid split">
+      <div>
+        <p class="mock-cap">Live UI · card</p>
+        <div class="gcard">
+          <div class="gc-head">
+            <span class="gc-tag">Cooktop Unit<span class="callout" style="top:8px;left:118px;">1</span></span>
+            <span class="gc-badge">ALL<span class="callout" style="top:8px;right:-8px;">2</span></span>
+          </div>
+          <div class="gc-art">
+            <svg width="120" height="96" viewBox="0 0 120 96" fill="none" stroke="#9aa098" stroke-width="1.4">
+              <rect x="34" y="10" width="70" height="78"/>
+              <path d="M34 30h70M34 52h70"/>
+              <rect x="16" y="22" width="34" height="16" fill="#e9e9e4"/>
+              <rect x="10" y="46" width="40" height="20" fill="#e9e9e4"/>
+              <text x="2" y="20" fill="#9aa098" font-size="9" stroke="none">13,0</text>
+              <text x="0" y="44" fill="#9aa098" font-size="9" stroke="none">26,25</text>
+              <text x="2" y="70" fill="#9aa098" font-size="9" stroke="none">39,5</text>
+            </svg>
+          </div>
+          <div class="gc-body">
+            <div class="gc-title">Cooktop Unit · Top Blender · BZ2</div>
+            <div class="gc-sub"><span class="code">TK6080BZ2</span><span>W 600 · H 795 mm</span></div>
+            <div class="gc-line"><span class="lab">H</span><span class="pill sel round">80</span></div>
+            <div class="gc-line"><span class="lab">W</span><span class="pill sel round">60</span><span class="pill round">70</span><span class="pill round">80</span><span class="pill round">90</span><span class="pill round">100</span><span class="callout" style="top:2px;left:40px;">3</span></div>
+            <div class="gc-line"><span class="lab">D</span><span class="pill sel round">58</span><span class="pill round">63</span><span class="pill round">68</span></div>
+            <div class="gc-foot">
+              <span class="icobtn">♡</span><span class="icobtn">⧉</span>
+              <span class="dot on">P</span><span class="dot">P1</span><span class="dot">C</span><span class="dot">C1</span><span class="dot">A</span>
+              <span class="callout" style="top:-6px;right:-6px;">4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <table class="maptable">
+        <tr><th>Element</th><th>Endpoint</th><th>Field / param</th></tr>
+        <tr>
+          <td><span class="num">1</span><span class="uiname">Group label</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/cards</span></span></td>
+          <td><span class="field">cardName</span>, <span class="field">section</span></td>
+        </tr>
+        <tr>
+          <td><span class="num">2</span><span class="uiname">Programme badge</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/cards</span></span></td>
+          <td><span class="field">programmeBadge</span> — <span class="param">ALL</span> / <span class="param">P · C</span> / <span class="param">C</span> (from tier families)</td>
+        </tr>
+        <tr>
+          <td><span class="num">3</span><span class="uiname">W / H / D chips</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/resolve</span></span></td>
+          <td>chip set = <span class="field">options.widthsCm / heightsCm / depthsCm</span>; click → <span class="param">?cardId&amp;widthCm=…</span> → order code</td>
+        </tr>
+        <tr>
+          <td><span class="num">4</span><span class="uiname">Tier dots P·P1·C·C1·A</span></td>
+          <td><span class="ep"><span class="verb get">GET</span><span class="path">/resolve</span></span></td>
+          <td>base tiers = <span class="field">tierCodes</span>; premium P1/C1 = <span class="field">skuData.featureFlags</span> → code <span class="param">P1&lt;sku&gt;</span></td>
+        </tr>
+        <tr>
+          <td><span class="uiname">♡ list · ⧉ copy</span></td>
+          <td colspan="2"><span class="powers">Client-local (My-list / clipboard). No backend call today — candidate favorites endpoint.</span></td>
+        </tr>
+      </table>
+    </div>
+    <p class="sec-intro" style="margin-top:16px;">The grid itself ("209 types") is
+      <span class="ep"><span class="verb get">GET</span><span class="path">/cards</span></span> with the active
+      category/size/programme filters and <span class="param">?page</span> / <span class="param">?limit</span>; the
+      count is the response <span class="field">pagination.total</span>.</p>
+  </section>
+
+  <!-- ============ 6. DETAIL PANEL ============ -->
+  <section id="detail">
+    <p class="eyebrow">Region 06 · Slide-over</p>
+    <h2>Item detail panel</h2>
+    <p class="sec-intro">Clicking a card opens the detail slide-over. One call —
+      <span class="ep"><span class="verb get">GET</span><span class="path">/detail/:sku</span></span> — returns
+      <span class="field">{ item, detail }</span>; every block below is a key of the computed
+      <span class="tag">detail</span> object, built server-side to mirror the legacy panel exactly.</p>
+
+    <div class="panel-grid split">
+      <div>
+        <p class="mock-cap">Live UI · panel</p>
+        <div class="mock detail">
+          <div class="dp-crumb">Base · Cooktops &amp; Downdrafts <span class="callout" style="position:static;display:inline-flex;margin-left:4px;">1</span></div>
+          <h3 class="dp-title">Cooktop Unit · Top Blender · BZ2</h3>
+          <div class="dp-codewrap">
+            <span class="dp-code">TK6080BZ2</span>
+            <span class="dp-btns"><span class="dp-btn">⧉ Copy</span><span class="dp-btn">▢ Catalog</span></span>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Configure<span class="callout" style="position:static;">2</span></div>
+            <div class="cfg-row"><span class="lab">Width</span><span class="pill sage round">60</span><span class="pill ghost round">70</span><span class="pill ghost round">80</span><span class="pill ghost round">90</span><span class="pill ghost round">100</span><span class="pill ghost round">120</span></div>
+            <div class="cfg-row"><span class="lab">Height</span><span class="pill ghost round">H73</span><span class="pill sage round">H80</span><span class="pill ghost round">H86</span></div>
+            <div class="cfg-row"><span class="lab">Depth</span><span class="pill sage round">58</span><span class="pill ghost round">63</span><span class="pill ghost round">68</span></div>
+            <div class="cfg-row"><span class="lab">Programme</span><span class="pill sage round">P</span><span class="pill ghost round">P1</span><span class="pill ghost round">C</span><span class="pill ghost round">C1</span><span class="pill ghost round">A</span></div>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Description<span class="callout" style="position:static;">3</span></div>
+            <div style="font-size:13.5px;color:#3f4744;">Hob unit
+              <ul class="note-list" style="margin-top:4px;"><li>1 blender</li><li>2 pullouts</li></ul>
+            </div>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Specification<span class="callout" style="position:static;">4</span></div>
+            <div class="spec-row"><span class="k">Width</span><span class="v">600 mm</span></div>
+            <div class="spec-row"><span class="k">Height</span><span class="v">795 mm</span></div>
+            <div class="spec-row"><span class="k">Depth</span><span class="v">560 mm <small>carcass</small></span></div>
+            <div class="spec-row"><span class="k">Carcase line</span><span class="v">80</span></div>
+            <div class="spec-row"><span class="k">Weight</span><span class="v">46.4 kg</span></div>
+            <div class="spec-row"><span class="k">Volume</span><span class="v">0.29 m³</span></div>
+            <div class="spec-row"><span class="k">Catalog page</span><span class="v">22.09 <small>· PDF p.267</small></span></div>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Programme availability<span class="callout" style="position:static;">5</span></div>
+            <div class="avail-note">Available in all programmes.</div>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Restrictions<span class="callout" style="position:static;">6</span></div>
+            <ul class="note-list">
+              <li>No recessed handle vertical</li>
+              <li>Cupboards 45° chamfered edge on both sides</li>
+              <li>Fronts –Q handle 790, 791</li>
+            </ul>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Modifications — how to<span class="callout" style="position:static;">7</span></div>
+            <div class="mod"><b>P1 — Primo, one handle on top</b> — order <span class="kps">P1TK6080BZ2</span>. Bottom drawers open 760 (touch) or 761 (electric).</div>
+            <div class="mod"><b>Handle-less mechanical (760)</b> — Softclose touch latch. <span class="kps">set handle 760</span></div>
+            <div class="mod"><b>Handle-less electric (761)</b> — SensoMatic. <span class="kps">set handle 761</span> <span class="kps">+SMNT</span>
+              <span class="warn">761 electric ALWAYS needs the SMNT transformer — not added automatically</span></div>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Alterations &amp; accessories<span class="callout" style="position:static;">8</span></div>
+            <div class="tabs">
+              <span class="tab on">Overview</span>
+              <span class="tab">Installation<span class="ct">1</span></span>
+              <span class="tab">Visible Sides<span class="ct">3</span></span>
+              <span class="tab">Alterations<span class="ct">22</span></span>
+              <span class="tab">Pullouts<span class="ct">4</span></span>
+            </div>
+          </div>
+
+          <div class="dp-sec">
+            <div class="dp-h">Planning notes<span class="callout" style="position:static;">9</span></div>
+            <div class="avail-note">Control panel on top.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <table class="maptable">
+          <tr><th>Panel block</th><th>detail.field</th></tr>
+          <tr><td><span class="num">1</span><span class="uiname">Breadcrumb + title</span></td><td><span class="field">header.category · subcategory · cardName · code</span></td></tr>
+          <tr><td><span class="num">2</span><span class="uiname">Configure pills</span></td><td><span class="field">configure.{width,height,depth,programme}.options[].code</span> — each pre-resolved to its order code (same as <span class="ep"><span class="verb get">GET</span><span class="path">/resolve</span></span>)</td></tr>
+          <tr><td><span class="num">3</span><span class="uiname">Description</span></td><td><span class="field">description[]</span></td></tr>
+          <tr><td><span class="num">4</span><span class="uiname">Specification rows</span></td><td><span class="field">specification[]</span> — <span class="field">wt/10</span> kg, <span class="field">vl/1000</span> m³, <span class="field">priceGroupRef · pp</span></td></tr>
+          <tr><td><span class="num">5</span><span class="uiname">Programme availability</span></td><td><span class="field">programmeAvailability</span> — <span class="field">restricted</span> + inclusion <span class="field">programs[]</span></td></tr>
+          <tr><td><span class="num">6</span><span class="uiname">Restrictions</span></td><td><span class="field">restrictions[]</span> (technicalNotes)</td></tr>
+          <tr><td><span class="num">7</span><span class="uiname">Modifications — how to</span></td><td><span class="field">modifications[]</span> — P1/C1 premium, 760/761 handle-less, vertical-V; each with <span class="field">codes[]</span> + <span class="field">warn</span></td></tr>
+          <tr><td><span class="num">8</span><span class="uiname">Alterations tabs</span></td><td><span class="field">alterations[].{name,count,codes}</span> (relatedSkus + accessories)</td></tr>
+          <tr><td><span class="num">9</span><span class="uiname">Planning notes</span></td><td><span class="field">planningNotes[]</span></td></tr>
+        </table>
+        <div class="callout-box">
+          <b>Also on the payload, not shown in this panel:</b> <span class="field">detail.pricing</span>
+          (<span class="field">priceClass · priceMatrix · bookPriceByProgram</span>) and <span class="field">detail.clickNote</span>.
+          Book price for programme P = <span class="field">priceMatrix[ programs[P].priceField ]</span>. The Instrument
+          surfaces price through the separate <b>⚙ Pricing</b> admin, not the detail slide-over.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ENDPOINT REFERENCE ============ -->
+  <section id="reference">
+    <p class="eyebrow">Appendix</p>
+    <h2>All 11 endpoints</h2>
+    <p class="sec-intro">Complete surface of the <span class="tag">/design-book</span> module. Every route is
+      JWT-guarded and documented with an <span class="tag">@ApiOperation</span> in Swagger.</p>
+    <div style="overflow-x:auto;">
+    <table class="reftable">
+      <tr><th>Endpoint</th><th>Purpose</th><th>Powers UI</th></tr>
+      <tr><td><span class="ep"><span class="verb post">POST</span><span class="path">/ingest</span></span></td><td>Upload full catalog export; upsert every SKU + reference table; missing → inactive.</td><td class="powers">Admin sync (CSV↑ / data refresh)</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/cards</span></span></td><td>Card-level grid list; SKUs grouped by cardId with axes + programme badge.</td><td class="powers">Result grid · counts</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/cards/:cardId</span></span></td><td>Every SKU of one card (incl. inactive), sorted.</td><td class="powers">Card expand / variant set</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/items</span></span></td><td>Paginated SKU list/search; category/size/programme filters + free-text q.</td><td class="powers">Search · size filters</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/items/:sku</span></span></td><td>Look up a code (array — some codes cross-listed across cards).</td><td class="powers">Deep-link / code lookup</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/detail/:sku</span></span></td><td>Raw item + computed detail (configure/spec/pricing/mods/…).</td><td class="powers">Detail slide-over</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/resolve</span></span></td><td>cardId + axis values → target order code.</td><td class="powers">Every W/H/D/programme pill click</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/programs</span></span></td><td>All programmes (key·name·family·priceField).</td><td class="powers">Programme dropdown · Mix</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/categories</span></span></td><td>Category → subcategory → section tree with counts.</td><td class="powers">Left rail</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/meta</span></span></td><td>Singleton reference: meta, priceFieldLegend, ruleTables, last ingest.</td><td class="powers">Pricing · ANTOSO · handle recipes</td></tr>
+      <tr><td><span class="ep"><span class="verb get">GET</span><span class="path">/stats</span></span></td><td>Total / active / inactive SKUs, cards, programmes, catalog version.</td><td class="powers">Masthead counts</td></tr>
+    </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>design-book · D4K-backend</span>
+    <span>catalog v584 · export = source of truth</span>
+  </footer>
+
+</div>
