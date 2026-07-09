@@ -10,7 +10,8 @@
  *   in the field. If you build the export, match these types exactly.
  *
  * ── MENTAL MODEL ────────────────────────────────────────────────────────────
- *   categories → subcategories → items (the "cards").
+ *   categories → subcategories → sections → cards. A grid CARD = a FAMILY of items (siblings
+ *   that share `familyId`; the card's W/H/D/Programme pills switch between them, one is the "face").
  *   An ITEM is one orderable code (SKU). Everything the detail screen shows for an
  *   item hangs off the item: the W/H/D/Programme pills, description, the alterations
  *   & accessories tabs, engineering flags, specification, restrictions, modifications,
@@ -120,7 +121,9 @@ export interface Subcategory {
   id: string;                  // "sinks"
   name: string;                // e.g. "Sinks", "Appliance housing", "Cooktops & Downdrafts"
   itemCount: number;
-  sections?: string[];         // optional smaller headers shown inside the grid for this sub (Item.section)
+  sections?: string[];         // the on-grid section HEADERS for this sub, IN RENDER ORDER — the grid stacks
+                               //   its cards under these (Item.section), e.g. Cooktops & Downdrafts → "Cooktop
+                               //   Units" → "Cooktop Unit with Drawers" → "Downdraft & Cooktop Units - …".
 }
 
 /* ═══════════════════════════ Functional "Design Tasks" sidebar ═══════════════════════════ */
@@ -232,8 +235,11 @@ export interface VariantRef {
 }
 
 /* ═══════════════════════════ Item ═══════════════════════════ */
-// UI: one ITEM = one product CARD = one orderable code (SKU). This is the main thing.
-// Everything the detail screen shows for a product is stored on its item.
+// UI: one ITEM = one orderable code (SKU). NOTE a grid product CARD is a whole FAMILY (see
+// `familyId`) — many sibling items collapse to ONE card, and its W/H/D/Programme pills switch
+// between them; the card "face" is one representative item. Cards are grouped under `section`
+// headers in the grid. On the DETAIL screen an item maps 1:1. This item is still the main thing —
+// everything the detail screen shows for a product is stored on it.
 
 export type ItemKind =
   | "cabinet"     // a full unit / card (has Configure, Specification, Engineering, …)
@@ -245,7 +251,16 @@ export interface Item {
   /* identity */
   sku: string;                 // PRIMARY KEY — the order code (e.g. "TK6080BZ2")
   kind: ItemKind;              // what type of thing this code is (see above)
-  familyId?: string;           // groups sibling codes of the same product
+  familyId?: string;           // groups sibling codes of the same product. THE GRID CARD KEY: one product
+                               //   CARD = one family (NOT one item). The card's face + W/H/D/Programme pills
+                               //   navigate this family's sibling SKUs; the grid collapses a family to a single
+                               //   card and stacks cards under `section` headers. "N types" = the family count.
+  familyFace?: boolean;        // OPTIONAL (app-exact rendering): true on the ONE sibling that is the family's
+                               //   default CARD FACE (the unit shown + its preselected pills). When absent, the
+                               //   backend picks a face heuristically (base tier P>P1>C>C1>A, then smallest dims).
+  gridOrder?: number;          // OPTIONAL: the item's position in the app's grid order — gives card order WITHIN
+                               //   a section (and, via each family's first unit, the section order). When absent
+                               //   the backend orders best-effort (section then sku). Captured only on re-extract.
   name: string;                // the title on the card / detail, "Cooktop Unit · Top Blender · BZ2"
   cardLabel?: string;          // small label at the card's top-left, "Cooktop Unit"
   programmeBadge?: string;     // the card's TOP-RIGHT summary badge (a circle / rounded chip), e.g. "P" or "P · A"
