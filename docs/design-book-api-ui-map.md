@@ -29,12 +29,10 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 
 ## 2. `GET /design-book/items` — grid / card list
 
-![Top filter bar](img/topbars.png)
-
 *The grid filter bar (all in `GET items` request table below). Left→right: **PROGRAMME dropdown**
 ("No programme · point range" — world state, no param) · **Mix** button (UI-only) · **W** row
 (`widthMm`, cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI-only) ·
-**D** row (`depthMm`).*
+**D** row (`depthClass` — nominal cm class 36/48/58/63/68, NOT `depthMm`).*
 
 ### Request (filters → UI controls)
 
@@ -56,7 +54,8 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 | `tier` | IN | **FRONTS pill** (P·P1·A·C·C1) | Top toolbar — "FRONTS" pill group | `…/items?tier=P1` |
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row (15·20·30·…·Corner) | `…/items?widthMm=600` |
 | `heightClass` | IN | **H pill** (73·80·86 — coarse bucket, not `heightMm`) | Grid filter bar — H row | `…/items?heightClass=80` |
-| `depthMm` | IN | **D pill** (cm×10 → mm) | Grid filter bar — D row (36·48·58·63·68) | `…/items?depthMm=580` |
+| `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68), NOT exact mm. Matches a unit when the class is among its available depths (`configure.depth[].label` — native OR a depth alteration, incl. the 63 cm alteration). Carcass = class×10−20 (58 ⇒ 560 mm). Mirror of `heightClass`. | Grid filter bar — D row | `…/items?depthClass=58` |
+| `depthMm` | IN | Exact carcass depth (mm) — precise match, **not** the grid D row (that row is a class → use `depthClass`) | (precise filter) | `…/items?depthMm=560` |
 | `heightMm` | IN | Exact carcass height (mm) — not a bar pill | (precise filter) | `…/items?heightMm=792` |
 | `suspended` | IN | **TOE-KICK "Suspended" toggle** (engineering `suspended`, ok=true) | Top toolbar — TOE-KICK H · Suspended | `…/items?suspended=true` |
 | `active` | IN | Active-only flag | Admin | `…/items?active=true` |
@@ -67,7 +66,15 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 > Grid is **tier-granular**: item↔programme links only by tier, so two same-tier programmes collapse to one tier.
 > Bar controls that are NOT item filters (world/display state, no param): PROGRAMME dropdown ("No programme · point range"),
 > TOE-KICK slider (cm), the ⇄ mm/inch converter box, "GREY, DON'T HIDE" toggle, "Mix" button, "Corner" width pill.
-> Combine freely: `…/items?category=Base&heightClass=80&depthMm=580&suspended=true&tier=P&page=1&limit=50`
+> Combine freely: `…/items?category=Base&heightClass=80&depthClass=58&suspended=true&tier=P&page=1&limit=50`
+>
+> **D pill = depth CLASS, not mm.** The D row (36·48·58·63·68) is a NOMINAL cm class, not the exact carcass
+> `depthMm` (class = carcass_cm + 2, so 58 ⇒ 560 mm carcass). Filter with **`depthClass`** — it matches a unit
+> whose available depths (`configure.depth[].label`, native OR alteration incl. the 63 cm alteration) contain the
+> class; `depthMm` stays an exact-mm filter. Raw `depthMm` is NOT a class signal (a "68" shelf can store
+> `depthMm` 610). Backend: `depthClass=C` → `configure.depth.label == String(C)` **OR** (no depth options AND
+> `depthMm == C*10−20`). Direct mirror of `heightClass` (the H pill). The old `depthMm=cm×10` sent by the D row
+> matched almost nothing (carcass is 20 mm shallower) — fixed 2026-07-10.
 >
 > **Grid is card = family, not unit.** Default (no `groupBy`) returns one row per UNIT (sku); the grid
 > shows one card per FAMILY ("type"). Leaf `b_cool#0` = **75 units → 4 cards**; Base zone = 7208 units /
@@ -85,8 +92,6 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 > in `export-schema.ts`).
 
 ### Response (per-card fields → card slots)
-
-![Product card](img/card.png)
 
 *One card (`TK6080BZ2`). Top-left = `cardLabel` ("Cooktop Unit") · top-right = `programmeBadge`
 ("ALL") · image area = `imageUrl` · title = `name` · `sku` + dims line (`widthMm`/`heightMm`) ·
@@ -106,7 +111,7 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 | `widthMm` / `heightMm` / `depthMm` | OUT | Dims line ("W 800 mm · H 792 mm") | Card — under title | `…/items` → `items[].widthMm` |
 | `configure.width[]` | OUT | **W** pill row | Card — Configure rows | `…/items?full=true` → `items[].configure.width` |
 | `configure.height[]` | OUT | **H** pill row (73 / 80 / 86) | Card — Configure rows | `…/items?full=true` → `items[].configure.height` |
-| `configure.depth[]` | OUT | **D** pill row (incl. "63 cm alteration") | Card — Configure rows | `…/items?full=true` → `items[].configure.depth` |
+| `configure.depth[]` | OUT | **D** pill row (incl. "63 cm alteration"). Its `label`s are the nominal depth **classes** (58/63/68…) the top-bar `depthClass` filter matches against | Card — Configure rows | `…/items?full=true` → `items[].configure.depth` |
 | `configure.programme[]` | OUT | Programme / tier pills (P · P1 · C1) | Card — **bottom-right** | `…/items?full=true` → `items[].configure.programme` |
 | `configure.optionRows[]` | OUT | Coded rows — **Ty** / Mode / Config (Z2XM · Z3M · ~~S2ZM~~) | Card — Configure rows | `…/items?full=true` → `items[].configure.optionRows` |
 | `configure.optionRows[].options[].crossedOut` | OUT | Struck-through pill (exists but not orderable here) | Card — pill state (e.g. ~~S2ZM~~) | `…/items?full=true` → `…optionRows[].options[].crossedOut` |
@@ -131,7 +136,7 @@ the app stacks cards under ("APPLIANCE FRONTS · DW (CENTER HANDLE)", "FRONT FOR
 ORIGINAL HANDLE D61"). Cards are **families** (same collapse as `groupBy=family`). It accepts **every**
 `GET items` filter (row-for-row identical to §2 request table: `leafId` / `groupKey` / `zone` /
 `category` / `subcategory` / `section` / `tier` / `family` / `programs[]` / `widthMm` / `heightClass` /
-`depthMm` / `kind` / `q` / `full` / `page` / `limit`). Use it instead of `GET items?groupBy=family`
+`depthClass` / `kind` / `q` / `full` / `page` / `limit`). Use it instead of `GET items?groupBy=family`
 when you want the server to do the section bucketing.
 
 ### Response (envelope → UI)
@@ -159,8 +164,6 @@ when you want the server to do the section bucketing.
 ---
 
 ## 3. `GET /design-book/items/:sku` — detail panel (`openDetail`)
-
-![Detail panel](img/detail.png)
 
 *Detail panel for `TK6080BZ2`, top→bottom = the response table below: breadcrumb + title +
 **Copy**/**Catalog** buttons (header) · **CONFIGURE** (`configure`) · **DESCRIPTION**
@@ -311,8 +314,6 @@ Clipboard) is covered.
 ---
 
 ## 5. `GET /design-book/categories` — type-taxonomy sidebar
-
-![Category sidebar](img/rail.png)
 
 *The left type-taxonomy sidebar. Search box = `q` · "All categories" 1614 = full tree · top-level
 rows (Base/Tall/Wall/Midway/Alteration/Handles/…) = `categories[].name` with `.itemCount` badge ·

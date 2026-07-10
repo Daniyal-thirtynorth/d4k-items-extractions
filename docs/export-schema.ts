@@ -328,7 +328,11 @@ export interface Item {
   /* dimensions (carcass, in mm) — cabinets have these; accessory codes may not */
   widthMm?: number;
   heightMm?: number;
-  depthMm?: number;
+  depthMm?: number;            // EXACT carcass depth (mm). NOT the top D-bar's value: that bar filters by a
+                               //   nominal depth CLASS (36/48/58/63/68 cm), and carcass = class×10−20 (class 58 ⇒
+                               //   560 mm; class = round(depthMm/10)+2). The class set a unit belongs to = its
+                               //   `configure.depth[].label`s (see Configure.depth); backend param = `depthClass`
+                               //   (mirror of heightClass). Raw depthMm is NOT a class signal (a "68" shelf stores 610).
   heightClass?: 73 | 80 | 86 | null;
   toeKick?: ToeKick;
   appliance?: ApplianceHousing;          // set ONLY on appliance-housing fronts — powers the card "Appliances" button (see below)
@@ -433,7 +437,11 @@ export interface SinkFitment {
 export interface Configure {
   width: DimensionOption[];    // the Width row (numeric)
   height: DimensionOption[];   // the Height row (numeric)
-  depth: DimensionOption[];    // the Depth row (numeric; includes a "63 cm alteration" option)
+  depth: DimensionOption[];    // the Depth row (numeric; includes a "63 cm alteration" option). Each `label` is a
+                               //   nominal depth CLASS in cm (58/63/68/36/48) — this same set is what the TOP D-bar
+                               //   filters on (backend `depthClass`; a unit matches a class when it appears here,
+                               //   native OR alteration). Carcass depthMm = label×10−20; label 63 = the 68 cm cabinet
+                               //   with a factory depth alteration (rarely a native unit).
   programme: ProgrammeOption[];// the Programme row (Primo / P1 / Contino / C1 / Avance)
   optionRows?: OptionRow[];    // EVERY extra selector row beyond W/H/D/Programme — coded ("Mode" 700-IF/A · 500-U,
                                //   "Ty"/Type TU/TV/TW · Z/S2Z/Z2X, "Config" 2 Shelves · Shelf + Railing · LED,
@@ -710,5 +718,9 @@ export interface FinishPrice {
  *     Inspiration" SIDEBAR entry is still a Category; only its generator behaviour is UI-only.)
  *   • The TOP filter bar — the W / H / D / height-class value pills + the "GREY, DON'T HIDE"
  *     toggle. It only shows/hides grid cards; its allowed values are derivable from items[].
+ *     NOTE the H and D pills are coarse CLASSES, not exact mm: H = `heightClass` (73/80/86);
+ *     D = a depth CLASS (36/48/58/63/68 cm) matched via each unit's `configure.depth[].label`
+ *     set (native OR alteration), served as the backend `depthClass` param. Carcass depthMm =
+ *     class×10−20, so raw `depthMm` (exact carcass) must NOT be used to filter the D pill.
  * Listed here only so both sides know the full detail screen and nothing looks missing.
  * ════════════════════════════════════════════════════════════════════════════ */

@@ -257,6 +257,56 @@ Local testing: `node dist/main.js` (PORT 8000, Swagger `/api`). The user's Beare
 **deployed** secret → 401 on localhost; mint a local token with the local `.env` `JWT_SECRET` for
 `masteradmin` (userId `651f8eb9c4710268e5a06947`). Token expires — re-mint on 401.
 
+## The lite browser UI (lives in `D4K-backend`, NOT here)
+
+A single-file, no-build reference frontend that browses the ingested catalog against the real
+design-book API. **It lives ONLY in the backend repo** — `D4K-backend/public/design-book-ui.html`
+(vanilla HTML/CSS/JS, ~50 KB, zero deps). Built 2026-07-10 in this session; do not re-create a copy in
+this repo. Open it at **`http://localhost:8000/design-book/ui`**.
+
+**Served + auth'd by two DEV-ONLY routes** (`D4K-backend/src/design-book/design-book-dev.controller.ts`,
+`@ApiExcludeController`, wired in `design-book.module.ts` which also registers a local `JwtModule` with
+the same `JWT_SECRET`):
+- `GET /design-book/ui` → `res.sendFile(<repo>/public/design-book-ui.html)` (path via `process.cwd()`,
+  so run `node dist/main.js` from the repo root).
+- `GET /design-book/dev-token` → mints a 1 h masteradmin JWT (`{userId:651f…6947, email:masteradmin@…}`)
+  via `JwtService`. Returns `{token, tokenType:"Bearer", expiresInSeconds:3600}`.
+- **Both gated to `ENVIRONMENT ∈ {local, dev}`** (mirrors `main.ts`); they **403 in stg/prd/demo** so the
+  unauthenticated token-minter never ships to prod. Guards are per-method in this module, so these routes
+  are simply not `@UseGuards`'d. ⚠️ Never set `ENVIRONMENT=local`/`dev` on a public host — it would expose
+  an admin-token endpoint. The minted user must exist in the connected Mongo or guarded routes still 401.
+
+**Token auto-renews — no paste needed.** The page auto-detects same-origin base (`location.origin +
+/design-book`, so no CORS since it's served by the backend), fetches `/dev-token` on boot, renews ~1 min
+before expiry (a 30 s `setInterval`), and retries once on any 401. Badge shows `🔑 auto · NNm left`. A
+manual token can still be pasted in the **⚙ connection** panel (sets `manual`, disables auto) — the fallback
+when `/dev-token` is absent (e.g. pointing at a deployed prod backend).
+
+**What it renders (all from the API, images built from `meta.imageUrlTemplate`):**
+- Faithful clone of the LEICHT top toolbar — brand bar (live `GET stats` counts), **PROGRAMME** family
+  pills → `family`, programme dropdown → `programs`, **FRONTS** tier pills `P/P1/A/C/C1` → `tier`,
+  **W/H/D** pill bars → `widthMm`/`heightClass`/`depthClass` (D is a nominal cm CLASS 36/48/58/63/68 matched via
+  `configure.depth[].label`, NOT exact `depthMm`; carcass = class×10−20), **Suspended** → `suspended`, **group by family**
+  → `groupBy`. All AND-compose, shown as removable chips. Cosmetic-only controls (Mix, toe-kick slider,
+  colour-temp, unit box, pin, "Grey don't hide", Corner width) are marked `title="display only"` — no
+  backend param exists (device-side render state per the section map above). Working light/dark theme toggle.
+- Left **Design-Tasks sidebar** from `GET functional-categories` (zones→groups→leaves + All + More) →
+  filters via `leafId`/`groupKey`/`zone`/`category`.
+- **Card grid** (`GET items`, paginated) where each card is a mini-configurator: clickable **H/W/D + Ty
+  option rows + programme tier pills** from the item's `configure` (in list rows). Clicking a pill **swaps
+  the card in place** to that sibling SKU (incl. backend-synthesized `P1/C1`). Card action buttons: **⧉ Copy**,
+  **＋ Add Sink** (from `sinkFitment.showOnCard`, opens a popup), **🍽️ Appliances** (only on housing fronts
+  that have `appliance` metadata — enriched via a follow-up `items?sku=…&full=true` call since `appliance`
+  is omitted from default list rows; opens a popup). ♥ favourite is intentionally skipped (device-side, UI-only).
+- **Detail drawer** (`GET items/:sku?expand=all`) — every section: Configure (clickable pills → sibling),
+  Appliance housing, Sink fitment, Description, Specification, Engineering flags, Restrictions, Programme
+  availability, Modifications, Planning notes, accessory-panel tabs (ref-cards resolved via the `refs` map),
+  Related groups, Finishes, Catalog PDF link, System Builder.
+
+To re-verify after backend changes: `npm run build` in `D4K-backend`, `node dist/main.js` from repo root,
+open `http://localhost:8000/design-book/ui` (no token step). It's a dev tool / API reference, not the
+product UI (the client builds the real React app).
+
 ## Open items / next steps
 
 1. ~~**Write the new client instruction** to export the full catalog to the contract~~ — **NO LONGER

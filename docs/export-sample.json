@@ -141,7 +141,7 @@
             ]
           }
         ],
-        "note": "Depth is carcass; full depth = carcass + front + 2 mm once a programme is chosen."
+        "note": "Depth is carcass; full depth = carcass + front + 2 mm once a programme is chosen. The TOP D filter bar matches these nominal depth-CLASS labels (58/63/68) via the `depthClass` query param — NOT the carcass depthMm (class 58 = 560 mm carcass = class*10-20). A unit matches a class when it appears among these labels (native OR the 63 cm alteration)."
       },
       "description": { "title": "Downdraft & cooktop unit", "bullets": ["1 blender", "2 pullouts", "Ducting behind the unit"] },
       "specification": {
