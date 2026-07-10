@@ -73,6 +73,9 @@ export interface CatalogExport {
   programmes: Programme[];     // the 120 kitchen lines listed in the top-left SELECT DROPDOWN
                                // ("No programme · point range"); the P / P1 / C / C1 / A tiers live here
   ruleTables?: RuleTables;     // handle / opening / lighting / carcass-colour reference tables (passthrough)
+  systems?: EngineeredSystem[]; // the "System Builder" panels — engineered SKU bundles (SensoMatic, LLE-R
+                               //   recessed light). Small registry; attaches to a detail screen by
+                               //   `triggerSkus`. See EngineeredSystem below.
   functionalCategories?: Sidebar; // the "Design Tasks" LEFT SIDEBAR, render-ready (Designer Inspiration +
                                //   All categories + zones→groups→leaves + More categories) — a SECOND nav,
                                //   distinct from `categories[]` (the type taxonomy). See below.
@@ -212,6 +215,45 @@ export type ProgrammeTier = "P" | "P1" | "C" | "C1" | "A";
 
 export type RuleTables = Record<string, unknown>; // handle_systems, opening_systems, vertical_handle, antoso, lighting, …
 
+/* ═══════════════════════════ System Builder ═══════════════════════════ */
+/**
+ * UI: the "System Builder" panel on certain detail screens — an engineered product presented as a
+ * complete SYSTEM (a bundle of SKUs) instead of scattered accessories. Two exist today: SensoMatic
+ * (drawer/pullout electrics) and the LLE-R recessed light. The panel renders on the detail screen of
+ * any code in `triggerSkus`, lists REQUIRED + OPTIONAL component slots (each an "Add" button), and
+ * shows a live "System Status" checklist + an "Add Complete <name> System" button.
+ *
+ * What is DATA (this object): the system's composition — its trigger items, the slots, each slot's
+ * candidate codes (as ItemRefs), the pill labels, and the default choice. What is UI-ONLY (NOT here):
+ * the Design Clipboard the "Add" buttons push into (a device-side scratch list, like ♥ My List) and
+ * the System-Status ticks (derived at runtime from clipboard contents). The client renders the panel +
+ * clipboard from this composition; the clipboard STATE stays on the device.
+ *
+ * Attach by REVERSE LOOKUP, don't embed: the backend finds `systems[]` whose `triggerSkus` includes an
+ * item's sku and serves it alongside `items/:sku`. All component codes are ItemRefs → resolve via the
+ * usual `sku → items[]` $lookup (name/image/dims), no duplication.
+ */
+export interface EngineeredSystem {
+  id: string;                  // stable key: "SENSO" | "LLER"
+  name: string;                // "SensoMatic System" | "LLE-R Recessed Light System" (the panel title)
+  note?: string;               // the grey sub-line, e.g. "Recessed LED lamp — 7.8 cm drill hole; …"
+  triggerSkus: string[];       // item SKUs whose detail screen shows this panel (SENSO has 4; LLER has 1)
+  required: SystemSlot[];      // the "Required Components" rows — each must be ordered for "Ready to Order"
+  optional?: SystemSlot[];     // the "Optional" rows below (e.g. a switch/control)
+}
+
+/**
+ * UI: one ROW in the System Builder — a labelled component slot. When `options` has one entry it shows
+ * a single code + Add button; when it has several it shows a pill group (the chosen pill sets the code
+ * next to the Add button). E.g. LLE-R's "Drill hole (by position)": Shelf (BO78) / Lower wall shelf +
+ * conduit (BO78U) / Upper shelf (BO78O), default BO78.
+ */
+export interface SystemSlot {
+  role: string;                // the bold row label: "Power Supply (USA)" | "Drill hole (by position)" | …
+  options: ItemRef[];          // the candidate codes (each an ItemRef; ItemRef.label = the pill text)
+  default?: string;            // pre-selected option sku — set only when options.length > 1
+}
+
 /* ═══════════════════════════ Reference primitive ═══════════════════════════ */
 /**
  * UI: a POINTER to another item. Anywhere the app shows a code (a pill target, a card in
@@ -270,6 +312,14 @@ export interface Item {
   category?: string;           // which sidebar category it lives in (Category.id)
   subcategory?: string;
   section?: string;
+  nameQualifier?: string;      // the small AMBER sub-label shown right after `name` on the card / detail title,
+                               //   e.g. "Mid 45 cm deep", "Top 45 cm deep", "Mid drawer 30 cm deep", "loose without
+                               //   drill holes". Comes from the family's variant map (vsub[variant]); shown only when
+                               //   the item has no special display name. Purely a label — not a separate SKU.
+  handedLR?: boolean;          // true → the card shows an "L/R" badge next to the title: the unit is available LEFT
+                               //   OR RIGHT hinged and the hinge side must be stated on order (the drawing shows the
+                               //   Left version). Computed by the app for single-door / door+pullout units whose code
+                               //   doesn't already fix a side. Omitted when false.
   functionalGroups?: ItemFunctionalGroup[]; // which "Design Tasks" leaves this item appears in (see
                                //   FunctionalZone). Materialized from the match rules; OMITTED for items
                                //   the app also excludes (non-zone categories, null-section edge units).
@@ -282,6 +332,8 @@ export interface Item {
   heightClass?: 73 | 80 | 86 | null;
   toeKick?: ToeKick;
   appliance?: ApplianceHousing;          // set ONLY on appliance-housing fronts — powers the card "Appliances" button (see below)
+  sinkFitment?: SinkFitment;             // set ONLY on Base/Sinks cabinets with a width — powers the card "Max Sink Size: NN″"
+                                         //   line and the "+ Add Sink" popup (see SinkFitment below)
 
   /* ── the detail-screen sections, in the order they appear. All optional — a code only
         carries the sections it actually shows. ── */
@@ -330,19 +382,40 @@ export interface ToeKick {
  * UI: some fronts ARE built-in-appliance housings (dishwasher doors, fridge / wine fronts).
  * Their product CARD shows a THIRD icon in the bottom action row (a fridge / appliance glyph,
  * next to ♥ "Add to my list" and ⧉ "Copy"), with the hover TOOLTIP "Appliances". Clicking it
- * (`addAppliances`) hands the front to the appliance schedule as a payload.
+ * (`addAppliances`) opens the APPLIANCES POPUP (and hands the front to the appliance schedule).
  *   Set this field ONLY when the item is an appliance-housing front (button shown); OMIT it on
  *   every other item. Everything here is FIXED per-front data derived from the catalog — the
  *   appliance schedule / picker UI that consumes it is a UI tool and is NOT exported.
  *   In v765 exactly 8 families are housings: Refrigerators (F1230, F1231, XGFRWINE) and
  *   Dishwashers (GFVK80_SM, GFVO, GFVO_AS, GFVO_B, GFVO_G).
+ *
+ *   THE POPUP — build it 1:1 from these fields (mirrors the app's `addAppliances` payload):
+ *     brand (company) · category · subcategory (DW only) · nicheSize (size) · note (DW only)
+ *   e.g. GFVK8080SM → "Gaggenau · Dishwashers · Built-In · 24"".
+ *   ⚠ `subcategory` AND `note` appear ONLY when category === "Dishwashers" — OMIT both on
+ *   Refrigerator fronts (a fridge front carries just category / brand / nicheSize).
  */
 export interface ApplianceHousing {
-  category: "Refrigerators" | "Dishwashers" | string; // appliance category; also picks the icon (Refrigerators → fridge glyph, else generic)
-  brand: string;              // default appliance brand shown on the card, e.g. "Gaggenau"
-  nicheSize: string;          // niche size as an inch label: dishwashers always "24"; fridge fronts derive from width (18" / 24" / 30" / 36")
-  subcategory?: string;       // DISHWASHERS only: "Built-In ADA" when heightClass === 73, else "Built-In"
-  note?: string;              // per-front fitment note (legs / cross-brand); e.g. "Can work with Miele, <sku> + 100 legs - BSH <sku> with 12 cm legs." (original-handle GFVO* fronts)
+  category: "Refrigerators" | "Dishwashers" | string; // appliance category; also picks the icon (Refrigerators → fridge glyph, else generic). Popup row 2.
+  brand: string;              // default appliance brand shown on the card, e.g. "Gaggenau". Popup row 1 (company).
+  nicheSize: string;          // niche size as an inch label: dishwashers always "24"; fridge fronts derive from width (18" / 24" / 30" / 36"). Popup last row (size).
+  subcategory?: string;       // DISHWASHERS only: "Built-In ADA" when heightClass === 73, else "Built-In". Popup row 3.
+  note?: string;              // DISHWASHERS only: per-front fitment note (legs / cross-brand); e.g. "Can work with Miele, <sku> + 100 legs - BSH <sku> with 12 cm legs." (original-handle GFVO* fronts). Popup footer.
+}
+
+/**
+ * UI: sink-base cards show a "Max Sink Size: NN″" line and a "+ Add Sink" button; the button opens a
+ * popup restating the cabinet width, the max bowl size, and the fitment rules. All of it is DERIVED from
+ * the cabinet width (SINK_FIT lookup) plus whether the front is a hinged door — no separate stored record.
+ * Set only on Base/Sinks cabinets that have a width. `notes` are the exact popup / "Sink fitment" lines.
+ */
+export interface SinkFitment {
+  maxSinkSizeInch: number | null; // largest sink-bowl size (inches) for this cabinet width; null = compact base (<45 cm) → confirm manually
+  cabinetWidthCm: number;      // the cabinet width in cm the size was derived from (e.g. 60)
+  customAboveInch: number;     // sinks larger than this (or wider than a 120 cm base) need a custom sink unit — always 42
+  isDoor: boolean;             // true = hinged-door sink base → deep-basin hinge mod ANSVVO275 may apply; false = drawer/pullout (no hinge mod)
+  showOnCard: boolean;         // true = the "Max Sink Size" line + Add Sink button render on the CARD (section is a Sink Unit / Sink without / Instant family); detail "Sink fitment" always shows
+  notes: string[];             // the exact fitment lines shown in the Add Sink popup / detail "Sink fitment" section
 }
 
 /* ─────────── Configure pills ─────────── */
@@ -623,7 +696,10 @@ export interface FinishPrice {
 /* ════════════════════════════════════════════════════════════════════════════
  * NOT in this export (the backend builds these from the main catalog + rules):
  *   • Pricing (changes per programme — points/HLP or selling/margin).
- *   • The System Builder panel (SensoMatic — an interactive component picker).
+ *   • The System Builder's Design CLIPBOARD + "System Status" ticks (device-side scratch list, like
+ *     ♥ My List — runtime state, not data). NOTE: the System Builder's COMPOSITION (its trigger items,
+ *     required/optional slots, component codes + pill labels) IS exported — see `systems[]` /
+ *     `EngineeredSystem`; only the clipboard the "Add" buttons feed stays out.
  *   • Handing note, "Add Sink", the appliance SCHEDULE / picker, the panel-sizer form
  *     (these are interactive tools, not fixed data). NOTE: the per-front appliance-housing
  *     metadata that powers the card "Appliances" button IS exported — see `Item.appliance`

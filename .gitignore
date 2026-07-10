@@ -8,7 +8,8 @@ server.log
 obseleted/old-extraction-pipeline/leicht_items.json
 obseleted/old-extraction-pipeline/leicht_catalog.json
 docs/export-v767.json
-docs/export-v767.pre-functional.bak.json
+# local pre-change safety backups of the full export — never committed (each ~95–103MB)
+docs/*.bak.json
 
 # Finder duplicate — not shipped at all (no .gz either)
 obseleted/duplicate-data/

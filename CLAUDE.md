@@ -102,7 +102,8 @@ docs/
                                      #   Carries plain-English `_ui` doc-keys (backend must strip; NOT in schema).
   export-v767.json                   # ⭐ THE ACTUAL FULL EXPORT (v767) — 18,375 items, ~103 MB. Schema-VALID
                                      #   (0 violations), 0 unresolved of 536,800 refs. Ingest THIS. Now also
-                                     #   carries top-level `functionalCategories` + per-item `functionalGroups[]`.
+                                     #   carries top-level `functionalCategories` + per-item `functionalGroups[]`,
+                                     #   and (2026-07-10) per-item `nameQualifier` / `handedLR` / `sinkFitment`.
   export-v767.json.gz                #   gzipped (3.3 MB)
   export-v767.pre-functional.bak.json #  backup of the export BEFORE functionalCategories/-Groups were added
   export-v767-SAMPLE.json            #   10 real items exercising every schema object
@@ -167,7 +168,13 @@ catalog updates are a clean re-ingest. Design (settled with the user + a data an
   (Compatible Accessories, Planned Together, Often Planned With, **Opening Support**, Complete This
   Cabinet), `engineering` flags, `specification`, `restrictions`, `programmeAvailability`,
   `modifications`, `planningNotes`, `didYouKnow`, `catalog`, `toeKick`, `appliance` (built-in-appliance
-  housing metadata, only on appliance fronts), `finishes`.
+  housing metadata, only on appliance fronts), `finishes`. Plus three card/title annotations added
+  2026-07-10: `nameQualifier` (amber sub-label after the title, e.g. "Mid 45 cm deep" — from `vsub[vr]`;
+  1,026 items), `handedLR` (bool — the "L/R" left-or-right-hinge badge; 2,605 items, general not sink-only),
+  and `sinkFitment` (the "Max Sink Size: NN″" line + "+ Add Sink" popup + detail "Sink fitment" section —
+  `{maxSinkSizeInch, cabinetWidthCm, customAboveInch:42, isDoor, showOnCard, notes[]}`, Base/Sinks with a
+  width; 1,420 items). All three are IN the export, ingested (schema `@Prop`s), and served by `GET items` +
+  `items/:sku`. Extractor computes them via the app's own `vsub`/`handed()`/`sinkMaxSize()`.
 - Dimensions in **mm** (chip labels keep cm). Prices excluded (programme-dependent; backend computes).
 - **Images are built, not stored.** `imageUrl = meta.imageUrlTemplate.replace("<CODE>", sku)` — a card/
   ItemRef only carries `{sku}`, so the picture needs no DB read and no join. The card's **other** fields
@@ -210,9 +217,14 @@ item's own cat·sub — client currently flattens it to `heading:""`]) → **Eng
 Tip-Softclose, Opening P1, 68cm depth → Yes/No 🟢🔴) → **Specification** (W/H/D, carcase line, weight,
 volume, catalog page) → **Restrictions** → **Programme availability** → **Modifications — how to**
 (handle 760/761, P1/C1 opening, with codes) → **Planning notes** → **💡 Did you know?** (cross-order tip).
-UI-only (not export data): My Note, Ask-the-Expert, System Builder, Add Sink, the appliance
-schedule/picker, panel-sizer. (But the per-front **appliance-housing** metadata behind the card
-"Appliances" button IS exported — `Item.appliance`; see Card action icons above.)
+UI-only (not export data): My Note, Ask-the-Expert, the **System Builder's Design Clipboard + System-Status
+ticks** (device-side runtime state), the appliance schedule/picker, panel-sizer. (But the per-front
+**appliance-housing** metadata behind the card "Appliances" button IS exported — `Item.appliance`; see Card
+action icons above. And the **"+ Add Sink"** popup on sink cards — "Max Sink Size: NN″" + fitment rules —
+IS exported too, `Item.sinkFitment`; NOT UI-only. The card's **"L/R"** badge = `Item.handedLR`; the amber
+title sub-label = `Item.nameQualifier`. And the **System Builder** panel's COMPOSITION — engineered SKU
+bundles (SensoMatic, LLE-R recessed light): trigger items, Required/Optional component rows + pill options —
+IS exported too, top-level `systems[]` [2026-07-10]; only its Design Clipboard / System-Status stay UI-only.)
 
 ## The backend (`D4K-backend`, separate repo)
 

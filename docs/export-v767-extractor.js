@@ -264,9 +264,8 @@ function toeKickOf(u,f){
 }
 function applianceOf(f,u){
   try{ if(!isApplHousing(f.id)) return null;
-    const o={ category:applCat(u), brand:'Gaggenau', nicheSize:applSize(u) };
-    const sub=applSub(u); if(sub) o.subcategory=sub;
-    const note=applNote(u); if(note) o.note=note;
+    const o={ category:applCat(f.id), brand:'Gaggenau', nicheSize:applSize(f.id,u) };
+    if(o.category==='Dishwashers'){ o.subcategory=applSub(u); const n=applNote(f.id,u)||f.plan; if(n) o.note=n; }  // subcategory + note are DW-only (mirror the app payload)
     return o;
   }catch(e){ return null; }
 }
@@ -296,6 +295,10 @@ function buildItem(f,u){
   const name = u.sd||u.ul||f.label||u.c;
   const it={ sku:u.c, kind:kindOf(f,u), familyId:f.id, name };
   if(f.label && f.label!==name) it.cardLabel=f.label;
+  // amber sub-label next to the card title = family vsub[vr] (hidden when a special display name exists)
+  try{ if(!u.sd && f.vsub && f.vsub[u.vr]) it.nameQualifier=f.vsub[u.vr]; }catch(e){}
+  // "L/R" badge — available left OR right hinged (app's own handed(); state hinge side on order)
+  try{ if(typeof handed==='function' && handed(u)) it.handedLR=true; }catch(e){}
   const bt=badgeText(u); if(bt) it.programmeBadge=bt;
   try{ const tiers=unitTiers(u); if(tiers&&tiers.length) it.availableTiers=tiers; }catch(e){}
   it.category=f.cat; it.subcategory=(typeof subDisp==='function'?subDisp(f):f.sub); if(f.sec) it.section=f.sec;
@@ -307,6 +310,24 @@ function buildItem(f,u){
   const cfg=scrapeConfigure(pin,u); if(cfg) it.configure=cfg;
   const desc=descOf(f,u); if(desc) it.description=desc;
   it.specification=specOf(f,u,pin);
+  // Sink fitment — "Max Sink Size" card line + "Add Sink" popup + detail "Sink fitment" section.
+  // Uses the app's own sinkMaxSize/sinkIsDoor so the value matches the UI exactly (Base/Sinks, width set).
+  try{
+    if(f.cat==='Base' && f.sub==='Sinks' && u.w!=null){
+      const mx=(typeof sinkMaxSize==='function')?sinkMaxSize(u):null;
+      const door=(typeof sinkIsDoor==='function')?!!sinkIsDoor(u):false;
+      const above=(typeof SINK_CUSTOM_ABOVE!=='undefined')?SINK_CUSTOM_ABOVE:42;
+      const notes=[];
+      notes.push(mx!=null?`Cabinet width ${u.w} cm → fits sink bowls up to ${mx}″.`
+                         :`Compact sink base (${u.w} cm) — confirm sink-bowl size against the cabinet width.`);
+      notes.push(`Sinks over ${above}″ (or wider than 120 cm base) require a custom sink unit.`);
+      if(door){ notes.push(`Deep-basin door rule: if basin depth exceeds 8″ (203 mm), add ANSVVO275 (top hinge dropped 27.5 cm for clearance). Not needed for basins ≤ 8″.`); }
+      else{ notes.push(`Drawer/pullout sink — no hinge modification (ANSVVO275 does not apply).`);
+            if(u.c==='TSP8080Z2') notes.push(`Note: with TSP8080Z2 plan a drawer blender (ANBLS) — the top drawer cannot operate within 26 cm of the top.`); }
+      it.sinkFitment={ maxSinkSizeInch:mx, cabinetWidthCm:u.w, customAboveInch:above, isDoor:door,
+        showOnCard:/^(Sink Unit|Sink without|Instant)/.test(f.sec||''), notes };
+    }
+  }catch(e){}
   const rs=restrictionsOf(u); if(rs) it.restrictions=rs;
   it.programmeAvailability=progAvailOf(f,u);
   const eng=scrapeEngineering(pin); if(eng) it.engineering=eng;
@@ -350,6 +371,16 @@ H.buildCategories=function(){
 H.buildProgrammes=function(){
   return (typeof PROGS!=='undefined'?PROGS:[]).map(p=>{ const o={ id:p.k, name:p.n, family:p.fam, tier:famTier(p.fam) }; if(p.fld!=null)o.priceField=p.fld; return o; });
 };
+// System Builder registry (window.SYSTEMS) -> EngineeredSystem[] (see export-schema.ts).
+// A slot's pill labels come from the source `lbl[]`; `default` only when >1 option.
+H.buildSystems=function(){
+  const S=((typeof SYSTEMS!=='undefined'&&SYSTEMS)||window.SYSTEMS)||[];
+  const slot=g=>{ const o={ role:g.n, options:(g.c||[]).map((c,i)=>{ const r={sku:c}; if(g.lbl&&g.lbl[i]) r.label=g.lbl[i]; return r; }) };
+    if((g.c||[]).length>1 && g.def) o.default=g.def; return o; };
+  return S.map(sys=>{ const o={ id:sys.id, name:sys.name }; if(sys.note) o.note=sys.note;
+    o.triggerSkus=(sys.trigger||[]).slice(); o.required=(sys.required||[]).map(slot);
+    if(sys.optional&&sys.optional.length) o.optional=sys.optional.map(slot); return o; });
+};
 H.finalize=function(){
   const items=window.__ITEMS||[];
   // dedupe by sku (first wins; prefer non-error)
@@ -369,6 +400,11 @@ H.finalize=function(){
     (it.relatedGroups||[]).forEach(g=>(g.cards||[]).forEach(c=>{ addRef(c.sku); (c.variants||[]).forEach(v=>addRef(v.sku)); }));
     (it.modifications||[]).forEach(m=>(m.codes||[]).forEach(c=>addRef(c.sku)));
     (it.didYouKnow&&it.didYouKnow.codes||[]).forEach(c=>addRef(c.sku));
+  });
+  // System Builder trigger + component codes are ItemRefs too — synthesize any non-unit one
+  (((typeof SYSTEMS!=='undefined'&&SYSTEMS)||window.SYSTEMS)||[]).forEach(sys=>{
+    (sys.trigger||[]).forEach(addRef);
+    (sys.required||[]).concat(sys.optional||[]).forEach(g=>(g.c||[]).forEach(addRef));
   });
   const synth=[];
   const validCode=(s)=> typeof s==='string' && /^[A-Za-z0-9][A-Za-z0-9._/-]{1,40}$/.test(s) && !/\s/.test(s);
@@ -398,6 +434,7 @@ H.finalize=function(){
     categories:cats,
     programmes:progs,
     ruleTables:(typeof RULES!=='undefined'?RULES:{}),
+    systems:H.buildSystems(),
     items:all
   };
   window.__EXPORT=exp;

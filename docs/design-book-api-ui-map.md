@@ -29,12 +29,20 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 
 ## 2. `GET /design-book/items` — grid / card list
 
+![Top filter bar](img/topbars.png)
+
+*The grid filter bar (all in `GET items` request table below). Left→right: **PROGRAMME dropdown**
+("No programme · point range" — world state, no param) · **Mix** button (UI-only) · **W** row
+(`widthMm`, cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI-only) ·
+**D** row (`depthMm`).*
+
 ### Request (filters → UI controls)
 
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|
 | `page`, `limit` | IN | Grid pager | Grid footer | `…/items?page=2&limit=50` |
-| `q` | IN | "Search by Code" box | Landing / top search | `…/items?q=TK6080` |
+| `q` | IN | "Search by Code" box (free-text **partial** match on sku / name) | Landing / top search | `…/items?q=TK6080` |
+| `sku[]` | IN | **Exact SKU** filter — one or more order codes (repeat or comma-separate; upper-cased; `$in`) | (precise lookup — copied ⧉ code, deep link, "my list" batch) | `…/items?sku=TK6080BZ2,TK7080BZ2` |
 | `category` | IN | Category pick | Left sidebar — type taxonomy (Base / Tall / Wall / Midway …) | `…/items?category=Base` |
 | `subcategory` | IN | Sub-category pick | Left sidebar — nested under category (Water / Cooling / …) | `…/items?category=Base&subcategory=Sinks` |
 | `section` | IN | On-page section header | Grid section divider | `…/items?section=Cooktops` |
@@ -78,10 +86,19 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 
 ### Response (per-card fields → card slots)
 
+![Product card](img/card.png)
+
+*One card (`TK6080BZ2`). Top-left = `cardLabel` ("Cooktop Unit") · top-right = `programmeBadge`
+("ALL") · image area = `imageUrl` · title = `name` · `sku` + dims line (`widthMm`/`heightMm`) ·
+**H/W/D** pill rows = `configure.height`/`.width`/`.depth` (filled = `selected`) · bottom-left ♥/⧉
+= UI-only fav/copy · bottom-right `P · P1 · C · C1 · A` = `availableTiers` (filled = orderable).*
+
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|
 | `sku` | OUT | Order code + Copy (⧉) button | Card — under title / bottom-left ⧉ | `…/items?limit=1` → `items[0].sku` |
 | `name` | OUT | Card title | Card — title line | `…/items` → `items[].name` |
+| `nameQualifier` | OUT | **Amber sub-label after the title** ("Mid 45 cm deep" · "Top 45 cm deep" · "Mid drawer 30 cm deep" · "loose without drill holes") | Card — right of title | `…/items?q=TSP6080BZ2` → `items[].nameQualifier` |
+| `handedLR` | OUT | **"L/R" badge** (available left OR right hinged — state hinge side on order; drawing shows Left) | Card — right of title | `…/items?q=TSP6080` → `items[].handedLR` |
 | `cardLabel` | OUT | Small card label | Card — **top-left** ("Front" / "Built-in DW door") | `…/items` → `items[].cardLabel` |
 | `programmeBadge` | OUT | Programme summary chip | Card — **top-right** (P / ALL / P·A) | `…/items` → `items[].programmeBadge` |
 | `availableTiers[]` | OUT | FRONTS tier badges | Card — **bottom-right** (P · P1 · C1) | `…/items` → `items[].availableTiers` |
@@ -95,7 +112,9 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 | `configure.optionRows[].options[].crossedOut` | OUT | Struck-through pill (exists but not orderable here) | Card — pill state (e.g. ~~S2ZM~~) | `…/items?full=true` → `…optionRows[].options[].crossedOut` |
 | `configure.*[].selected` / `.available` | OUT | Highlighted vs greyed pill | Card — pill state | `…/items?full=true` → `…configure.width[].available` |
 | `configure.*[].sku` | OUT | Pill target (click → opens that item) | Card — pill navigation | `…/items?full=true` → `…configure.width[].sku` |
-| `appliance` | OUT | Appliances (fridge) icon | Card — **bottom-left** (appliance fronts only) | `…/items?full=true` → `items[].appliance` |
+| `appliance` | OUT | Appliances icon → **Appliances popup** (brand · category · subcategory · nicheSize) | Card — **bottom-left** (appliance fronts only) | `…/items?full=true` → `items[].appliance` |
+| `sinkFitment.maxSinkSizeInch` | OUT | **"Max Sink Size: NN″" line** | Card — bottom row (Base/Sinks cards, `showOnCard`) | `…/items?q=TSP6080BZ2` → `items[].sinkFitment.maxSinkSizeInch` |
+| `sinkFitment` (`cabinetWidthCm` · `customAboveInch` · `isDoor` · `notes[]`) | OUT | **"+ Add Sink" popup** — width, max bowl size, fitment rules | Card — **bottom-right** "+ Add Sink" button → popup | `…/items?full=true&q=TSP6080BZ2` → `items[].sinkFitment` |
 | `types` | OUT | **"N types" count** (distinct families in the filtered set) | Grid — header ("4 types") | `…/items?leafId=b_cool%230` → `types` |
 | `unitCount` | OUT | Units collapsed into the card (grouped mode only) | Card — (variant count) | `…/items?leafId=b_cool%230&groupBy=family` → `items[].unitCount` |
 | `memberSkus[]` | OUT | Every code in the family (grouped mode) — resolves the card's pills | Card — Configure pill targets | `…?groupBy=family` → `items[].memberSkus` |
@@ -127,6 +146,10 @@ when you want the server to do the section bucketing.
 
 > **Cards are families**, identical to `groupBy=family` (see §2's "card = family" + face-unit notes) —
 > each `cards[]` entry carries `familyId` / `unitCount` / `memberSkus[]` / family-wide `availableTiers`.
+> **Card/popup annotations flow through** (from the face unit's own item doc): `nameQualifier`,
+> `handedLR`, `sinkFitment` (Max Sink Size / + Add Sink), and `appliance` (Appliances popup) all appear
+> on `cards[]` where set — same shape as §2 `items[]`. Verified on `subcategory=Sinks` (18/25 cards carry
+> `sinkFitment`) and `subcategory=Appliance housing` (`GFVK8073SM` → Gaggenau · Dishwashers · Built-In ADA · 24").
 > **Paging is by family (card), not by section**: the page's cards are section-sorted then bucketed, so a
 > section straddling a page boundary appears (partially) on **both** pages — the client merges buckets by
 > `section` on scroll. Same best-effort ordering caveat as §2 (v767 export didn't capture the app's
@@ -136,6 +159,15 @@ when you want the server to do the section bucketing.
 ---
 
 ## 3. `GET /design-book/items/:sku` — detail panel (`openDetail`)
+
+![Detail panel](img/detail.png)
+
+*Detail panel for `TK6080BZ2`, top→bottom = the response table below: breadcrumb + title +
+**Copy**/**Catalog** buttons (header) · **CONFIGURE** (`configure`) · **DESCRIPTION**
+(`description`) · **POSSIBLE ALTERATIONS & ACCESSORIES** tabs (`accessoryPanel.tabs`) ·
+**SPECIFICATION** (`specification`) · **RESTRICTIONS** (`restrictions`) · **PROGRAMME
+AVAILABILITY** (`programmeAvailability`) · **MODIFICATIONS — HOW TO** (`modifications`) ·
+**PLANNING NOTES** (`planningNotes`).*
 
 ### Request
 
@@ -149,12 +181,15 @@ when you want the server to do the section bucketing.
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|
 | `item.sku` / `name` | OUT | Header code + title | Detail — header | `…/items/TK6080BZ2` → `item.name` |
+| `item.nameQualifier` | OUT | Amber sub-label after the title ("Mid 45 cm deep") | Detail — header, right of title | `…/items/TSP6080BZ2` → `item.nameQualifier` |
+| `item.handedLR` | OUT | "L/R" badge (left OR right hinged — state hinge side on order) | Detail — header, right of title | `…/items/TSP6080` → `item.handedLR` |
 | `item.toeKick` | OUT | Toe-kick installed-height | Detail — header dims | `…/items/TK6080BZ2` → `item.toeKick` |
 | `item.configure` | OUT | CONFIGURE box (W/H/D/Programme + coded rows) | Detail — Configure | `…/items/TK6080BZ2` → `item.configure` |
 | `item.description` | OUT | DESCRIPTION block (title + bullets) | Detail — Description | `…/items/TK6080BZ2` → `item.description` |
 | `item.accessoryPanel.tabs[]` | OUT | POSSIBLE ALTERATIONS & ACCESSORIES tabs | Detail — panel tabs | `…/items/T6073VE` → `item.accessoryPanel.tabs` |
 | `item.accessoryPanel…swatches` / `visibleSideCombos` / `options` | OUT | Finish-interior grid · visible-side combos · option chips | Detail — Finish/Options tabs | `…/items/T6073VE` → `…accessoryPanel.tabs[].swatches` |
 | `item.relatedGroups[]` | OUT | Compatible Accessories · Planned Together · Opening Support · Complete This Cabinet | Detail — related groups | `…/items/T3073Z2W?expand=refs` → `item.relatedGroups` |
+| `systems[]` | OUT | **System Builder** panel — Required/Optional component rows + "Add Complete … System" (top-level, sibling of `item`; only on trigger skus) | Detail — System Builder box | `…/items/LLERUS` → `systems` |
 | `item.engineering[]` | OUT | ENGINEERING capability flags (🟢/🔴) | Detail — Engineering | `…/items/TK6080BZ2` → `item.engineering` |
 | `item.specification` | OUT | SPECIFICATION (W/H/D, carcase, weight, volume, page) | Detail — Specification | `…/items/TK6080BZ2` → `item.specification` |
 | `item.restrictions[]` | OUT | RESTRICTIONS | Detail — Restrictions | `…/items/TK6080BZ2` → `item.restrictions` |
@@ -162,11 +197,90 @@ when you want the server to do the section bucketing.
 | `item.modifications[]` | OUT | MODIFICATIONS — how to (handle 760/761, P1/C1) | Detail — Modifications | `…/items/TK6080BZ2` → `item.modifications` |
 | `item.planningNotes[]` | OUT | PLANNING NOTES | Detail — Planning notes | `…/items/TK6080BZ2` → `item.planningNotes` |
 | `item.didYouKnow` | OUT | 💡 Did you know? | Detail — footer tip | `…/items/TK6080BZ2` → `item.didYouKnow` |
-| `item.appliance` | OUT | Appliances button metadata (brand / niche / category) | Detail — Appliances | `…/items/GFVO` → `item.appliance` |
+| `item.appliance` | OUT | **Appliances popup** — click the Appliances button; rows built from these fields | Detail / Card — Appliances popup | `…/items/GFVK8080SM` → `item.appliance` |
+| `item.sinkFitment` | OUT | **Sink fitment** section + **"+ Add Sink" popup** (max bowl size · width · rules) | Detail — Sink fitment (Base/Sinks only) | `…/items/TSP6080BZ2` → `item.sinkFitment` |
 | `item.finishes[]` | OUT | Finish → price | Detail — finish/pricing | `…/items/TK6080BZ2` → `item.finishes` |
 | `item.imageUrl` | OUT | Main product image | Detail — header image | `…/items/TK6080BZ2` → `item.imageUrl` |
 | `catalog` (expand) | OUT | CATALOG button → price-cropped PDF page | Detail — header CATALOG button | `…/items/TK6080BZ2?expand=catalog` → `catalog` |
 | `refs` (expand) | OUT | Resolves each ItemRef sku → name/kind/image | Detail — all card labels/images | `…/items/T6073VE?expand=refs` → `refs` |
+
+> **Appliances popup** (`item.appliance`, set only on the 8 housing families). The card/detail
+> **Appliances** button (fridge/appliance glyph, tooltip "Appliances") opens a popup whose rows map
+> **1:1** to the app's `addAppliances` payload:
+> `brand` (company) · `category` (Refrigerators \| Dishwashers — also picks the icon) ·
+> `subcategory` (**DW only**: Built-In \| Built-In ADA when heightClass 73) ·
+> `nicheSize` (24" for DW; 18/24/30/36" for fridge, from width) ·
+> `note` (**DW only**, original-handle GFVO* fronts: leg/brand fitment).
+> `subcategory` + `note` are present **only** when `category === "Dishwashers"`; a fridge front carries
+> just brand/category/nicheSize. Example: `GFVK8080SM` → **"Gaggenau · Dishwashers · Built-In · 24"".**
+>
+> **Sink fitment** (`item.sinkFitment`, set only on **Base/Sinks** cabinets with a width). Powers the card
+> **"Max Sink Size: NN″"** line and the **"+ Add Sink"** popup, plus the detail **Sink fitment** section.
+> All DERIVED from the cabinet width (`SINK_FIT` lookup) + whether the front is a hinged door — no separate
+> record:
+> `maxSinkSizeInch` (largest bowl for this width; **null** = compact base <45 cm → confirm manually) ·
+> `cabinetWidthCm` (the width it was derived from) ·
+> `customAboveInch` (always **42** — larger, or wider than a 120 cm base, needs a custom sink unit) ·
+> `isDoor` (true = hinged door → deep-basin mod **ANSVVO275** may apply; false = drawer/pullout, no hinge mod) ·
+> `showOnCard` (true = the "Max Sink Size" line + Add Sink button render on the CARD; the detail section always shows) ·
+> `notes[]` (the exact popup / "Sink fitment" lines).
+> Example: `TSP6080BZ2` (60 cm) → **"Max Sink Size: 21″"**; `TSP457368ZV` (45 cm) → **12″**.
+>
+> **"L/R" badge** (`item.handedLR`, present & `true` only on hinge-side-optional units; omitted otherwise).
+> The card/detail title shows a small **"L/R"** tag with tooltip *"Available left or right hinged — state the
+> hinge side on order. The drawing shows the Left version."* The app COMPUTES it (single-door, or
+> door+pullout, whose code doesn't already fix a side) — it is not a stored field, so the export materializes
+> it. **General, not sink-only**: 2,605 items carry it (270 of them Base/Sinks). Example: `TSP6080` /
+> `TSP6080B` → **true** ("Sink unit L/R"); `TSP6080Z` / `TSP6080BZ` (pull-outs) → omitted.
+>
+> **System Builder** (`systems[]`, a **top-level** response field alongside `item` — NOT under `item`).
+> Present only when the sku is a *trigger* of an engineered system; absent otherwise. The panel presents an
+> engineered product as a complete **system** (a bundle of SKUs) rather than scattered accessories:
+> **Required Components** rows + **Optional** rows (each an "Add" button), an **"Add Complete … System"**
+> button, and a live **System Status** checklist. Two systems today, both served by reverse-lookup on
+> `triggerSkus` (composition stored on the catalog meta doc):
+> `id` (SENSO \| LLER) · `name` (panel title) · `note` (grey sub-line) · `triggerSkus[]` (which items show it) ·
+> `required[]` / `optional[]` — each a **slot** `{ role (bold row label), options: ItemRef[] (each `{sku,label?}`;
+> `label` = the pill text), default? (pre-selected sku, only when >1 option) }`.
+> A slot with one option renders a single code + Add; several options render a **pill group** (the chosen
+> pill sets the code). Component codes are ItemRefs → `?expand=refs` hydrates them (name/kind/image), same
+> as card refs. Example: `LLERUS` → **LLE-R Recessed Light System** — Required *Drill hole (by position)*
+> [Shelf `BO78` (default) · Lower wall shelf + conduit `BO78U` · Upper shelf `BO78O`] + *Power Supply (USA)*
+> `L24NT75US`; Optional *Switch / Control* `L24CB`. `MPEZS` (+ `MPC1EZS`/`MPP1EZS`/`MPEHAA`) → **SensoMatic System**.
+> **UI-only, NOT in the payload:** the **Design Clipboard** the "Add" buttons feed + the **System Status**
+> ticks — device-side runtime state (like ♥ My List); the client renders the panel + clipboard from
+> `systems[]`, the clipboard *contents* stay on the device.
+
+#### System Builder — every panel element → `systems[]` field
+
+`GET items/LLERUS` returns `systems[0]` = the LLE-R object; the **whole panel and all its popups** render
+from it (plus per-code image/name via item-resolve, plus the device clipboard for runtime state). One row
+per on-screen element:
+
+| Panel element (on screen) | Rendered from | Condition / note |
+|---|---|---|
+| Panel title + grey sub-line | `name` · `note` | always |
+| **REQUIRED COMPONENTS** heading | — (static label) | shown when `required[].length > 0` |
+| Component row label (bold) | `slot.role` | e.g. "Drill hole (by position)", "Power Supply (USA)" |
+| Single-code row: code + **Add** | `slot.options[0].sku` | when `options.length === 1` (Power Supply, Switch/Control) |
+| **Pill group** — shown code flips BO78→BO78U→BO78O | one pill per `options[]` (pill text = `option.label`, falls back to sku); selected pill starts at `default`, then user pick; the code shown beside = the **selected** `option.sku` | when `options.length > 1` (Drill hole) |
+| **OPTIONAL** heading + rows | `optional[]` (each a slot, same shape) | shown when `optional[].length > 0` |
+| **Add** button (per row) | `clipboard.add(selectedSku)` | selectedSku = that row's chosen option |
+| **Add Complete … System** (black) | label = `"Add Complete " + name`; click adds the trigger sku + each required row's selected sku | uses `name` · `triggerSkus` (current sku) · `required[].`selected |
+| **SYSTEM STATUS** checklist | title tick = `name` − " System"; one row per `required[].role`; **✔ Ready to Order** when every required sku is in the clipboard (else "Missing N required") | trigger + required only — **optional excluded** |
+| **Design Clipboard** popup rows (thumb · name · ⧉ copy · ✕) | the codes come from `systems[]` (trigger + option skus); each row's **image** = `meta.imageUrlTemplate` ⊕ sku, **name** = item-resolve (`GET items/:sku` or `?expand=refs`) | list membership / order / "N" count badge = device state |
+
+**Two things NOT in `systems[]` (by design):**
+1. **Clipboard membership** — which codes the user added, their order, the "N" count badge → device-side
+   runtime state (like ♥ My List / ⧉ Copy).
+2. **Each code's image + name** shown in a clipboard row → not duplicated here; the image is built from
+   `meta.imageUrlTemplate`, the name comes from the item (`GET items/:sku` or `?expand=refs`). `systems[]`
+   carries only the sku per option.
+
+So `systems[]` carries the fixed **composition + labels + defaults**; the client + item-resolve + device
+clipboard supply the **runtime state + visuals**. Every element of the panel and all its popups
+(Required/Optional rows, the drill-hole pill popup, each Add, Add Complete, System Status, Design
+Clipboard) is covered.
 
 ---
 
@@ -197,6 +311,12 @@ when you want the server to do the section bucketing.
 ---
 
 ## 5. `GET /design-book/categories` — type-taxonomy sidebar
+
+![Category sidebar](img/rail.png)
+
+*The left type-taxonomy sidebar. Search box = `q` · "All categories" 1614 = full tree · top-level
+rows (Base/Tall/Wall/Midway/Alteration/Handles/…) = `categories[].name` with `.itemCount` badge ·
+indented rows under **Base** (Sinks/Cooktops/…) = `categories[].subcategories[]`.*
 
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|
@@ -254,6 +374,7 @@ into its two card rows: **START BY DESIGN TASK** (`designTasks`) + **OR BROWSE B
 | `meta.imageUrlTemplate` | OUT | Builds every product/card image URL | (drives all `imageUrl`s) | `…/meta` → `meta.imageUrlTemplate` |
 | `meta.schemaVersion` / `catalogVersion` | OUT | Version / about | Admin · about | `…/meta` → `meta.schemaVersion` |
 | `meta.counts` | OUT | Catalog totals | Admin · stats | `…/meta` → `meta.counts` |
+| `systems[]` | OUT | Full **System Builder** registry (SENSO · LLER) — the whole engineered-system table; per-item slice served by `GET items/:sku` (§3) | (drives the detail System Builder panel) | `…/meta` → `systems` |
 | `lastIngestSummary` | OUT | Last sync report | Admin · import history | `…/meta` → `lastIngestSummary` |
 
 ---

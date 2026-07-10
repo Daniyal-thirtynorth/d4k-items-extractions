@@ -80,3 +80,25 @@ count (matches the UI number).
 
 To re-run for a future build: the tree is static in the HTML — re-extract `const TASKS`, recompute counts +
 membership in-page with `taskCount`/`famInTaskSub` over the new `FAMS` (skip `f.hid`), re-join by unit code.
+
+## `systems[]` — System Builder (added 2026-07-10)
+
+The detail screen of certain codes shows a **"System Builder"** panel — an engineered product sold as a
+complete SYSTEM (a bundle of SKUs) rather than scattered accessories, with Required + Optional component
+rows (each an "Add" button), an "Add Complete … System" button, and a live "System Status" checklist.
+
+**Source of truth:** `window.SYSTEMS` in the HTML (a static registry; `SYSTEMS=[…]` for SensoMatic +
+`SYSTEMS.push(…)` for LLE-R). Two systems today:
+- **SENSO** (SensoMatic) — triggers `MPEZS · MPC1EZS · MPP1EZS · MPEHAA`; required Power Supply `SMNT`,
+  Power Lead `SMNK200US`, Connecting Cable `SMVK100/160/200` (default 200); optional Tip-Softclose `MPMZS`.
+- **LLER** (LLE-R Recessed Light) — trigger `LLERUS`; required Drill-hole-by-position `BO78/BO78U/BO78O`
+  (default BO78), Power Supply (USA) `L24NT75US`; optional Switch/Control `L24CB`.
+
+Top-level `systems: EngineeredSystem[]` (schema `EngineeredSystem` / `SystemSlot`). A system attaches to a
+detail screen by `triggerSkus`; all component codes are `ItemRef`s (`ItemRef.label` = the pill text) — 0
+unresolved of 11 refs. The extractor emits it via `H.buildSystems()` (maps `SYSTEMS` verbatim). **UI-only,
+NOT exported:** the Design Clipboard the "Add" buttons feed + the System-Status ticks (device-side runtime
+state, like ♥ My List). Backend to attach by reverse-lookup on `triggerSkus` and serve with `items/:sku`.
+
+To re-run for a future build: `H.buildSystems()` already reads the live `window.SYSTEMS` — no extra step;
+new/changed systems flow through automatically.

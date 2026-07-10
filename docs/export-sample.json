@@ -4,7 +4,7 @@
     "source": "leicht_units v765 (headless run) — SAMPLE",
     "schemaVersion": "1.0.0",
     "imageUrlTemplate": "https://cdn.leicht.example/itemData/<CODE>.jpg",
-    "counts": { "items": 14, "cabinets": 5, "accessories": 9, "categories": 8, "programmes": 3 },
+    "counts": { "items": 16, "cabinets": 7, "accessories": 9, "categories": 8, "programmes": 3 },
     "note": "Illustrative sample — the items below between them exercise EVERY object in export-schema.ts. Some ItemRef/pill targets (e.g. T7080BZ2TU, EBFF6058, LBFS60582) point at items outside this small slice; in a real export every referenced sku exists in items[]. Any key that starts with `_ui` is a plain-English note saying which part of the screen the block maps to — it is DOCUMENTATION ONLY. The backend must ignore/strip every `_ui` key on ingest; `_ui` is NOT part of the schema and must NOT be exported by the client."
   },
 
@@ -349,11 +349,11 @@
       "active": true,
       "widthMm": 800, "heightMm": 792, "depthMm": 20, "heightClass": 80,
       "appliance": {
+        "_ui": "APPLIANCES POPUP data (button bottom-left of card, tooltip 'Appliances'). Rows built 1:1: brand · category · subcategory (DW only) · nicheSize. GFVK80_SM is a plain built-in DW front (NOT original-handle) → NO note. Popup reads 'Gaggenau · Dishwashers · Built-In · 24\"'.",
         "category": "Dishwashers",
         "brand": "Gaggenau",
-        "nicheSize": "24",
-        "subcategory": "Built-In",
-        "note": "Can work with Miele, GFVK80_SM + 100 legs - BSH GFVO with 12 cm legs."
+        "nicheSize": "24\"",
+        "subcategory": "Built-In"
       },
       "configure": {
         "width": [{ "label": "80", "value": 800, "unit": "mm", "sku": "GFVK8080SM", "selected": true, "available": true }],
@@ -410,6 +410,58 @@
       }
     },
 
+    {
+      "_ui": "REFRIGERATOR appliance front — the OTHER popup shape. category 'Refrigerators' picks the FRIDGE icon; nicheSize derives from WIDTH (460 mm → 18\"). NO subcategory, NO note (both are Dishwashers-only). Popup reads 'Gaggenau · Refrigerators · 18\"'.",
+      "sku": "GF46204",
+      "kind": "cabinet",
+      "familyId": "F1230",
+      "name": "Refrigerator Front · 46 cm · Built-in",
+      "cardLabel": "Built-in refrigerator door",
+      "programmeBadge": "P",
+      "availableTiers": ["P"],
+      "category": "base", "subcategory": "water",
+      "active": true,
+      "widthMm": 460, "heightMm": 2040, "depthMm": 20,
+      "appliance": {
+        "_ui": "Fridge popup: only brand / category / nicheSize. category 'Refrigerators' → fridge glyph. nicheSize from width 460 mm = 18\".",
+        "category": "Refrigerators",
+        "brand": "Gaggenau",
+        "nicheSize": "18\""
+      },
+      "configure": {
+        "width": [{ "label": "46", "value": 460, "unit": "mm", "sku": "GF46204", "selected": true, "available": true }],
+        "height": [], "depth": [],
+        "programme": [{ "label": "Primo", "tier": "P", "opening": false, "sku": "GF46204", "selected": true, "available": true }]
+      },
+      "description": { "title": "Built-in refrigerator front", "bullets": ["Fits a 46 cm / 18\" niche appliance", "Fully integrated"] }
+    },
+    {
+      "_ui": "DISHWASHER appliance front WITH a fitment note — original-handle GFVO* family (D61 double-panel). Full DW popup: brand · category · subcategory · nicheSize PLUS the note footer (legs / cross-brand). note text carries this front's own sku.",
+      "sku": "AGFV608061S",
+      "kind": "cabinet",
+      "familyId": "GFVO_AS",
+      "name": "Dishwasher Front · Original handle D61 · Avance",
+      "cardLabel": "Built-in DW door",
+      "programmeBadge": "A",
+      "availableTiers": ["A"],
+      "category": "base", "subcategory": "water",
+      "active": true,
+      "widthMm": 600, "heightMm": 810, "depthMm": 61, "heightClass": 80,
+      "appliance": {
+        "_ui": "DW popup with note. subcategory 'Built-In' (heightClass 80; 73 → 'Built-In ADA'). Popup reads 'Gaggenau · Dishwashers · Built-In · 24\"' then the note line.",
+        "category": "Dishwashers",
+        "brand": "Gaggenau",
+        "nicheSize": "24\"",
+        "subcategory": "Built-In",
+        "note": "Can work with Miele, AGFV608061S + 100 legs - BSH AGFV608061S with 12 cm legs."
+      },
+      "configure": {
+        "width": [{ "label": "60", "value": 600, "unit": "mm", "sku": "AGFV608061S", "selected": true, "available": true }],
+        "height": [], "depth": [],
+        "programme": [{ "label": "Avance", "tier": "A", "opening": false, "sku": "AGFV608061S", "selected": true, "available": true }]
+      },
+      "description": { "title": "Fully integrated dishwasher front (original handle)", "bullets": ["Original handle D61 with 50 mm double-panel", "60 cm DW"] }
+    },
     { "sku": "VSF135ADP", "kind": "accessory", "name": "Dishwasher Plinth Cover · 135 cm", "category": "base", "subcategory": "water", "active": true, "widthMm": 1350 },
     { "sku": "VSF270ADP", "kind": "accessory", "name": "Dishwasher Plinth Cover · 270 cm", "category": "base", "subcategory": "water", "active": true, "widthMm": 2700 },
     { "sku": "EBF6058",   "kind": "accessory", "name": "Cutlery tray",                     "active": true },
