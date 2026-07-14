@@ -1,1203 +1,2017 @@
 {
-  "inspiration": {
-    "key": "__INSP__",
-    "label": "Designer Inspiration",
-    "emoji": "✨"
-  },
-  "allCategories": {
-    "key": "ALL",
-    "label": "All categories",
-    "count": 1714
-  },
-  "zones": [
+ "inspiration": {
+  "key": "__INSP__",
+  "label": "Designer Inspiration",
+  "emoji": "✨"
+ },
+ "allCategories": {
+  "key": "ALL",
+  "label": "All categories",
+  "count": 1714
+ },
+ "zones": [
+  {
+   "zone": "Base",
+   "label": "BASE",
+   "count": 234,
+   "groups": [
     {
-      "zone": "Base",
-      "label": "BASE",
-      "count": 234,
-      "groups": [
+     "groupKey": "b_water",
+     "name": "Water",
+     "emoji": "💧",
+     "count": 87,
+     "allRow": {
+      "label": "All Base Water",
+      "count": 87
+     },
+     "leaves": [
+      {
+       "leafId": "b_water#0",
+       "name": "Sink Cabinets",
+       "count": 18,
+       "match": [
         {
-          "groupKey": "b_water",
-          "name": "Water",
-          "emoji": "💧",
-          "count": 87,
-          "allRow": {
-            "label": "All Base Water",
-            "count": 87
-          },
-          "leaves": [
-            {
-              "leafId": "b_water#0",
-              "name": "Sink Cabinets",
-              "count": 18,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Sinks",
-                  "sectionExclude": "^(Accessories|Towel Rails|Sink Equipment|Fronts & Panels|Alterations)"
-                }
-              ]
-            },
-            {
-              "leafId": "b_water#1",
-              "name": "Trash Pullouts",
-              "count": 5,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Trash Pullout"
-                }
-              ]
-            },
-            {
-              "leafId": "b_water#2",
-              "name": "Dishwasher Fronts",
-              "count": 19,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Appliance housing",
-                  "sectionExclude": "^(Oven|Wine|Under-Counter|Appliance Doors)"
-                }
-              ]
-            },
-            {
-              "leafId": "b_water#3",
-              "name": "Sinks & Faucets",
-              "count": 27,
-              "match": [
-                {
-                  "category": "Sink",
-                  "subcategory": "Faucets"
-                }
-              ]
-            },
-            {
-              "leafId": "b_water#4",
-              "name": "Sink Accessories",
-              "count": 18,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Sinks",
-                  "sectionInclude": "^(Accessories|Towel Rails|Sink Equipment|Fronts & Panels|Alterations)"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "b_cool",
-          "name": "Cooling",
-          "emoji": "❄️",
-          "count": 4,
-          "allRow": {
-            "label": "All Base Cooling",
-            "count": 4
-          },
-          "leaves": [
-            {
-              "leafId": "b_cool#0",
-              "name": "Under-Counter Fridge & Wine",
-              "count": 4,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Appliance housing",
-                  "sectionInclude": "^(Wine|Under-Counter|Appliance Doors)"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "b_cook",
-          "name": "Cooking",
-          "emoji": "🔥",
-          "count": 34,
-          "allRow": {
-            "label": "All Base Cooking",
-            "count": 34
-          },
-          "leaves": [
-            {
-              "leafId": "b_cook#0",
-              "name": "Cooktop Units",
-              "count": 8,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Cooktops & Downdrafts",
-                  "sectionInclude": "^Cooktop"
-                }
-              ]
-            },
-            {
-              "leafId": "b_cook#1",
-              "name": "Downdraft & Cooktop Units - Single Drawer",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Cooktops & Downdrafts",
-                  "sectionInclude": "- Single Drawer$"
-                }
-              ]
-            },
-            {
-              "leafId": "b_cook#2",
-              "name": "Downdraft & Cooktop Units - Two Drawers",
-              "count": 4,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Cooktops & Downdrafts",
-                  "sectionInclude": "- Two Drawers$"
-                }
-              ]
-            },
-            {
-              "leafId": "b_cook#3",
-              "name": "Downdraft & Cooktop Units - Three Drawers",
-              "count": 3,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Cooktops & Downdrafts",
-                  "sectionInclude": "- Three Drawers$"
-                }
-              ]
-            },
-            {
-              "leafId": "b_cook#4",
-              "name": "Oven Bases",
-              "count": 3,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Appliance housing",
-                  "sectionInclude": "^Oven"
-                }
-              ]
-            },
-            {
-              "leafId": "b_cook#5",
-              "name": "Cooking Accessories",
-              "count": 14,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Cooktops & Downdrafts",
-                  "sectionInclude": "^Accessories"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "b_store",
-          "name": "Storage",
-          "emoji": "📦",
-          "count": 81,
-          "allRow": {
-            "label": "All Base Storage",
-            "count": 81
-          },
-          "leaves": [
-            {
-              "leafId": "b_store#0",
-              "name": "Drawer Cabinets",
-              "count": 30,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Drawers & Pullouts"
-                }
-              ]
-            },
-            {
-              "leafId": "b_store#1",
-              "name": "Door Cabinets",
-              "count": 7,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Doors"
-                }
-              ]
-            },
-            {
-              "leafId": "b_store#2",
-              "name": "Function Cabinets",
-              "count": 14,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Function Cabinets"
-                }
-              ]
-            },
-            {
-              "leafId": "b_store#3",
-              "name": "Special Height",
-              "count": 30,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Special Height"
-                }
-              ]
-            },
-            {
-              "leafId": "b_store#4",
-              "name": "Alterations",
-              "count": 12,
-              "match": [
-                {
-                  "familyId": "F7300"
-                },
-                {
-                  "familyId": "F1844"
-                },
-                {
-                  "familyId": "F13"
-                },
-                {
-                  "familyId": "F2013__DRWDUP"
-                },
-                {
-                  "familyId": "F1965__DRWDUP"
-                },
-                {
-                  "familyId": "F1919__DRWDUP"
-                },
-                {
-                  "familyId": "F1932__DRWDUP"
-                },
-                {
-                  "familyId": "F2011__DRWDUP"
-                },
-                {
-                  "familyId": "F2010__DRWDUP"
-                },
-                {
-                  "familyId": "F1933__DRWDUP"
-                },
-                {
-                  "familyId": "F1930__DRWDUP"
-                },
-                {
-                  "familyId": "F1917__DRWDUP"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "b_layout",
-          "name": "Layout",
-          "emoji": "📐",
-          "count": 96,
-          "allRow": {
-            "label": "All Base Layout",
-            "count": 96
-          },
-          "leaves": [
-            {
-              "leafId": "b_layout#0",
-              "name": "Corner Cabinets",
-              "count": 8,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Corners"
-                }
-              ]
-            },
-            {
-              "leafId": "b_layout#1",
-              "name": "Fillers",
-              "count": 12,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Fillers"
-                }
-              ]
-            },
-            {
-              "leafId": "b_layout#2",
-              "name": "End Panels",
-              "count": 20,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Accessories & Surround"
-                }
-              ]
-            },
-            {
-              "leafId": "b_layout#3",
-              "name": "Modifications",
-              "count": 56,
-              "match": [
-                {
-                  "category": "Alteration",
-                  "zone": "Base"
-                },
-                {
-                  "familyId": "MRG_KMBBOX"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "b_design",
-          "name": "Design",
-          "emoji": "✨",
-          "count": 56,
-          "allRow": {
-            "label": "All Base Design",
-            "count": 56
-          },
-          "leaves": [
-            {
-              "leafId": "b_design#0",
-              "name": "Open Shelves",
-              "count": 8,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Open & Lights",
-                  "sectionInclude": "^Open Shelf"
-                }
-              ]
-            },
-            {
-              "leafId": "b_design#1",
-              "name": "Glass Cabinets",
-              "count": 3,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Open & Lights",
-                  "sectionInclude": "^Glass"
-                }
-              ]
-            },
-            {
-              "leafId": "b_design#2",
-              "name": "Lighting",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Base",
-                  "subcategory": "Open & Lights",
-                  "sectionInclude": "^Lighting"
-                }
-              ]
-            },
-            {
-              "leafId": "b_design#3",
-              "name": "Plinth (Toe-Kick)",
-              "count": 43,
-              "match": [
-                {
-                  "category": "Panels & surround",
-                  "subcategory": "Plinth"
-                },
-                {
-                  "category": "Panels & surround",
-                  "subcategory": "Plinth Accessories"
-                }
-              ]
-            }
-          ]
+         "category": "Base",
+         "subcategory": "Sinks",
+         "sectionExclude": "^(Accessories|Towel Rails|Sink Equipment|Fronts & Panels|Alterations)"
         }
-      ]
+       ]
+      },
+      {
+       "leafId": "b_water#1",
+       "name": "Trash Pullouts",
+       "count": 5,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Trash Pullout"
+        }
+       ]
+      },
+      {
+       "leafId": "b_water#2",
+       "name": "Dishwasher Fronts",
+       "count": 19,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Appliance housing",
+         "sectionExclude": "^(Oven|Wine|Under-Counter|Appliance Doors)"
+        }
+       ]
+      },
+      {
+       "leafId": "b_water#3",
+       "name": "Sinks & Faucets",
+       "count": 27,
+       "match": [
+        {
+         "category": "Sink",
+         "subcategory": "Faucets"
+        }
+       ]
+      },
+      {
+       "leafId": "b_water#4",
+       "name": "Sink Accessories",
+       "count": 18,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Sinks",
+         "sectionInclude": "^(Accessories|Towel Rails|Sink Equipment|Fronts & Panels|Alterations)"
+        }
+       ]
+      }
+     ]
     },
     {
-      "zone": "Tall",
-      "label": "TALL",
-      "count": 340,
-      "groups": [
+     "groupKey": "b_cool",
+     "name": "Cooling",
+     "emoji": "❄️",
+     "count": 4,
+     "allRow": {
+      "label": "All Base Cooling",
+      "count": 4
+     },
+     "leaves": [
+      {
+       "leafId": "b_cool#0",
+       "name": "Under-Counter Fridge & Wine",
+       "count": 4,
+       "match": [
         {
-          "groupKey": "t_water",
-          "name": "Water",
-          "emoji": "💧",
-          "count": 7,
-          "allRow": {
-            "label": "All Tall Water",
-            "count": 7
-          },
-          "leaves": [
-            {
-              "leafId": "t_water#0",
-              "name": "Dishwasher",
-              "count": 3,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Appliance Housing",
-                  "sectionInclude": "^Dishwasher"
-                }
-              ]
-            },
-            {
-              "leafId": "t_water#1",
-              "name": "Washing Machine",
-              "count": 4,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Appliance Housing",
-                  "sectionInclude": "^Washing Machine"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "t_cool",
-          "name": "Cooling",
-          "emoji": "❄️",
-          "count": 34,
-          "allRow": {
-            "label": "All Tall Cooling",
-            "count": 34
-          },
-          "leaves": [
-            {
-              "leafId": "t_cool#0",
-              "name": "Appliance Doors & Fronts",
-              "count": 9,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Appliance Housing",
-                  "sectionInclude": "^Appliance Doors"
-                }
-              ]
-            },
-            {
-              "leafId": "t_cool#1",
-              "name": "Fridge & Freezer Housing",
-              "count": 25,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Appliance Housing",
-                  "sectionInclude": "^Fridge"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "t_cook",
-          "name": "Cooking",
-          "emoji": "🔥",
-          "count": 99,
-          "allRow": {
-            "label": "All Tall Cooking",
-            "count": 99
-          },
-          "leaves": [
-            {
-              "leafId": "t_cook#0",
-              "name": "Appliance Housing Units",
-              "count": 26,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Appliance Housing",
-                  "sectionInclude": "^(Housing Units|Niche)"
-                }
-              ]
-            },
-            {
-              "leafId": "t_cook#1",
-              "name": "Modular Housing Units",
-              "count": 66,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Modular Housing Units"
-                }
-              ]
-            },
-            {
-              "leafId": "t_cook#2",
-              "name": "Slide-away Door Housing",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Appliance Housing",
-                  "sectionInclude": "^Slide-away"
-                }
-              ]
-            },
-            {
-              "leafId": "t_cook#3",
-              "name": "Accessories & Modifications",
-              "count": 5,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Appliance Housing",
-                  "sectionInclude": "^Accessories"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "t_store",
-          "name": "Storage",
-          "emoji": "📦",
-          "count": 151,
-          "allRow": {
-            "label": "All Tall Storage",
-            "count": 151
-          },
-          "leaves": [
-            {
-              "leafId": "t_store#0",
-              "name": "Modular Storage Units",
-              "count": 52,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Modular Storage Units"
-                },
-                {
-                  "category": "Tall",
-                  "subcategory": "Modular Housing Units",
-                  "sectionInclude": "^Step [24]"
-                }
-              ]
-            },
-            {
-              "leafId": "t_store#1",
-              "name": "Tall Storage",
-              "count": 46,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Tall Storage"
-                }
-              ]
-            },
-            {
-              "leafId": "t_store#2",
-              "name": "Closet & Wardrobe",
-              "count": 33,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Closet & Wardrobe"
-                }
-              ]
-            },
-            {
-              "leafId": "t_store#3",
-              "name": "Drawers & Accessories",
-              "count": 13,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Drawers & Accessories"
-                }
-              ]
-            },
-            {
-              "leafId": "t_store#4",
-              "name": "Top Cupboard",
-              "count": 7,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Top Cupboard"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "t_layout",
-          "name": "Layout",
-          "emoji": "📐",
-          "count": 97,
-          "allRow": {
-            "label": "All Tall Layout",
-            "count": 97
-          },
-          "leaves": [
-            {
-              "leafId": "t_layout#0",
-              "name": "Corner Cabinets",
-              "count": 6,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Corner"
-                }
-              ]
-            },
-            {
-              "leafId": "t_layout#1",
-              "name": "Sliding & Fold-Away Doors",
-              "count": 19,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Sliding & Fold-Away Doors"
-                }
-              ]
-            },
-            {
-              "leafId": "t_layout#2",
-              "name": "Passage Doors",
-              "count": 10,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Passage Doors"
-                }
-              ]
-            },
-            {
-              "leafId": "t_layout#3",
-              "name": "Panels, Fillers & Surrounds",
-              "count": 32,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Panels, Fillers & Surrounds"
-                }
-              ]
-            },
-            {
-              "leafId": "t_layout#4",
-              "name": "Modifications",
-              "count": 30,
-              "match": [
-                {
-                  "category": "Alteration",
-                  "zone": "Tall"
-                },
-                {
-                  "familyId": "F2549"
-                },
-                {
-                  "familyId": "F2550"
-                },
-                {
-                  "familyId": "F1958"
-                },
-                {
-                  "familyId": "F2059"
-                },
-                {
-                  "familyId": "F1959"
-                },
-                {
-                  "familyId": "F2014"
-                },
-                {
-                  "familyId": "F2057"
-                },
-                {
-                  "familyId": "F1935"
-                },
-                {
-                  "familyId": "F2056"
-                },
-                {
-                  "familyId": "F2015"
-                },
-                {
-                  "familyId": "F2058"
-                },
-                {
-                  "familyId": "F1945"
-                },
-                {
-                  "familyId": "F1933"
-                },
-                {
-                  "familyId": "F1965"
-                },
-                {
-                  "familyId": "F2055"
-                },
-                {
-                  "familyId": "F1928"
-                },
-                {
-                  "familyId": "F2010"
-                },
-                {
-                  "familyId": "F2012"
-                },
-                {
-                  "familyId": "F2016"
-                },
-                {
-                  "familyId": "F1967"
-                },
-                {
-                  "familyId": "F1923"
-                },
-                {
-                  "familyId": "F1922"
-                },
-                {
-                  "familyId": "F1921"
-                },
-                {
-                  "familyId": "F1924"
-                },
-                {
-                  "familyId": "F1948"
-                },
-                {
-                  "familyId": "F2054"
-                },
-                {
-                  "familyId": "F2011"
-                },
-                {
-                  "familyId": "F1934"
-                },
-                {
-                  "familyId": "F1929"
-                },
-                {
-                  "familyId": "F1932"
-                },
-                {
-                  "familyId": "MRG_CENTRALFRONT"
-                },
-                {
-                  "familyId": "MRG_FRONTOVERHANG"
-                },
-                {
-                  "familyId": "MRG_FRONTSIZE"
-                },
-                {
-                  "familyId": "MRG_CUPALT1"
-                },
-                {
-                  "familyId": "MRG_CUPALT2"
-                },
-                {
-                  "familyId": "F1940"
-                },
-                {
-                  "familyId": "MRG_KMBBOX"
-                },
-                {
-                  "familyId": "XFV"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "t_design",
-          "name": "Design",
-          "emoji": "✨",
-          "count": 20,
-          "allRow": {
-            "label": "All Tall Design",
-            "count": 20
-          },
-          "leaves": [
-            {
-              "leafId": "t_design#0",
-              "name": "Display & Open Storage",
-              "count": 20,
-              "match": [
-                {
-                  "category": "Tall",
-                  "subcategory": "Display & Open Storage"
-                }
-              ]
-            }
-          ]
+         "category": "Base",
+         "subcategory": "Appliance housing",
+         "sectionInclude": "^(Wine|Under-Counter|Appliance Doors)"
         }
-      ]
+       ]
+      }
+     ]
     },
     {
-      "zone": "Wall",
-      "label": "WALL",
-      "count": 69,
-      "groups": [
+     "groupKey": "b_cook",
+     "name": "Cooking",
+     "emoji": "🔥",
+     "count": 34,
+     "allRow": {
+      "label": "All Base Cooking",
+      "count": 34
+     },
+     "leaves": [
+      {
+       "leafId": "b_cook#0",
+       "name": "Cooktop Units",
+       "count": 8,
+       "match": [
         {
-          "groupKey": "w_cook",
-          "name": "Cooking",
-          "emoji": "🔥",
-          "count": 2,
-          "allRow": {
-            "label": "All Wall Cooking",
-            "count": 2
-          },
-          "leaves": [
-            {
-              "leafId": "w_cook#0",
-              "name": "Microwave Housing",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Ventilation & Micro",
-                  "sectionInclude": "^Microwave"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "w_vent",
-          "name": "Ventilation",
-          "emoji": "🌀",
-          "count": 14,
-          "allRow": {
-            "label": "All Wall Ventilation",
-            "count": 14
-          },
-          "leaves": [
-            {
-              "leafId": "w_vent#0",
-              "name": "Extractor Wall Units",
-              "count": 14,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Ventilation & Micro",
-                  "sectionExclude": "^Microwave"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "w_store",
-          "name": "Storage",
-          "emoji": "📦",
-          "count": 18,
-          "allRow": {
-            "label": "All Wall Storage",
-            "count": 18
-          },
-          "leaves": [
-            {
-              "leafId": "w_store#0",
-              "name": "Wall Units",
-              "count": 7,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Wall unit"
-                }
-              ]
-            },
-            {
-              "leafId": "w_store#1",
-              "name": "Lift-Up Units",
-              "count": 6,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Lift-Up"
-                }
-              ]
-            },
-            {
-              "leafId": "w_store#2",
-              "name": "Interior+",
-              "count": 5,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Interior+"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "w_layout",
-          "name": "Layout",
-          "emoji": "📐",
-          "count": 30,
-          "allRow": {
-            "label": "All Wall Layout",
-            "count": 30
-          },
-          "leaves": [
-            {
-              "leafId": "w_layout#0",
-              "name": "Corner Cabinets",
-              "count": 7,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Corner"
-                }
-              ]
-            },
-            {
-              "leafId": "w_layout#1",
-              "name": "Fillers",
-              "count": 14,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Fillers"
-                }
-              ]
-            },
-            {
-              "leafId": "w_layout#2",
-              "name": "Modifications",
-              "count": 9,
-              "match": [
-                {
-                  "category": "Alteration",
-                  "zone": "Wall"
-                },
-                {
-                  "familyId": "F1940"
-                },
-                {
-                  "familyId": "MRG_KMBBOX"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "w_design",
-          "name": "Design",
-          "emoji": "✨",
-          "count": 14,
-          "allRow": {
-            "label": "All Wall Design",
-            "count": 14
-          },
-          "leaves": [
-            {
-              "leafId": "w_design#0",
-              "name": "Glass Cabinets",
-              "count": 9,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Glass unit"
-                }
-              ]
-            },
-            {
-              "leafId": "w_design#1",
-              "name": "Open Shelves",
-              "count": 5,
-              "match": [
-                {
-                  "category": "Wall",
-                  "subcategory": "Open shelf"
-                }
-              ]
-            }
-          ]
+         "category": "Base",
+         "subcategory": "Cooktops & Downdrafts",
+         "sectionInclude": "^Cooktop"
         }
-      ]
+       ]
+      },
+      {
+       "leafId": "b_cook#1",
+       "name": "Downdraft & Cooktop Units - Single Drawer",
+       "count": 2,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Cooktops & Downdrafts",
+         "sectionInclude": "- Single Drawer$"
+        }
+       ]
+      },
+      {
+       "leafId": "b_cook#2",
+       "name": "Downdraft & Cooktop Units - Two Drawers",
+       "count": 4,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Cooktops & Downdrafts",
+         "sectionInclude": "- Two Drawers$"
+        }
+       ]
+      },
+      {
+       "leafId": "b_cook#3",
+       "name": "Downdraft & Cooktop Units - Three Drawers",
+       "count": 3,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Cooktops & Downdrafts",
+         "sectionInclude": "- Three Drawers$"
+        }
+       ]
+      },
+      {
+       "leafId": "b_cook#4",
+       "name": "Oven Bases",
+       "count": 3,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Appliance housing",
+         "sectionInclude": "^Oven"
+        }
+       ]
+      },
+      {
+       "leafId": "b_cook#5",
+       "name": "Cooking Accessories",
+       "count": 14,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Cooktops & Downdrafts",
+         "sectionInclude": "^Accessories"
+        }
+       ]
+      }
+     ]
     },
     {
-      "zone": "Midway",
-      "label": "MIDWAY",
-      "count": 24,
-      "groups": [
+     "groupKey": "b_store",
+     "name": "Storage",
+     "emoji": "📦",
+     "count": 81,
+     "allRow": {
+      "label": "All Base Storage",
+      "count": 81
+     },
+     "leaves": [
+      {
+       "leafId": "b_store#0",
+       "name": "Drawer Cabinets",
+       "count": 30,
+       "match": [
         {
-          "groupKey": "m_cook",
-          "name": "Cooking",
-          "emoji": "🔥",
-          "count": 2,
-          "allRow": {
-            "label": "All Midway Cooking",
-            "count": 2
-          },
-          "leaves": [
-            {
-              "leafId": "m_cook#0",
-              "name": "Appliance Niches",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Appliances"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "m_store",
-          "name": "Storage",
-          "emoji": "📦",
-          "count": 9,
-          "allRow": {
-            "label": "All Midway Storage",
-            "count": 9
-          },
-          "leaves": [
-            {
-              "leafId": "m_store#0",
-              "name": "Cabinets & Slide Away",
-              "count": 4,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Cabinets & Slide Away"
-                }
-              ]
-            },
-            {
-              "leafId": "m_store#1",
-              "name": "Drawers & Pull-outs",
-              "count": 3,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Drawers & Pull-outs"
-                }
-              ]
-            },
-            {
-              "leafId": "m_store#2",
-              "name": "Roller Shutter",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Roller Shutter"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "m_layout",
-          "name": "Layout",
-          "emoji": "📐",
-          "count": 4,
-          "allRow": {
-            "label": "All Midway Layout",
-            "count": 4
-          },
-          "leaves": [
-            {
-              "leafId": "m_layout#0",
-              "name": "Accessory Surround",
-              "count": 4,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Accessory surround"
-                }
-              ]
-            },
-            {
-              "leafId": "m_layout#1",
-              "name": "Wall Cladding",
-              "count": 0,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Wall cladding"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "groupKey": "m_design",
-          "name": "Design",
-          "emoji": "✨",
-          "count": 9,
-          "allRow": {
-            "label": "All Midway Design",
-            "count": 9
-          },
-          "leaves": [
-            {
-              "leafId": "m_design#0",
-              "name": "Glass Cabinets",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Glass unit"
-                }
-              ]
-            },
-            {
-              "leafId": "m_design#1",
-              "name": "Open Shelves",
-              "count": 5,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Open shelf"
-                }
-              ]
-            },
-            {
-              "leafId": "m_design#2",
-              "name": "Lighting",
-              "count": 2,
-              "match": [
-                {
-                  "category": "Midway",
-                  "subcategory": "Lighting"
-                }
-              ]
-            }
-          ]
+         "category": "Base",
+         "subcategory": "Drawers & Pullouts"
         }
-      ]
+       ]
+      },
+      {
+       "leafId": "b_store#1",
+       "name": "Door Cabinets",
+       "count": 7,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Doors"
+        }
+       ]
+      },
+      {
+       "leafId": "b_store#2",
+       "name": "Function Cabinets",
+       "count": 14,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Function Cabinets"
+        }
+       ]
+      },
+      {
+       "leafId": "b_store#3",
+       "name": "Special Height",
+       "count": 30,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Special Height"
+        }
+       ]
+      },
+      {
+       "leafId": "b_store#4",
+       "name": "Alterations",
+       "count": 12,
+       "match": [
+        {
+         "familyId": "F7300"
+        },
+        {
+         "familyId": "F1844"
+        },
+        {
+         "familyId": "F13"
+        },
+        {
+         "familyId": "F2013__DRWDUP"
+        },
+        {
+         "familyId": "F1965__DRWDUP"
+        },
+        {
+         "familyId": "F1919__DRWDUP"
+        },
+        {
+         "familyId": "F1932__DRWDUP"
+        },
+        {
+         "familyId": "F2011__DRWDUP"
+        },
+        {
+         "familyId": "F2010__DRWDUP"
+        },
+        {
+         "familyId": "F1933__DRWDUP"
+        },
+        {
+         "familyId": "F1930__DRWDUP"
+        },
+        {
+         "familyId": "F1917__DRWDUP"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "b_layout",
+     "name": "Layout",
+     "emoji": "📐",
+     "count": 96,
+     "allRow": {
+      "label": "All Base Layout",
+      "count": 96
+     },
+     "leaves": [
+      {
+       "leafId": "b_layout#0",
+       "name": "Corner Cabinets",
+       "count": 8,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Corners"
+        }
+       ]
+      },
+      {
+       "leafId": "b_layout#1",
+       "name": "Fillers",
+       "count": 12,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Fillers"
+        }
+       ]
+      },
+      {
+       "leafId": "b_layout#2",
+       "name": "End Panels",
+       "count": 20,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Accessories & Surround"
+        }
+       ]
+      },
+      {
+       "leafId": "b_layout#3",
+       "name": "Modifications",
+       "count": 56,
+       "match": [
+        {
+         "category": "Alteration",
+         "zone": "Base"
+        },
+        {
+         "familyId": "MRG_KMBBOX"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "b_design",
+     "name": "Design",
+     "emoji": "✨",
+     "count": 56,
+     "allRow": {
+      "label": "All Base Design",
+      "count": 56
+     },
+     "leaves": [
+      {
+       "leafId": "b_design#0",
+       "name": "Open Shelves",
+       "count": 8,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Open & Lights",
+         "sectionInclude": "^Open Shelf"
+        }
+       ]
+      },
+      {
+       "leafId": "b_design#1",
+       "name": "Glass Cabinets",
+       "count": 3,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Open & Lights",
+         "sectionInclude": "^Glass"
+        }
+       ]
+      },
+      {
+       "leafId": "b_design#2",
+       "name": "Lighting",
+       "count": 2,
+       "match": [
+        {
+         "category": "Base",
+         "subcategory": "Open & Lights",
+         "sectionInclude": "^Lighting"
+        }
+       ]
+      },
+      {
+       "leafId": "b_design#3",
+       "name": "Plinth (Toe-Kick)",
+       "count": 43,
+       "match": [
+        {
+         "category": "Panels & surround",
+         "subcategory": "Plinth"
+        },
+        {
+         "category": "Panels & surround",
+         "subcategory": "Plinth Accessories"
+        }
+       ]
+      }
+     ]
     }
-  ],
-  "moreCategories": [
+   ]
+  },
+  {
+   "zone": "Tall",
+   "label": "TALL",
+   "count": 340,
+   "groups": [
     {
+     "groupKey": "t_water",
+     "name": "Water",
+     "emoji": "💧",
+     "count": 7,
+     "allRow": {
+      "label": "All Tall Water",
+      "count": 7
+     },
+     "leaves": [
+      {
+       "leafId": "t_water#0",
+       "name": "Dishwasher",
+       "count": 3,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Appliance Housing",
+         "sectionInclude": "^Dishwasher"
+        }
+       ]
+      },
+      {
+       "leafId": "t_water#1",
+       "name": "Washing Machine",
+       "count": 4,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Appliance Housing",
+         "sectionInclude": "^Washing Machine"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "t_cool",
+     "name": "Cooling",
+     "emoji": "❄️",
+     "count": 34,
+     "allRow": {
+      "label": "All Tall Cooling",
+      "count": 34
+     },
+     "leaves": [
+      {
+       "leafId": "t_cool#0",
+       "name": "Appliance Doors & Fronts",
+       "count": 9,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Appliance Housing",
+         "sectionInclude": "^Appliance Doors"
+        }
+       ]
+      },
+      {
+       "leafId": "t_cool#1",
+       "name": "Fridge & Freezer Housing",
+       "count": 25,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Appliance Housing",
+         "sectionInclude": "^Fridge"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "t_cook",
+     "name": "Cooking",
+     "emoji": "🔥",
+     "count": 99,
+     "allRow": {
+      "label": "All Tall Cooking",
+      "count": 99
+     },
+     "leaves": [
+      {
+       "leafId": "t_cook#0",
+       "name": "Appliance Housing Units",
+       "count": 26,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Appliance Housing",
+         "sectionInclude": "^(Housing Units|Niche)"
+        }
+       ]
+      },
+      {
+       "leafId": "t_cook#1",
+       "name": "Modular Housing Units",
+       "count": 66,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Modular Housing Units"
+        }
+       ]
+      },
+      {
+       "leafId": "t_cook#2",
+       "name": "Slide-away Door Housing",
+       "count": 2,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Appliance Housing",
+         "sectionInclude": "^Slide-away"
+        }
+       ]
+      },
+      {
+       "leafId": "t_cook#3",
+       "name": "Accessories & Modifications",
+       "count": 5,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Appliance Housing",
+         "sectionInclude": "^Accessories"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "t_store",
+     "name": "Storage",
+     "emoji": "📦",
+     "count": 151,
+     "allRow": {
+      "label": "All Tall Storage",
+      "count": 151
+     },
+     "leaves": [
+      {
+       "leafId": "t_store#0",
+       "name": "Modular Storage Units",
+       "count": 52,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Modular Storage Units"
+        },
+        {
+         "category": "Tall",
+         "subcategory": "Modular Housing Units",
+         "sectionInclude": "^Step [24]"
+        }
+       ]
+      },
+      {
+       "leafId": "t_store#1",
+       "name": "Tall Storage",
+       "count": 46,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Tall Storage"
+        }
+       ]
+      },
+      {
+       "leafId": "t_store#2",
+       "name": "Closet & Wardrobe",
+       "count": 33,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Closet & Wardrobe"
+        }
+       ]
+      },
+      {
+       "leafId": "t_store#3",
+       "name": "Drawers & Accessories",
+       "count": 13,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Drawers & Accessories"
+        }
+       ]
+      },
+      {
+       "leafId": "t_store#4",
+       "name": "Top Cupboard",
+       "count": 7,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Top Cupboard"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "t_layout",
+     "name": "Layout",
+     "emoji": "📐",
+     "count": 97,
+     "allRow": {
+      "label": "All Tall Layout",
+      "count": 97
+     },
+     "leaves": [
+      {
+       "leafId": "t_layout#0",
+       "name": "Corner Cabinets",
+       "count": 6,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Corner"
+        }
+       ]
+      },
+      {
+       "leafId": "t_layout#1",
+       "name": "Sliding & Fold-Away Doors",
+       "count": 19,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Sliding & Fold-Away Doors"
+        }
+       ]
+      },
+      {
+       "leafId": "t_layout#2",
+       "name": "Passage Doors",
+       "count": 10,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Passage Doors"
+        }
+       ]
+      },
+      {
+       "leafId": "t_layout#3",
+       "name": "Panels, Fillers & Surrounds",
+       "count": 32,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Panels, Fillers & Surrounds"
+        }
+       ]
+      },
+      {
+       "leafId": "t_layout#4",
+       "name": "Modifications",
+       "count": 30,
+       "match": [
+        {
+         "category": "Alteration",
+         "zone": "Tall"
+        },
+        {
+         "familyId": "F2549"
+        },
+        {
+         "familyId": "F2550"
+        },
+        {
+         "familyId": "F1958"
+        },
+        {
+         "familyId": "F2059"
+        },
+        {
+         "familyId": "F1959"
+        },
+        {
+         "familyId": "F2014"
+        },
+        {
+         "familyId": "F2057"
+        },
+        {
+         "familyId": "F1935"
+        },
+        {
+         "familyId": "F2056"
+        },
+        {
+         "familyId": "F2015"
+        },
+        {
+         "familyId": "F2058"
+        },
+        {
+         "familyId": "F1945"
+        },
+        {
+         "familyId": "F1933"
+        },
+        {
+         "familyId": "F1965"
+        },
+        {
+         "familyId": "F2055"
+        },
+        {
+         "familyId": "F1928"
+        },
+        {
+         "familyId": "F2010"
+        },
+        {
+         "familyId": "F2012"
+        },
+        {
+         "familyId": "F2016"
+        },
+        {
+         "familyId": "F1967"
+        },
+        {
+         "familyId": "F1923"
+        },
+        {
+         "familyId": "F1922"
+        },
+        {
+         "familyId": "F1921"
+        },
+        {
+         "familyId": "F1924"
+        },
+        {
+         "familyId": "F1948"
+        },
+        {
+         "familyId": "F2054"
+        },
+        {
+         "familyId": "F2011"
+        },
+        {
+         "familyId": "F1934"
+        },
+        {
+         "familyId": "F1929"
+        },
+        {
+         "familyId": "F1932"
+        },
+        {
+         "familyId": "MRG_CENTRALFRONT"
+        },
+        {
+         "familyId": "MRG_FRONTOVERHANG"
+        },
+        {
+         "familyId": "MRG_FRONTSIZE"
+        },
+        {
+         "familyId": "MRG_CUPALT1"
+        },
+        {
+         "familyId": "MRG_CUPALT2"
+        },
+        {
+         "familyId": "F1940"
+        },
+        {
+         "familyId": "MRG_KMBBOX"
+        },
+        {
+         "familyId": "XFV"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "t_design",
+     "name": "Design",
+     "emoji": "✨",
+     "count": 20,
+     "allRow": {
+      "label": "All Tall Design",
+      "count": 20
+     },
+     "leaves": [
+      {
+       "leafId": "t_design#0",
+       "name": "Display & Open Storage",
+       "count": 20,
+       "match": [
+        {
+         "category": "Tall",
+         "subcategory": "Display & Open Storage"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "zone": "Wall",
+   "label": "WALL",
+   "count": 69,
+   "groups": [
+    {
+     "groupKey": "w_cook",
+     "name": "Cooking",
+     "emoji": "🔥",
+     "count": 2,
+     "allRow": {
+      "label": "All Wall Cooking",
+      "count": 2
+     },
+     "leaves": [
+      {
+       "leafId": "w_cook#0",
+       "name": "Microwave Housing",
+       "count": 2,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Ventilation & Micro",
+         "sectionInclude": "^Microwave"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "w_vent",
+     "name": "Ventilation",
+     "emoji": "🌀",
+     "count": 14,
+     "allRow": {
+      "label": "All Wall Ventilation",
+      "count": 14
+     },
+     "leaves": [
+      {
+       "leafId": "w_vent#0",
+       "name": "Extractor Wall Units",
+       "count": 14,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Ventilation & Micro",
+         "sectionExclude": "^Microwave"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "w_store",
+     "name": "Storage",
+     "emoji": "📦",
+     "count": 18,
+     "allRow": {
+      "label": "All Wall Storage",
+      "count": 18
+     },
+     "leaves": [
+      {
+       "leafId": "w_store#0",
+       "name": "Wall Units",
+       "count": 7,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Wall unit"
+        }
+       ]
+      },
+      {
+       "leafId": "w_store#1",
+       "name": "Lift-Up Units",
+       "count": 6,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Lift-Up"
+        }
+       ]
+      },
+      {
+       "leafId": "w_store#2",
+       "name": "Interior+",
+       "count": 5,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Interior+"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "w_layout",
+     "name": "Layout",
+     "emoji": "📐",
+     "count": 30,
+     "allRow": {
+      "label": "All Wall Layout",
+      "count": 30
+     },
+     "leaves": [
+      {
+       "leafId": "w_layout#0",
+       "name": "Corner Cabinets",
+       "count": 7,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Corner"
+        }
+       ]
+      },
+      {
+       "leafId": "w_layout#1",
+       "name": "Fillers",
+       "count": 14,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Fillers"
+        }
+       ]
+      },
+      {
+       "leafId": "w_layout#2",
+       "name": "Modifications",
+       "count": 9,
+       "match": [
+        {
+         "category": "Alteration",
+         "zone": "Wall"
+        },
+        {
+         "familyId": "F1940"
+        },
+        {
+         "familyId": "MRG_KMBBOX"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "w_design",
+     "name": "Design",
+     "emoji": "✨",
+     "count": 14,
+     "allRow": {
+      "label": "All Wall Design",
+      "count": 14
+     },
+     "leaves": [
+      {
+       "leafId": "w_design#0",
+       "name": "Glass Cabinets",
+       "count": 9,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Glass unit"
+        }
+       ]
+      },
+      {
+       "leafId": "w_design#1",
+       "name": "Open Shelves",
+       "count": 5,
+       "match": [
+        {
+         "category": "Wall",
+         "subcategory": "Open shelf"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "zone": "Midway",
+   "label": "MIDWAY",
+   "count": 24,
+   "groups": [
+    {
+     "groupKey": "m_cook",
+     "name": "Cooking",
+     "emoji": "🔥",
+     "count": 2,
+     "allRow": {
+      "label": "All Midway Cooking",
+      "count": 2
+     },
+     "leaves": [
+      {
+       "leafId": "m_cook#0",
+       "name": "Appliance Niches",
+       "count": 2,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Appliances"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "m_store",
+     "name": "Storage",
+     "emoji": "📦",
+     "count": 9,
+     "allRow": {
+      "label": "All Midway Storage",
+      "count": 9
+     },
+     "leaves": [
+      {
+       "leafId": "m_store#0",
+       "name": "Cabinets & Slide Away",
+       "count": 4,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Cabinets & Slide Away"
+        }
+       ]
+      },
+      {
+       "leafId": "m_store#1",
+       "name": "Drawers & Pull-outs",
+       "count": 3,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Drawers & Pull-outs"
+        }
+       ]
+      },
+      {
+       "leafId": "m_store#2",
+       "name": "Roller Shutter",
+       "count": 2,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Roller Shutter"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "m_layout",
+     "name": "Layout",
+     "emoji": "📐",
+     "count": 4,
+     "allRow": {
+      "label": "All Midway Layout",
+      "count": 4
+     },
+     "leaves": [
+      {
+       "leafId": "m_layout#0",
+       "name": "Accessory Surround",
+       "count": 4,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Accessory surround"
+        }
+       ]
+      },
+      {
+       "leafId": "m_layout#1",
+       "name": "Wall Cladding",
+       "count": 0,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Wall cladding"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "groupKey": "m_design",
+     "name": "Design",
+     "emoji": "✨",
+     "count": 9,
+     "allRow": {
+      "label": "All Midway Design",
+      "count": 9
+     },
+     "leaves": [
+      {
+       "leafId": "m_design#0",
+       "name": "Glass Cabinets",
+       "count": 2,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Glass unit"
+        }
+       ]
+      },
+      {
+       "leafId": "m_design#1",
+       "name": "Open Shelves",
+       "count": 5,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Open shelf"
+        }
+       ]
+      },
+      {
+       "leafId": "m_design#2",
+       "name": "Lighting",
+       "count": 2,
+       "match": [
+        {
+         "category": "Midway",
+         "subcategory": "Lighting"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "moreCategories": [
+  {
+   "category": "Alteration",
+   "count": 98,
+   "subs": [
+    {
+     "name": "Cabinet Modifications",
+     "count": 23,
+     "filter": {
       "category": "Alteration",
-      "count": 98
+      "subcategory": "Cabinet Modifications"
+     }
     },
     {
-      "category": "Handles",
-      "count": 134
+     "name": "Front Combination",
+     "count": 3,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Front Combination"
+     }
     },
     {
-      "category": "Lighting",
-      "count": 41
+     "name": "Drawers & Pull-outs",
+     "count": 16,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Drawers & Pull-outs"
+     }
     },
     {
-      "category": "Service",
-      "count": 119
+     "name": "Glass unit",
+     "count": 1,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Glass unit"
+     }
     },
     {
-      "category": "Accessories & interior",
-      "count": 227
+     "name": "Open shelf",
+     "count": 7,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Open shelf"
+     }
     },
     {
-      "category": "Countertops",
-      "count": 197
+     "name": "Sink",
+     "count": 1,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Sink"
+     }
     },
     {
-      "category": "Panels & surround",
-      "count": 186
+     "name": "Ventilation",
+     "count": 6,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Ventilation"
+     }
+    },
+    {
+     "name": "Slide-Away",
+     "count": 1,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Slide-Away"
+     }
+    },
+    {
+     "name": "Side Panel Modifications",
+     "count": 2,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Side Panel Modifications"
+     }
+    },
+    {
+     "name": "Fillers",
+     "count": 1,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Fillers"
+     }
+    },
+    {
+     "name": "Accessory",
+     "count": 37,
+     "filter": {
+      "category": "Alteration",
+      "subcategory": "Accessory"
+     }
     }
-  ]
+   ]
+  },
+  {
+   "category": "Handles",
+   "count": 134,
+   "subs": [
+    {
+     "name": "Electric",
+     "count": 11,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Electric"
+     }
+    },
+    {
+     "name": "Extra charge",
+     "count": 10,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Extra charge"
+     }
+    },
+    {
+     "name": "Vertical Handle",
+     "count": 3,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Vertical Handle"
+     }
+    },
+    {
+     "name": "Sink knob",
+     "count": 2,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Sink knob"
+     }
+    },
+    {
+     "name": "Foldable inlet handle",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Foldable inlet handle"
+     }
+    },
+    {
+     "name": "Grip profile",
+     "count": 6,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Grip profile"
+     }
+    },
+    {
+     "name": "Grip profile pair",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Grip profile pair"
+     }
+    },
+    {
+     "name": "Handle screws",
+     "count": 3,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Handle screws"
+     }
+    },
+    {
+     "name": "Inset handle",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Inset handle"
+     }
+    },
+    {
+     "name": "Inset handle with bar",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Inset handle with bar"
+     }
+    },
+    {
+     "name": "LED-handle profile",
+     "count": 7,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "LED-handle profile"
+     }
+    },
+    {
+     "name": "Metal bow handle BOSSA",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Metal bow handle BOSSA"
+     }
+    },
+    {
+     "name": "Metal flap handle",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Metal flap handle"
+     }
+    },
+    {
+     "name": "Metal knob",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Metal knob"
+     }
+    },
+    {
+     "name": "Solid wood grip profile",
+     "count": 1,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Solid wood grip profile"
+     }
+    },
+    {
+     "name": "Avance Contino Caps",
+     "count": 31,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Avance Contino Caps"
+     }
+    },
+    {
+     "name": "Bar handle",
+     "count": 8,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Bar handle"
+     }
+    },
+    {
+     "name": "Metal grip profile",
+     "count": 4,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Metal grip profile"
+     }
+    },
+    {
+     "name": "Metal bow handle",
+     "count": 41,
+     "filter": {
+      "category": "Handles",
+      "subcategory": "Metal bow handle"
+     }
+    }
+   ]
+  },
+  {
+   "category": "Lighting",
+   "count": 41,
+   "subs": [
+    {
+     "name": "LED",
+     "count": 20,
+     "filter": {
+      "category": "Lighting",
+      "subcategory": "LED"
+     }
+    },
+    {
+     "name": "Light Bridge",
+     "count": 4,
+     "filter": {
+      "category": "Lighting",
+      "subcategory": "Light Bridge"
+     }
+    },
+    {
+     "name": "Lights Service",
+     "count": 2,
+     "filter": {
+      "category": "Lighting",
+      "subcategory": "Lights Service"
+     }
+    },
+    {
+     "name": "Budget lights",
+     "count": 2,
+     "filter": {
+      "category": "Lighting",
+      "subcategory": "Budget lights"
+     }
+    },
+    {
+     "name": "Niche Shelf",
+     "count": 8,
+     "filter": {
+      "category": "Lighting",
+      "subcategory": "Niche Shelf"
+     }
+    },
+    {
+     "name": "Control & Switch",
+     "count": 5,
+     "filter": {
+      "category": "Lighting",
+      "subcategory": "Control & Switch"
+     }
+    }
+   ]
+  },
+  {
+   "category": "Service",
+   "count": 119,
+   "subs": [
+    {
+     "name": "Hinges & Hardware",
+     "count": 41,
+     "filter": {
+      "category": "Service",
+      "subcategory": "Hinges & Hardware"
+     }
+    },
+    {
+     "name": "Drawer Systems",
+     "count": 14,
+     "filter": {
+      "category": "Service",
+      "subcategory": "Drawer Systems"
+     }
+    },
+    {
+     "name": "Waste Systems",
+     "count": 10,
+     "filter": {
+      "category": "Service",
+      "subcategory": "Waste Systems"
+     }
+    },
+    {
+     "name": "Storage Accessories",
+     "count": 1,
+     "filter": {
+      "category": "Service",
+      "subcategory": "Storage Accessories"
+     }
+    },
+    {
+     "name": "Care & Consumables",
+     "count": 21,
+     "filter": {
+      "category": "Service",
+      "subcategory": "Care & Consumables"
+     }
+    },
+    {
+     "name": "Legacy Lighting",
+     "count": 32,
+     "filter": {
+      "category": "Service",
+      "subcategory": "Legacy Lighting"
+     }
+    }
+   ]
+  },
+  {
+   "category": "Accessories & interior",
+   "count": 227,
+   "subs": [
+    {
+     "name": "Domo Rail",
+     "count": 12,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Domo Rail"
+     }
+    },
+    {
+     "name": "Combo",
+     "count": 32,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Combo"
+     }
+    },
+    {
+     "name": "L-Box in oak",
+     "count": 14,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "L-Box in oak"
+     }
+    },
+    {
+     "name": "L-Box in walnut",
+     "count": 14,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "L-Box in walnut"
+     }
+    },
+    {
+     "name": "Q-Box / Q-Vario",
+     "count": 20,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Q-Box / Q-Vario"
+     }
+    },
+    {
+     "name": "Beech equipment",
+     "count": 6,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Beech equipment"
+     }
+    },
+    {
+     "name": "Plastic equipment",
+     "count": 6,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Plastic equipment"
+     }
+    },
+    {
+     "name": "Cable management",
+     "count": 6,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Cable management"
+     }
+    },
+    {
+     "name": "Worktop socket",
+     "count": 3,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Worktop socket"
+     }
+    },
+    {
+     "name": "Further accessories",
+     "count": 57,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Further accessories"
+     }
+    },
+    {
+     "name": "Inner drawers & pullouts",
+     "count": 21,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Inner drawers & pullouts"
+     }
+    },
+    {
+     "name": "Wire accessories / Drop-in trays",
+     "count": 2,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Wire accessories / Drop-in trays"
+     }
+    },
+    {
+     "name": "Interior+",
+     "count": 3,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Interior+"
+     }
+    },
+    {
+     "name": "Shelves",
+     "count": 20,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Shelves"
+     }
+    },
+    {
+     "name": "Slicer / Folding steps",
+     "count": 3,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Slicer / Folding steps"
+     }
+    },
+    {
+     "name": "Anti slip mats",
+     "count": 8,
+     "filter": {
+      "category": "Accessories & interior",
+      "subcategory": "Anti slip mats"
+     }
+    }
+   ]
+  },
+  {
+   "category": "Countertops",
+   "count": 197,
+   "subs": [
+    {
+     "name": "Worktops",
+     "count": 7,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Worktops"
+     }
+    },
+    {
+     "name": "Laminate · Worktops & Edge Styles",
+     "count": 3,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Laminate · Worktops & Edge Styles"
+     }
+    },
+    {
+     "name": "Laminate · Processing",
+     "count": 16,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Laminate · Processing"
+     }
+    },
+    {
+     "name": "Laminate · Accessories",
+     "count": 11,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Laminate · Accessories"
+     }
+    },
+    {
+     "name": "Compact Material · Worktops",
+     "count": 2,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Compact Material · Worktops"
+     }
+    },
+    {
+     "name": "Compact Material · Processing",
+     "count": 11,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Compact Material · Processing"
+     }
+    },
+    {
+     "name": "Compact Material · Processing (KPS)",
+     "count": 5,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Compact Material · Processing (KPS)"
+     }
+    },
+    {
+     "name": "Compact Material · Processing (KPK)",
+     "count": 3,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Compact Material · Processing (KPK)"
+     }
+    },
+    {
+     "name": "Compact Material · Niche Panels",
+     "count": 3,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Compact Material · Niche Panels"
+     }
+    },
+    {
+     "name": "Compact Material · Side Panels",
+     "count": 7,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Compact Material · Side Panels"
+     }
+    },
+    {
+     "name": "Natural Stone · Worktops",
+     "count": 2,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Natural Stone · Worktops"
+     }
+    },
+    {
+     "name": "Natural Stone · Processing",
+     "count": 11,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Natural Stone · Processing"
+     }
+    },
+    {
+     "name": "Natural Stone · Niche Panels",
+     "count": 5,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Natural Stone · Niche Panels"
+     }
+    },
+    {
+     "name": "Natural Stone · Side Panels",
+     "count": 9,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Natural Stone · Side Panels"
+     }
+    },
+    {
+     "name": "Solid Wood · Worktops",
+     "count": 2,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Solid Wood · Worktops"
+     }
+    },
+    {
+     "name": "Solid Wood · Processing",
+     "count": 10,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Solid Wood · Processing"
+     }
+    },
+    {
+     "name": "Solid Wood · Side Panels",
+     "count": 12,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Solid Wood · Side Panels"
+     }
+    },
+    {
+     "name": "Glass · Worktops",
+     "count": 2,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Glass · Worktops"
+     }
+    },
+    {
+     "name": "Glass · Processing",
+     "count": 24,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Glass · Processing"
+     }
+    },
+    {
+     "name": "Glass · Niche Panels",
+     "count": 8,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Glass · Niche Panels"
+     }
+    },
+    {
+     "name": "Glass · Side Panels",
+     "count": 3,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Glass · Side Panels"
+     }
+    },
+    {
+     "name": "Porcelain Ceramic · Worktops",
+     "count": 3,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Porcelain Ceramic · Worktops"
+     }
+    },
+    {
+     "name": "Porcelain Ceramic · Processing",
+     "count": 5,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Porcelain Ceramic · Processing"
+     }
+    },
+    {
+     "name": "Porcelain Ceramic · Processing (1.2 cm)",
+     "count": 5,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Porcelain Ceramic · Processing (1.2 cm)"
+     }
+    },
+    {
+     "name": "Porcelain Ceramic · Processing (2.2 / 4.1 / 6 cm)",
+     "count": 4,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Porcelain Ceramic · Processing (2.2 / 4.1 / 6 cm)"
+     }
+    },
+    {
+     "name": "Porcelain Ceramic · Niche Panels",
+     "count": 5,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Porcelain Ceramic · Niche Panels"
+     }
+    },
+    {
+     "name": "Porcelain Ceramic · Side Panels",
+     "count": 12,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Porcelain Ceramic · Side Panels"
+     }
+    },
+    {
+     "name": "Glass · Backsplash",
+     "count": 2,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Glass · Backsplash"
+     }
+    },
+    {
+     "name": "Porcelain Ceramic · Accessories",
+     "count": 1,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Porcelain Ceramic · Accessories"
+     }
+    },
+    {
+     "name": "Solid Wood · Accessories",
+     "count": 2,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Solid Wood · Accessories"
+     }
+    },
+    {
+     "name": "Natural Stone · Accessories",
+     "count": 2,
+     "filter": {
+      "category": "Countertops",
+      "subcategory": "Natural Stone · Accessories"
+     }
+    }
+   ]
+  },
+  {
+   "category": "Panels & surround",
+   "count": 186,
+   "subs": [
+    {
+     "name": "Side panels W",
+     "count": 43,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Side panels W"
+     }
+    },
+    {
+     "name": "Shelves B",
+     "count": 19,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Shelves B"
+     }
+    },
+    {
+     "name": "Open Shelf Units",
+     "count": 18,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Open Shelf Units"
+     }
+    },
+    {
+     "name": "Benches & Tables",
+     "count": 13,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Benches & Tables"
+     }
+    },
+    {
+     "name": "FIOS Frame Shelves",
+     "count": 14,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "FIOS Frame Shelves"
+     }
+    },
+    {
+     "name": "Ceiling Blenders",
+     "count": 15,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Ceiling Blenders"
+     }
+    },
+    {
+     "name": "Pilasters",
+     "count": 7,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Pilasters"
+     }
+    },
+    {
+     "name": "Plinth",
+     "count": 27,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Plinth"
+     }
+    },
+    {
+     "name": "Plinth Accessories",
+     "count": 19,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Plinth Accessories"
+     }
+    },
+    {
+     "name": "Surround",
+     "count": 7,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Surround"
+     }
+    },
+    {
+     "name": "Wall Cladding",
+     "count": 4,
+     "filter": {
+      "category": "Panels & surround",
+      "subcategory": "Wall Cladding"
+     }
+    }
+   ]
+  }
+ ]
 }

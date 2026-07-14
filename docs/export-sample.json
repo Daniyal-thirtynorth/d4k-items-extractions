@@ -3,74 +3,218 @@
     "generated": "2026-07-07T00:00:00.000Z",
     "source": "leicht_units v765 (headless run) — SAMPLE",
     "schemaVersion": "1.0.0",
-    "imageUrlTemplate": "https://cdn.leicht.example/itemData/<CODE>.jpg",
-    "counts": { "items": 16, "cabinets": 7, "accessories": 9, "categories": 8, "programmes": 3 },
+    "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
+    "counts": {
+      "items": 16,
+      "cabinets": 7,
+      "accessories": 9,
+      "categories": 8,
+      "programmes": 3
+    },
     "note": "Illustrative sample — the items below between them exercise EVERY object in export-schema.ts. Some ItemRef/pill targets (e.g. T7080BZ2TU, EBFF6058, LBFS60582) point at items outside this small slice; in a real export every referenced sku exists in items[]. Any key that starts with `_ui` is a plain-English note saying which part of the screen the block maps to — it is DOCUMENTATION ONLY. The backend must ignore/strip every `_ui` key on ingest; `_ui` is NOT part of the schema and must NOT be exported by the client."
   },
-
   "categories": [
     {
       "_ui": "LEFT SIDEBAR groups. Click a category to filter the grid. Sub-categories sit under it.",
-      "id": "base", "name": "Base", "itemCount": 234,
+      "id": "base",
+      "name": "Base",
+      "itemCount": 234,
       "subcategories": [
-        { "id": "water",    "name": "Water",    "itemCount": 87, "sections": ["STAINLESS STEEL SINKS"] },
-        { "id": "cooling",  "name": "Cooling",  "itemCount": 4 },
-        { "id": "cooking",  "name": "Cooking",  "itemCount": 34, "sections": ["DOWNDRAFT & COOKTOP UNITS - TWO DRAWERS", "DOWNDRAFT & COOKTOP UNITS"] },
-        { "id": "storage",  "name": "Storage",  "itemCount": 81 },
-        { "id": "layout",   "name": "Layout",   "itemCount": 96 },
-        { "id": "design",   "name": "Design",   "itemCount": 56 }
+        {
+          "id": "water",
+          "name": "Water",
+          "itemCount": 87,
+          "sections": [
+            "STAINLESS STEEL SINKS"
+          ]
+        },
+        {
+          "id": "cooling",
+          "name": "Cooling",
+          "itemCount": 4
+        },
+        {
+          "id": "cooking",
+          "name": "Cooking",
+          "itemCount": 34,
+          "sections": [
+            "DOWNDRAFT & COOKTOP UNITS - TWO DRAWERS",
+            "DOWNDRAFT & COOKTOP UNITS"
+          ]
+        },
+        {
+          "id": "storage",
+          "name": "Storage",
+          "itemCount": 81
+        },
+        {
+          "id": "layout",
+          "name": "Layout",
+          "itemCount": 96
+        },
+        {
+          "id": "design",
+          "name": "Design",
+          "itemCount": 56
+        }
       ]
     },
     {
-      "id": "tall", "name": "Tall", "itemCount": 339,
+      "id": "tall",
+      "name": "Tall",
+      "itemCount": 339,
       "subcategories": [
-        { "id": "modular-storage-units", "name": "Modular Storage Units", "itemCount": 52 },
-        { "id": "tall-storage",          "name": "Tall Storage",          "itemCount": 46 },
-        { "id": "closet-wardrobe",       "name": "Closet & Wardrobe",     "itemCount": 33 },
-        { "id": "drawers-accessories",   "name": "Drawers & Accessories", "itemCount": 13 },
-        { "id": "top-cupboard",          "name": "Top Cupboard",          "itemCount": 7 }
+        {
+          "id": "modular-storage-units",
+          "name": "Modular Storage Units",
+          "itemCount": 52
+        },
+        {
+          "id": "tall-storage",
+          "name": "Tall Storage",
+          "itemCount": 46
+        },
+        {
+          "id": "closet-wardrobe",
+          "name": "Closet & Wardrobe",
+          "itemCount": 33
+        },
+        {
+          "id": "drawers-accessories",
+          "name": "Drawers & Accessories",
+          "itemCount": 13
+        },
+        {
+          "id": "top-cupboard",
+          "name": "Top Cupboard",
+          "itemCount": 7
+        }
       ]
     },
-    { "id": "wall",   "name": "Wall",   "itemCount": 69, "subcategories": [] },
-    { "id": "midway", "name": "Midway", "itemCount": 24, "subcategories": [] },
     {
-      "id": "alteration", "name": "Alteration", "itemCount": 98,
-      "subcategories": [
-        { "id": "standard",      "name": "Standard",      "itemCount": 62 },
-        { "id": "unit-specific", "name": "Unit Specific",  "itemCount": 36 }
-      ]
+      "id": "wall",
+      "name": "Wall",
+      "itemCount": 69,
+      "subcategories": []
     },
-    { "id": "handles", "name": "Handles", "itemCount": 134,
+    {
+      "id": "midway",
+      "name": "Midway",
+      "itemCount": 24,
+      "subcategories": []
+    },
+    {
+      "id": "alteration",
+      "name": "Alteration",
+      "itemCount": 98,
       "subcategories": [
-        { "id": "metal-bow-handle", "name": "Metal bow handle", "itemCount": 21 }
+        {
+          "id": "standard",
+          "name": "Standard",
+          "itemCount": 62
+        },
+        {
+          "id": "unit-specific",
+          "name": "Unit Specific",
+          "itemCount": 36
+        }
       ]
     },
     {
-      "id": "lighting", "name": "Lighting", "itemCount": 41,
+      "id": "handles",
+      "name": "Handles",
+      "itemCount": 134,
       "subcategories": [
-        { "id": "all-lighting",   "name": "All Lighting",   "itemCount": 41 },
-        { "id": "led",            "name": "LED",            "itemCount": 20 },
-        { "id": "light-bridge",   "name": "Light Bridge",   "itemCount": 4 },
-        { "id": "lights-service", "name": "Lights Service", "itemCount": 2 },
-        { "id": "budget-lights",  "name": "Budget lights",  "itemCount": 2 },
-        { "id": "niche-shelf",    "name": "Niche Shelf",    "itemCount": 8 },
-        { "id": "control-switch", "name": "Control & Switch","itemCount": 5 }
+        {
+          "id": "metal-bow-handle",
+          "name": "Metal bow handle",
+          "itemCount": 21
+        }
       ]
     },
-    { "id": "designer-inspiration", "name": "✨ Designer Inspiration", "itemCount": 0, "subcategories": [] }
+    {
+      "id": "lighting",
+      "name": "Lighting",
+      "itemCount": 41,
+      "subcategories": [
+        {
+          "id": "all-lighting",
+          "name": "All Lighting",
+          "itemCount": 41
+        },
+        {
+          "id": "led",
+          "name": "LED",
+          "itemCount": 20
+        },
+        {
+          "id": "light-bridge",
+          "name": "Light Bridge",
+          "itemCount": 4
+        },
+        {
+          "id": "lights-service",
+          "name": "Lights Service",
+          "itemCount": 2
+        },
+        {
+          "id": "budget-lights",
+          "name": "Budget lights",
+          "itemCount": 2
+        },
+        {
+          "id": "niche-shelf",
+          "name": "Niche Shelf",
+          "itemCount": 8
+        },
+        {
+          "id": "control-switch",
+          "name": "Control & Switch",
+          "itemCount": 5
+        }
+      ]
+    },
+    {
+      "id": "designer-inspiration",
+      "name": "✨ Designer Inspiration",
+      "itemCount": 0,
+      "subcategories": []
+    }
   ],
-
   "programmes": [
-    { "_ui": "TOP-LEFT dropdown lines (the kitchen product lines). Picking one sets the finishes and prices.", "id": "rocca-01", "name": "ROCCA 01", "family": "PRIMO", "tier": "P", "priceField": 0 },
-    { "id": "avance-linea", "name": "AVANCE LINEA",  "family": "AVANCE",  "tier": "A", "priceField": 1 },
-    { "id": "contino-uno",  "name": "CONTINO UNO",   "family": "CONTINO", "tier": "C", "priceField": 2 }
+    {
+      "_ui": "TOP-LEFT dropdown lines (the kitchen product lines). Picking one sets the finishes and prices.",
+      "id": "rocca-01",
+      "name": "ROCCA 01",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 0
+    },
+    {
+      "id": "avance-linea",
+      "name": "AVANCE LINEA",
+      "family": "AVANCE",
+      "tier": "A",
+      "priceField": 1
+    },
+    {
+      "id": "contino-uno",
+      "name": "CONTINO UNO",
+      "family": "CONTINO",
+      "tier": "C",
+      "priceField": 2
+    }
   ],
-
   "ruleTables": {
-    "handle_systems": { "760": "handle-less mechanical", "761": "handle-less electric (needs SMNT)" },
-    "opening_systems": { "P1": "one handle on top (Primo)", "C1": "one handle on top (Contino)" }
+    "handle_systems": {
+      "760": "handle-less mechanical",
+      "761": "handle-less electric (needs SMNT)"
+    },
+    "opening_systems": {
+      "P1": "one handle on top (Primo)",
+      "C1": "one handle on top (Contino)"
+    }
   },
-
   "items": [
     {
       "_ui": "ONE PRODUCT CARD and its detail page. This is a cabinet you can order (an item). Everything below is a section that its detail page shows.",
@@ -80,7 +224,11 @@
       "name": "Downdraft & Cooktop Unit · Ducting behind the unit",
       "cardLabel": "Downdraft & Cooktop Unit",
       "programmeBadge": "P",
-      "availableTiers": ["P", "P1", "A"],
+      "availableTiers": [
+        "P",
+        "P1",
+        "A"
+      ],
       "category": "base",
       "subcategory": "cooking",
       "section": "DOWNDRAFT & COOKTOP UNITS - TWO DRAWERS",
@@ -89,136 +237,520 @@
       "heightMm": 795,
       "depthMm": 560,
       "heightClass": 80,
-      "toeKick": { "addCm": 15, "installedHeightMm": 945 },
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 945
+      },
       "configure": {
         "_ui": "The W / H / D / Programme pill rows — on the card and in the CONFIGURE box. Clicking a pill opens a different code (the sku on that pill).",
         "width": [
-          { "label": "60",  "value": 600,  "unit": "mm", "sku": "T6080BZ2TU",  "selected": true,  "available": true },
-          { "label": "70",  "value": 700,  "unit": "mm", "sku": "T7080BZ2TU",  "selected": false, "available": true },
-          { "label": "80",  "value": 800,  "unit": "mm", "sku": "T8080BZ2TU",  "selected": false, "available": true },
-          { "label": "90",  "value": 900,  "unit": "mm", "sku": "T9080BZ2TU",  "selected": false, "available": true },
-          { "label": "100", "value": 1000, "unit": "mm", "sku": "T10080BZ2TU", "selected": false, "available": true },
-          { "label": "120", "value": 1200, "unit": "mm", "sku": null,          "selected": false, "available": false }
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "T6080BZ2TU",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "70",
+            "value": 700,
+            "unit": "mm",
+            "sku": "T7080BZ2TU",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "T8080BZ2TU",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "90",
+            "value": 900,
+            "unit": "mm",
+            "sku": "T9080BZ2TU",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "100",
+            "value": 1000,
+            "unit": "mm",
+            "sku": "T10080BZ2TU",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "120",
+            "value": 1200,
+            "unit": "mm",
+            "sku": null,
+            "selected": false,
+            "available": false
+          }
         ],
         "height": [
-          { "label": "73", "value": 730, "unit": "mm", "sku": "T6073BZ2TU", "selected": false, "available": true },
-          { "label": "80", "value": 800, "unit": "mm", "sku": "T6080BZ2TU", "selected": true,  "available": true },
-          { "label": "86", "value": 860, "unit": "mm", "sku": "T6086BZ2TU", "selected": false, "available": true }
+          {
+            "label": "73",
+            "value": 730,
+            "unit": "mm",
+            "sku": "T6073BZ2TU",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "T6080BZ2TU",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "86",
+            "value": 860,
+            "unit": "mm",
+            "sku": "T6086BZ2TU",
+            "selected": false,
+            "available": true
+          }
         ],
         "depth": [
-          { "label": "58", "value": 580, "unit": "mm", "sku": "T6080BZ2TU",   "selected": true,  "available": true },
-          { "label": "63", "value": 630, "unit": "mm", "sku": "T6080BZ2TU63", "selected": false, "available": true, "note": "63 cm depth (alteration)" },
-          { "label": "68", "value": 680, "unit": "mm", "sku": "T6080BZ2TU68", "selected": false, "available": true }
+          {
+            "label": "58",
+            "value": 580,
+            "unit": "mm",
+            "sku": "T6080BZ2TU",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "63",
+            "value": 630,
+            "unit": "mm",
+            "sku": "T6080BZ2TU63",
+            "selected": false,
+            "available": true,
+            "note": "63 cm depth (alteration)"
+          },
+          {
+            "label": "68",
+            "value": 680,
+            "unit": "mm",
+            "sku": "T6080BZ2TU68",
+            "selected": false,
+            "available": true
+          }
         ],
         "programme": [
-          { "label": "Primo",                                  "tier": "P",  "opening": false, "sku": "T6080BZ2TU",   "selected": true,  "available": true },
-          { "label": "Opening P1 — Primo, one handle on top",  "tier": "P1", "opening": true,  "sku": "P1T6080BZ2TU", "selected": false, "available": true },
-          { "label": "Avance",                                 "tier": "A",  "opening": false, "sku": "T6080BZ2TU",   "selected": false, "available": true },
-          { "label": "Contino",                                "tier": "C",  "opening": false, "sku": null,           "selected": false, "available": false }
+          {
+            "label": "Primo",
+            "tier": "P",
+            "opening": false,
+            "sku": "T6080BZ2TU",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "Opening P1 — Primo, one handle on top",
+            "tier": "P1",
+            "opening": true,
+            "sku": "P1T6080BZ2TU",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "Avance",
+            "tier": "A",
+            "opening": false,
+            "sku": "T6080BZ2TU",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "Contino",
+            "tier": "C",
+            "opening": false,
+            "sku": null,
+            "selected": false,
+            "available": false
+          }
         ],
         "optionRows": [
           {
             "_ui": "An EXTRA pill row beyond W/H/D/Programme. Same behaviour — each pill opens a sibling code.",
             "label": "Ty",
             "options": [
-              { "label": "TU", "sku": "T6080BZ2TU", "selected": true,  "available": true },
-              { "label": "TV", "sku": "T6080BZ2TV", "selected": false, "available": true },
-              { "label": "TW", "sku": "T6080BZ2TW", "selected": false, "available": true }
+              {
+                "label": "TU",
+                "sku": "T6080BZ2TU",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "TV",
+                "sku": "T6080BZ2TV",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "TW",
+                "sku": "T6080BZ2TW",
+                "selected": false,
+                "available": true
+              }
             ]
           },
           {
             "label": "Insert",
             "options": [
-              { "label": "Blender",    "sku": "T6080BZ2TU", "selected": true,  "available": true },
-              { "label": "No blender", "sku": "T6080BS2TU", "selected": false, "available": true }
+              {
+                "label": "Blender",
+                "sku": "T6080BZ2TU",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "No blender",
+                "sku": "T6080BS2TU",
+                "selected": false,
+                "available": true
+              }
             ]
           },
           {
             "label": "Variant",
             "options": [
-              { "label": "Ducting behind", "sku": "T6080BZ2TU", "selected": true,  "available": true },
-              { "label": "Ducting down",   "sku": "T6080BZ2DU", "selected": false, "available": true }
+              {
+                "label": "Ducting behind",
+                "sku": "T6080BZ2TU",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "Ducting down",
+                "sku": "T6080BZ2DU",
+                "selected": false,
+                "available": true
+              }
             ]
           }
         ],
         "note": "Depth is carcass; full depth = carcass + front + 2 mm once a programme is chosen. The TOP D filter bar matches these nominal depth-CLASS labels (58/63/68) via the `depthClass` query param — NOT the carcass depthMm (class 58 = 560 mm carcass = class*10-20). A unit matches a class when it appears among these labels (native OR the 63 cm alteration)."
       },
-      "description": { "title": "Downdraft & cooktop unit", "bullets": ["1 blender", "2 pullouts", "Ducting behind the unit"] },
-      "specification": {
-        "widthMm": 600, "heightMm": 795, "depthMm": 560,
-        "depthKind": "carcass", "fullDepthMm": 580,
-        "modifiers": "—", "carcaseLine": "80", "weightKg": 46.4, "volumeM3": 0.29,
-        "catalogPage": { "priceGroupRef": "22.09", "pdfPage": 267 }
+      "description": {
+        "title": "Downdraft & cooktop unit",
+        "bullets": [
+          "1 blender",
+          "2 pullouts",
+          "Ducting behind the unit"
+        ]
       },
-      "restrictions": ["Not available with 63 cm carcass in Contino.", "Requires SMNT transformer when handle-less electric (761)."],
-      "programmeAvailability": { "excluded": false, "programmes": [], "note": "No programme exclusions." },
+      "specification": {
+        "widthMm": 600,
+        "heightMm": 795,
+        "depthMm": 560,
+        "depthKind": "carcass",
+        "fullDepthMm": 580,
+        "modifiers": "—",
+        "carcaseLine": "80",
+        "weightKg": 46.4,
+        "volumeM3": 0.29,
+        "catalogPage": {
+          "priceGroupRef": "22.09",
+          "pdfPage": 267
+        }
+      },
+      "restrictions": [
+        "Not available with 63 cm carcass in Contino.",
+        "Requires SMNT transformer when handle-less electric (761)."
+      ],
+      "programmeAvailability": {
+        "excluded": false,
+        "programmes": [],
+        "note": "No programme exclusions."
+      },
       "engineering": [
-        { "key": "suspended",    "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)", "ok": true,  "value": "Yes",      "ref": "book envelope p.2.03" },
-        { "key": "sensomatic",   "label": "SensoMatic possible",                                            "ok": true,  "value": "Yes" },
-        { "key": "tipSoftclose", "label": "Tip-on Softclose",                                               "ok": false, "value": "No" },
-        { "key": "openingP1",    "label": "Opening system P1",                                              "ok": true,  "value": "760 only" },
-        { "key": "depth68",      "label": "68 cm depth",                                                    "ok": true,  "value": "Yes" }
+        {
+          "key": "suspended",
+          "label": "Suspended installation approved (ANTOSO, book envelope p.2.03)",
+          "ok": true,
+          "value": "Yes",
+          "ref": "book envelope p.2.03"
+        },
+        {
+          "key": "sensomatic",
+          "label": "SensoMatic possible",
+          "ok": true,
+          "value": "Yes"
+        },
+        {
+          "key": "tipSoftclose",
+          "label": "Tip-on Softclose",
+          "ok": false,
+          "value": "No"
+        },
+        {
+          "key": "openingP1",
+          "label": "Opening system P1",
+          "ok": true,
+          "value": "760 only"
+        },
+        {
+          "key": "depth68",
+          "label": "68 cm depth",
+          "ok": true,
+          "value": "Yes"
+        }
       ],
       "modifications": [
-        { "title": "P1 — Primo, one handle on top", "text": "Order the P1 prefix on the base code.", "codes": [{ "label": "P1 opening", "sku": "P1T6080BZ2TU" }] },
-        { "title": "Handle-less electric (761)", "text": "Add the transformer.", "codes": [{ "label": "set handle 761", "sku": "761" }, { "label": "+SMNT (transformer)", "sku": "SMNT" }], "warn": "761 electric ALWAYS needs the SMNT transformer." }
+        {
+          "title": "P1 — Primo, one handle on top",
+          "text": "Order the P1 prefix on the base code.",
+          "codes": [
+            {
+              "label": "P1 opening",
+              "sku": "P1T6080BZ2TU"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "Add the transformer.",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer."
+        }
       ],
-      "planningNotes": ["Leave 30 mm clearance behind for ducting.", "Downdraft motor ordered separately."],
-      "didYouKnow": { "text": "This cabinet can also be ordered — same front, deeper carcase.", "codes": [{ "label": "63 cm deep", "sku": "T6080BZ2TU63" }, { "label": "68 cm deep", "sku": "T6080BZ2TU68" }] },
-      "catalog": { "available": true, "page": 267, "bookId": "primo", "url": "https://cdn.leicht.example/catalog/primo/267.pdf", "urlTemplate": "https://cdn.leicht.example/catalog/primo/<PAGE>.pdf", "priceGroupRef": "22.09", "pricesHidden": true, "priceCrop": 0.585 },
+      "planningNotes": [
+        "Leave 30 mm clearance behind for ducting.",
+        "Downdraft motor ordered separately."
+      ],
+      "didYouKnow": {
+        "text": "This cabinet can also be ordered — same front, deeper carcase.",
+        "codes": [
+          {
+            "label": "63 cm deep",
+            "sku": "T6080BZ2TU63"
+          },
+          {
+            "label": "68 cm deep",
+            "sku": "T6080BZ2TU68"
+          }
+        ]
+      },
+      "catalog": {
+        "available": true,
+        "page": 267,
+        "bookId": "primo",
+        "url": "https://cdn.leicht.example/catalog/primo/267.pdf",
+        "urlTemplate": "https://cdn.leicht.example/catalog/primo/<PAGE>.pdf",
+        "priceGroupRef": "22.09",
+        "pricesHidden": true,
+        "priceCrop": 0.585
+      },
       "accessoryPanel": {
         "_ui": "The 'POSSIBLE ALTERATIONS & ACCESSORIES' block — the row of tabs. Each tab holds groups of cards; every card points to another item.",
         "tabs": [
           {
             "_ui": "One tab. 'Compatible Accessories' lists everything that fits this cabinet, grouped by CATEGORY · SUBCATEGORY.",
-            "label": "Compatible Accessories", "count": 2,
-            "notes": ["Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."],
+            "label": "Compatible Accessories",
+            "count": 2,
+            "notes": [
+              "Everything compatible with this cabinet, wherever it lives in the catalog. Click a card to open it."
+            ],
             "sections": [
-              { "heading": "BASE · SINKS",   "notes": [], "cards": [{ "sku": "HFO3" }] },
-              { "heading": "BASE · COOKING", "notes": [], "cards": [{ "sku": "EBF6058" }] }
+              {
+                "heading": "BASE · SINKS",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "HFO3"
+                  }
+                ]
+              },
+              {
+                "heading": "BASE · COOKING",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "EBF6058"
+                  }
+                ]
+              }
             ]
           },
           {
-            "label": "Q-Box", "count": 3, "notes": [],
+            "label": "Q-Box",
+            "count": 3,
+            "notes": [],
             "sections": [
-              { "heading": null, "notes": [], "cards": [
-                { "sku": "EBF6058" },
-                { "sku": "EBFF6058", "label": "Cutlery tray with 3 foil" },
-                { "sku": "EBFM6058", "label": "Cutlery tray with knife holder" }
-              ] }
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "EBF6058"
+                  },
+                  {
+                    "sku": "EBFF6058",
+                    "label": "Cutlery tray with 3 foil"
+                  },
+                  {
+                    "sku": "EBFM6058",
+                    "label": "Cutlery tray with knife holder"
+                  }
+                ]
+              }
             ]
           },
           {
-            "label": "L-Box oak", "count": 2, "notes": [],
+            "label": "L-Box oak",
+            "count": 2,
+            "notes": [],
             "sections": [
-              { "heading": null, "notes": [], "cards": [
-                { "sku": "LBFS60581", "label": "L-Box in oak drawer-set 1", "variants": [{ "label": "L3/M3", "sku": "LBFS60581" }, { "label": "M8", "sku": "LBFS60581U" }] },
-                { "sku": "LBFS60582", "label": "L-Box in oak drawer-set 2", "variants": [{ "label": "L3/M3", "sku": "LBFS60582" }, { "label": "M8", "sku": "LBFS60582U" }] }
-              ] }
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "LBFS60581",
+                    "label": "L-Box in oak drawer-set 1",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBFS60581"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBFS60581U"
+                      }
+                    ]
+                  },
+                  {
+                    "sku": "LBFS60582",
+                    "label": "L-Box in oak drawer-set 2",
+                    "variants": [
+                      {
+                        "label": "L3/M3",
+                        "sku": "LBFS60582"
+                      },
+                      {
+                        "label": "M8",
+                        "sku": "LBFS60582U"
+                      }
+                    ]
+                  }
+                ]
+              }
             ]
           },
           {
-            "label": "Alterations", "count": 2, "notes": [],
+            "label": "Alterations",
+            "count": 2,
+            "notes": [],
             "sections": [
-              { "heading": "Standard",      "notes": [], "cards": [{ "sku": "ANST" }] },
-              { "heading": "Unit Specific", "notes": [], "cards": [{ "sku": "ANTSP63US" }] }
+              {
+                "heading": "Standard",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANST"
+                  }
+                ]
+              },
+              {
+                "heading": "Unit Specific",
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "ANTSP63US"
+                  }
+                ]
+              }
             ]
           }
         ]
       },
       "relatedGroups": [
-        { "_ui": "Card lists that sit OUTSIDE the tabs, lower on the detail page (each is its own little section).", "key": "compatibleAccessories", "heading": "Compatible Accessories", "notes": [], "cards": [{ "sku": "HFO3" }] },
-        { "key": "plannedTogether",       "heading": "Planned together",       "notes": [],                                                "cards": [{ "sku": "SPL6082E" }] },
-        { "key": "oftenPlannedWith",      "heading": "Often planned with",     "notes": [],                                                "cards": [{ "sku": "NRSM5054" }] },
-        { "key": "openingSupport",        "heading": "Opening support",        "notes": ["Needed for the sink/trash pullout below."],       "cards": [{ "sku": "HFO3" }] },
-        { "key": "completeThisCabinet",   "heading": "Complete this cabinet",  "notes": [],                                                "cards": [{ "sku": "VSF135ADP" }] }
+        {
+          "_ui": "Card lists that sit OUTSIDE the tabs, lower on the detail page (each is its own little section).",
+          "key": "compatibleAccessories",
+          "heading": "Compatible Accessories",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "HFO3"
+            }
+          ]
+        },
+        {
+          "key": "plannedTogether",
+          "heading": "Planned together",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "SPL6082E"
+            }
+          ]
+        },
+        {
+          "key": "oftenPlannedWith",
+          "heading": "Often planned with",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "NRSM5054"
+            }
+          ]
+        },
+        {
+          "key": "openingSupport",
+          "heading": "Opening support",
+          "notes": [
+            "Needed for the sink/trash pullout below."
+          ],
+          "cards": [
+            {
+              "sku": "HFO3"
+            }
+          ]
+        },
+        {
+          "key": "completeThisCabinet",
+          "heading": "Complete this cabinet",
+          "notes": [],
+          "cards": [
+            {
+              "sku": "VSF135ADP"
+            }
+          ]
+        }
       ],
       "finishes": [
-        { "finishCode": "31", "price": 128900 },
-        { "finishCode": "45", "price": 142500 }
-      ]
+        {
+          "finishCode": "31",
+          "price": 128900
+        },
+        {
+          "finishCode": "45",
+          "price": 142500
+        }
+      ],
+      "priceUnit": "pts"
     },
-
     {
       "sku": "SPL6082E",
       "kind": "cabinet",
@@ -226,31 +758,85 @@
       "name": "BLANCO Etagon · Stainless Steel",
       "cardLabel": "BLANCO Etagon",
       "programmeBadge": "P",
-      "availableTiers": ["P"],
-      "category": "base", "subcategory": "water", "section": "STAINLESS STEEL SINKS",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "base",
+      "subcategory": "water",
+      "section": "STAINLESS STEEL SINKS",
       "active": true,
-      "widthMm": 600, "heightMm": 0, "depthMm": 0, "heightClass": null,
+      "widthMm": 600,
+      "heightMm": 0,
+      "depthMm": 0,
+      "heightClass": null,
       "configure": {
-        "width": [{ "label": "60", "value": 600, "unit": "mm", "sku": "SPL6082E", "selected": true, "available": true }],
+        "width": [
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "SPL6082E",
+            "selected": true,
+            "available": true
+          }
+        ],
         "height": [],
         "depth": [],
-        "programme": [{ "label": "Primo", "tier": "P", "opening": false, "sku": "SPL6082E", "selected": true, "available": true }],
+        "programme": [
+          {
+            "label": "Primo",
+            "tier": "P",
+            "opening": false,
+            "sku": "SPL6082E",
+            "selected": true,
+            "available": true
+          }
+        ],
         "optionRows": [
           {
             "label": "Mode",
             "options": [
-              { "label": "700-IF/A", "sku": "SPL7082EIFA", "selected": false, "available": true },
-              { "label": "700-U",    "sku": "SPL7082EU",   "selected": false, "available": true },
-              { "label": "500-IF/A", "sku": "SPL5082EIFA", "selected": true,  "available": true },
-              { "label": "500-U",    "sku": "SPL5082EU",   "selected": false, "available": true }
+              {
+                "label": "700-IF/A",
+                "sku": "SPL7082EIFA",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "700-U",
+                "sku": "SPL7082EU",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "500-IF/A",
+                "sku": "SPL5082EIFA",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "500-U",
+                "sku": "SPL5082EU",
+                "selected": false,
+                "available": true
+              }
             ]
           }
         ]
       },
-      "description": { "title": "BLANCO Etagon sink", "bullets": ["Stainless steel", "Undermount / flush options"] },
-      "catalog": { "available": false, "page": null }
+      "description": {
+        "title": "BLANCO Etagon sink",
+        "bullets": [
+          "Stainless steel",
+          "Undermount / flush options"
+        ]
+      },
+      "catalog": {
+        "available": false,
+        "page": null
+      },
+      "priceUnit": "HLP"
     },
-
     {
       "sku": "MU6033Z",
       "kind": "cabinet",
@@ -258,47 +844,171 @@
       "name": "Module Below · KL 73/86 — Z Family",
       "cardLabel": "Module Below",
       "programmeBadge": "P · A",
-      "availableTiers": ["P", "A"],
-      "category": "tall", "subcategory": "modular-storage-units",
+      "availableTiers": [
+        "P",
+        "A"
+      ],
+      "category": "tall",
+      "subcategory": "modular-storage-units",
       "active": true,
-      "widthMm": 600, "heightMm": 330, "depthMm": 580, "heightClass": 73,
-      "toeKick": { "addCm": 15, "installedHeightMm": 480, "suspended": true },
+      "widthMm": 600,
+      "heightMm": 330,
+      "depthMm": 580,
+      "heightClass": 73,
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 480,
+        "suspended": true
+      },
       "configure": {
         "width": [
-          { "label": "60", "value": 600, "unit": "mm", "sku": "MU6033Z", "selected": true,  "available": true },
-          { "label": "75", "value": 750, "unit": "mm", "sku": "MU7533Z", "selected": false, "available": true },
-          { "label": "76", "value": 760, "unit": "mm", "sku": "MU7633Z", "selected": false, "available": true }
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "MU6033Z",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "75",
+            "value": 750,
+            "unit": "mm",
+            "sku": "MU7533Z",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "76",
+            "value": 760,
+            "unit": "mm",
+            "sku": "MU7633Z",
+            "selected": false,
+            "available": true
+          }
         ],
         "height": [
-          { "label": "33", "value": 330, "unit": "mm", "sku": "MU6033Z", "selected": true,  "available": true },
-          { "label": "47", "value": 470, "unit": "mm", "sku": "MU6047Z", "selected": false, "available": true },
-          { "label": "60", "value": 600, "unit": "mm", "sku": "MU6060Z", "selected": false, "available": true },
-          { "label": "73", "value": 730, "unit": "mm", "sku": "MU6073Z", "selected": false, "available": true },
-          { "label": "86", "value": 860, "unit": "mm", "sku": "MU6086Z", "selected": false, "available": true }
+          {
+            "label": "33",
+            "value": 330,
+            "unit": "mm",
+            "sku": "MU6033Z",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "47",
+            "value": 470,
+            "unit": "mm",
+            "sku": "MU6047Z",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "MU6060Z",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "73",
+            "value": 730,
+            "unit": "mm",
+            "sku": "MU6073Z",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "86",
+            "value": 860,
+            "unit": "mm",
+            "sku": "MU6086Z",
+            "selected": false,
+            "available": true
+          }
         ],
         "depth": [
-          { "label": "58", "value": 580, "unit": "mm", "sku": "MU6033Z",   "selected": true,  "available": true },
-          { "label": "63", "value": 630, "unit": "mm", "sku": "MU6033Z63", "selected": false, "available": true }
+          {
+            "label": "58",
+            "value": 580,
+            "unit": "mm",
+            "sku": "MU6033Z",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "63",
+            "value": 630,
+            "unit": "mm",
+            "sku": "MU6033Z63",
+            "selected": false,
+            "available": true
+          }
         ],
         "programme": [
-          { "label": "Primo",  "tier": "P", "opening": false, "sku": "MU6033Z", "selected": true,  "available": true },
-          { "label": "Avance", "tier": "A", "opening": false, "sku": "MU6033Z", "selected": false, "available": true }
+          {
+            "label": "Primo",
+            "tier": "P",
+            "opening": false,
+            "sku": "MU6033Z",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "Avance",
+            "tier": "A",
+            "opening": false,
+            "sku": "MU6033Z",
+            "selected": false,
+            "available": true
+          }
         ],
         "optionRows": [
           {
             "label": "Ty",
             "options": [
-              { "label": "Z",   "sku": "MU6033Z", "selected": true,  "available": true },
-              { "label": "Z2",  "sku": null,      "selected": false, "available": false, "crossedOut": true },
-              { "label": "Z1Z", "sku": null,      "selected": false, "available": false, "crossedOut": true },
-              { "label": "Z3",  "sku": null,      "selected": false, "available": false, "crossedOut": true }
+              {
+                "label": "Z",
+                "sku": "MU6033Z",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "Z2",
+                "sku": null,
+                "selected": false,
+                "available": false,
+                "crossedOut": true
+              },
+              {
+                "label": "Z1Z",
+                "sku": null,
+                "selected": false,
+                "available": false,
+                "crossedOut": true
+              },
+              {
+                "label": "Z3",
+                "sku": null,
+                "selected": false,
+                "available": false,
+                "crossedOut": true
+              }
             ]
           }
         ]
       },
-      "description": { "title": "Module below", "bullets": ["KL 73/86", "Z family"] }
+      "description": {
+        "title": "Module below",
+        "bullets": [
+          "KL 73/86",
+          "Z family"
+        ]
+      },
+      "priceUnit": "pts"
     },
-
     {
       "sku": "NRSM5054",
       "kind": "cabinet",
@@ -306,37 +1016,120 @@
       "name": "Niche shelf unit · H 54 cm",
       "cardLabel": "Niche shelf unit",
       "programmeBadge": "P",
-      "availableTiers": ["P"],
-      "category": "lighting", "subcategory": "niche-shelf",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "lighting",
+      "subcategory": "niche-shelf",
       "active": true,
-      "widthMm": 500, "heightMm": 540, "depthMm": 0, "heightClass": null,
+      "widthMm": 500,
+      "heightMm": 540,
+      "depthMm": 0,
+      "heightClass": null,
       "configure": {
         "width": [
-          { "label": "50",  "value": 500,  "unit": "mm", "sku": "NRSM5054",  "selected": true,  "available": true },
-          { "label": "60",  "value": 600,  "unit": "mm", "sku": "NRSM6054",  "selected": false, "available": true },
-          { "label": "80",  "value": 800,  "unit": "mm", "sku": "NRSM8054",  "selected": false, "available": true },
-          { "label": "90",  "value": 900,  "unit": "mm", "sku": "NRSM9054",  "selected": false, "available": true },
-          { "label": "100", "value": 1000, "unit": "mm", "sku": "NRSM10054", "selected": false, "available": true },
-          { "label": "120", "value": 1200, "unit": "mm", "sku": "NRSM12054", "selected": false, "available": true }
+          {
+            "label": "50",
+            "value": 500,
+            "unit": "mm",
+            "sku": "NRSM5054",
+            "selected": true,
+            "available": true
+          },
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "NRSM6054",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "NRSM8054",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "90",
+            "value": 900,
+            "unit": "mm",
+            "sku": "NRSM9054",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "100",
+            "value": 1000,
+            "unit": "mm",
+            "sku": "NRSM10054",
+            "selected": false,
+            "available": true
+          },
+          {
+            "label": "120",
+            "value": 1200,
+            "unit": "mm",
+            "sku": "NRSM12054",
+            "selected": false,
+            "available": true
+          }
         ],
         "height": [],
         "depth": [],
-        "programme": [{ "label": "Primo", "tier": "P", "opening": false, "sku": "NRSM5054", "selected": true, "available": true }],
+        "programme": [
+          {
+            "label": "Primo",
+            "tier": "P",
+            "opening": false,
+            "sku": "NRSM5054",
+            "selected": true,
+            "available": true
+          }
+        ],
         "optionRows": [
           {
             "label": "Config",
             "options": [
-              { "label": "2 Shelves",              "sku": "NRSM5054",    "selected": true,  "available": true },
-              { "label": "Shelf + Railing",        "sku": "NRSM5054SR",  "selected": false, "available": true },
-              { "label": "2 Shelves · LED",        "sku": "NRSM5054L",   "selected": false, "available": true },
-              { "label": "Shelf + Railing · LED",  "sku": "NRSM5054SRL", "selected": false, "available": true }
+              {
+                "label": "2 Shelves",
+                "sku": "NRSM5054",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "Shelf + Railing",
+                "sku": "NRSM5054SR",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "2 Shelves · LED",
+                "sku": "NRSM5054L",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "Shelf + Railing · LED",
+                "sku": "NRSM5054SRL",
+                "selected": false,
+                "available": true
+              }
             ]
           }
         ]
       },
-      "description": { "title": "Niche shelf unit", "bullets": ["H 54 cm", "2 shelves"] }
+      "description": {
+        "title": "Niche shelf unit",
+        "bullets": [
+          "H 54 cm",
+          "2 shelves"
+        ]
+      },
+      "priceUnit": "HLP"
     },
-
     {
       "sku": "GFVK8080SM",
       "kind": "cabinet",
@@ -344,10 +1137,18 @@
       "name": "Dishwasher Front · 80 cm DW + 20 cm open · SM",
       "cardLabel": "Dishwasher Front",
       "programmeBadge": "P",
-      "availableTiers": ["P", "C", "A"],
-      "category": "base", "subcategory": "water",
+      "availableTiers": [
+        "P",
+        "C",
+        "A"
+      ],
+      "category": "base",
+      "subcategory": "water",
       "active": true,
-      "widthMm": 800, "heightMm": 792, "depthMm": 20, "heightClass": 80,
+      "widthMm": 800,
+      "heightMm": 792,
+      "depthMm": 20,
+      "heightClass": 80,
       "appliance": {
         "_ui": "APPLIANCES POPUP data (button bottom-left of card, tooltip 'Appliances'). Rows built 1:1: brand · category · subcategory (DW only) · nicheSize. GFVK80_SM is a plain built-in DW front (NOT original-handle) → NO note. Popup reads 'Gaggenau · Dishwashers · Built-In · 24\"'.",
         "category": "Dishwashers",
@@ -355,61 +1156,164 @@
         "nicheSize": "24\"",
         "subcategory": "Built-In"
       },
+      "inspiration": {
+        "_ui": "INSPIRATION PHOTO POPUP (camera icon top-left of card → lightbox). TOP-LEVEL card mirror of accessoryPanel.tabs[Inspiration] so the list API returns it (accessoryPanel is omitted from list rows). heading = bold code/dims line; caption = the finish-note sentence shown under the photo.",
+        "heading": "GFVK8080SM — Front · 80 cm DW + 20 cm open · SM · W 800 × H 792 × D 20 mm",
+        "caption": "Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style.",
+        "imageUrl": "https://cdn.leicht.example/inspiration/GFVK8080SM.jpg",
+        "fullScreen": true
+      },
       "configure": {
-        "width": [{ "label": "80", "value": 800, "unit": "mm", "sku": "GFVK8080SM", "selected": true, "available": true }],
+        "width": [
+          {
+            "label": "80",
+            "value": 800,
+            "unit": "mm",
+            "sku": "GFVK8080SM",
+            "selected": true,
+            "available": true
+          }
+        ],
         "height": [],
         "depth": [],
-        "programme": [{ "label": "Primo", "tier": "P", "opening": false, "sku": "GFVK8080SM", "selected": true, "available": true }]
+        "programme": [
+          {
+            "label": "Primo",
+            "tier": "P",
+            "opening": false,
+            "sku": "GFVK8080SM",
+            "selected": true,
+            "available": true
+          }
+        ]
       },
-      "description": { "title": "Fully integrated dishwasher front", "bullets": ["80 cm DW + 20 cm open module", "SM finish family"] },
+      "description": {
+        "title": "Fully integrated dishwasher front",
+        "bullets": [
+          "80 cm DW + 20 cm open module",
+          "SM finish family"
+        ]
+      },
       "accessoryPanel": {
         "tabs": [
           {
-            "label": "Plinth Cover", "count": 2,
-            "notes": ["Plinth cover profile clipped onto 1.6 cm material. Available colours: K273 Platinum · K284 Carbon Grey."],
+            "label": "Plinth Cover",
+            "count": 2,
+            "notes": [
+              "Plinth cover profile clipped onto 1.6 cm material. Available colours: K273 Platinum · K284 Carbon Grey."
+            ],
             "sections": [
-              { "heading": null, "notes": [], "cards": [{ "sku": "VSF135ADP" }, { "sku": "VSF270ADP" }] }
+              {
+                "heading": null,
+                "notes": [],
+                "cards": [
+                  {
+                    "sku": "VSF135ADP"
+                  },
+                  {
+                    "sku": "VSF270ADP"
+                  }
+                ]
+              }
             ]
           },
           {
             "_ui": "The 'Finish interior' tab. TOP HALF: a grid of colour squares (swatches). BELOW IT: a table saying which visible-side finishes are allowed with each interior finish.",
-            "label": "Finish interior", "count": 19,
-            "notes": ["Interior colour = cupboard exterior colour. Indicate the frame colour on the order. Change of handle or glass is not possible. Possible colours for the interior — see chapter 11."],
+            "label": "Finish interior",
+            "count": 19,
+            "notes": [
+              "Interior colour = cupboard exterior colour. Indicate the frame colour on the order. Change of handle or glass is not possible. Possible colours for the interior — see chapter 11."
+            ],
             "sections": [],
             "swatches": [
-              { "code": "032", "label": "032", "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+032.jpg" },
-              { "code": "273", "label": "273", "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+273.jpg" },
-              { "code": "284", "label": "284", "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+284.jpg" }
+              {
+                "code": "032",
+                "label": "032",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+032.jpg"
+              },
+              {
+                "code": "273",
+                "label": "273",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+273.jpg"
+              },
+              {
+                "code": "284",
+                "label": "284",
+                "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+284.jpg"
+              }
             ],
             "visibleSideCombos": [
-              { "interior": "K 273 / K 284", "allowed": ["K", "KH", "KG", "FF", "FS", "FG", "H", "MC", "ME", "PF", "VM 152", "VM 284", "VM 286"] },
-              { "interior": "K",  "allowed": ["K", "FF", "FS"] },
-              { "interior": "KH", "allowed": ["KH"] }
+              {
+                "interior": "K 273 / K 284",
+                "allowed": [
+                  "K",
+                  "KH",
+                  "KG",
+                  "FF",
+                  "FS",
+                  "FG",
+                  "H",
+                  "MC",
+                  "ME",
+                  "PF",
+                  "VM 152",
+                  "VM 284",
+                  "VM 286"
+                ]
+              },
+              {
+                "interior": "K",
+                "allowed": [
+                  "K",
+                  "FF",
+                  "FS"
+                ]
+              },
+              {
+                "interior": "KH",
+                "allowed": [
+                  "KH"
+                ]
+              }
             ]
           },
           {
             "_ui": "The 'Options' tab. A short note, then small chips. EACH CHIP IS A PLAIN CODE (text only) — it is NOT an item / SKU, so do NOT make cards from these or look them up in items[].",
-            "label": "Options", "count": 6,
-            "notes": ["Extra-charge interior styles — state on the order:"],
+            "label": "Options",
+            "count": 6,
+            "notes": [
+              "Extra-charge interior styles — state on the order:"
+            ],
             "sections": [],
-            "options": ["MPK/KH/KG", "MPFF/PF/VM", "MPFS/ME", "MPKM", "MPFG/MC", "MPH"]
+            "options": [
+              "MPK/KH/KG",
+              "MPFF/PF/VM",
+              "MPFS/ME",
+              "MPKM",
+              "MPFG/MC",
+              "MPH"
+            ]
           },
           {
             "_ui": "The 'Inspiration' tab. No cards — just one big room photo of the front, with a 'View full screen' button.",
-            "label": "Inspiration", "count": 0,
-            "notes": ["Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style."],
+            "label": "Inspiration",
+            "count": 0,
+            "notes": [],
             "sections": [],
             "inspiration": {
-              "item": { "sku": "GFVK8080SM" },
+              "item": {
+                "sku": "GFVK8080SM"
+              },
               "heading": "GFVK8080SM — Front · 80 cm DW + 20 cm open · SM · W 800 × H 792 × D 20 mm",
+              "caption": "Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style.",
               "imageUrl": "https://cdn.leicht.example/inspiration/GFVK8080SM.jpg",
               "fullScreen": true
             }
           }
         ]
-      }
+      },
+      "priceUnit": "pts"
     },
-
     {
       "_ui": "REFRIGERATOR appliance front — the OTHER popup shape. category 'Refrigerators' picks the FRIDGE icon; nicheSize derives from WIDTH (460 mm → 18\"). NO subcategory, NO note (both are Dishwashers-only). Popup reads 'Gaggenau · Refrigerators · 18\"'.",
       "sku": "GF46204",
@@ -418,10 +1322,15 @@
       "name": "Refrigerator Front · 46 cm · Built-in",
       "cardLabel": "Built-in refrigerator door",
       "programmeBadge": "P",
-      "availableTiers": ["P"],
-      "category": "base", "subcategory": "water",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "base",
+      "subcategory": "water",
       "active": true,
-      "widthMm": 460, "heightMm": 2040, "depthMm": 20,
+      "widthMm": 460,
+      "heightMm": 2040,
+      "depthMm": 20,
       "appliance": {
         "_ui": "Fridge popup: only brand / category / nicheSize. category 'Refrigerators' → fridge glyph. nicheSize from width 460 mm = 18\".",
         "category": "Refrigerators",
@@ -429,11 +1338,37 @@
         "nicheSize": "18\""
       },
       "configure": {
-        "width": [{ "label": "46", "value": 460, "unit": "mm", "sku": "GF46204", "selected": true, "available": true }],
-        "height": [], "depth": [],
-        "programme": [{ "label": "Primo", "tier": "P", "opening": false, "sku": "GF46204", "selected": true, "available": true }]
+        "width": [
+          {
+            "label": "46",
+            "value": 460,
+            "unit": "mm",
+            "sku": "GF46204",
+            "selected": true,
+            "available": true
+          }
+        ],
+        "height": [],
+        "depth": [],
+        "programme": [
+          {
+            "label": "Primo",
+            "tier": "P",
+            "opening": false,
+            "sku": "GF46204",
+            "selected": true,
+            "available": true
+          }
+        ]
       },
-      "description": { "title": "Built-in refrigerator front", "bullets": ["Fits a 46 cm / 18\" niche appliance", "Fully integrated"] }
+      "description": {
+        "title": "Built-in refrigerator front",
+        "bullets": [
+          "Fits a 46 cm / 18\" niche appliance",
+          "Fully integrated"
+        ]
+      },
+      "priceUnit": "pts"
     },
     {
       "_ui": "DISHWASHER appliance front WITH a fitment note — original-handle GFVO* family (D61 double-panel). Full DW popup: brand · category · subcategory · nicheSize PLUS the note footer (legs / cross-brand). note text carries this front's own sku.",
@@ -443,10 +1378,16 @@
       "name": "Dishwasher Front · Original handle D61 · Avance",
       "cardLabel": "Built-in DW door",
       "programmeBadge": "A",
-      "availableTiers": ["A"],
-      "category": "base", "subcategory": "water",
+      "availableTiers": [
+        "A"
+      ],
+      "category": "base",
+      "subcategory": "water",
       "active": true,
-      "widthMm": 600, "heightMm": 810, "depthMm": 61, "heightClass": 80,
+      "widthMm": 600,
+      "heightMm": 810,
+      "depthMm": 61,
+      "heightClass": 80,
       "appliance": {
         "_ui": "DW popup with note. subcategory 'Built-In' (heightClass 80; 73 → 'Built-In ADA'). Popup reads 'Gaggenau · Dishwashers · Built-In · 24\"' then the note line.",
         "category": "Dishwashers",
@@ -456,21 +1397,106 @@
         "note": "Can work with Miele, AGFV608061S + 100 legs - BSH AGFV608061S with 12 cm legs."
       },
       "configure": {
-        "width": [{ "label": "60", "value": 600, "unit": "mm", "sku": "AGFV608061S", "selected": true, "available": true }],
-        "height": [], "depth": [],
-        "programme": [{ "label": "Avance", "tier": "A", "opening": false, "sku": "AGFV608061S", "selected": true, "available": true }]
+        "width": [
+          {
+            "label": "60",
+            "value": 600,
+            "unit": "mm",
+            "sku": "AGFV608061S",
+            "selected": true,
+            "available": true
+          }
+        ],
+        "height": [],
+        "depth": [],
+        "programme": [
+          {
+            "label": "Avance",
+            "tier": "A",
+            "opening": false,
+            "sku": "AGFV608061S",
+            "selected": true,
+            "available": true
+          }
+        ]
       },
-      "description": { "title": "Fully integrated dishwasher front (original handle)", "bullets": ["Original handle D61 with 50 mm double-panel", "60 cm DW"] }
+      "description": {
+        "title": "Fully integrated dishwasher front (original handle)",
+        "bullets": [
+          "Original handle D61 with 50 mm double-panel",
+          "60 cm DW"
+        ]
+      },
+      "priceUnit": "pts"
     },
-    { "sku": "VSF135ADP", "kind": "accessory", "name": "Dishwasher Plinth Cover · 135 cm", "category": "base", "subcategory": "water", "active": true, "widthMm": 1350 },
-    { "sku": "VSF270ADP", "kind": "accessory", "name": "Dishwasher Plinth Cover · 270 cm", "category": "base", "subcategory": "water", "active": true, "widthMm": 2700 },
-    { "sku": "EBF6058",   "kind": "accessory", "name": "Cutlery tray",                     "active": true },
-    { "sku": "LBFS60581", "kind": "accessory", "name": "L-Box in oak drawer-set 1",        "active": true },
-    { "sku": "LBFS60581U","kind": "part",      "name": "L-Box in oak drawer-set 1 · M8 exchange rail", "active": true },
-    { "sku": "HFO3",      "kind": "accessory", "name": "Opening support for sink and trash pullout cupboards", "category": "base", "subcategory": "water", "active": true },
-    { "sku": "ANST",      "kind": "alteration", "name": "Cupboard Depth Alteration",       "category": "alteration", "subcategory": "standard",      "active": true },
-    { "sku": "ANTSP63US", "kind": "alteration", "name": "63 cm Deep-Install Alteration (unit-specific)", "category": "alteration", "subcategory": "unit-specific", "active": true },
-
+    {
+      "sku": "VSF135ADP",
+      "kind": "accessory",
+      "name": "Dishwasher Plinth Cover · 135 cm",
+      "category": "base",
+      "subcategory": "water",
+      "active": true,
+      "widthMm": 1350,
+      "priceUnit": "HLP"
+    },
+    {
+      "sku": "VSF270ADP",
+      "kind": "accessory",
+      "name": "Dishwasher Plinth Cover · 270 cm",
+      "category": "base",
+      "subcategory": "water",
+      "active": true,
+      "widthMm": 2700,
+      "priceUnit": "HLP"
+    },
+    {
+      "sku": "EBF6058",
+      "kind": "accessory",
+      "name": "Cutlery tray",
+      "active": true,
+      "priceUnit": "HLP"
+    },
+    {
+      "sku": "LBFS60581",
+      "kind": "accessory",
+      "name": "L-Box in oak drawer-set 1",
+      "active": true,
+      "priceUnit": "pts"
+    },
+    {
+      "sku": "LBFS60581U",
+      "kind": "part",
+      "name": "L-Box in oak drawer-set 1 · M8 exchange rail",
+      "active": true,
+      "priceUnit": "pts"
+    },
+    {
+      "sku": "HFO3",
+      "kind": "accessory",
+      "name": "Opening support for sink and trash pullout cupboards",
+      "category": "base",
+      "subcategory": "water",
+      "active": true,
+      "priceUnit": "HLP"
+    },
+    {
+      "sku": "ANST",
+      "kind": "alteration",
+      "name": "Cupboard Depth Alteration",
+      "category": "alteration",
+      "subcategory": "standard",
+      "active": true,
+      "priceUnit": "pts"
+    },
+    {
+      "sku": "ANTSP63US",
+      "kind": "alteration",
+      "name": "63 cm Deep-Install Alteration (unit-specific)",
+      "category": "alteration",
+      "subcategory": "unit-specific",
+      "active": true,
+      "priceUnit": "pts"
+    },
     {
       "_ui": "A HANDLE product card. Its 'Finish' pill row: each pill is a COLOUR SWATCH + finish code, and picking one opens the sibling code ZGR529<finish>. This is the configure.optionRows case where pills carry `swatch`.",
       "sku": "ZGR529032",
@@ -479,28 +1505,71 @@
       "name": "Metal bow handle No. 529",
       "cardLabel": "Metal bow handle",
       "programmeBadge": "P",
-      "availableTiers": ["P"],
-      "category": "handles", "subcategory": "metal-bow-handle",
+      "availableTiers": [
+        "P"
+      ],
+      "category": "handles",
+      "subcategory": "metal-bow-handle",
       "active": true,
       "configure": {
         "width": [],
         "height": [],
         "depth": [],
-        "programme": [{ "label": "Primo", "tier": "P", "opening": false, "sku": "ZGR529032", "selected": true, "available": true }],
+        "programme": [
+          {
+            "label": "Primo",
+            "tier": "P",
+            "opening": false,
+            "sku": "ZGR529032",
+            "selected": true,
+            "available": true
+          }
+        ],
         "optionRows": [
           {
             "_ui": "The 'Finish' row. Each pill shows a colour SWATCH square (image built from the Finish host: leicht-store.s3…/Finish/F+<swatch>.jpg) plus the finish code. `swatch` usually equals the pill label.",
             "label": "Finish",
             "options": [
-              { "label": "032", "swatch": "032", "sku": "ZGR529032", "selected": true,  "available": true },
-              { "label": "100", "swatch": "100", "sku": "ZGR529100", "selected": false, "available": true },
-              { "label": "277", "swatch": "277", "sku": "ZGR529277", "selected": false, "available": true },
-              { "label": "307", "swatch": "307", "sku": "ZGR529307", "selected": false, "available": true }
+              {
+                "label": "032",
+                "swatch": "032",
+                "sku": "ZGR529032",
+                "selected": true,
+                "available": true
+              },
+              {
+                "label": "100",
+                "swatch": "100",
+                "sku": "ZGR529100",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "277",
+                "swatch": "277",
+                "sku": "ZGR529277",
+                "selected": false,
+                "available": true
+              },
+              {
+                "label": "307",
+                "swatch": "307",
+                "sku": "ZGR529307",
+                "selected": false,
+                "available": true
+              }
             ]
           }
         ]
       },
-      "description": { "title": "Metal bow handle", "bullets": ["No. 529, powder coated", "Drill hole distance: 160 mm"] }
+      "description": {
+        "title": "Metal bow handle",
+        "bullets": [
+          "No. 529, powder coated",
+          "Drill hole distance: 160 mm"
+        ]
+      },
+      "priceUnit": "HLP"
     }
   ]
 }

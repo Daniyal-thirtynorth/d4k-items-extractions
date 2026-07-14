@@ -75,7 +75,13 @@ function scrapePanel(panel){
   if(oc.length){ res.options=oc.map(x=>T(x)); }
   // inspiration
   const insp=panel.querySelector('.inspshot');
-  if(insp){ const img=insp.querySelector('img'); res.inspiration={ imageUrl: img?img.getAttribute('src'):'', fullScreen:true }; }
+  if(insp){ const img=insp.querySelector('img'); const b={ imageUrl: img?img.getAttribute('src'):'', fullScreen:true };
+    // caption note (dwInspoCap): `<b>code</b> — label · dims<span class="lbx-cap-sub">TAIL</span>` — split heading vs sub-line
+    const capNote=[...panel.querySelectorAll('.note')].find(n=>n.querySelector('.lbx-cap-sub'));
+    if(capNote){ const sub=capNote.querySelector('.lbx-cap-sub'); const tail=T(sub);
+      const head=T(capNote).slice(0, T(capNote).length-tail.length).trim();
+      if(head) b.heading=head; if(tail) b.caption=tail; }
+    res.inspiration=b; }
   // sub-tabs (Alterations: Standard / Unit Specific)
   const subs=[...panel.querySelectorAll('.altsub')];
   const subPanels=[...panel.querySelectorAll('.altsub-panel')];
@@ -102,6 +108,7 @@ function scrapePanel(panel){
   // panel-level notes (direct .note not inside a card/desc)
   [...panel.querySelectorAll('.note')].forEach(n=>{
     if(n.closest('.icard')||n.closest('.idesc')) return;
+    if(n.querySelector('.lbx-cap-sub')) return;  // inspiration caption note — captured in res.inspiration, not notes[]
     const t=T(n); if(t) res.notes.push(t);
   });
   return res;
@@ -336,8 +343,16 @@ function buildItem(f,u){
   const dyk=scrapeDidYouKnow(pin); if(dyk) it.didYouKnow=dyk;
   const cat=catalogOf(u); if(cat) it.catalog=cat;
   const acc=scrapeAccessoryPanel(pin,u); if(acc) it.accessoryPanel=acc;
+  // lift the Inspiration tab's photo to a TOP-LEVEL card field so the grid list API returns it
+  // (accessoryPanel is omitted from list rows) — drives the card camera button → lightbox popup.
+  try{ const insTab=(acc&&acc.tabs||[]).find(t=>t.inspiration); if(insTab){ const b=insTab.inspiration;
+    it.inspiration={ imageUrl:b.imageUrl, caption:b.caption, heading:b.heading, fullScreen:b.fullScreen };
+    if(it.inspiration.heading==null) delete it.inspiration.heading; } }catch(e){}
   const rel=scrapeRelated(pin,u); if(rel) it.relatedGroups=rel;
   const fin=finishesOf(u); if(fin) it.finishes=fin;
+  // pts-pill unit — HLP dealer-list calc groups (cg 15/38/61) show "HLP"; everything else "pts".
+  // Ports the app's own priceClass(u); per-item (some accessories are HLP → their cards read "NNN HLP").
+  try{ it.priceUnit = (typeof priceClass==='function') ? priceClass(u) : ((u.cg===15||u.cg===38||u.cg===61)?'HLP':'pts'); }catch(e){ it.priceUnit='pts'; }
   return it;
 }
 

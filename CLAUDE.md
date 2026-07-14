@@ -228,10 +228,14 @@ IS exported too, top-level `systems[]` [2026-07-10]; only its Design Clipboard /
 
 ## The backend (`D4K-backend`, separate repo)
 
-NestJS 11 + Mongoose module `design-book` (`@Controller('design-book')`, JWT-guarded). 8 endpoints
+NestJS 11 + Mongoose module `design-book` (`@Controller('design-book')`, JWT-guarded). 9 endpoints
 (`/cards`, `/cards/:cardId`, `/resolve` deleted; `/detail/:sku` merged into `/items/:sku`):
-`POST ingest`, `GET items`, `items/:sku`, `programs`, `categories`, `functional-categories`, `meta`,
-`stats`. `design-book.detail.ts` now only builds `catalog` (the PDF binding) + ref-hydration; the item
+`POST ingest`, `GET items`, `items/:sku`, `programs`, `categories`, `functional-categories`,
+`tall-heights`, `meta`, `stats`. **`GET tall-heights`** (2026-07-14) = the TALL two-row height selector
+(carcase LINE 73/80/86 + the DYNAMIC carcase-HEIGHT row); reproduces the app's `availHeights()` from the
+leaf-visible set (heights DERIVED by snapping `heightMm` to a tall height ±8 mm — no export change), plus
+`GET items` gains `line`/`tallHeight` filters. See `docs/design-book-api-ui-map.md` §6b.
+`design-book.detail.ts` now only builds `catalog` (the PDF binding) + ref-hydration; the item
 stores every detail section verbatim. Premium **P1/C1** = code prefix on a base, synthesized via
 reverse-lookup (not stored). `GET items/:sku` also builds `imageUrl` from `meta.imageUrlTemplate`.
 Details and history in the memory file `design-book-module.md`.
@@ -287,7 +291,10 @@ when `/dev-token` is absent (e.g. pointing at a deployed prod backend).
   pills → `family`, programme dropdown → `programs`, **FRONTS** tier pills `P/P1/A/C/C1` → `tier`,
   **W/H/D** pill bars → `widthMm`/`heightClass`/`depthClass` (D is a nominal cm CLASS 36/48/58/63/68 matched via
   `configure.depth[].label`, NOT exact `depthMm`; carcass = class×10−20), **Suspended** → `suspended`, **group by family**
-  → `groupBy`. All AND-compose, shown as removable chips. Cosmetic-only controls (Mix, toe-kick slider,
+  → `groupBy`, plus a **TALL two-row height selector** (`#tallRow`, shown only in tall context via `isTallContext()`):
+  **LINE** pills 73/80/86 → `line` + a **dynamic HEIGHT** row → `tallHeight`, both fed by `GET tall-heights`
+  (`refreshTallRow()` caches `heightsByLine`/`lineOptions`; line-switch repaints the height row from cache;
+  Avance-locked lines greyed). All AND-compose, shown as removable chips. Cosmetic-only controls (Mix, toe-kick slider,
   colour-temp, unit box, pin, "Grey don't hide", Corner width) are marked `title="display only"` — no
   backend param exists (device-side render state per the section map above). Working light/dark theme toggle.
 - Left **Design-Tasks sidebar** from `GET functional-categories` (zones→groups→leaves + All + More) →

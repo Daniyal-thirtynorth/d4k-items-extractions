@@ -1939,7 +1939,8 @@
           "finishCode": "1",
           "price": 94200
         }
-      ]
+      ],
+      "priceUnit": "pts"
     },
     {
       "sku": "ATK6080BZIZ",
@@ -2777,7 +2778,8 @@
           "finishCode": "60",
           "price": 197400
         }
-      ]
+      ],
+      "priceUnit": "pts"
     },
     {
       "sku": "CT1573",
@@ -3248,7 +3250,8 @@
           "finishCode": "75",
           "price": 90900
         }
-      ]
+      ],
+      "priceUnit": "pts"
     },
     {
       "sku": "C1GFV607361S2Z",
@@ -3482,16 +3485,16 @@
           {
             "label": "Inspiration",
             "count": 0,
-            "notes": [
-              "C1GFV607361S2Z — Front for Built-in Appliances · Original handle D61 · W 600 × H 730 × D 20 mmExample of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style."
-            ],
+            "notes": [],
             "sections": [],
             "inspiration": {
               "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Units-stage/GVF.S2Z.jpg",
               "fullScreen": true,
               "item": {
                 "sku": "C1GFV607361S2Z"
-              }
+              },
+              "heading": "C1GFV607361S2Z — Front for Built-in Appliances · Original handle D61 · W 600 × H 730 × D 20 mm",
+              "caption": "Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style."
             }
           }
         ]
@@ -3557,7 +3560,14 @@
           "finishCode": "75",
           "price": 134800
         }
-      ]
+      ],
+      "inspiration": {
+        "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Units-stage/GVF.S2Z.jpg",
+        "caption": "Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style.",
+        "heading": "C1GFV607361S2Z — Front for Built-in Appliances · Original handle D61 · W 600 × H 730 × D 20 mm",
+        "fullScreen": true
+      },
+      "priceUnit": "pts"
     },
     {
       "sku": "TSPA807368BTZW",
@@ -4034,7 +4044,8 @@
           "finishCode": "55",
           "price": 266300
         }
-      ]
+      ],
+      "priceUnit": "pts"
     },
     {
       "sku": "ZGR529032",
@@ -4219,7 +4230,8 @@
           "finishCode": "1",
           "price": 4000
         }
-      ]
+      ],
+      "priceUnit": "HLP"
     },
     {
       "sku": "HFO3",
@@ -4300,7 +4312,8 @@
           "finishCode": "1",
           "price": 20100
         }
-      ]
+      ],
+      "priceUnit": "HLP"
     },
     {
       "sku": "ANST",
@@ -4338,7 +4351,8 @@
           "finishCode": "1",
           "price": 13700
         }
-      ]
+      ],
+      "priceUnit": "pts"
     },
     {
       "sku": "LBFS60581U",
@@ -4500,7 +4514,8 @@
         "excluded": false,
         "programmes": [],
         "note": "No programme exclusions."
-      }
+      },
+      "priceUnit": "pts"
     },
     {
       "sku": "VSF135ADP",
@@ -4551,7 +4566,8 @@
           "finishCode": "1",
           "price": 1200
         }
-      ]
+      ],
+      "priceUnit": "HLP"
     }
   ]
 }

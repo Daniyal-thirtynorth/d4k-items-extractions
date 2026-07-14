@@ -159,7 +159,24 @@ export interface Sidebar {
   inspiration: { key: "__INSP__"; label: string; emoji: string }; // the ✨ Designer Inspiration row (no count)
   allCategories: { key: "ALL"; label: string; count: number };    // the "All categories · 1714" row
   zones: SidebarZone[];                                            // Base / Tall / Wall / Midway
-  moreCategories: { category: string; count: number }[];          // non-zone type categories below the zones
+  moreCategories: MoreCategory[];                                  // non-zone type categories below the zones
+}
+// A "More categories" row (Alteration / Handles / Lighting / Service / Accessories & interior /
+// Countertops / Panels & surround). Unlike a zone, it has NO functional groups — it expands
+// straight into its TYPE subcategories as leaves (the app renders these via `subButtons(c)`).
+// `count` and every `subs[].count` are FAMILY counts over FAMS with f.cat === category, INCLUDING
+// hidden families (so sum(subs.count) === count); leaves are ordered as the app orders them
+// (source `subRank`, then count desc). Each leaf filters the grid by { category, subcategory }
+// (both already stored on every Item) — no leafId / functionalGroups materialization needed.
+export interface MoreCategory {
+  category: string;                              // e.g. "Alteration"
+  count: number;                                 // families with f.cat === category (the header number)
+  subs: MoreCategoryLeaf[];                       // its type-subcategories, as leaves
+}
+export interface MoreCategoryLeaf {
+  name: string;                                  // the subcategory (subDisp space = Item.subcategory), e.g. "Cabinet Modifications"
+  count: number;                                 // families in this subcategory (unfiltered)
+  filter: { category: string; subcategory: string }; // pass straight to GET items to filter the grid
 }
 export interface SidebarZone {
   zone: string;                // "Base" | "Tall" | "Wall" | "Midway"
@@ -320,6 +337,12 @@ export interface Item {
                                //   OR RIGHT hinged and the hinge side must be stated on order (the drawing shows the
                                //   Left version). Computed by the app for single-door / door+pullout units whose code
                                //   doesn't already fix a side. Omitted when false.
+  priceUnit?: 'pts' | 'HLP';   // the UNIT shown on the card's point pill ("290 pts" vs "290 HLP"). Per-item:
+                               //   HLP dealer-list calc groups (IDM cg 15/38/61) read "HLP" (the book number is
+                               //   already a currency list price); everything else reads "pts" (account points).
+                               //   Ports the app's priceClass(u). Applies to ANY item that shows a pill, incl.
+                               //   accessory cards. The NUMBER is programme-priced (backend `pts`, from finishes);
+                               //   this is only its label. Defaults to "pts" when cg is absent.
   functionalGroups?: ItemFunctionalGroup[]; // which "Design Tasks" leaves this item appears in (see
                                //   FunctionalZone). Materialized from the match rules; OMITTED for items
                                //   the app also excludes (non-zone categories, null-section edge units).
@@ -338,6 +361,10 @@ export interface Item {
   appliance?: ApplianceHousing;          // set ONLY on appliance-housing fronts — powers the card "Appliances" button (see below)
   sinkFitment?: SinkFitment;             // set ONLY on Base/Sinks cabinets with a width — powers the card "Max Sink Size: NN″"
                                          //   line and the "+ Add Sink" popup (see SinkFitment below)
+  inspiration?: InspirationBlock;        // set ONLY on DW-front / mat cards that have an inspiration photo — the TOP-LEVEL
+                                         //   card mirror of accessoryPanel.tabs[Inspiration], so the LIST api returns it
+                                         //   (accessoryPanel is omitted from list rows). Drives the card CAMERA-ICON button →
+                                         //   lightbox popup (heading + caption + full-screen photo). See InspirationBlock below.
 
   /* ── the detail-screen sections, in the order they appear. All optional — a code only
         carries the sections it actually shows. ── */
@@ -554,8 +581,12 @@ export interface PanelTab {
  */
 export interface InspirationBlock {
   item?: ItemRef;             // the featured front the scene shows, e.g. { sku: "GFVK8080SM" }
-  heading?: string;           // the bold line above the note:
+  heading?: string;           // the bold line above the note (from dwInspoCap):
                               // "GFVK8080SM — Front · 80 cm DW + 20 cm open · SM · W 800 × H 792 × D 20 mm"
+  caption?: string;           // the finish-note sub-line under the heading (dwInspoCap tail) — the sentence
+                              // shown in the lightbox, e.g. "Example of a fully integrated dishwasher front.
+                              // Actual finish depends on the selected programme and door style." One of three
+                              // fixed variants (mat / integrated-DW-front / generic inspiration reference).
   imageUrl: string;           // the big lifestyle photo (full-width, has "View full screen").
                               // A separate render — NOT imageUrlTemplate(sku).
   fullScreen?: boolean;       // true = the "View full screen" button is shown

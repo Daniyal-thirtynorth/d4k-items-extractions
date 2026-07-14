@@ -13,7 +13,7 @@ side-by-side to the UI element it drives and where that element sits on screen.
   and the contract `docs/export-schema.ts`.
 
 Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/:sku` · `GET programs` ·
-`GET categories` · `GET functional-categories` · `GET home` · `GET meta` · `GET stats`.
+`GET categories` · `GET functional-categories` · `GET tall-heights` · `GET home` · `GET meta` · `GET stats`.
 
 ---
 
@@ -30,7 +30,8 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 ## 2. `GET /design-book/items` — grid / card list
 
 *The grid filter bar (all in `GET items` request table below). Left→right: **PROGRAMME dropdown**
-("No programme · point range" — world state, no param) · **Mix** button (UI-only) · **W** row
+("No programme · point range" — sets the card **`pts`** price via `priceProgram`, not a grid filter) ·
+**Mix** button (UI-only) · **W** row
 (`widthMm`, cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI-only) ·
 **D** row (`depthClass` — nominal cm class 36/48/58/63/68, NOT `depthMm`).*
 
@@ -51,12 +52,16 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 | `kind` | IN | Item-type filter (cabinet/alteration/accessory/part) | (filter) | `…/items?kind=accessory` |
 | `family` | IN | **PROGRAMME tab** (All / Primo / Avance / Contino) — maps to tiers (Primo→P/P1, Contino→C/C1, Avance→A) | Top toolbar — "PROGRAMME" tab group | `…/items?family=Contino` |
 | `programs[]` | IN | **PROGRAMME picker multi-select** (array of programme ids/names; union of their tiers) | "Programme for Base units" modal (Step 1 of 4) — highlighted chips | `…/items?programs=AVENIDA&programs=BONDI-A` |
+| `priceProgram` | IN | **PROGRAMME dropdown** (single id/name) — the programme to **PRICE** cards in; each item's `pts` (the "951 pts" / "290 HLP" pill number) is computed for it. **Not a grid filter** (doesn't change which cards return). Falls back to the sole `programs` entry when exactly one is selected; no programme → no `pts` ("point range") | Top toolbar — Programme SELECT DROPDOWN | `…/items?priceProgram=BOSSA` |
 | `tier` | IN | **FRONTS pill** (P·P1·A·C·C1) | Top toolbar — "FRONTS" pill group | `…/items?tier=P1` |
+| `opening` | IN | **OPENING toggle** (P1 \| C1) — the "one handle on top" opening variant (P1=Primo, C1=Contino). Keeps fronts orderable in that variant (`availableTiers ∋ P1/C1`). AND-composes with `tier`/`family` | Top toolbar — "OPENING" pill (right of the programme tiers) | `…/items?opening=P1` |
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row (15·20·30·…·Corner) | `…/items?widthMm=600` |
 | `heightClass` | IN | **H pill** (73·80·86 — coarse bucket, not `heightMm`) | Grid filter bar — H row | `…/items?heightClass=80` |
 | `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68), NOT exact mm. Matches a unit when the class is among its available depths (`configure.depth[].label` — native OR a depth alteration, incl. the 63 cm alteration). Carcass = class×10−20 (58 ⇒ 560 mm). Mirror of `heightClass`. | Grid filter bar — D row | `…/items?depthClass=58` |
 | `depthMm` | IN | Exact carcass depth (mm) — precise match, **not** the grid D row (that row is a class → use `depthClass`) | (precise filter) | `…/items?depthMm=560` |
 | `heightMm` | IN | Exact carcass height (mm) — not a bar pill | (precise filter) | `…/items?heightMm=792` |
+| `line` | IN | **TALL LINE pill** (73·80·86) — carcase LINE / height-system. **TALL only.** Picks which system the HEIGHT row draws from (80 → {146,190,204,217}; 73 & 86 → {153,197,210,224}) and filters the grid to it. Distinct from `heightClass` (also 73/80/86 but the coarse BASE bucket). Options + system from `GET tall-heights` (§6b) | Tall toolbar — **top pill row** | `…/items?zone=Tall&line=80` |
+| `tallHeight` | IN | **TALL HEIGHT pill** — the chosen carcase height in cm (146·153·190·197·204·210·217·224). **TALL only.** Matches units whose height snaps to it (from `heightMm`, ±8 mm). Offered values are dynamic per leaf+line → get them from `GET tall-heights` (§6b) | Tall toolbar — **second (dynamic) pill row** | `…/items?leafId=t_water%230&tallHeight=204` |
 | `suspended` | IN | **TOE-KICK "Suspended" toggle** (engineering `suspended`, ok=true) | Top toolbar — TOE-KICK H · Suspended | `…/items?suspended=true` |
 | `active` | IN | Active-only flag | Admin | `…/items?active=true` |
 | `groupBy=family` | IN | **Grid card grouping** — one card per family ("N types"); pages by family, not unit | Grid — the card grid itself (each card = a "type") | `…/items?leafId=b_cool%230&groupBy=family` |
@@ -64,8 +69,14 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 
 > **availableTiers precedence** (one filter, most-specific wins): `tier` (FRONTS pill) → `programs[]` (picker) → `family` (tab).
 > Grid is **tier-granular**: item↔programme links only by tier, so two same-tier programmes collapse to one tier.
-> Bar controls that are NOT item filters (world/display state, no param): PROGRAMME dropdown ("No programme · point range"),
-> TOE-KICK slider (cm), the ⇄ mm/inch converter box, "GREY, DON'T HIDE" toggle, "Mix" button, "Corner" width pill.
+> The toolbar's **P · A · C · C-12** group (right of the programme name) = the PROGRAMME-family tabs → `family`
+> (Primo/Avance/Contino; **Contino-12 folds into Contino** — same tiers C/C1, no separate grid filter).
+> **OPENING** (P1/C1) is an INDEPENDENT toggle → `opening`, ANDed on top of the above (own `$and` clause), since
+> P1/C1 fronts are their own tier records (`availableTiers:["P1"]`) — so `opening=P1` and `tier=P1` select the same
+> 1091 fronts, and `tier=C & opening=P1` = ∅ (C and P1 fronts are disjoint records — as in the app).
+> Bar controls that are NOT grid filters: PROGRAMME dropdown (sets the card `pts` price via **`priceProgram`** — a
+> pricing param, not a filter; "No programme" → no `pts`). Pure UI/display state (no param at all): TOE-KICK
+> slider (cm), the ⇄ mm/inch converter box, "GREY, DON'T HIDE" toggle, "Mix" button, "Corner" width pill.
 > Combine freely: `…/items?category=Base&heightClass=80&depthClass=58&suspended=true&tier=P&page=1&limit=50`
 >
 > **D pill = depth CLASS, not mm.** The D row (36·48·58·63·68) is a NOMINAL cm class, not the exact carcass
@@ -75,6 +86,15 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 > `depthMm` 610). Backend: `depthClass=C` → `configure.depth.label == String(C)` **OR** (no depth options AND
 > `depthMm == C*10−20`). Direct mirror of `heightClass` (the H pill). The old `depthMm=cm×10` sent by the D row
 > matched almost nothing (carcass is 20 mm shallower) — fixed 2026-07-10.
+>
+> **Tall two-row height selector (`line` + `tallHeight`).** TALL units show TWO stacked pill rows the other
+> zones don't: a static **LINE** row (73·80·86) and a **dynamic HEIGHT** row (e.g. 190·204·217). LINE picks the
+> carcase-height SYSTEM (80 → {146,190,204,217}; 73 & 86 → {153,197,210,224}; Avance locks to 80); HEIGHT lists
+> only the carcase heights actually present in the visible leaf, narrowed to the line — so **every leaf shows its
+> own set** (Dishwasher → {204,217}; Washing Machine → {190,204,217}). The values are NOT stored: a unit's tall
+> carcase height is derived by snapping `heightMm` to the nearest known height (±8 mm) — the app's `tallHC`. Get the
+> two rows from **`GET tall-heights` (§6b)**, then feed the picks back here as **`line`** / **`tallHeight`**. NOT the
+> same as the BASE H pill `heightClass` (also 73/80/86 but a stored coarse bucket, base only). Added 2026-07-14.
 >
 > **Grid is card = family, not unit.** Default (no `groupBy`) returns one row per UNIT (sku); the grid
 > shows one card per FAMILY ("type"). Leaf `b_cool#0` = **75 units → 4 cards**; Base zone = 7208 units /
@@ -96,7 +116,9 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 *One card (`TK6080BZ2`). Top-left = `cardLabel` ("Cooktop Unit") · top-right = `programmeBadge`
 ("ALL") · image area = `imageUrl` · title = `name` · `sku` + dims line (`widthMm`/`heightMm`) ·
 **H/W/D** pill rows = `configure.height`/`.width`/`.depth` (filled = `selected`) · bottom-left ♥/⧉
-= UI-only fav/copy · bottom-right `P · P1 · C · C1 · A` = `availableTiers` (filled = orderable).*
+= UI-only fav/copy · bottom-right `P · P1 · C · C1 · A` = `availableTiers` (filled = orderable) ·
+**bottom-right price pill "951 pts" / "290 HLP"** = `pts` (number, present only when a programme is
+priced) + `priceUnit` (the pts/HLP unit label).*
 
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|
@@ -107,6 +129,8 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 | `cardLabel` | OUT | Small card label | Card — **top-left** ("Front" / "Built-in DW door") | `…/items` → `items[].cardLabel` |
 | `programmeBadge` | OUT | Programme summary chip | Card — **top-right** (P / ALL / P·A) | `…/items` → `items[].programmeBadge` |
 | `availableTiers[]` | OUT | FRONTS tier badges | Card — **bottom-right** (P · P1 · C1) | `…/items` → `items[].availableTiers` |
+| `pts` | OUT | **Price pill NUMBER "951"** — the card point value for the priced programme (`priceProgram`, or a sole `programs`). `ceil(book/100)` over the programme's finish column. **Absent** when no programme is priced (app shows "point range"). Its UNIT label = `priceUnit` (next row) | Card — **bottom-right**, grey/green pill | `…/items?sku=GFVK8080SZ2M&priceProgram=BOSSA` → `items[].pts` (= 1134) |
+| `priceUnit` | OUT | **Price-pill UNIT label** — "pts" (account points) vs **"HLP"** (dealer-list, IDM calc groups 15/38/61; the book number is already a currency list price). Per-item, **always present** (independent of `pts`/programme). Ports the app's `priceClass` | Card — **bottom-right**, the small unit inside the pill | `…/items?q=EBF10058` → `items[].priceUnit` (= "HLP") |
 | `imageUrl` | OUT | Product image (built from `meta.imageUrlTemplate`) | Card — image area | `…/items` → `items[].imageUrl` |
 | `widthMm` / `heightMm` / `depthMm` | OUT | Dims line ("W 800 mm · H 792 mm") | Card — under title | `…/items` → `items[].widthMm` |
 | `configure.width[]` | OUT | **W** pill row | Card — Configure rows | `…/items?full=true` → `items[].configure.width` |
@@ -120,6 +144,8 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 | `appliance` | OUT | Appliances icon → **Appliances popup** (brand · category · subcategory · nicheSize) | Card — **bottom-left** (appliance fronts only) | `…/items?full=true` → `items[].appliance` |
 | `sinkFitment.maxSinkSizeInch` | OUT | **"Max Sink Size: NN″" line** | Card — bottom row (Base/Sinks cards, `showOnCard`) | `…/items?q=TSP6080BZ2` → `items[].sinkFitment.maxSinkSizeInch` |
 | `sinkFitment` (`cabinetWidthCm` · `customAboveInch` · `isDoor` · `notes[]`) | OUT | **"+ Add Sink" popup** — width, max bowl size, fitment rules | Card — **bottom-right** "+ Add Sink" button → popup | `…/items?full=true&q=TSP6080BZ2` → `items[].sinkFitment` |
+| `inspiration.imageUrl` | OUT | **Inspiration-photo lightbox** — the full lifestyle render loaded on click | Card — **camera icon top-left** → popup image | `…/items?q=AGFV6080` → `items[].inspiration.imageUrl` |
+| `inspiration` (`caption` · `heading` · `fullScreen`) | OUT | Popup caption sentence (`caption`) + bold code/dims line (`heading`) + "View full screen" flag | Card — camera-icon → **lightbox popup** caption | `…/items?q=AGFV6080` → `items[].inspiration.caption` |
 | `types` | OUT | **"N types" count** (distinct families in the filtered set) | Grid — header ("4 types") | `…/items?leafId=b_cool%230` → `types` |
 | `unitCount` | OUT | Units collapsed into the card (grouped mode only) | Card — (variant count) | `…/items?leafId=b_cool%230&groupBy=family` → `items[].unitCount` |
 | `memberSkus[]` | OUT | Every code in the family (grouped mode) — resolves the card's pills | Card — Configure pill targets | `…?groupBy=family` → `items[].memberSkus` |
@@ -135,9 +161,9 @@ Same grid as `GET items`, but the response is already bucketed into the on-scree
 the app stacks cards under ("APPLIANCE FRONTS · DW (CENTER HANDLE)", "FRONT FOR DISHWASHER APPLIANCES ·
 ORIGINAL HANDLE D61"). Cards are **families** (same collapse as `groupBy=family`). It accepts **every**
 `GET items` filter (row-for-row identical to §2 request table: `leafId` / `groupKey` / `zone` /
-`category` / `subcategory` / `section` / `tier` / `family` / `programs[]` / `widthMm` / `heightClass` /
-`depthClass` / `kind` / `q` / `full` / `page` / `limit`). Use it instead of `GET items?groupBy=family`
-when you want the server to do the section bucketing.
+`category` / `subcategory` / `section` / `tier` / `opening` / `family` / `programs[]` / `priceProgram` /
+`widthMm` / `heightClass` / `depthClass` / `line` / `tallHeight` / `kind` / `q` / `full` / `page` / `limit`). Use it
+instead of `GET items?groupBy=family` when you want the server to do the section bucketing.
 
 ### Response (envelope → UI)
 
@@ -152,8 +178,9 @@ when you want the server to do the section bucketing.
 > **Cards are families**, identical to `groupBy=family` (see §2's "card = family" + face-unit notes) —
 > each `cards[]` entry carries `familyId` / `unitCount` / `memberSkus[]` / family-wide `availableTiers`.
 > **Card/popup annotations flow through** (from the face unit's own item doc): `nameQualifier`,
-> `handedLR`, `sinkFitment` (Max Sink Size / + Add Sink), and `appliance` (Appliances popup) all appear
-> on `cards[]` where set — same shape as §2 `items[]`. Verified on `subcategory=Sinks` (18/25 cards carry
+> `handedLR`, `sinkFitment` (Max Sink Size / + Add Sink), `appliance` (Appliances popup),
+> `inspiration` (camera-icon lightbox), and the **`pts` price pill** (number when `priceProgram` / a sole
+> `programs` is set; unit `priceUnit` always) all appear on `cards[]` where set — same shape as §2 `items[]`. Verified on `subcategory=Sinks` (18/25 cards carry
 > `sinkFitment`) and `subcategory=Appliance housing` (`GFVK8073SM` → Gaggenau · Dishwashers · Built-In ADA · 24").
 > **Paging is by family (card), not by section**: the page's cards are section-sorted then bucketed, so a
 > section straddling a page boundary appears (partially) on **both** pages — the client merges buckets by
@@ -178,6 +205,7 @@ AVAILABILITY** (`programmeAvailability`) · **MODIFICATIONS — HOW TO** (`modif
 |---|---|---|---|---|
 | `:sku` (path) | IN | Clicked card / "Search by Code" | Grid card / top search | `…/items/TK6080BZ2` |
 | `expand=refs,catalog,all` | IN | (enrichment flags) | Powers card labels/images + Catalog PDF — no visible control | `…/items/T6073VE?expand=all` |
+| `priceProgram` | IN | Programme to **PRICE the resolved ref cards** in (with `expand=refs`). Each `refs[sku]` then carries `pts` (point value) + `priceUnit` — so the accessory / alteration / related cards in the panel show their "NNN pts"/"NNN HLP" pill, same as the grid. Omit → refs have no `pts` | (mirrors the grid's active programme; no own control) | `…/items/CT10073IS2IZ?expand=refs&priceProgram=BOSSA` → `refs.EBF10058.pts` |
 
 ### Response (detail sections → panel blocks, top→bottom)
 
@@ -202,10 +230,12 @@ AVAILABILITY** (`programmeAvailability`) · **MODIFICATIONS — HOW TO** (`modif
 | `item.didYouKnow` | OUT | 💡 Did you know? | Detail — footer tip | `…/items/TK6080BZ2` → `item.didYouKnow` |
 | `item.appliance` | OUT | **Appliances popup** — click the Appliances button; rows built from these fields | Detail / Card — Appliances popup | `…/items/GFVK8080SM` → `item.appliance` |
 | `item.sinkFitment` | OUT | **Sink fitment** section + **"+ Add Sink" popup** (max bowl size · width · rules) | Detail — Sink fitment (Base/Sinks only) | `…/items/TSP6080BZ2` → `item.sinkFitment` |
+| `item.inspiration` | OUT | **Inspiration lightbox** (imageUrl · caption · heading) — same photo as the panel's Inspiration tab, also as a top-level card field | Detail / Card — camera-icon → lightbox popup | `…/items/AGFV6080` → `item.inspiration` |
+| `item.priceUnit` | OUT | Price-pill UNIT ("pts" \| "HLP") for this item's point pill — HLP = dealer-list calc groups 15/38/61 | Detail / Card — inside the point pill | `…/items/EBF10058` → `item.priceUnit` (= "HLP") |
 | `item.finishes[]` | OUT | Finish → price | Detail — finish/pricing | `…/items/TK6080BZ2` → `item.finishes` |
 | `item.imageUrl` | OUT | Main product image | Detail — header image | `…/items/TK6080BZ2` → `item.imageUrl` |
 | `catalog` (expand) | OUT | CATALOG button → price-cropped PDF page | Detail — header CATALOG button | `…/items/TK6080BZ2?expand=catalog` → `catalog` |
-| `refs` (expand) | OUT | Resolves each ItemRef sku → name/kind/image | Detail — all card labels/images | `…/items/T6073VE?expand=refs` → `refs` |
+| `refs` (expand) | OUT | Resolves each ItemRef sku → name/kind/image (+ `priceUnit`; + `pts` when `priceProgram` set) so accessory/alteration/related **ref cards show their point pill** | Detail — all card labels/images + their pills | `…/items/CT10073IS2IZ?expand=refs&priceProgram=BOSSA` → `refs.EBF10058` (`{name, priceUnit:"HLP", pts}`) |
 
 > **Appliances popup** (`item.appliance`, set only on the 8 housing families). The card/detail
 > **Appliances** button (fridge/appliance glyph, tooltip "Appliances") opens a popup whose rows map
@@ -228,6 +258,18 @@ AVAILABILITY** (`programmeAvailability`) · **MODIFICATIONS — HOW TO** (`modif
 > `showOnCard` (true = the "Max Sink Size" line + Add Sink button render on the CARD; the detail section always shows) ·
 > `notes[]` (the exact popup / "Sink fitment" lines).
 > Example: `TSP6080BZ2` (60 cm) → **"Max Sink Size: 21″"**; `TSP457368ZV` (45 cm) → **12″**.
+>
+> **Inspiration photo** (`item.inspiration`, set only on the **518** DW-front / mat cards that map to an
+> S3 render). The small **camera icon** at the card's top-left (and the detail panel's **Inspiration tab**)
+> opens a **lightbox** showing the full lifestyle photo + caption. Fields:
+> `imageUrl` (the S3 lifestyle render — a SEPARATE image, NOT `meta.imageUrlTemplate ⊕ sku`) ·
+> `caption` (the finish-note sentence under the photo — one of 3 fixed variants: integrated-DW-front /
+> drawer-mat / generic inspiration reference) · `heading` (**368/518**: the bold code · family · dims line,
+> e.g. "AGFV6080 — Front for Built-in Appliances · Special Height · W 600 × H 806 × D 20 mm"; omitted when
+> the code has no family match) · `fullScreen` (true = "View full screen" button).
+> It is a **top-level card mirror** of `accessoryPanel.tabs[Inspiration]` — materialized so the LIST api
+> returns it even though `accessoryPanel` is stripped from list rows (it is NOT in `LIST_OMIT`, so it ships
+> on every card and detail without `full=true`). Example: `AGFV6080` → integrated-DW-front photo + caption.
 >
 > **"L/R" badge** (`item.handedLR`, present & `true` only on hinge-side-optional units; omitted otherwise).
 > The card/detail title shows a small **"L/R"** tag with tooltip *"Available left or right hinged — state the
@@ -340,7 +382,60 @@ indented rows under **Base** (Sinks/Cooktops/…) = `categories[].subcategories[
 | `zones[]` | OUT | Zone header + count (Base/Tall/Wall/Midway) | Left sidebar — zone header | `…/functional-categories` → `functionalCategories.zones` |
 | `zones[].groups[]` | OUT | Group row (💧 Water / Cooling / Cooking / Storage / …) | Left sidebar — group + "All Base Water" allRow | `…/functional-categories` → `…zones[].groups` |
 | `zones[].groups[].leaves[]` | OUT | Leaf row + count (Sink Cabinets · Trash Pullouts · Dishwasher Fronts …) | Left sidebar — leaves (click → `GET items?leafId=`) | `…/functional-categories` → `…groups[].leaves` |
-| `moreCategories[]` | OUT | Extra categories | Left sidebar — "more" | `…/functional-categories` → `functionalCategories.moreCategories` |
+| `moreCategories[]` | OUT | "More categories" list — non-zone type categories (Alteration · Handles · Lighting · Service · Accessories & interior · Countertops · Panels & surround) | Left "Design Tasks" sidebar — below the zones | `…/functional-categories` → `functionalCategories.moreCategories` |
+| `moreCategories[].category` / `.count` | OUT | "More" row header + family-count badge (incl. hidden families → `sum(subs.count) === count`) | Left sidebar — "more" row ("Alteration · 98") | `…` → `moreCategories[].count` |
+| `moreCategories[].subs[]` | OUT | The row's TYPE-subcategory **leaves** — expands like a zone but with **no functional groups** (renders via app `subButtons(c)`, ordered `subRank` then count desc) | Left sidebar — under a "more" row | `…` → `moreCategories[].subs` |
+| `moreCategories[].subs[].name` / `.count` | OUT | Leaf label + family count (unfiltered) | Left sidebar — leaf row ("Cabinet Modifications · 23") | `…` → `moreCategories[].subs[].name` |
+| `moreCategories[].subs[].filter` (`{category, subcategory}`) | OUT | Leaf click → grid query. **NOT `leafId`** — filters by `category` + `subcategory` directly (both stored on every Item), so no `functionalGroups` materialization needed | Left sidebar — leaf click | `…` → `moreCategories[].subs[].filter` (→ `…/items?category=Alteration&subcategory=Cabinet%20Modifications`) |
+
+> **`moreCategories[]` shape (2026-07-14):** each entry now carries a `subs[]` array of type-subcategory
+> **leaves** (`{name, count, filter:{category, subcategory}}`) — previously it was a flat
+> `{category, count}` header only. A "more" row is NOT a zone: it has no 💧/🔥 functional groups and no
+> `leafId` leaves; it drops straight into its TYPE subcategories (mirrors §5 `GET categories`, but served
+> from this one endpoint). Click a leaf → `GET items?category=<cat>&subcategory=<sub>` (the `filter`
+> object, ready to pass through). Counts are FAMILY counts over `FAMS` with `f.cat === category`
+> **including hidden families**, so `sum(subs[].count) === category count`. Contract: `MoreCategory` /
+> `MoreCategoryLeaf` in `export-schema.ts`.
+
+---
+
+## 6b. `GET /design-book/tall-heights` — TALL dynamic height selector (line + height rows)
+
+Powers the TALL toolbar's **two stacked pill rows** — the static **LINE** row (73·80·86) and the
+**dynamic HEIGHT** row (190·204·217…). **TALL units only.** Reproduces the app's `availHeights()`: over
+the currently-visible set (the SAME context filters as `GET items`, but *before* the line/height picks
+narrow it), collect the distinct tall carcase heights (snapped from `heightMm`, ±8 mm) and, per line,
+keep only that line's system (80 → {146,190,204,217}; 73 & 86 → {153,197,210,224}; ALL & both present →
+default to 80). Every Design-Tasks leaf therefore returns its **own** set. Feed the picked `line` +
+`tallHeight` back to `GET items` (§2).
+
+### Request (context filters — same names as `GET items`)
+
+| API parameter | Dir | UI parameter (element) | UI location | Sample call |
+|---|---|---|---|---|
+| `leafId` / `groupKey` / `zone` | IN | The active "Design Tasks" leaf / group / zone (which units are visible) | Left "Design Tasks" sidebar | `…/tall-heights?leafId=t_water%230` |
+| `category` / `subcategory` / `section` / `familyId` | IN | Type-taxonomy narrowing (if the grid is in a category view) | Left type sidebar | `…/tall-heights?category=Tall` |
+| `tier` / `family` / `programs[]` | IN | Active FRONTS tier / PROGRAMME tab / programme picker — narrows the visible set, and Avance locks LINE to 80 | Top toolbar | `…/tall-heights?zone=Tall&family=Avance` |
+| `suspended` / `active` | IN | Same toggles as `GET items` | Top toolbar / admin | `…/tall-heights?zone=Tall&suspended=true` |
+| `line` | IN | The **selected** LINE (73·80·86) — sets `selectedLine` + which `heights` come back (default ALL). Does NOT change `heightsByLine` (all four always returned) | Tall toolbar — top pill row | `…/tall-heights?leafId=t_water%230&line=80` |
+
+### Response
+
+| API parameter | Dir | UI parameter (element) | UI location | Sample call |
+|---|---|---|---|---|
+| `lineOptions[]` (`value` · `available` · `heights[]`) | OUT | The **LINE row** pills (73·80·86); `available:false` = Avance-locked (only 80); each carries its own `heights` so switching line needs no round-trip | Tall toolbar — **top pill row** | `…/tall-heights?leafId=t_water%230` → `lineOptions` |
+| `selectedLine` | OUT | Which LINE pill is active (the `line` param, else `"ALL"`) | Tall toolbar — top row selection | `…?line=80` → `selectedLine` (= 80) |
+| `heights[]` | OUT | The **HEIGHT row** pills for `selectedLine` (e.g. `[204,217]`) | Tall toolbar — **second (dynamic) pill row** | `…/tall-heights?leafId=t_water%230&line=80` → `heights` |
+| `heightsByLine` (`ALL` · `73` · `80` · `86`) | OUT | The HEIGHT set for **every** line — lets the client repaint the second row instantly on a LINE click | Tall toolbar — second row (per line) | `…/tall-heights?leafId=t_water%230` → `heightsByLine` |
+
+> **Two-axis model.** `line` (73/80/86) is the carcase LINE = height SYSTEM; `tallHeight` (146…224) is the
+> chosen carcase height. A unit's carcase height is **derived**, not stored — snap `heightMm` to the nearest of
+> {146,153,190,197,204,210,217,224} within ±8 mm (the app's `tallHC`). This is a different axis from the BASE H
+> pill `heightClass` (also 73/80/86, but a stored coarse bucket set only on the ~311 base-line tall families).
+> No export/schema change — pure query-param + backend derivation (like `depthClass`). Verified 2026-07-14: all
+> 20 tall leaves × 4 lines match the live app's `availHeights()` exactly. Flow: render `lineOptions` →
+> user picks LINE → repaint HEIGHT row from `heightsByLine[line]` → user picks height →
+> `GET items?leafId=<leaf>&line=<line>&tallHeight=<cm>`.
 
 ---
 
