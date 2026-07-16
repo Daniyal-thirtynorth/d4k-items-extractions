@@ -51,7 +51,7 @@ Endpoints: `POST ingest` · `GET items` · `GET items/by-section` · `GET items/
 | `zone` | IN | "Design Tasks" **zone** | Left "Design Tasks" sidebar — zone header (Base/Tall/Wall/Midway) | `…/items?zone=Base` |
 | `kind` | IN | Item-type filter (cabinet/alteration/accessory/part) | (filter) | `…/items?kind=accessory` |
 | `family` | IN | **PROGRAMME tab** (All / Primo / Avance / Contino) — maps to tiers (Primo→P/P1, Contino→C/C1, Avance→A) | Top toolbar — "PROGRAMME" tab group | `…/items?family=Contino` |
-| `programs[]` | IN | **PROGRAMME picker multi-select** (array of programme ids/names; union of their tiers) | "Programme for Base units" modal (Step 1 of 4) — highlighted chips | `…/items?programs=AVENIDA&programs=BONDI-A` |
+| `programs[]` | IN | **PROGRAMME picker multi-select** (array of programme ids/names; union of their tiers). **Also drives configure PILL STATE** — without it every pill returns `available:true` and nothing strikes (§2c) | "Programme for Base units" modal (Step 1 of 4) — highlighted chips | `…/items?programs=AVENIDA&programs=BONDI-A` |
 | `priceProgram` | IN | **PROGRAMME dropdown** (single id/name) — the programme to **PRICE** cards in; each item's `pts` (the "951 pts" / "290 HLP" pill number) is computed for it. **Not a grid filter** (doesn't change which cards return). Falls back to the sole `programs` entry when exactly one is selected; no programme → no `pts` ("point range") | Top toolbar — Programme SELECT DROPDOWN | `…/items?priceProgram=BOSSA` |
 | `tier` | IN | **FRONTS pill** (P·P1·A·C·C1) | Top toolbar — "FRONTS" pill group | `…/items?tier=P1` |
 | `opening` | IN | **OPENING toggle** (P1 \| C1) — the "one handle on top" opening variant (P1=Primo, C1=Contino). Keeps fronts orderable in that variant (`availableTiers ∋ P1/C1`). AND-composes with `tier`/`family` | Top toolbar — "OPENING" pill (right of the programme tiers) | `…/items?opening=P1` |
@@ -138,9 +138,10 @@ priced) + `priceUnit` (the pts/HLP unit label).*
 | `configure.depth[]` | OUT | **D** pill row (incl. "63 cm alteration"). Its `label`s are the nominal depth **classes** (58/63/68…) the top-bar `depthClass` filter matches against | Card — Configure rows | `…/items?full=true` → `items[].configure.depth` |
 | `configure.programme[]` | OUT | Programme / tier pills (P · P1 · C1) | Card — **bottom-right** | `…/items?full=true` → `items[].configure.programme` |
 | `configure.optionRows[]` | OUT | Coded rows — **Ty** / Mode / Config (Z2XM · Z3M · ~~S2ZM~~) | Card — Configure rows | `…/items?full=true` → `items[].configure.optionRows` |
-| `configure.optionRows[].options[].crossedOut` | OUT | Struck-through pill (exists but not orderable here) | Card — pill state (e.g. ~~S2ZM~~) | `…/items?full=true` → `…optionRows[].options[].crossedOut` |
-| `configure.*[].selected` / `.available` | OUT | Highlighted vs greyed pill | Card — pill state | `…/items?full=true` → `…configure.width[].available` |
-| `configure.*[].sku` | OUT | Pill target (click → opens that item) | Card — pill navigation | `…/items?full=true` → `…configure.width[].sku` |
+| `configure.*[].selected` / `.available` | OUT | Highlighted vs **struck/greyed** pill — `available:false` = not orderable here. **Full state rules → §2c** | Card — pill state | `…/items?full=true` → `…configure.width[].available` |
+| `configure.*[].programmeExcluded` | OUT | **Response-only** (never stored) — set with `available:false` when the pill's target unit is not orderable in the sent `programs`. Drives the "Not available with the selected programme" tooltip. **Absent unless `programs` is sent** → §2c | Card — pill state (struck) | `…/items?sku=T6080&full=true&programs=BOSSA` → `configure.width[0].programmeExcluded` (= true) |
+| `configure.*[].crossedOut` | OUT | **RESERVED — never emitted** (0 / 256,937 pills; the extractor reads the detail panel, which greys rather than strikes). Treat a struck pill as `available:false`; handle defensively only. → §2c | Card — pill state | *(no live example — field is never present)* |
+| `configure.*[].sku` | OUT | Pill target (click → opens that item). `null` = no target code → pill is inert (§2c) | Card — pill navigation | `…/items?full=true` → `…configure.width[].sku` |
 | `appliance` | OUT | Appliances icon → **Appliances popup** (brand · category · subcategory · nicheSize) | Card — **bottom-left** (appliance fronts only) | `…/items?full=true` → `items[].appliance` |
 | `sinkFitment.maxSinkSizeInch` | OUT | **"Max Sink Size: NN″" line** | Card — bottom row (Base/Sinks cards, `showOnCard`) | `…/items?q=TSP6080BZ2` → `items[].sinkFitment.maxSinkSizeInch` |
 | `sinkFitment` (`cabinetWidthCm` · `customAboveInch` · `isDoor` · `notes[]`) | OUT | **"+ Add Sink" popup** — width, max bowl size, fitment rules | Card — **bottom-right** "+ Add Sink" button → popup | `…/items?full=true&q=TSP6080BZ2` → `items[].sinkFitment` |
@@ -180,13 +181,311 @@ instead of `GET items?groupBy=family` when you want the server to do the section
 > **Card/popup annotations flow through** (from the face unit's own item doc): `nameQualifier`,
 > `handedLR`, `sinkFitment` (Max Sink Size / + Add Sink), `appliance` (Appliances popup),
 > `inspiration` (camera-icon lightbox), and the **`pts` price pill** (number when `priceProgram` / a sole
-> `programs` is set; unit `priceUnit` always) all appear on `cards[]` where set — same shape as §2 `items[]`. Verified on `subcategory=Sinks` (18/25 cards carry
+> `programs` is set; unit `priceUnit` always) all appear on `cards[]` where set — same shape as §2 `items[]`.
+> **Configure PILL STATE flows through too** — send `programs` and each card's `configure` pills come back
+> `available:false` + `programmeExcluded` where the target is not orderable (§2c). This is the endpoint the
+> grid calls, so **it is the one that must carry `programs`** or no card pill will ever strike.
+> **The WHOLE-CARD grey is a separate thing (§2e)** — a programme-excluded card is never dropped from the
+> grid, it renders greyed + "not available". It needs `programmeAvailability`, which is **not** in the
+> default card projection: pass `full=true`.
+> Verified on `subcategory=Sinks` (18/25 cards carry
 > `sinkFitment`) and `subcategory=Appliance housing` (`GFVK8073SM` → Gaggenau · Dishwashers · Built-In ADA · 24").
 > **Paging is by family (card), not by section**: the page's cards are section-sorted then bucketed, so a
 > section straddling a page boundary appears (partially) on **both** pages — the client merges buckets by
 > `section` on scroll. Same best-effort ordering caveat as §2 (v767 export didn't capture the app's
 > section / card order). Verified: `leafId=b_water#2` → 19 families → 6 section buckets ("Appliance
 > Fronts · DW (center handle)" = 5 cards, "Front for Dishwasher Appliances · Original handle D61" = 3).
+
+---
+
+## 2c. Pill state — rendering DISABLED / STRUCK configure pills
+
+How the client decides that a W / H / D / Programme / coded-row pill is greyed, struck, or dead.
+Applies identically to every configure option in **§2** (`items[].configure`), **§2b**
+(`sections[].cards[].configure`) and **§3** (`item.configure`) — same three fields everywhere:
+
+- `available` — **stored** (export). The pill's baseline state.
+- `sku` — **stored**. The pill's target unit; `null` = no target code exists.
+- `programmeExcluded` — **response-only annotation**, added by the backend when `programs` is sent.
+  Never stored, never in the export.
+
+### The three states
+
+| `available` | `sku` | Meaning | Render | Clickable? |
+|---|---|---|---|---|
+| `true` | set | Orderable | normal | **yes** → opens that sku |
+| `false` | set | Not orderable in the selected programme (**always** carries `programmeExcluded`) | **grid: struck** · **detail: greyed** | **yes** → still opens the sibling |
+| `false` | `null` | No target code at all | greyed / dead | no |
+
+> **The middle state is QUERY-TIME ONLY.** In the stored export it does not occur: every pill with a
+> `sku` is `available:true` and every `available:false` pill has `sku:null` (verified against the live
+> app 2026-07-15 — at the app's default toolbar state, every chip with a target renders live and every
+> not-live chip has no target). So `available:false && sku` can only mean *"the backend turned this off
+> for the programme you sent"*. Distribution in v781 below.
+>
+> This was **not** true before 2026-07-15: the export carried 11,013 fabricated `available:false`+sku
+> pills from an extractor bug that froze the D toolbar filter into the data. If you see that state
+> without `programmeExcluded`, the ingested export predates the fix.
+
+> **Struck ≠ disabled.** The app's greyed-out chip keeps its handler —
+> `<button class="wchip ${ok?'':'wn'}" … onclick="…;pickHeight('${b.id}',${hh})">`. Clicking a struck
+> pill navigates to the sibling unit. Only the `sku:null` state is inert.
+
+### Strike vs grey is a SURFACE, not a field
+
+Both come from the app's single `available(u)` gate, rendered by two different renderers:
+
+| Surface | App markup | Result |
+|---|---|---|
+| Grid card (`renderGrid`) | `.wchip.wn { opacity:.32; text-decoration:line-through }` | **struck** |
+| Detail panel (`openDetail` → `.cfgsec`) | `.chip` + inline `style="opacity:.4"` | **greyed** |
+
+So the client picks strike-or-grey **by which surface it is drawing**, never by a data field. The
+user-reported "struck W pills on the floor-unit card" and a greyed W chip in that same unit's detail
+panel are *the same `available:false`*.
+
+### ⚠️ `crossedOut` is RESERVED — never emitted
+
+`ConfigOption.crossedOut` is defined in `export-schema.ts` but is set **0 times out of 256,937
+pills** in both v767 and v781. This is structural, not an oversight: the extractor's `chipCrossed()`
+scrapes `#pin` — the **detail panel** — and the detail panel only ever greys (`opacity:.4`). The
+strike exists solely in the grid renderer, which the extractor never reads. `crossedOut` therefore
+cannot be produced by the current pipeline.
+
+**Do not branch on it.** Treat a struck pill as `available:false`. Handle `crossedOut` defensively
+(if truthy → struck + inert) only so a future export can't break the client. Open decision: either
+drop the field from the schema or teach the extractor to read the grid — it is dead weight today.
+
+### ⚠️ The client MUST send `programs` — or nothing strikes
+
+The export's `available` is the **no-programme baseline**: extraction runs with `state.prog = null`,
+where the app's `progOk` half passes everything. The programme half is resolved **at query time** by
+`annotateProgrammeExclusions` (`design-book.service.ts`), which reads each pill target's own
+`programmeAvailability` — exactly what the app's `progOk` does. It only ever turns a pill **off**,
+never back on.
+
+**No `programs` param → every pill comes back `available:true` → no strikes.** This was a real bug in
+the lite reference UI: the API was correct, the grid sent no `programs`, and the card rendered clean.
+
+Worked example — the reported case, `T6080` "Floor unit" under **BOSSA**:
+
+```bash
+# Baseline — no programme. ALL 12 width pills come back available:true (15 and 20 included).
+…/items?sku=T6080&full=true
+#   → configure.width[0] = {"label":"15","sku":"T1580","available":true}
+
+# With the programme. T1580 / T2080 list 100 of 120 programmes and BOSSA is not among them:
+…/items?sku=T6080&full=true&programs=BOSSA
+#   → configure.width[0] = {"label":"15","sku":"T1580","available":false,"programmeExcluded":true}
+#   → configure.width[1] = {"label":"20","sku":"T2080","available":false,"programmeExcluded":true}
+#   → the grid renders both STRUCK — matching the client app exactly.
+```
+
+`programmeExcluded` exists so the client can tell *"not in the selected programme"* apart from a
+baseline grey — useful for the tooltip, not for the strike decision itself:
+
+| Condition | Tooltip |
+|---|---|
+| `crossedOut` | "Exists in this family — not orderable in this configuration" |
+| `available:false`, `sku:null` | "Not available for this unit — no separate code" |
+| `available:false`, `programmeExcluded` | **"Not available with the selected programme"** |
+| `available:false`, sku, no annotation | "Not orderable in this configuration — opens the sibling unit" |
+
+Multi-select is a **union** (`programs=BOSSA&programs=AVENIDA` → a pill dies only if *no* selected
+programme allows it), matching the app's `ks.some(pk => progOkFor(u, pk))`. Accepts ids or names.
+
+Endpoints that annotate — send `programs` to all three:
+
+```bash
+…/items?leafId=b_store%231&groupBy=family&programs=BOSSA
+…/items/by-section?leafId=b_store%231&programs=BOSSA     # ← the endpoint the grid actually calls
+…/items/T6080?expand=all&programs=BOSSA
+```
+
+Cost: one extra query per page (the union of the page's pill target skus).
+
+### Not every pill state is baked in — coverage gap
+
+The app's real gate is
+`progOk && tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk`, reading
+`state.prog/.tier/.depth/.handle/.front/.open/.antoso/.doorline`. The backend resolves **`progOk`
+only**; the other seven were frozen at extraction in the app's DEFAULT toolbar state. Consequence: if
+the real frontend ships the **FRONTS tier pills** or the depth / handle / front / opening toggles as
+live controls, pills will **not** re-strike as those change. Same family of gap as the
+`faceForTiers` FRONTS limitation (§2 "card = family").
+
+### Reference implementation
+
+`D4K-backend/public/design-book-ui.html` → **`optState(o)`** — 12 lines, returns
+`{cls, title, dead, sku}`, shared by the card rows (`cfgRow`, `cardProgRow`) and the detail drawer
+(`pillTargets`). CSS: `.cp.off` (grid, struck) · `.pill.off` (drawer, grey) · `.dead` · `.xed`.
+
+Real distribution across v781's 256,937 **stored** configure pills (post-fix):
+
+| State | Count | |
+|---|---|---|
+| `available:true` (all have a sku) | 251,968 | clickable |
+| `available:false` + `sku:null` | 4,969 | dead — no target code |
+| `available:false` + sku | **0** | query-time only (see above) |
+| `crossedOut:true` | **0** | reserved, never emitted |
+
+Measured pill-state parity against the live app's rendered grid (1,634 cards, chip-by-chip):
+
+| Context | Pills | Match | | |
+|---|---|---|---|---|
+| baseline | 3,284 | 3,278 | **99.82%** | 6 = the app's own grid/detail split on the 63 cm-alteration chip (its detail greys it `d63off`, its grid does not; we follow the detail) |
+| BOSSA | 2,347 | 2,321 | **98.89%** | those 6 + 20 where the unit is genuinely programme-excluded (`u.x` contains the key) and the app greys the **whole card** while we strike the individual pill — the "Grey, don't hide" presentation split, not a data disagreement |
+
+---
+
+## 2d. How to DISPLAY a struck / greyed / dead pill (rendering spec)
+
+§2c says *which* state a pill is in. This says *what to draw* for it. Copy-paste target for the real
+frontend; the lite UI (`D4K-backend/public/design-book-ui.html`) implements exactly this.
+
+### One function decides everything
+
+Never branch on `available` alone — three fields interact (`available`, `sku`, `crossedOut`), and the
+answer differs per surface. Derive a state once, render from it:
+
+```js
+// D4K-backend/public/design-book-ui.html → optState() — the reference implementation, verbatim.
+function optState(o){
+  const sku   = o ? (o.sku || o.target || null) : null;
+  const cross = !!(o && o.crossedOut === true);
+  const na    = !!(o && o.available === false);
+  const dead  = cross || (na && !sku);          // ← the ONLY unclickable states
+  let cls = '', title = '';
+  if(cross)      { cls=' xed';  title='Exists in this family — not orderable in this configuration'; }
+  else if(dead)  { cls=' dead'; title=(o&&o.note)||'Not available for this unit — no separate code'; }
+  else if(na)    { cls=' off';  title=(o&&o.programmeExcluded)
+                                  ? 'Not available with the selected programme'
+                                  : ((o&&o.note)||'Not orderable in this configuration — opens the sibling unit'); }
+  else if(o&&o.note) title=o.note;
+  return {cls,title,dead,na,sku};
+}
+```
+
+### The four visual states
+
+| State | Class | Grid CSS (card) | Detail CSS (drawer) | Tooltip | Click |
+|---|---|---|---|---|---|
+| normal | *(none)* | full opacity | full opacity | `note` if any | → opens `sku` |
+| selected | `.sel` | filled accent | filled accent | — | inert (already here) |
+| `available:false` + `sku` | `.off` | `opacity:.32; text-decoration:line-through` → **struck** | `opacity:.4` → **greyed** | "Not available with the selected programme" | **→ still opens `sku`** |
+| `available:false` + `sku:null` | `.dead` | `opacity:.3; filter:grayscale(1); cursor:not-allowed` | same | "Not available for this unit — no separate code" | **inert** |
+| `crossedOut:true` *(reserved, 0 today)* | `.xed` | `text-decoration:line-through; opacity:.55; cursor:not-allowed` | same | "Exists in this family — not orderable in this configuration" | **inert** |
+
+```css
+/* grid card — .off STRIKES */          /* detail drawer — .off GREYS */
+.cp.off  {opacity:.32;text-decoration:line-through}    .pill.off {opacity:.4}
+.cp.dead {opacity:.3;filter:grayscale(1);cursor:not-allowed}  .pill.dead{opacity:.3;filter:grayscale(1);cursor:not-allowed}
+.cp.xed  {text-decoration:line-through;opacity:.55;cursor:not-allowed}  .pill.xed{text-decoration:line-through;opacity:.55;cursor:not-allowed}
+```
+
+### Wiring the click — the one rule people get wrong
+
+`available:false` does **not** mean unclickable. Only `dead` does. Bind the handler on `!dead && sku`:
+
+```js
+const st = optState(o);
+const p  = el('span', 'cp' + (o.selected ? ' sel' : '') + st.cls, o.label);
+if (st.title) p.title = st.title;
+if (!st.dead && !o.selected && st.sku) p.onclick = () => swapCard(card, st.sku);  // grid: swap in place
+// detail drawer: p.onclick = () => openDetail(st.sku)
+```
+
+This mirrors the app's own chip builder — its struck `.wchip.wn` keeps its `pickHeight(...)` handler
+(§2c "Struck ≠ disabled"). A frontend that disables struck pills breaks navigation the app allows.
+
+---
+
+## 2e. Card state — GREY, DON'T HIDE (whole-card programme exclusion)
+
+§2c/§2d cover the **pills inside** a card. This covers the **card itself**. Both are needed to match the
+client app; they are computed from different fields and the backend currently annotates only the pills.
+
+### The rule
+
+**The app never removes a card because of the programme.** Pick a programme and an unorderable card
+stays in the grid, rendered dead: greyed image + title, greyed tier badge, struck W/H/D chips, the
+literal text **"not available"** where the action icons would be, and a greyed points pill. The card
+keeps its slot in its section. A frontend that filters those cards out client-side will show fewer
+cards than the client app in the same section — that is the single biggest source of grid mismatch.
+
+Verified live on `leafId=b_store#1` (Base › Doors, "Door Cabinets") under **WAKUU** (`programs=280`),
+which is the screenshot the client sent — exactly one of the 7 cards greys, `TSS12080T2`:
+
+| Card | `programmeAvailability.excluded` | allowed `programmes[]` | `280` in list | Render |
+|---|---|---|---|---|
+| `T6080IS2IZ` | true | 107 | yes | live |
+| `T6086ISIZ2` | true | 82 | yes | live |
+| `T6080N` | true | 110 | yes | live |
+| `T6080` / `T6080S` | true | 110 | yes | live |
+| `ATQ608068S` | **false** | 0 | — | live (no restriction at all) |
+| `TSS12080T2` | true | 89 | **no** | **GREY + "not available"** |
+
+### The predicate — identical to the backend's pill test
+
+`excluded:true` means *"this item HAS a programme allow-list"*; `programmes[]` **is** that allow-list.
+`excluded:false` means *no restriction* — always live. Do not read `excluded` alone as "is excluded".
+
+```js
+// Same test as design-book.service.ts → annotateProgrammeExclusions(), applied to the CARD's own sku.
+function cardExcluded(card, programs /* the selected programme ids, e.g. ["280"] */) {
+  const pa = card.programmeAvailability;
+  if (!pa?.excluded) return false;                 // no allow-list → never grey
+  if (!programs?.length) return false;             // no programme picked → never grey
+  const allowed = pa.programmes || [];
+  return !programs.some(p => allowed.includes(p)); // none of the picked progs allowed → grey the card
+}
+```
+
+### ⚠️ `programmeAvailability` is NOT in the default card projection — send `full=true`
+
+Today `GET items` / `GET items/by-section` omit `programmeAvailability` from card rows (they return
+`availableTiers` / `programmeBadge` / `familyId` but not this). **Verified: without `full=true` the
+field is absent on all 7 cards above, so the grid cannot compute the grey state at all.** Two options:
+
+```bash
+# Works today — costs the full item doc per card:
+GET /design-book/items/by-section?leafId=b_store%231&programs=280&full=true
+
+# Without it, every card row comes back with programmeAvailability ABSENT → nothing can grey.
+GET /design-book/items/by-section?leafId=b_store%231&programs=280
+```
+
+> **Recommended backend change (not done):** have the backend annotate the **card** the same way it
+> already annotates the pills — reuse `annotateProgrammeExclusions`, set `card.programmeExcluded=true`
+> on the row, and the frontend needs neither `full=true` nor the predicate above. The current split
+> (pills annotated server-side, card left to the client) is an asymmetry, not a design decision.
+
+### Known parity split — card-grey vs pill-strike
+
+The ~20 pill mismatches logged in §2c's parity table are this same issue seen from the other side: the
+app greys the **whole card** for a programme-excluded unit, where we strike the **individual pill**. Both
+carry the same information; they are different presentations. Settle which one the real frontend uses.
+
+---
+
+## 2f. ⚠️ OPEN — section bucketing may not match the app (unverified)
+
+In the client's WAKUU screenshot all 5 visible cards sit under one **"DOOR + DRAWER COMBINATIONS"**
+header. Our export gives those families four *different* `section` values, straight from the app's own
+family data (`item.section = f.sec` in the extractor — not invented by us):
+
+| Card | our `section` |
+|---|---|
+| `T6080IS2IZ`, `T6086ISIZ2` | Door + Drawer Combinations |
+| `TSS12080T2` | Specialty Door Solutions |
+| `T6080N` | Niche & Decorative Applications |
+| `ATQ608068S` | Hot Water Units |
+
+So `by-section` returns **7 families / 5 sections** and buckets 2 under that header where the client's
+screenshot shows 5. Either the app's grid does not bucket by `f.sec` the way we assume, or the screenshot
+is cropped and the remaining headers are simply off-frame. **Not yet checked against the live app** — do
+that (serve the v781 HTML, pick WAKUU, dump the grid's rendered headers + card codes) before changing
+anything. Do not "fix" the section values: they are the app's own data.
 
 ---
 
@@ -206,6 +505,7 @@ AVAILABILITY** (`programmeAvailability`) · **MODIFICATIONS — HOW TO** (`modif
 | `:sku` (path) | IN | Clicked card / "Search by Code" | Grid card / top search | `…/items/TK6080BZ2` |
 | `expand=refs,catalog,all` | IN | (enrichment flags) | Powers card labels/images + Catalog PDF — no visible control | `…/items/T6073VE?expand=all` |
 | `priceProgram` | IN | Programme to **PRICE the resolved ref cards** in (with `expand=refs`). Each `refs[sku]` then carries `pts` (point value) + `priceUnit` — so the accessory / alteration / related cards in the panel show their "NNN pts"/"NNN HLP" pill, same as the grid. Omit → refs have no `pts` | (mirrors the grid's active programme; no own control) | `…/items/CT10073IS2IZ?expand=refs&priceProgram=BOSSA` → `refs.EBF10058.pts` |
+| `programs[]` | IN | Active PROGRAMME selection — greys the CONFIGURE pills whose target is not orderable in it (adds `available:false` + `programmeExcluded`). **Pass the grid's programme through**, or the detail panel shows every pill as available (§2c). Ids or names; multi = union | (mirrors the grid's active programme; no own control) | `…/items/T6080?expand=all&programs=BOSSA` → `item.configure.width[0].available` (= false) |
 
 ### Response (detail sections → panel blocks, top→bottom)
 

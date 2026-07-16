@@ -242,7 +242,7 @@
         "installedHeightMm": 945
       },
       "configure": {
-        "_ui": "The W / H / D / Programme pill rows — on the card and in the CONFIGURE box. Clicking a pill opens a different code (the sku on that pill).",
+        "_ui": "The W / H / D / Programme pill rows — on the card and in the CONFIGURE box. Clicking a pill opens a different code (the sku on that pill). PILL STATE: read `available` + `sku` together — (1) available:true + sku = normal, click opens that sku; (2) available:false + sku = NOT orderable in the SELECTED PROGRAMME — the GRID renders it STRUCK-THROUGH, the DETAIL panel renders it GREY, and BOTH stay clickable; (3) available:false + sku:null = no target code at all → grey and inert (see the '120' pill below). Strike-vs-grey is a SURFACE choice (which renderer you are in), NOT a data field — the app drives both from one flag. IMPORTANT: state (2) NEVER appears in a stored export — in the real v781 export every pill with a sku is available:true and every available:false pill has sku:null. It exists ONLY in API responses, added at query time when the client sends `programs` (the backend also sets programmeExcluded:true then). So the client MUST send `programs` or nothing ever strikes. See docs/design-book-api-ui-map.md §2c.",
         "width": [
           {
             "label": "60",
@@ -286,6 +286,7 @@
           },
           {
             "label": "120",
+            "_ui": "STATE 3 — available:false with sku:null. No 120 cm code exists in this family at all, so there is nowhere to navigate. Grey and INERT (do not attach a click handler). This is the ONLY available:false state a stored export contains: 4,969 pills in v781, every one of them sku:null. The '63 cm depth (alteration)' depth pill is usually this state too — it has no separate code.",
             "value": 1200,
             "unit": "mm",
             "sku": null,
@@ -470,6 +471,7 @@
         "Requires SMNT transformer when handle-less electric (761)."
       ],
       "programmeAvailability": {
+        "_ui": "PROGRAMME AVAILABILITY block on the detail page — and the field that drives the runtime PILL STATE described on `configure` above. Read it as: excluded:false → orderable in EVERY programme (`programmes` stays empty — an empty array here means 'no limit', NOT 'nothing allowed'). excluded:true → orderable ONLY in the programme ids listed in `programmes` (ids, matching programmes[].id). THE CROSS-ITEM LINK: a pill on ANOTHER item dies because of THIS item's programmeAvailability — e.g. the real T6080 card's W pills 15/20 point at T1580/T2080, both of which are excluded:true with 100 of 120 programmes listed and BOSSA NOT among them, so under BOSSA those two pills come back available:false + programmeExcluded:true and the grid strikes them. The backend resolves this per request (annotateProgrammeExclusions) — it is never baked into the exported `available`.",
         "excluded": false,
         "programmes": [],
         "note": "No programme exclusions."
@@ -967,6 +969,7 @@
         ],
         "optionRows": [
           {
+            "_ui": "⚠️ `crossedOut` is RESERVED AND NEVER EMITTED — it is shown here ONLY because this sample's job is to exercise every object in export-schema.ts. It is set 0 times out of 256,937 configure pills in BOTH the real v767 and v781 exports, and that is STRUCTURAL, not an oversight: the extractor's chipCrossed() scrapes the DETAIL panel (#pin), which only ever greys (opacity:.4) — the strike-through exists solely in the GRID renderer (.wchip.wn), which the extractor never reads. DO NOT branch on crossedOut. A struck pill is just `available:false` drawn by the grid (see the T6080BZ2TU width '50' pill). Handle crossedOut defensively (truthy → struck + inert) only so a future export cannot break the client. In a REAL export these three pills would carry available:false + sku:null and nothing else — i.e. STATE 3, grey and inert.",
             "label": "Ty",
             "options": [
               {

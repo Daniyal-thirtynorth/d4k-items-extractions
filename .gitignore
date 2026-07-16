@@ -8,6 +8,7 @@ server.log
 obseleted/old-extraction-pipeline/leicht_items.json
 obseleted/old-extraction-pipeline/leicht_catalog.json
 docs/export-v767.json
+docs/export-v781.json
 # local pre-change safety backups of the full export — never committed (each ~95–103MB)
 docs/*.bak.json
 

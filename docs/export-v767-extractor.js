@@ -6,9 +6,19 @@
 const H = window.__H = {};
 const T = (el)=> el? (el.textContent||'').replace(/\s+/g,' ').trim() : '';
 const num = (s)=>{ const m=String(s).match(/-?\d+(\.\d+)?/); return m?Number(m[0]):null; };
+// coerce a dimension to mm-number. numbers pass through unchanged (already mm); strings like
+// "30 cm"/"58 cm" (some source u.W/u.H/u.D) -> mm, "NN mm" -> NN. keeps schema Number cast valid.
+const mm = (v)=>{ if(typeof v!=='string') return v; const m=v.match(/-?\d+(\.\d+)?/); if(!m) return v; const n=Number(m[0]); return /mm/i.test(v)?Math.round(n):Math.round(n*10); };
 const slug = (s)=> String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const IMGT = (typeof IMG==='function') ? IMG('__CODE__').replace('__CODE__','<CODE>') : '<CODE>';
 const FAMLET = (typeof window.FAMLET!=='undefined')?window.FAMLET:{PRIMO:'P',AVANCE:'A',CONTINO:'C'};
+// PRISTINE toolbar defaults, snapshotted ONCE at injection. buildItem() restores these before every
+// openDetail so each unit is scraped through the app's OWN default view — no filters applied.
+// Inject this file on a FRESH page load: touching the toolbar first would bake that state into DEF.
+// Real defaults (v781): depth:58 · width:'ALL' · height:'ALL' · line:'ALL' · tier:'ALL' · prog:null ·
+// open:'' · antoso:false. NOTE the sentinels are the STRING 'ALL', not null — nulling them breaks the
+// app's gates (available() then returns false for every unit).
+const DEF = (function(){ try{ return JSON.parse(JSON.stringify(state)); }catch(e){ return null; } })();
 const famTier = (fam)=>{ const F=String(fam||''); if(F.indexOf('PRIMO')===0)return 'P'; if(F.indexOf('AVANCE')===0)return 'A'; if(F.indexOf('CONTINO')===0)return 'C'; return (FAMLET&&FAMLET[fam])||'P'; };
 
 // ---- target parse from a chip onclick ----
@@ -24,15 +34,37 @@ function chipTarget(onclick, u){
   if(/pickInsert\(/.test(onclick)) return u.c;
   return null;
 }
+// Availability + crossed-out are read from the COMPUTED style so we match whatever the client
+// HTML actually renders, regardless of the mechanism (inline `style="opacity:.4"`, a CSS class
+// like `.d63off{opacity:.4;cursor:not-allowed;filter:grayscale(1)}`, or `disabled`).
+// NOTE: the old inline-only regex /opacity:\s*\.?[0-3]/ MISSED the app's actual greying value
+// (`opacity:.4`), so ~11k greyed chips were wrongly exported as available:true.
 function chipAvail(chip){
-  if(chip.disabled) return false;
+  const sel=/(^|\s)good(\s|$)/.test(chip.className||'');
+  try{
+    const cs=getComputedStyle(chip);
+    if(parseFloat(cs.opacity)<0.9) return false;                 // greyed
+    if(/not-allowed/.test(cs.cursor)) return false;              // explicitly blocked
+    if(cs.filter && cs.filter!=='none') return false;            // grayscale(1) (e.g. .d63off)
+  }catch(e){}
   const st=chip.getAttribute('style')||'';
-  if(/opacity\s*:\s*\.?[0-3]/.test(st)) return false;  // opacity .3/.4 = greyed
+  const m=st.match(/opacity\s*:\s*([0-9]*\.?[0-9]+)/);           // fallback if computed style unavailable
+  if(m && parseFloat(m[1])<0.9) return false;
+  // `disabled` ALONE is not a dead option: the Programme row marks the CURRENTLY-SELECTED chip
+  // disabled (can't navigate to where you already are) while rendering it normally (`good`,
+  // opacity 1). A genuinely dead chip is always ALSO dimmed (the app pairs disabled+opacity:.3).
+  if(chip.disabled && !sel) return false;
   return true;
 }
+// crossedOut = genuinely STRUCK-THROUGH (schema: distinct from greyed `available:false`).
+// `.d63off` is greyed/grayscale, NOT struck — it is reported via available:false, not here.
 function chipCrossed(chip){
-  const cls=chip.className||''; const st=chip.getAttribute('style')||'';
-  return /d63off/.test(cls) || /line-through/.test(st);
+  try{
+    const cs=getComputedStyle(chip);
+    if(/line-through/.test(cs.textDecorationLine||cs.textDecoration||'')) return true;
+  }catch(e){}
+  const st=chip.getAttribute('style')||'';
+  return /line-through/.test(st);
 }
 
 // ---- card extraction ----
@@ -123,7 +155,7 @@ function scrapeConfigure(pin,u){
     const k=T(row.querySelector('.cfgk'));
     const chips=[...row.querySelectorAll('.chip')];
     if(k==='Width'||k==='Height'||k==='Depth'){
-      const arr=chips.map(ch=>{ const lbl=T(ch); const oc=ch.getAttribute('onclick'); const o={ label:lbl, value:(num(lbl)!=null?num(lbl)*10:null), unit:'mm', sku:chipTarget(oc,u), selected:/(^|\s)good(\s|$)/.test(ch.className), available:chipAvail(ch) }; if(k==='Depth'&&/63/.test(lbl)) o.note='63 cm depth (alteration)'; return o; });
+      const arr=chips.map(ch=>{ const lbl=T(ch); const oc=ch.getAttribute('onclick'); const o={ label:lbl, value:(num(lbl)!=null?num(lbl)*10:null), unit:'mm', sku:chipTarget(oc,u), selected:/(^|\s)good(\s|$)/.test(ch.className), available:chipAvail(ch) }; if(k==='Depth'&&/63/.test(lbl)) o.note='63 cm depth (alteration)'; if(chipCrossed(ch)) o.crossedOut=true; return o; });
       C[k.toLowerCase()]=arr;
     } else if(k==='Programme'){
       C.programme=chips.map(ch=>{ const lbl=T(ch); const tier=lbl; const oc=ch.getAttribute('onclick'); let sku=null; try{ sku=sibCode(u,tier)||chipTarget(oc,u);}catch(e){ sku=chipTarget(oc,u);} return { label:lbl, tier, opening:/1$/.test(tier), sku:(sku&&CODESET&&CODESET.has(sku))?sku:(sku||null), selected:/(^|\s)good(\s|$)/.test(ch.className), available:chipAvail(ch) }; });
@@ -234,7 +266,7 @@ function descOf(f,u){
 function specOf(f,u,pin){
   const carc = (typeof carcaseLine==='function')?carcaseLine(u):null;
   const mods=[u.V?'Vertical handle (V)':'',u.E?'One-piece front (E)':'',u.J?'Line-86 (J)':'',u.Yc?'Line-66 (Y) → '+u.Yc:''].filter(Boolean).join(' · ')||'—';
-  const s={ widthMm:(u.W!=null?u.W:null), heightMm:(u.H!=null?u.H:(f.h!=null?f.h:null)), depthMm:(u.D!=null?u.D:null) };
+  const s={ widthMm:(u.W!=null?mm(u.W):null), heightMm:(u.H!=null?mm(u.H):(f.h!=null?mm(f.h):null)), depthMm:(u.D!=null?mm(u.D):null) };
   if(u.D!=null){ s.depthKind='carcass'; }
   s.modifiers=mods;
   if(carc!=null) s.carcaseLine=String(carc);
@@ -243,12 +275,20 @@ function specOf(f,u,pin){
   if(u.pg) s.catalogPage={ priceGroupRef:u.pg, pdfPage:(u.pp!=null?u.pp:null) };
   return s;
 }
+// `programmes` = the ids the unit CAN be ordered in, from the app's own progOkFor(u,key)
+// over the FULL PROGS list. Do NOT source the keys from progKeysFor(u): it reads
+// state.prog, which is null throughout extraction, so it returns [] and the allowed list
+// came out empty on every item (`excluded` stayed right — only the list was lost).
+// Empty array = not limited = all programmes, per the schema.
+// progOkFor also has an `xE` clause gated on state.front===1; front is a toolbar toggle,
+// not programme data, and is 0 during extraction, so that clause stays inert here.
 function progAvailOf(f,u){
-  let pks=[]; try{ pks=progKeysFor(u)||[]; }catch(e){}
-  const availIds=[];
-  try{ pks.forEach(pk=>{ const okp=(typeof progOkFor==='function')?progOkFor(u,pk):true; if(okp) availIds.push(pk); }); }catch(e){}
-  const excl=(u.x||[]);
-  return { excluded: excl.length>0, programmes: availIds, note: excl.length? ('Excluded from '+excl.length+' programme(s).') : 'No programme exclusions.' };
+  const KS=(typeof PROGS!=='undefined'?PROGS:[]).map(p=>p.k);
+  const allowed=KS.filter(k=>{ try{ return (typeof progOkFor==='function')?progOkFor(u,k):true; }catch(e){ return true; } });
+  const limited=allowed.length<KS.length;
+  return { excluded: limited,
+           programmes: limited?allowed:[],
+           note: limited?('Orderable in '+allowed.length+' of '+KS.length+' programmes.'):'No programme exclusions.' };
 }
 function planningOf(f,u){
   const parts=[];
@@ -296,7 +336,19 @@ function kindOf(f,u){
 
 // ---- build one item ----
 function buildItem(f,u){
-  try{ state.depth = (D2CODE[u.D]!=null?D2CODE[u.D]:58); state.open=''; state.d63=null; }catch(e){}
+  // FULL per-unit reset to the app's PRISTINE defaults, so every unit is scraped through the app's
+  // own unfiltered view. Resetting only depth/open/d63 let residual toolbar state (height/line/prog/
+  // width) from the PREVIOUS openDetail leak in and suppress whole config rows — order-dependent.
+  //
+  // DO NOT set state.depth to the unit's own depth class here. `state.depth` IS the D toolbar FILTER:
+  // at the default (58) — and at 63 — the Configure box renders every chip live, but at ANY other
+  // value the app dims every chip whose target sits at a different depth. Canonicalizing per unit
+  // therefore froze a FILTERED view into `available`, fabricating available:false on 11,013 pills
+  // across 2,891 units (every unit whose depth class was not 58/63) — and it dimmed the Width/Height/
+  // optionRows chips too, not just Depth. Verified against the live app 2026-07-15: at DEF, every chip
+  // with a target is live and every not-live chip has sku:null. `selected` is unaffected — the app
+  // marks the unit's own Depth chip `good` at DEF just the same.
+  try{ if(DEF) Object.assign(state, JSON.parse(JSON.stringify(DEF))); state.d63=null; }catch(e){}
   try{ openDetail(f.id, u.c); }catch(e){}
   const pin=document.getElementById('pin');
   const name = u.sd||u.ul||f.label||u.c;
@@ -310,7 +362,7 @@ function buildItem(f,u){
   try{ const tiers=unitTiers(u); if(tiers&&tiers.length) it.availableTiers=tiers; }catch(e){}
   it.category=f.cat; it.subcategory=(typeof subDisp==='function'?subDisp(f):f.sub); if(f.sec) it.section=f.sec;
   it.active=true;
-  if(u.W!=null) it.widthMm=u.W; if(u.H!=null) it.heightMm=u.H; if(u.D!=null) it.depthMm=u.D;
+  if(u.W!=null) it.widthMm=mm(u.W); if(u.H!=null) it.heightMm=mm(u.H); if(u.D!=null) it.depthMm=mm(u.D);
   it.heightClass = [73,80,86].includes(u.hc)?u.hc:null;
   const tk=toeKickOf(u,f); if(tk) it.toeKick=tk;
   const ap=applianceOf(f,u); if(ap) it.appliance=ap;
@@ -360,8 +412,15 @@ function buildItem(f,u){
 H.IMGT=IMGT;
 H.jobs=null;
 H.buildJobs=function(){
-  // flat list of {f,u}; keep all families (dedupe by sku at finalize)
-  const jobs=[]; FAMS.forEach(f=>{ (f.units||[]).forEach(u=>{ jobs.push([f,u]); }); });
+  // flat list of {f,u}; dedupe by sku at finalize (FIRST wins).
+  // VISIBLE families MUST come first: a sku can live in both a hidden `__DRWDUP`/`MRG_` synthetic
+  // and the real family (e.g. GF76204Z in F1231[hid] + F1231__GF0). The app never renders hidden
+  // families, so their render is wrong (e.g. depth row missing) — ordering visible-first makes
+  // first-wins keep the family the app actually shows. Hidden are appended last ONLY so the ~13
+  // hid-ONLY codes still make it into the export.
+  const jobs=[];
+  FAMS.forEach(f=>{ if(f.hid) return; (f.units||[]).forEach(u=>{ jobs.push([f,u]); }); });
+  FAMS.forEach(f=>{ if(!f.hid) return; (f.units||[]).forEach(u=>{ jobs.push([f,u]); }); });
   // ensure CODE2FAM built (openDetail builds it lazily; force now)
   if(!window.CODE2FAM){ window.CODE2FAM={}; FAMS.forEach(function(ff){ if(ff.hid) return; ff.units.forEach(function(x){ if(!window.CODE2FAM[x.c]) window.CODE2FAM[x.c]=ff; }); }); }
   H.jobs=jobs; window.__ITEMS=window.__ITEMS||[]; return jobs.length;
@@ -396,6 +455,35 @@ H.buildSystems=function(){
     o.triggerSkus=(sys.trigger||[]).slice(); o.required=(sys.required||[]).map(slot);
     if(sys.optional&&sys.optional.length) o.optional=sys.optional.map(slot); return o; });
 };
+// The FACE CARD per family, per tier context = the ONE unit the grid renders for a whole
+// type. Not derivable from the units: the app picks it in selectedUnit()/ppool() using
+// per-family defaults ("height 80", the dim hd/height branches, ppool's tier ordering),
+// so drive the app's OWN visibleBlocks() and record what it actually renders — same rule
+// as the rest of this extractor. '_' = no programme; P/A/C = the programme's FAMLET tier
+// (activeFamFor). Captured in DEFAULT toolbar state (W/H All, D 58, line ALL, no per-card
+// picks) — a filtered grid may legitimately surface a different unit, which the backend's
+// existing tier/width/height/sku sort handles as the fallback.
+// Iterate every category so each non-hidden family is covered exactly once per context.
+H.buildFaces=function(){
+  const face={};
+  if(typeof visibleBlocks!=='function' || typeof FAMS==='undefined' || typeof state==='undefined') return face;
+  const byFam={}; (typeof PROGS!=='undefined'?PROGS:[]).forEach(p=>{ (byFam[p.fam]=byFam[p.fam]||[]).push(p.k); });
+  const first=(f)=>(byFam[f]&&byFam[f][0])||null;
+  const CTX=[['_',null],['P',first('PRIMO')],['A',first('AVANCE')],['C',first('CONTINO')]];
+  const cats=[...new Set(FAMS.filter(f=>!f.hid).map(f=>f.cat))];
+  const s={prog:state.prog,cat:state.cat,sub:state.sub};
+  CTX.forEach(([key,pk])=>{ if(key!=='_' && !pk) return;
+    cats.forEach(cat=>{
+      state.prog=pk; state.cat=cat; state.sub='';
+      let vb=[]; try{ vb=visibleBlocks(); }catch(e){ return; }
+      vb.forEach(x=>{ if(!x||!x.b||!x.u||!x.u.c) return;
+        const o=(face[x.b.id]=face[x.b.id]||{});
+        if(o[key]==null) o[key]=x.u.c; });
+    }); });
+  state.prog=s.prog; state.cat=s.cat; state.sub=s.sub;
+  return face;
+};
+
 H.finalize=function(){
   const items=window.__ITEMS||[];
   // dedupe by sku (first wins; prefer non-error)
@@ -435,6 +523,18 @@ H.finalize=function(){
   });
   const all=uniq.concat(synth);
   all.forEach(it=>{ delete it._err; });
+  // Tag each family's face unit with the tier contexts it fronts. Key by (familyId, sku),
+  // NOT sku: the app can render one sku as the face of TWO families, while this export
+  // keeps one item per sku under a single familyId. Keying by sku alone would tag a unit
+  // for a face it earned in another family (e.g. ZBLL30 fronts a different family but its
+  // item lives in L3232), giving that family two face-ranked units and letting the
+  // backend's width tiebreak pick the wrong one. A tag on a family that can never surface
+  // it is worse than no tag — the tier/width/height/sku fallback handles those.
+  const faces=H.buildFaces(); const faceOf={};
+  Object.keys(faces).forEach(fid=>{ const o=faces[fid];
+    Object.keys(o).forEach(k=>{ const key=fid+'|'+o[k]; (faceOf[key]=faceOf[key]||[]); if(faceOf[key].indexOf(k)<0) faceOf[key].push(k); }); });
+  const FORD={'_':0,P:1,A:2,C:3};
+  all.forEach(it=>{ const f=faceOf[it.familyId+'|'+it.sku]; if(f&&f.length) it.faceForTiers=f.slice().sort((a,b)=>FORD[a]-FORD[b]); });
   const cabinets=all.filter(i=>i.kind==='cabinet').length;
   const cats=H.buildCategories(); const progs=H.buildProgrammes();
   const exp={

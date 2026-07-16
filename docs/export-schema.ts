@@ -230,6 +230,14 @@ export interface Programme {
 // P1 / C1 = "opening" variants (one handle on top) — not real stored codes, made from a flag.
 export type ProgrammeTier = "P" | "P1" | "C" | "C1" | "A";
 
+/**
+ * The tier context a family's FACE CARD is picked for (see Item.faceForTiers) — the app's
+ * `activeFamFor()`: the selected programme's family tier. "_" = no programme selected.
+ * Only the three base tiers exist here (a programme is PRIMO / AVANCE / CONTINO[-12]);
+ * P1/C1 are opening variants of a programme, not programmes of their own.
+ */
+export type FaceTierKey = "_" | "P" | "A" | "C";
+
 export type RuleTables = Record<string, unknown>; // handle_systems, opening_systems, vertical_handle, antoso, lighting, …
 
 /* ═══════════════════════════ System Builder ═══════════════════════════ */
@@ -326,6 +334,15 @@ export interface Item {
   availableTiers?: ProgrammeTier[]; // the FRONTS tier badges at the card's BOTTOM-RIGHT — which tiers this front comes
                                //   in (P/P1/C/C1/A). Usually derivable from configure.programme[] (its `available` ones);
                                //   store it for cards that show the badges without a full configure.
+  faceForTiers?: FaceTierKey[]; // the tier contexts in which THIS unit is the FACE CARD of its family — the single
+                               //   unit the grid renders for the whole type. '_' = no programme selected; P/A/C = the
+                               //   selected programme's tier (PRIMO/AVANCE/CONTINO, per the app's activeFamFor).
+                               //   Absent on non-face units. NOT derivable: the app picks the face in selectedUnit()/
+                               //   ppool() from per-family defaults (e.g. "height 80, width 60"), the dim hd/height
+                               //   branches and tier ordering — e.g. family F805 faces T6080 under P but CT6080 under
+                               //   C, and NEVER its smallest unit CT1573. Captured by driving the app's own
+                               //   visibleBlocks() in DEFAULT toolbar state (W/H All, D 58, no per-card picks), so a
+                               //   grid with W/H filters applied may legitimately surface a different unit.
   category?: string;           // which sidebar category it lives in (Category.id)
   subcategory?: string;
   section?: string;
