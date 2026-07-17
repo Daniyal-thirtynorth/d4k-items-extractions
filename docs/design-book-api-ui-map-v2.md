@@ -273,6 +273,30 @@ is no grid-filter param for handle / front / doorline — they are pure toolbar 
 `alwaysAvailable` (`u._c`) short-circuits ALL gates to live. *The grid `suspended` filter is the
 `engineering` `suspended` flag, a related-but-separate signal from the `capabilities.antosoOk` pill gate.
 
+#### Per-gate GREY condition (render reference)
+
+For a pill whose TARGET has `capabilities` `c` and the current `ToolbarState` `s`, the pill (or whole card,
+on the card's own caps) renders **GREY** when the target FAILS any gate below. `alwaysAvailable` = never grey.
+
+| Gate | GREY when (target caps `c` vs toolbar `s`) |
+|---|---|
+| progOk | `s.progKeys` non-empty AND every one ∈ `c.excludedPrograms` (in Full-E, also `c.hasE` & ∈ `c.excludedProgramsE`; `c.isFrmat` special) |
+| tierOk (P/A/C) | `s.tier` ∉ {ALL, `c.tier`} AND `c.tierTwins` includes `s.tier` (a real twin exists → app swaps to it) |
+| tierOk (P1/C1) | `s.tier` ∈ {P1, C1} AND `c.op !== s.tier` |
+| depthOk | `s.depth` ∉ `c.depthClasses` AND `s.depth !== 58` AND `s.depth !== 63` (58 & 63 always pass) |
+| handleOk | `s.handle === 'V'` AND `!c.handleFree` |
+| frontOk | `s.front === 1` AND `!c.frontE` |
+| openOk | `s.open` set AND NOT (`s.open==='P1'?c.openP1:c.openC1`) AND `!c.singleHandle` |
+| antosoOk | `s.antoso` AND `!c.antosoOk` |
+| doorOk | `s.doorline` set AND NOT (`s.doorline==='J'?c.doorJ:c.doorY`) |
+
+> **Frontend mapping:** the client evaluates all 8 gates with `availableFromCaps(c, s)` below (single source
+> of truth) and renders per the four-state spec further down. The table above is the human-readable
+> per-gate breakdown for building/debugging. For the **authoring** side — what each field means and how to
+> SET it so a pill greys — see the CRUD guide `docs/design-book-crud-guide.md` §3a (depthClasses + the
+> 58/63 quirk), §3b (tier/op/tierTwins — the FRONTS twin-swap), §3c (the remaining six gates), §3d (master
+> greying table).
+
 ### The reference port — `availableFromCaps` (copy verbatim from the schema)
 
 The client evaluates this for every pill (a pill is DEAD when `sku` is null before this even runs):

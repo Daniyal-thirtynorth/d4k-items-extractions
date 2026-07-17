@@ -23,6 +23,59 @@ There is **no build/test here** — it is data files + docs (it IS a git repo no
 and `*.bak.json` are gitignored, the `.gz` is committed). Big JSON files: never `Read` them whole; use
 `python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
 
+## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17). READ THIS FIRST.
+
+The model was reworked from the fat "everything pre-computed, frozen at the default toolbar" export (v1,
+`docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.0.0**). Everything below
+this block that describes `configure` / `programmeAvailability` / `accessoryPanel` / `relatedGroups` /
+`specification` / `programmeBadge` and the frozen per-pill `available` boolean is **v1 — superseded**.
+Current facts:
+
+- **Contract = `docs/export-schema-v2.ts`.** An item stores INTRINSIC FACTS + plain-array RULES + THIN sku
+  refs; the UI/backend DERIVE the rest. Key field changes: `configure`→**`parameters`** (thin pills
+  `{label,sku}`, no stored `available`/`selected`); `programmeAvailability`→**`capabilities.excludedPrograms`**;
+  `accessoryPanel`/`relatedGroups`→thin **`alterations`/`accessories`/`companions`** sku lists +
+  **`finishInterior`** (Vero); `specification`→flat `priceGroupRef`/`frontModifiers`/`carcaseLine`/`weightKg`/
+  `volumeM3`; `programmeBadge`/`cardLabel` dropped (derive); `engineering`→`[{key,ok}]`.
+- **⭐ `capabilities` (17 fields) is the pill-gate rule surface.** A configure pill greys when its TARGET
+  item's capabilities fail a gate for the current toolbar: `available(u) = alwaysAvailable || (progOk &&
+  tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk)`. The client reproduces all 8
+  gates via the **`availableFromCaps(caps, toolbar)`** port (in the schema). Fields: `tier, op, tierTwins[],
+  excludedPrograms[], excludedProgramsE[], isFrmat, hasE, depthClasses[], handleFree, frontE, openP1, openC1,
+  singleHandle, antosoOk, doorJ, doorY, alwaysAvailable`. **Verified 99.997%** vs the live app across 313,842
+  combinations (16,518 pill targets × 19 toolbar states); FRMAT (1 unit) the only residual (layer `isFrmat`).
+- **Fresh full extraction (not a transform).** `docs/export-v781-extractor2.js` drives the app + inlines
+  `scripts/compute-capabilities.js` → emits the v2 shape directly. Run it in Chrome (serve HTML, inject,
+  `__H.processBatch(start,n)` in ~3000 chunks, `__H.finalize()`, `__H.post('http://localhost:8799/save')`
+  with `scripts/extract-sink.js` running). Output **`docs/export-v781-fresh.json`** (18,396 items; committed
+  as `.gz`; raw is gitignored). It recovers 21 units the app init deletes (see `meta.recoveredArtifactSkus`).
+  `scripts/audit-excluded-programs.js` proved `excludedPrograms` == the app's `progOkFor` 100%.
+- **Backend (D4K-backend) is migrated + ingested to D4K-dev.** Item schema reshaped; `annotateProgrammeExclusions`
+  now reads `capabilities.excludedPrograms`; the other 7 gates are client-side. **Manual CRUD added:**
+  `POST/PATCH/DELETE /design-book/items` (share `normalizeItemDoc` with ingest — same shape; every field incl.
+  the whole `capabilities` object settable at creation; `UpsertItemDto`). Re-ingest = **extractor wins** (no
+  merge layer). `.env` currently points at **D4K-dev** (was prod — flip back when done). Migration cleanup:
+  `D4K-backend/scripts/strip-legacy-designbook-fields.js`.
+- **Docs (all v2):** `docs/export-schema-v2.ts` (contract) · `docs/export-sample-v2.json` (12-item worked
+  sample) · `docs/design-book-api-ui-map-v2.md` (API↔UI, §2c the 8-gate model + per-gate GREY table +
+  `availableFromCaps` + render spec; §1b CRUD) · **`docs/design-book-crud-guide.md`** (authoring guide:
+  mental model = a card is a FAMILY of sibling items linked by pills, the rule lives on the pill TARGET;
+  §3a depthClasses+58/63 quirk, §3b tier/op/tierTwins, §3c the other 6 gates, §3d master greying table; the
+  BOSSA "disable 2 width pills" recipe). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
+  `export-sample.json`) are kept for diffing but superseded.
+- **UIs (dev tools in D4K-backend/public/, local/dev only):** `GET /design-book/ui` = the lite BROWSE UI
+  (rebuilt for v2 — cards from `parameters`, whole-card GREY via `availableFromCaps`); **`GET /design-book/admin`**
+  = a full form-based CRUD authoring UI (every field a structured control, programme picker for
+  `excludedPrograms`, dynamic pill rows, live `availableFromCaps` preview, open-by-code + `/admin#SKU`
+  deep-link). Both auto-auth via `/design-book/dev-token`.
+- **Self-sufficiency for greying:** whole-card GREY = each list row ships its own `capabilities` (not in
+  `LIST_OMIT`) → client-local, no extra call. Pill programme-grey = send `programs=` → backend stamps
+  `available:false`+`programmeExcluded`. **KNOWN GAP:** per-pill greying by the other 7 gates in the DETAIL
+  drawer needs the pill target's caps, but `resolveRefs` does NOT project `capabilities` yet — one-line fix
+  (`capabilities:1` in the projection) makes `?expand=refs` fully self-sufficient.
+- **BOSSA = programme id `244`** (PRIMO/P). "Disable width 15/20 in BOSSA" = put `"244"` in the 15/20 pill
+  TARGETS' `capabilities.excludedPrograms` (NOT on the parent) — see crud-guide §5.
+
 ## UI vocabulary — what each term means on screen (and where it maps)
 
 Read this before the schema. It maps what the user sees in the app to the data model in
