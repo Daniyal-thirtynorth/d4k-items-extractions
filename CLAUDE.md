@@ -19,8 +19,9 @@ A **data + schema workspace** for the D4K "Design Book" — the LEICHT kitchen-f
 `obseleted/old-extraction-pipeline/`. The client now generates JSON directly by a headless
 "parity run" of their own app (`openDetail`), so the export matches the live UI exactly.
 
-There is **no build/test/git here** — it is data files + docs. Big JSON files: never `Read` them
-whole; use `python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
+There is **no build/test here** — it is data files + docs (it IS a git repo now; raw `docs/export-*.json`
+and `*.bak.json` are gitignored, the `.gz` is committed). Big JSON files: never `Read` them whole; use
+`python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 
@@ -86,45 +87,48 @@ Read this before the schema. It maps what the user sees in the app to the data m
 ## Current files (the working set)
 
 ```
-data-from-client/                    # NOTE (2026-07-08): all client data JSON deleted — only the HTML
-                                     #   build is kept here now. Everything the backend needs is the
-                                     #   in-house export under docs/ (export-v767.json). The old client
-                                     #   files below (v584 catalog, accessory-panel export, ts-structure
-                                     #   export) are GONE from disk; recover from git history if needed.
-  leicht_units__767_.html            # ⭐ LIVE APP BUILD v767 (17.6 MB) — THE ONLY FILE STILL HERE.
+data-from-client/                    # NOTE: all client data JSON deleted — only the HTML builds kept.
+                                     #   Everything the backend needs is the in-house export under docs/
+                                     #   (export-v781.json). Old client files (v584 catalog, accessory-panel
+                                     #   export, ts-structure export) are GONE from disk; recover from git.
+  leicht_units__781_.html            # ⭐ CURRENT LIVE APP BUILD v781 (17.8 MB) — THE ONE TO EXTRACT FROM.
                                      #   Raw catalog in <script id="DATA"> (DB.families/programs/altnames/
-                                     #   rules). The FULL v767 export was generated FROM this file by
+                                     #   rules). The FULL v781 export was generated FROM this file by
                                      #   driving its own renderer (see below).
+  leicht_units__767_.html            #   prior build v767 (17.6 MB) — kept for diffing; superseded by v781.
 
-docs/
+docs/                                # NOTE: raw *.json exports (v767/v781) are gitignored (>50MB); the .gz
+                                     #   is committed — gunzip to use. All *.bak.json are local-only.
   export-schema.ts                   # ⭐ THE CONTRACT — canonical normalized export schema (see below)
   export-sample.json                 # ⭐ worked SAMPLE of the contract — 13 items exercise every schema object.
                                      #   Carries plain-English `_ui` doc-keys (backend must strip; NOT in schema).
-  export-v767.json                   # ⭐ THE ACTUAL FULL EXPORT (v767) — 18,375 items, ~103 MB. Schema-VALID
-                                     #   (0 violations), 0 unresolved of 536,800 refs. Ingest THIS. Now also
-                                     #   carries top-level `functionalCategories` + per-item `functionalGroups[]`,
-                                     #   and (2026-07-10) per-item `nameQualifier` / `handedLR` / `sinkFitment`.
-  export-v767.json.gz                #   gzipped (3.3 MB)
-  export-v767.pre-functional.bak.json #  backup of the export BEFORE functionalCategories/-Groups were added
-  export-v767-SAMPLE.json            #   10 real items exercising every schema object
-  export-v767-extractor.js           #   the in-page extractor that produced it (re-runnable for v768+)
-  export-v767-README.md              #   method + counts + how to re-run
-  functional-view-v767.json          #   standalone "Design Tasks" sidebar tree (zones→groups→leaves+rules+counts)
-  design-book-guide.html / .pdf      # illustrated guide to the CURRENT backend API (UI element → endpoint)
-  design-book-api-map.html / .pdf    # map of the current backend endpoints
+  export-v781.json                   # ⭐ THE ACTUAL FULL EXPORT (v781) — 18,375 items (16,847 cabinet ·
+                                     #   1,381 accessory · 147 alteration + synthesized), 14 categories,
+                                     #   120 programmes, ~101 MB. Ingest THIS. Carries top-level
+                                     #   functionalCategories + systems[], and per-item functionalGroups[] /
+                                     #   nameQualifier / handedLR / sinkFitment / faceForTiers.
+  export-v781.json.gz                #   gzipped (3.4 MB) — the committed form
+  export-v781-extractor.js           #   the in-page extractor that produced it (re-runnable for v782+)
+  export-v781.pre-functional.bak.json #  local backup before functionalCategories/-Groups (gitignored)
+  export-v767.json / .gz / -extractor.js / -README.md / -SAMPLE.json / functional-view-v767.json
+                                     #   ⭐ prior v767 export + its extractor/README/sample — superseded by
+                                     #   v781 but kept; README has the full method + how-to-re-run notes.
+  design-book-api-ui-map.md          # ⭐ CURRENT canonical API↔UI map (endpoints ↔ screen elements)
+  design-book-guide.html / .pdf      # older illustrated guide to the backend API (UI element → endpoint)
+  design-book-api-map.html / .pdf    # older map of the backend endpoints (superseded by the .md above)
   img/                               # screenshots used by the guide
 
 obseleted/                           # retired — see bottom
 ```
 
-## ⭐ The v767 full export — produced IN-HOUSE (`docs/export-v767.json`)
+## ⭐ The v781 full export — produced IN-HOUSE (`docs/export-v781.json`)
 
 We no longer wait on the client for a correct export — **all prior client exports were wrong and
-discarded.** A fresh, schema-valid full export of v767 was built here from `leicht_units__767_.html`.
+discarded.** A fresh, schema-valid full export of v781 was built here from `leicht_units__781_.html`
+(current). The prior v767 export + extractor are kept for diffing.
 
-**Result:** 18,375 items (16,915 cabinet · 1,306 accessory · 154 alteration · +23 synthesized
-referenced codes), 14 categories, 120 programmes. `node validate.js` → **0 schema violations**;
-**0 unresolved of 536,800** pill/card/variant refs; 0 dup skus.
+**Result:** 18,375 items (16,847 cabinet · 1,381 accessory · 147 alteration + synthesized referenced
+codes), 14 categories, 120 programmes. Ingest THIS.
 
 **Why it is correct (and the client's wasn't):** the raw `<script id="DATA">` JSON is NOT the shipped
 model — on load the page runs a big reclassify/split/merge (`classify`, `splitFam`, `mergeFams`, …),
@@ -132,7 +136,7 @@ so the final `FAMS` = 1,714 families / 18,823 units only exists post-init, and e
 (configure pills, engineering, accessory tabs, related groups, appliance) is COMPUTED by the app's own
 `openDetail()` renderer. So we **drive the app's real code**, never re-implement it:
 1. serve the HTML over http, open in Chrome (extension can't do `file://`);
-2. `fetch`+`eval` `docs/export-v767-extractor.js` in the page → `__H` reachable (FAMS + helpers are
+2. `fetch`+`eval` `docs/export-v781-extractor.js` in the page → `__H` reachable (FAMS + helpers are
    page-scope globals, callable from injected JS);
 3. `__H.processBatch(start,n)` in chunks → for each unit: canonicalize `state.depth`, call
    `openDetail(fid,code)`, scrape `#pin` DOM into the schema (chip targets from `onclick`, card codes
@@ -146,10 +150,17 @@ so the final `FAMS` = 1,714 families / 18,823 units only exists post-init, and e
    use top-level `await` + a trailing bare expression).
 
 Gotchas baked into the extractor: programme-tier siblings (P/C/A/P1/C1 prefixes) are pill targets only,
-NOT stored items (backend synthesizes them from base+featureFlags); dims coerced to mm-numbers (some
-source `u.W` are strings like `"30 cm"`); `specification` omitted when a unit has no real dim (matches
-sample — accessories carry no spec); `catalogPage` dropped when no PDF page. Re-run for v768+: same 5
-steps, just point the http server at the new HTML. Full notes in `docs/export-v767-README.md`.
+NOT stored items (backend synthesizes them from base+featureFlags); dims coerced to mm-numbers via `mm()`
+(some source `u.W` are strings like `"30 cm"`); `specification` omitted when a unit has no real dim
+(matches sample — accessories carry no spec); `catalogPage` dropped when no PDF page. **v781 extractor
+fixes (2026-07-16):** `chipAvail()` reads the COMPUTED style (`opacity:.4` is the real greying — the old
+inline-only regex exported ~11k greyed chips as `available:true`); `disabled` alone no longer marks a chip
+dead (the Programme row disables the selected chip while rendering normally); `chipCrossed()` reports only
+genuine line-through (`.d63off` is greyed not struck → `available:false`); `progAvailOf()` sources
+programme ids from `progOkFor()` over the full `PROGS` list (`state.prog` is null during extraction, so
+the old `progKeysFor()` returned empty every item); pristine toolbar defaults snapshotted once at injection
+and restored before every `openDetail`. New: `Item.faceForTiers` (see schema). Re-run for v782+: same 5
+steps, just point the http server at the new HTML. Full method notes in `docs/export-v767-README.md`.
 
 ## The export schema (the contract) — `docs/export-schema.ts`
 
@@ -162,7 +173,7 @@ catalog updates are a clean re-ingest. Design (settled with the user + a data an
   accessory/alteration cards, card variants, modification codes, companions. **No embedded duplication.**
   (Measured: accessory cards duplicated ~122× in the flat export; one code, `ANST`, on 11,001 units.
   Image is 100% derivable from `imageUrlTemplate`. 1,453/1,804 card codes are already SKUs.)
-- Top level: `{ meta, categories[], programmes[], ruleTables?, items[] }`.
+- Top level: `{ meta, categories[], programmes[], ruleTables?, functionalCategories, systems[], items[] }`.
 - An item carries every detail-screen section it shows (all optional): `configure` (W/H/D/Programme
   pills → target SKUs), `description`, `accessoryPanel` (tabs→sections→card refs), `relatedGroups`
   (Compatible Accessories, Planned Together, Often Planned With, **Opening Support**, Complete This
@@ -175,6 +186,10 @@ catalog updates are a clean re-ingest. Design (settled with the user + a data an
   `{maxSinkSizeInch, cabinetWidthCm, customAboveInch:42, isDoor, showOnCard, notes[]}`, Base/Sinks with a
   width; 1,420 items). All three are IN the export, ingested (schema `@Prop`s), and served by `GET items` +
   `items/:sku`. Extractor computes them via the app's own `vsub`/`handed()`/`sinkMaxSize()`.
+  Plus (2026-07-16) **`faceForTiers`** (`FaceTierKey[]` where key = `"_" | "P" | "A" | "C"`) — the tier
+  contexts in which a unit is its family's FACE card; 1,848 items. NOT derivable — the app picks the face
+  in `selectedUnit()`/`ppool()` from per-family defaults, so it's captured by driving the app's own
+  `visibleBlocks()` in default toolbar state.
 - Dimensions in **mm** (chip labels keep cm). Prices excluded (programme-dependent; backend computes).
 - **Images are built, not stored.** `imageUrl = meta.imageUrlTemplate.replace("<CODE>", sku)` — a card/
   ItemRef only carries `{sku}`, so the picture needs no DB read and no join. The card's **other** fields
@@ -317,8 +332,8 @@ product UI (the client builds the real React app).
 ## Open items / next steps
 
 1. ~~**Write the new client instruction** to export the full catalog to the contract~~ — **NO LONGER
-   NEEDED for v767.** We produce the export ourselves from the live HTML (`docs/export-v767.json`, see
-   the v767-export section above). All the old defects the client instruction was meant to fix
+   NEEDED.** We produce the export ourselves from the live HTML (`docs/export-v781.json`, see
+   the v781-export section above). All the old defects the client instruction was meant to fix
    (Alterations flattened, raw-`<svg>` Inspiration label, dropped lifestyle image, missing `configure`)
    are handled by driving `openDetail`. Only re-ask the client if they can give the SEPARATE
    inspiration/lifestyle render URLs (the one thing not in the HTML). Old email + accessory-panel schema
@@ -326,7 +341,7 @@ product UI (the client builds the real React app).
 2. ~~**Version alignment**~~ — **RESOLVED.** The single in-house full-catalog export at one version
    (v767) removes the old v584/v728/v765 join gap. Re-run the extractor on each new HTML build.
 3. **Build proper APIs in `D4K-backend`** once the schema is agreed — the endpoints that serve the new
-   normalized item model to the React UI. Ingest `docs/export-v767.json` (schema-valid, 18,375 items).
+   normalized item model to the React UI. Ingest `docs/export-v781.json` (schema-valid, 18,375 items).
 4. **Two v765 app bugs to raise with the client** (found while verifying `relatedGroups` in-browser):
    - **`oftenPlannedWith` never renders** — the render does `meta.companions[f.sub]`, but `companions`
      keys are `"Sink"`/`"Cooktop"` while family `sub` values are `"Sinks"`/`"Cooktops & Downdrafts"` →
