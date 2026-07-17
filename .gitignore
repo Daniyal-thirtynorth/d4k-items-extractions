@@ -14,3 +14,7 @@ docs/*.bak.json
 
 # Finder duplicate — not shipped at all (no .gz either)
 obseleted/duplicate-data/
+
+# v2 fresh full exports (raw >50MB) — committed as .gz instead
+docs/export-v781-fresh.json
+docs/export-v781-min.json
