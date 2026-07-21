@@ -102,6 +102,8 @@ stays free ("customize anything" inside the known surface). `PatchItemDto` = `Pa
 | `availableTiers[]` · `faceForTiers[]` | string[] | FRONTS tier badges · which tiers this unit is the family FACE card |
 | **`capabilities`** | object (17 fields — §2d) | **the pill-gate rule inputs** — how every configure pill greys |
 | **`parameters`** | `{ width[], height[], depth[], programme[], options[] }` | the W/H/D/Programme + coded pill rows (§2) |
+| **`heightExtension`** (2.2) | `{sku, addCode, options:[{label, heightMm}]}` | the **`217+`** chip on the Height row — 230/244/250 cm via the 217 cm unit + `MPHVERL`. **Not** three more `parameters.height` pills (the HP20 panels have REAL 230/250 siblings — the labels would collide) — §2c-3 |
+| **`doorLineYCode`** (2.2) | string | the literal order code when the toolbar picks door-line **Y** (Y REPLACES the whole code, so it can't be derived). Set it on the same units that carry `capabilities.doorLineY` — that flag is the gate, this is the code — §2c-3 |
 | `alterations[]` | string[] (sku codes) | Alterations tab cards (hydrated via `refs`) |
 | `accessories[]` | `(string \| {sku, variants:[{label,sku}]})[]` | accessory / pullout cards (+ runner/length variants) |
 | `companions[]` | string[] (sku codes) | Planned-together / Opening-support / Complete-this-cabinet cards |
@@ -253,6 +255,9 @@ To resolve a pill the client:
 3. looks up the **TARGET item's `capabilities`** (already on the card / in `refs`) and runs
    `availableFromCaps(caps, toolbar)` → **GREY** if false, else **LIVE**.
 
+On CLICK every row navigates (`GET items/{pill.sku}`) — **except a `depth` pill that points at the item
+itself, which must NOT fetch**. Full handler: **§2c-4**.
+
 
 ### 2c-1. ⭐ SELECTED — navigation rows vs DEPTH (state) rows
 
@@ -333,6 +338,8 @@ Notes:
   that is bad data, not a model — mark **none** rather than all, so nothing renders wrongly selected.
 - Reference implementation: `depthOptsForCard()` / `depthCodeFor()` / `cardDepthOf()` / `selMark()` in
   `D4K-backend/public/design-book-ui.html`.
+- **Writing the click handler? → §2c-4** — selection + the fetch / don't-fetch decision as one
+  copy-paste function.
 
 > **The pill's own item does NOT carry the answer** — the answer lives on the item the pill points at.
 > Grid cards ship `capabilities` on every row (so same-family sibling targets are already present); the
@@ -357,6 +364,8 @@ The catalog expresses "this cabinet at 68 cm" in two different ways, and a singl
 pill.sku !== item.sku   // → B: a SEPARATE ITEM. Navigate to it.
 pill.sku === item.sku   // → A: the SAME item. Order code = pill.code ?? item.sku.
 ```
+
+`pill.sku !== item.sku` is therefore also the **fetch** condition — the click handler is in **§2c-4**.
 
 `code` is written on **every pill of a re-cut row** — including the `58` and `63` pills where it equals
 `sku` — so *`code` present ⟹ same item*, but **the converse does not hold**: a self-pointing pill with no
@@ -464,6 +473,129 @@ Render it as its own row appended after `Height`. **It is deliberately not part 
 families like the HP20 panels also have **real** 230 / 250 cm sibling units, so the labels would collide —
 one `230` that opens a different product, another that extends this one. `GET items/HP20146` shows both at
 once (`Height: H146 … H230 H250` plus `217+: 230 244 250`).
+
+**⚠️ The `217+` row NAVIGATES first, then holds state — it is not a pure state row like depth.** Only the
+217 cm unit can BE extended, so where you are decides what a chip means:
+
+| you are on | a `217+` chip is | `selected` | order code |
+|---|---|---|---|
+| a **shorter sibling** (`HP20146`, `item.sku !== heightExtension.sku`) | plain **navigation** — opens `heightExtension.sku`, carrying the choice | **never** — nothing is lit | the unit's own code, untouched |
+| the **217 unit** (`HP20217`, `item.sku === heightExtension.sku`) | **state** — re-clicking the lit chip clears it | the picked label | `[heightExtension.sku, heightExtension.addCode]` |
+
+101 of the 2,046 units are the 217 units themselves, and they carry a self-referential
+`heightExtension.sku === sku` — which is what makes the pick land somewhere it can render.
+
+Two things this forces on a client:
+
+- **Never mark a chip `selected` while `item.sku !== heightExtension.sku`.** The header would show the
+  short unit's own unextended code while a chip claimed 250 cm.
+- **Key the pick by `heightExtension.sku`, not by a bare label**, so it survives the hop onto that unit.
+  A reset-on-navigate effect keyed on the current sku (the right thing for the depth pick) otherwise
+  wipes the choice in the same commit that acts on it.
+
+```js
+// one handler, both halves
+function pickHeightExt(item, opt) {
+  const hx = item.heightExtension; if (!hx) return;
+  if (item.sku !== hx.sku) { setPick({sku: hx.sku, label: opt.label}); return open(hx.sku); }
+  setPick(isSelected(opt) ? null : {sku: hx.sku, label: opt.label});   // on it → toggle
+}
+// selected, and the clipboard's second line, only ON the 217 unit
+const here = item.sku === hx.sku;
+const lines = here && pick?.sku === hx.sku ? [hx.sku, hx.addCode] : [depthResolvedCode];
+```
+
+Reference implementation + the live trace it was verified against: `D4K-backend/public/design-book-ui.html`
+(`hextPills` / `pickDrawerHext`).
+
+---
+
+### 2c-4. ⭐⭐ DEPTH PILL — which one is selected, and when a click must call `GET items/:sku`
+
+The one row on the whole page where a click is **sometimes an API call and sometimes not**. Everything
+here is a restatement of §2c-1 (selection) + §2c-2 (the two models) as one copy-paste handler; read those
+for the *why*, this section for the *what to write*.
+
+**The rule in one line:** the fetch decision is `pill.sku !== item.sku`, and the selection decision is by
+**label**, never by sku.
+
+#### The 4 things a depth pill can be
+
+| # | Pill shape | Meaning | Click → | API call? |
+|---|---|---|---|---|
+| 1 | `pill.sku !== item.sku` | **sibling unit** — depth is a separate product (model B) | navigate to that unit | ✅ **YES** — `GET items/{pill.sku}?expand=all` |
+| 2 | `pill.sku === item.sku` + `pill.code` ≠ sku | **same unit, re-cut order code** (model A, `u.d`) | set local depth state | ❌ **NO** |
+| 3 | `pill.sku === item.sku`, no `code` / `code === sku` | same unit, native class or a code-less class | set local depth state | ❌ **NO** |
+| 4 | `pill.alteration === true` (the `63`) | same unit + alteration codes in the clipboard | set local depth state, add `d63Set` codes | ❌ **NO** |
+
+Shapes 2–4 change **nothing on the server**. The item, its `capabilities`, its image, its price group and
+every other row are unchanged — only the displayed/copied order code and the effective carcass mm move.
+Re-fetching there is a wasted round-trip **and** re-renders the row from scratch, losing the local depth
+pick.
+
+#### ⚠️ NEVER fetch `pill.code`. It is DISPLAY / COPY only.
+
+The depth-cut codes are synthesized and **never stored as units**, and — unlike the `P1`/`C1` prefixes,
+which the backend *does* synthesize on read — nothing resolves them:
+
+```bash
+GET /design-book/items/T6080IS2IZ      → 200   # the stored unit          (pill.sku)
+GET /design-book/items/T608036IS2IZ    → 400   # the depth-cut order code (pill.code)  ← never call this
+GET /design-book/items/P1T3080S        → 200   # tier prefix IS synthesized on read
+```
+
+Same "synthesized, never stored" phrase, opposite API behaviour. So: **route, fetch and build the image
+from `pill.sku`; show and copy `pill.code ?? item.sku`.** `imageUrl` stays on `item.sku` at every depth.
+
+#### The complete handler
+
+```js
+// ── SELECTION (which pill is lit) ────────────────────────────────────────────
+// by LABEL, never by sku — several pills share item.sku on a depth row.
+function selectedDepthLabel(item, pills, cardPick, toolbarDepthClass) {
+  const isStatePill = p => p.sku === item.sku;               // stays here (shapes 2-4)
+  const chosen = [cardPick, toolbarDepthClass, 58]           // the app's cardDepth(id,u)
+    .find(v => v != null && pills.some(p => String(p.label) === String(v)));
+  const at     = pills.find(p => String(p.label) === String(chosen));
+  const own    = pills.filter(isStatePill);
+  const native = own.find(p => !p.alteration) ?? own[0] ?? null;
+  // MIXED row (7,458 of 11,551): honour `chosen` only if that pill is a state of THIS item,
+  // else fall back to this item's own native pill — otherwise the sibling pill renders
+  // "selected", goes inert, and BLOCKS the navigation.
+  return (at && isStatePill(at)) ? String(chosen) : (native ? String(native.label) : null);
+  // null is legal — the app draws no lit chip either. Never "select the first pill".
+}
+
+// ── CLICK ────────────────────────────────────────────────────────────────────
+function onDepthPillClick(item, pill) {
+  if (pill.sku == null) return;                              // DEAD — not clickable
+  if (pill.sku !== item.sku) {                               // shape 1 → REAL navigation
+    return openItem(pill.sku);                               // GET items/{pill.sku}?expand=all
+  }
+  setCardDepth(item.sku, pill.label);                        // shapes 2-4 → NO fetch
+  setOrderCode(pill.code ?? item.sku);                       // display / Copy button only
+  setEffectiveDepthMm(Number(pill.label) * 10 - 20);         // carcass mm at that class
+  if (pill.alteration) addClipboardCodes(d63Set(item));      // 63 → ANTSP63US · MPRU · …
+}
+```
+
+`openItem(sku)` is the same call the grid makes for any other pill — pass the toolbar's `programs=` and
+`priceProgram=` through so the new unit comes back with its programme greying already stamped (§3).
+
+Note a **GREY** depth pill is still clickable (§2c) — greying gates *availability*, not navigation, so a
+grey shape-1 pill still fetches.
+
+#### Checklist — the four bugs this prevents
+
+1. **Selecting by `sku === item.sku`** → every self pill lights up (native **and** the 63 alteration).
+2. **Honouring the toolbar class on a mixed row** → a *sibling* pill renders selected, goes inert, and the
+   user can never leave the current unit.
+3. **Fetching on every depth click** → `GET items/T608036IS2IZ` **400s**, or (at best) a pointless
+   round-trip that resets the local depth pick.
+4. **Filtering / routing / image-building on `code`** → nothing resolves; use `capabilities.depthClasses`
+   for filtering (§2c-2) and `sku` for everything addressable.
+
+---
 
 ### The 8 gates — toolbar control → `capabilities` field(s)
 
@@ -947,3 +1079,5 @@ One row per v1 section / feature → where it lives in v2 (or why it is gone). `
 | §9 `GET stats` | §9 | ✅ unchanged |
 | — | §1b `POST/PATCH/DELETE items` (CRUD + DTO surface) | ➕ new in v2 |
 | — | §2d `capabilities` object (17 fields) | ➕ new in v2 |
+| — | §2c-1 / §2c-2 / §2c-4 depth as a STATE row (`parameters.depth[].code`, the two models, the fetch / don't-fetch click handler) | ➕ new in 2.1 |
+| — | §2c-3 the rest of the order-code surface (`assemble()` inputs; `doorLineYCode`, `heightExtension`; `Insert` is plain navigation) | ➕ new in 2.2 |
