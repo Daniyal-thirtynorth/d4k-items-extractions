@@ -24,7 +24,7 @@
  * ── VERIFIED ────────────────────────────────────────────────────────────────
  *   `Capabilities` reproduce the app's own `available()` at **99.997%** across
  *   313,842 combinations (16,518 configure-pill targets × 19 toolbar states). The
- *   only residual is FRMAT (1 unit — layer the `FRMAT_MAX` size-table via `isFrmat`).
+ *   only residual is FRMAT (1 unit — layer the `FRMAT_MAX` size-table via `isFrmatFamily`).
  *
  * ── UNITS / NAMING / IMAGES ─────────────────────────────────────────────────
  *   Dimensions in MILLIMETRES unless a field says otherwise. `sku` = an item's
@@ -33,7 +33,8 @@
  *   meta.imageUrlTemplate.replace("<CODE>", sku)`.
  *
  * ── VERSIONING ──────────────────────────────────────────────────────────────
- *   `meta.schemaVersion` = "2.0.0". The extractor emits this shape directly
+ *   `meta.schemaVersion` = "2.2.0"  (2.1 added DimPill.code; 2.2 adds Item.doorLineYCode + Item.heightExtension — all additive).
+ *   The extractor emits this shape directly
  *   (`docs/export-v781-extractor2.js`); ingest AND the CRUD endpoints write it
  *   through one `normalizeItemDoc`, so hand-authored and extracted items match.
  */
@@ -52,7 +53,7 @@ export interface CatalogExport {
 export interface ExportMeta {
   generated: string;               // ISO datetime
   source: string;                  // e.g. "leicht_units v781 (headless DOM extraction via openDetail)"
-  schemaVersion: string;           // "2.0.0"
+  schemaVersion: string;           // "2.2.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension
   imageUrlTemplate: string;        // ".../itemData/<CODE>.jpg" — build every image from this + sku
   counts: { items: number; cabinets: number; accessories: number; categories: number; programmes: number };
   recoveredArtifactSkus?: string[]; // codes the app's init deleted as artifacts but which are still real
@@ -92,10 +93,22 @@ export interface Item {
   availableTiers?: ProgrammeTier[]; // FRONTS tier badges the front comes in (P/P1/C/C1/A) — grid tier filter
   faceForTiers?: FaceTierKey[];     // tier contexts in which THIS unit is its family's FACE card (_/P/A/C).
                                     //   NOT derivable — captured from the app's visibleBlocks().
-  capabilities: Capabilities;       // ⭐ THE RULE INPUTS — drive every configure-pill gate (see below)
+  capabilities?: Capabilities;      // ⭐ THE RULE INPUTS — drive every configure-pill gate (see below).
+                                    //   Present on every REAL unit (18,375/18,396 in v781). Absent on the
+                                    //   21 SYNTHESIZED stub items — codes that are only ever REFERENCED
+                                    //   (760, 761, IS, SZ2, HW60GA2, …): they exist in no family, so there
+                                    //   is nothing to compute a gate from. Treat missing as "never greys"
+                                    //   (`availableFromCaps` returns true for a null caps object).
+  doorLineYCode?: string;           // ORDER CODE when the toolbar picks door-line **Y** (line 66). Y is the
+                                    //   one code modifier that is NOT derivable: V/E/J/P1/C1 are prefixes or
+                                    //   suffixes on `sku`, but Y REPLACES the whole code (app `assemble()`
+                                    //   first line: `if(dl==='Y' && u.Yc) return u.Yc`). 11 units in v781,
+                                    //   exactly those with `capabilities.doorLineY` — that flag is the GATE,
+                                    //   this is the code. Never a stored item of its own.
 
   /* configurator pills — thin: label + navigation target only. State is DERIVED. */
   parameters?: Parameters;
+  heightExtension?: HeightExtension; // Tall only: the "217+" chip appended to the HEIGHT row.
 
   /* thin reference lists — sku CODES only; cards hydrated at read via the ref index */
   alterations?: string[];          // alteration-code refs (Standard + Unit-Specific)
@@ -147,26 +160,26 @@ export interface Item {
 export interface Capabilities {
   alwaysAvailable: boolean;        // app `u._c` — short-circuits every gate to available:true
   // tierOk
-  tier: "P" | "A" | "C" | null;    // native line (app `u.fam`; null = line-neutral, never greys by tier)
-  op: "P1" | "C1" | null;          // this unit IS a premium opening variant
-  tierTwins: ("P" | "A" | "C")[];  // tiers (≠ native) for which a REAL sibling SKU exists → grey under that tier
+  nativeTier: "P" | "A" | "C" | null; // native line (app `u.fam`; null = line-neutral, never greys by tier)
+  opening: "P1" | "C1" | null;     // this unit IS a premium opening variant
+  twinTiers: ("P" | "A" | "C")[];  // tiers (≠ native) for which a REAL sibling SKU exists → grey under that tier
   // progOk
   excludedPrograms: string[];      // programme ids the unit is NOT orderable in (app `u.x`) — THE programme rule
   excludedProgramsE: string[];     // extra exclusions active ONLY in single-front / "Full-E" mode (app `u.xE`)
-  isFrmat: boolean;                // FRMAT max-size-table family — layer FRMAT_MAX[programmeName] on top
-  hasE: boolean;                   // E-capable (needed for the excludedProgramsE path)
+  isFrmatFamily: boolean;          // FRMAT max-size-table family — layer FRMAT_MAX[programmeName] on top
+  hasEFront: boolean;              // E-capable (needed for the excludedProgramsE path)
   // depthOk
   depthClasses: number[];          // nominal depth CLASSES the unit offers (cm). 58 & 63 always pass.
   // handleOk / frontOk / openOk
   handleFree: boolean;             // no-handle front OR interior module (app `u.V || _hFree`)
-  frontE: boolean;                 // one-piece front (app `u.E || /\dE$/.test(code)`)
+  onePieceFront: boolean;          // one-piece front (app `u.E || /\dE$/.test(code)`)
   openP1: boolean;                 // supports the P1 opening variant
   openC1: boolean;                 // supports the C1 opening variant
   singleHandle: boolean;           // ≤1 stacked front (opening rule always passes when true)
   // antosoOk / doorOk
-  antosoOk: boolean;               // inside the ANTOSO suspended-install approval envelope (precomputed)
-  doorJ: boolean;                  // door-line J
-  doorY: boolean;                  // door-line Y
+  antosoApproved: boolean;         // inside the ANTOSO suspended-install approval envelope (precomputed)
+  doorLineJ: boolean;              // door-line J
+  doorLineY: boolean;              // door-line Y
 }
 
 /**
@@ -189,23 +202,23 @@ export interface ToolbarState {
  * REFERENCE PORT of the app's `available()` — evaluate a pill's TARGET
  * capabilities against the toolbar. The client calls this for every pill; a pill
  * is DEAD when its `sku` is null (no target), GREY when this returns false, else
- * live. (FRMAT: also `&& !(caps.isFrmat && frmatExcluded(prog))`.)
+ * live. (FRMAT: also `&& !(caps.isFrmatFamily && frmatExcluded(prog))`.)
  *
  *   function availableFromCaps(c: Capabilities, s: ToolbarState): boolean {
  *     if (c.alwaysAvailable) return true;
  *     const pk = s.progKeys ?? [];
  *     const progOk  = !pk.length || pk.some(k =>
- *       !c.excludedPrograms.includes(k) && !c.isFrmat &&
- *       !(s.front === 1 && c.hasE && c.excludedProgramsE.includes(k)));
+ *       !c.excludedPrograms.includes(k) && !c.isFrmatFamily &&
+ *       !(s.front === 1 && c.hasEFront && c.excludedProgramsE.includes(k)));
  *     const tierOk  = !s.tier || s.tier === 'ALL' ? true
- *       : (s.tier === 'P1' || s.tier === 'C1') ? c.op === s.tier
- *       : !c.tier ? true : c.tier === s.tier ? true : !c.tierTwins.includes(s.tier);
+ *       : (s.tier === 'P1' || s.tier === 'C1') ? c.opening === s.tier
+ *       : !c.nativeTier ? true : c.nativeTier === s.tier ? true : !c.twinTiers.includes(s.tier);
  *     const depthOk = s.depth === 58 || s.depth === 63 || c.depthClasses.includes(s.depth ?? 58);
  *     const handleOk= s.handle !== 'V' || c.handleFree;
- *     const frontOk = s.front !== 1 || c.frontE;
+ *     const frontOk = s.front !== 1 || c.onePieceFront;
  *     const openOk  = !s.open || (s.open === 'P1' ? c.openP1 : c.openC1) || c.singleHandle;
- *     const antosoOk= !s.antoso || c.antosoOk;
- *     const doorOk  = !s.doorline || (s.doorline === 'J' ? c.doorJ : c.doorY);
+ *     const antosoOk= !s.antoso || c.antosoApproved;
+ *     const doorOk  = !s.doorline || (s.doorline === 'J' ? c.doorLineJ : c.doorLineY);
  *     return progOk && tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk;
  *   }
  */
@@ -213,22 +226,61 @@ export interface ToolbarState {
 /* ─────────── Configurator pills ─────────── */
 /**
  * UI: the H / W / D / Programme rows on the card + detail "Configure" box, plus
- * any coded rows (Mode / Ty / Config / Finish). Each pill just NAVIGATES to a
+ * any coded rows (Ty / Runner / Finish / Insert / …). Each pill just NAVIGATES to a
  * sibling item (`sku`); clicking it opens that item. Availability + selected state
  * are DERIVED at read — selected = (pill.sku === item.sku); dead = (sku == null);
  * grey = availableFromCaps(target.capabilities, toolbar) === false.
+ * EXCEPTION: a `depth` row is a STATE row, not navigation — see DimPill below.
  */
 export interface Parameters {
   width?: DimPill[];
   height?: DimPill[];
   depth?: DimPill[];               // a pill may be a 63 cm depth ALTERATION (alteration:true)
   programme?: ProgrammePill[];     // P / P1 / C / C1 / A
-  options?: OptionPill[];          // coded rows, flattened (Mode/Ty/Config/Finish); one entry per pill
+  options?: OptionPill[];          // coded rows, flattened (Ty/Runner/Finish/Insert/…); one entry per pill
 }
-export interface DimPill { label: string; sku: string | null; alteration?: boolean; }
+/**
+ * A W / H / D pill. `sku` is the ITEM you land on; `code` (depth rows only) is the ORDER CODE
+ * at that setting.
+ *
+ * On a DEPTH row the pills are usually NOT navigation: `u.d = [36,48,68]` means *this* cabinet is
+ * orderable at those depths, so every pill carries the item's own `sku` and only the order code
+ * changes. The app re-cuts it in `assemble()`:
+ *     parseCanon(c) = c.match(/^([A-Z]+)(\d+)([A-Z0-9]*)$/)          // pre · dig · fn
+ *     if (depth !== 58 && u.d.includes(depth)) c = pre + dig + depth + fn
+ *     // T6080IS2IZ @36 → T608036IS2IZ    @48 → T608048IS2IZ    @68 → T608068IS2IZ
+ * Those codes are SYNTHESIZED — none of them exists as a stored unit (same status as the P1/C1
+ * prefixes), which is why `sku` still points at the base item. `code` is present on every pill of a
+ * re-cut depth row (4,858 pills over 2,348 items in v781) and absent everywhere else, where the
+ * order code IS `sku`. Class 58 and the 63 ALTERATION pill keep the base code (`assemble` maps
+ * depth 63 → 58; the app expresses 63 cm as base + ANTSP63US · MPRU · … in the clipboard).
+ *
+ * ⚠️ SELECTED on a depth row is picked by LABEL (per-card depth → toolbar D → 58), never by
+ * `sku === item.sku` — several pills share the sku by design. See design-book-api-ui-map-v2.md §2c-1.
+ */
+export interface DimPill {
+  label: string;
+  sku: string | null;
+  alteration?: boolean;            // the 63 cm depth-alteration pill
+  code?: string;                   // depth rows: the order code at this class (may equal `sku`)
+}
 export interface ProgrammePill { tier: ProgrammeTier; sku: string | null; opening?: boolean; }
+/**
+ * The "217+" chip the app appends to the HEIGHT row on Tall units (never Appliance housing) whose
+ * family has an orderable 217 cm unit. Collapsed it reads `217+`; tapping it expands to 230 / 244 /
+ * 250 cm, and picking one lands on the 217 cm unit with `addCode` ordered alongside — i.e. the
+ * height twin of the 63 cm depth alteration, and the reason it cannot live in `parameters.height`:
+ * some families (the HP20 panels) ALSO have real 230/250 cm sibling units, so the labels collide.
+ *
+ * 2,046 units / 83 families in v781. NOT derivable — captured from the app's own gate.
+ */
+export interface HeightExtension {
+  sku: string;                     // the 217 cm unit the chip opens (the extension is ordered on THAT unit)
+  addCode: string;                 // companion code ordered alongside it — "MPHVERL"
+  options: { label: string; heightMm: number }[]; // 230 / 244 / 250 cm → 2304 / 2436.5 / 2500 mm
+}
 export interface OptionPill {
-  group: string;                   // the row label as shown ("Ty" | "Mode" | "Config" | "Finish" | …)
+  group: string;                   // the row label as shown ("Ty" | "Runner" | "Finish" | "Insert" | …)
   label: string;                   // the pill text
   sku: string | null;              // the sibling item it opens
   swatch?: string;                 // finish code when the pill shows a colour square (build img from Finish host)

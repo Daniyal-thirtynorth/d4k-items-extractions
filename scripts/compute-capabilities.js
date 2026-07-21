@@ -137,15 +137,15 @@ function computeCapabilities(u, f, codeIx) {
     alwaysAvailable: !!u._c,
 
     // ── tierOk ──
-    tier: u.fam || null,                 // 'P' | 'A' | 'C' | null (native line; null = line-neutral)
-    op: u.op || null,                    // 'P1' | 'C1' | null (this unit IS a premium opening variant)
-    tierTwins: tierTwins(u, codeIx),     // ('P'|'A'|'C')[] tiers with a real sibling SKU
+    nativeTier: u.fam || null,           // 'P' | 'A' | 'C' | null (native line; null = line-neutral)
+    opening: u.op || null,               // 'P1' | 'C1' | null (this unit IS a premium opening variant)
+    twinTiers: tierTwins(u, codeIx),     // ('P'|'A'|'C')[] tiers with a real sibling SKU
 
     // ── progOk ──
     excludedPrograms: (u.x || []).slice(),   // "No fronts X" programme-key exclusions
     excludedProgramsE: (u.xE || []).slice(), // single-front programme-key exclusions
-    isFrmat: code === 'FRMAT',               // special max-size-table family (needs FRMAT_MAX lookup)
-    hasE: !!u.E,                             // raw E flag (progOkFor single-front path)
+    isFrmatFamily: code === 'FRMAT',         // special max-size-table family (needs FRMAT_MAX lookup)
+    hasEFront: !!u.E,                        // raw E flag (progOkFor single-front path)
 
     // ── depthOk ──
     depthClasses: depthClasses(u),           // cm classes the unit offers
@@ -154,7 +154,7 @@ function computeCapabilities(u, f, codeIx) {
     handleFree: !!u.V || !!hFree,            // u.V (no-handle front) or interior module
 
     // ── frontOk ──
-    frontE: !!u.E || /\dE$/.test(code),      // E-type OR code ends digit+E
+    onePieceFront: !!u.E || /\dE$/.test(code), // E-type OR code ends digit+E
 
     // ── openOk ──
     openP1: !!u.P1 || code.startsWith('P1'),
@@ -162,11 +162,11 @@ function computeCapabilities(u, f, codeIx) {
     singleHandle: singleHandleRow(u),
 
     // ── antosoOk (static approval envelope; matches antosoU(u,u._cat,'')) ──
-    antosoOk: antosoU(u, cat, ''),
+    antosoApproved: antosoU(u, cat, ''),
 
     // ── doorOk ──
-    doorJ: !!u.J,
-    doorY: !!u.Yc,
+    doorLineJ: !!u.J,
+    doorLineY: !!u.Yc,
   };
 }
 
@@ -183,8 +183,8 @@ function availableFromCaps(caps, toolbar) {
   const keys = t.progKeys || [];
   const progOk = !keys.length || keys.some((pk) => {
     if (caps.excludedPrograms.includes(pk)) return false;
-    if (caps.isFrmat) return false; // real app: FRMAT_MAX[programmeName] lookup — special-case elsewhere
-    if (t.front === 1 && caps.hasE && caps.excludedProgramsE.includes(pk)) return false;
+    if (caps.isFrmatFamily) return false; // real app: FRMAT_MAX[programmeName] lookup — special-case elsewhere
+    if (t.front === 1 && caps.hasEFront && caps.excludedProgramsE.includes(pk)) return false;
     return true;
   });
 
@@ -192,17 +192,17 @@ function availableFromCaps(caps, toolbar) {
   const tier = t.tier;
   let tierOk;
   if (!tier || tier === 'ALL') tierOk = true;
-  else if (tier === 'P1' || tier === 'C1') tierOk = caps.op === tier;
-  else if (!caps.tier) tierOk = true;                 // line-neutral
-  else if (caps.tier === tier) tierOk = true;         // native line
-  else tierOk = !caps.tierTwins.includes(tier);       // no real sibling ⇒ stays
+  else if (tier === 'P1' || tier === 'C1') tierOk = caps.opening === tier;
+  else if (!caps.nativeTier) tierOk = true;           // line-neutral
+  else if (caps.nativeTier === tier) tierOk = true;   // native line
+  else tierOk = !caps.twinTiers.includes(tier);       // no real sibling ⇒ stays
 
   const depthOk = t.depth === 58 || t.depth === 63 || caps.depthClasses.includes(t.depth);
   const handleOk = t.handle !== 'V' || caps.handleFree;
-  const frontOk = t.front !== 1 || caps.frontE;
+  const frontOk = t.front !== 1 || caps.onePieceFront;
   const openOk = !t.open || (t.open === 'P1' ? caps.openP1 : caps.openC1) || caps.singleHandle;
-  const antosoOk = !t.antoso || caps.antosoOk;
-  const doorOk = !t.doorline || (t.doorline === 'J' ? caps.doorJ : caps.doorY);
+  const antosoOk = !t.antoso || caps.antosoApproved;
+  const doorOk = !t.doorline || (t.doorline === 'J' ? caps.doorLineJ : caps.doorLineY);
 
   return progOk && tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk;
 }
@@ -252,6 +252,6 @@ if (require.main === module) {
 
   // spot-assert the documented twin behaviour
   const t6080 = computeCapabilities(codeIx['T6080'].u, codeIx['T6080'].f, codeIx);
-  console.log('\n[assert] T6080.tierTwins includes "C":', t6080.tierTwins.includes('C'),
-    '| excludes "A":', !t6080.tierTwins.includes('A'));
+  console.log('\n[assert] T6080.twinTiers includes "C":', t6080.twinTiers.includes('C'),
+    '| excludes "A":', !t6080.twinTiers.includes('A'));
 }

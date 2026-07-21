@@ -17,7 +17,7 @@
  *     artifacts (re-parsed from the still-present <script id="DATA"> JSON).
  *
  * Output top level: { meta, categories, programmes, ruleTables, systems,
- *                     functionalCategories, items }  (meta.schemaVersion '2.0.0').
+ *                     functionalCategories, items }  (meta.schemaVersion '2.2.0').
  * ==========================================================================*/
 (function(){
 const H = window.__H = {};
@@ -120,29 +120,29 @@ function computeCapabilities(u, f, codeIx){
   return {
     alwaysAvailable: !!u._c,                 // available() short-circuit
     // ── tierOk ──
-    tier: u.fam || null,                     // 'P'|'A'|'C'|null (native line; null = line-neutral)
-    op: u.op || null,                        // 'P1'|'C1'|null (this unit IS a premium opening variant)
-    tierTwins: tierTwins(u, codeIx),         // tiers with a real sibling SKU
-    // ── progOk ──  excludedPrograms = RAW u.x (backend layers the FRMAT-table rule via isFrmat)
+    nativeTier: u.fam || null,               // 'P'|'A'|'C'|null (native line; null = line-neutral)
+    opening: u.op || null,                   // 'P1'|'C1'|null (this unit IS a premium opening variant)
+    twinTiers: tierTwins(u, codeIx),         // tiers with a real sibling SKU
+    // ── progOk ──  excludedPrograms = RAW u.x (backend layers the FRMAT-table rule via isFrmatFamily)
     excludedPrograms: (u.x || []).slice(),
     excludedProgramsE: (u.xE || []).slice(), // single-front programme-key exclusions
-    isFrmat: code === 'FRMAT',
-    hasE: !!u.E,
+    isFrmatFamily: code === 'FRMAT',
+    hasEFront: !!u.E,
     // ── depthOk ──
     depthClasses: depthClasses(u),
     // ── handleOk ──
     handleFree: !!u.V || !!hFree,
     // ── frontOk ──
-    frontE: !!u.E || /\dE$/.test(code),
+    onePieceFront: !!u.E || /\dE$/.test(code),
     // ── openOk ──
     openP1: !!u.P1 || code.startsWith('P1'),
     openC1: !!u.C1 || code.startsWith('C1'),
     singleHandle: singleHandleRow(u),
     // ── antosoOk ──
-    antosoOk: antosoU(u, cat, ''),
+    antosoApproved: antosoU(u, cat, ''),
     // ── doorOk ──
-    doorJ: !!u.J,
-    doorY: !!u.Yc,
+    doorLineJ: !!u.J,
+    doorLineY: !!u.Yc,
   };
 }
 // build the code index ONCE at injection over post-init FAMS
@@ -161,7 +161,18 @@ function chipTarget(onclick, u){
   if(m=onclick.match(/goBandDetail\('[^']*','[^']*','([^']*)'\)/)){ try{ return sibCode(u,m[1])||null; }catch(e){ return null; } }
   if(m=onclick.match(/setDetailOpen\('([^']*)'\)/)){ try{ return sibCode(u,m[1])||null; }catch(e){ return null; } }
   if(/setDepth\(/.test(onclick)) return u.c;
-  if(/pickInsert\(/.test(onclick)) return u.c;
+  // Insert (L3/M3 · M8) is an `insAx` family axis: `pickInsert` only sets `blockIns[fid]`, which
+  // `insPool()` uses to filter the family pool — so the pill DOES land on a different stored unit,
+  // it just carries no target in its onclick. Resolve the sibling that keeps every other axis
+  // (width / vr / carcase width) and swaps `ins`. v781: one family, FP_16FRONT, 0 ambiguous.
+  if(m=onclick.match(/pickInsert\('([^']*)','([^']*)'\)/)){
+    try{
+      const f=FAMS.find(x=>x.id===m[1]); if(!f) return u.c;
+      const iv=m[2];
+      const t=(f.units||[]).find(x=>x.ins===iv && x.w===u.w && x.vr===u.vr && x.W===u.W);
+      return t?t.c:null;
+    }catch(e){ return u.c; }
+  }
   return null;
 }
 function chipAvail(chip){
@@ -256,6 +267,17 @@ function scrapeConfigure(pin,u){
     const chips=[...row.querySelectorAll('.chip')];
     if(k==='Width'||k==='Height'||k==='Depth'){
       const arr=chips.map(ch=>{ const lbl=T(ch); const oc=ch.getAttribute('onclick'); const o={ label:lbl, value:(num(lbl)!=null?num(lbl)*10:null), unit:'mm', sku:chipTarget(oc,u), selected:/(^|\s)good(\s|$)/.test(ch.className), available:chipAvail(ch) }; if(k==='Depth'&&/63/.test(lbl)) o.note='63 cm depth (alteration)'; if(chipCrossed(ch)) o.crossedOut=true; return o; });
+      // DEPTH state row: `setDepth(cc)` keeps the unit and only re-cuts the ORDER CODE
+      // (assemble(): pre+dig+cc+fn). Ask the app for it instead of re-deriving — every pill of
+      // the row gets `code`, so a reader never has to guess why the skus repeat. `u.d` empty =
+      // a real sibling-navigation depth row → no `code` (the order code IS the sku).
+      if(k==='Depth' && (u.d||[]).length && typeof assemble==='function'){
+        arr.forEach(o=>{ const cc=num(o.label);
+          o.code = (cc!=null && (u.d||[]).includes(cc))
+            ? assemble(u,{depth:cc,open:'',doorline:'',front:0,vh:false})   // 36/48/68 → re-cut
+            : u.c;                                                          // 58 + the 63 alteration keep the base code
+        });
+      }
       C[k.toLowerCase()]=arr;
     } else if(k==='Programme'){
       C.programme=chips.map(ch=>{ const lbl=T(ch); const tier=lbl; const oc=ch.getAttribute('onclick'); let sku=null; try{ sku=sibCode(u,tier)||chipTarget(oc,u);}catch(e){ sku=chipTarget(oc,u);} return { label:lbl, tier, opening:/1$/.test(tier), sku:(sku&&CODESET&&CODESET.has(sku))?sku:(sku||null), selected:/(^|\s)good(\s|$)/.test(ch.className), available:chipAvail(ch) }; });
@@ -396,6 +418,27 @@ function kindOf(f,u){
 // classify a REFERENCED code (card target) as alteration vs accessory
 function isAlterationSku(sku){ const cf=window.CODE2FAM&&window.CODE2FAM[sku]; if(cf&&cf.cat==='Alteration') return true; return /^AN/.test(String(sku||'')); }
 
+/* The "217+" chip the app APPENDS to the Height row (card `.wchips` H + detail `.cfgrow Height`).
+ * It is injected after `openDetail` returns by a late IIFE and its buttons carry an `onclick`
+ * PROPERTY, not an attribute — so the DOM scrapers never see it. Reproduce the app's own gate
+ * (`_inject` + `_u217For`) instead: Tall, not Appliance housing, and the family must hold an
+ * available 217 cm unit (per-`vr` when the family has a variant axis). Picking a value opens that
+ * 217 unit and orders MPHVERL alongside it — the height twin of the 63 cm depth alteration.
+ * v781: 2,046 units / 83 families. Kept OUT of `parameters.height` because families like the HP20
+ * panels also have REAL 230/250 cm sibling units and the labels would collide. */
+const HEXT_MM=[[230,2304],[244,2436.5],[250,2500]];
+function heightExtensionOf(f,u){
+  try{
+    if(!f||!u||f.cat!=='Tall'||f.sub==='Appliance housing') return null;
+    const pool = f.byprog ? (f.vlbl?ppool(f).filter(x=>x.vr===u.vr):ppool(f))
+                          : (f.vlbl?f.units.filter(x=>x.vr===u.vr):f.units);
+    const m=(pool||[]).find(x=>x.hc===217);
+    if(!m || (typeof available==='function' && !available(m))) return null;
+    return { sku:m.c, addCode:'MPHVERL',
+             options:HEXT_MM.map(([label,heightMm])=>({label:String(label),heightMm})) };
+  }catch(e){ return null; }
+}
+
 /* ============================================================================
  * THIN MAPPERS — reduce the rich scraped structures to the minimal shape.
  * ==========================================================================*/
@@ -408,7 +451,8 @@ function mapParameters(cfg){
   if(cfg.depth&&cfg.depth.length){
     const d=cfg.depth.map(o=>{ const p={}; put(p,'label',o.label); put(p,'sku',o.sku);
       const lbl=typeof o.label==='string'?o.label:''; const note=typeof o.note==='string'?o.note:'';
-      if(o.alteration===true||/63/.test(lbl)||/alter/i.test(lbl)||/alter/i.test(note)) p.alteration=true; return p; });
+      if(o.alteration===true||/63/.test(lbl)||/alter/i.test(lbl)||/alter/i.test(note)) p.alteration=true;
+      put(p,'code',o.code); return p; });
     if(d.length)P.depth=d;
   }
   if(cfg.programme&&cfg.programme.length){
@@ -596,6 +640,10 @@ function buildItem(f,u,recovered){
   if(u.pp!=null) it.catalogPage=u.pp;
   try{ const carc=(typeof carcaseLine==='function')?carcaseLine(u):null; if(carc!=null) it.carcaseLine=String(carc); }catch(e){}
   const fm=frontModifiersOf(u); if(fm) it.frontModifiers=fm;
+  // Door-line Y REPLACES the whole order code (assemble(): `if(dl==='Y' && u.Yc) return u.Yc`), unlike
+  // V/E/J/P1/C1 which are derivable prefixes/suffixes — so the literal code has to ship. 11 units.
+  if(u.Yc) it.doorLineYCode=String(u.Yc);
+  const hx=heightExtensionOf(f,u); if(hx) it.heightExtension=hx;
   if(u.wt) it.weightKg=Number((u.wt/10).toFixed(1));
   if(u.vl) it.volumeM3=Number((u.vl/1000).toFixed(2));
 
@@ -771,13 +819,13 @@ H.finalize=function(){
     meta:{
       generated:new Date().toISOString(),
       source:'leicht_units v781 (headless DOM extraction via openDetail)',
-      schemaVersion:'2.0.0',
+      schemaVersion:'2.2.0',
       imageUrlTemplate:IMGT,
       counts:{ items:all.length, cabinets, accessories:all.length-cabinets, categories:cats.length, programmes:progs.length, recovered:recoveredSkus.length },
       recoveredArtifactSkus:recoveredSkus,   // app-suppressed "not-in-pricelist" units re-included by the coverage fix
       note:'Minimal + capabilities export of v781. Each item is the THIN shape: '+
         'capabilities REPLACES programmeAvailability (raw u.x excludedPrograms + tier/depth/handle/open/antoso/door gate inputs, '+
-        'isFrmat kept so the backend layers the FRMAT max-size rule); configure→parameters (label+sku pills only); '+
+        'isFrmatFamily kept so the backend layers the FRMAT max-size rule); configure→parameters (label+sku pills only); '+
         'accessoryPanel→alterations/accessories(+variants)/finishInterior; relatedGroups→companions; engineering→{key,ok}. '+
         'Built by driving the app\'s own openDetail()/visibleBlocks()/famInTaskSub(); '+recoveredSkus.length+' app-deleted '+
         'artifact units recovered from the raw <script id="DATA"> (see meta.recoveredArtifactSkus); '+synth.length+

@@ -30,14 +30,15 @@ Endpoints: `POST ingest` · **`POST items` · `PATCH items/:sku` · `DELETE item
 | Area | v1 | **v2** |
 |---|---|---|
 | **Author items** | ingest-only (extractor) | **NEW: `POST/PATCH/DELETE items`** — build/edit any item by hand, including its whole `capabilities` object. §1b |
-| **Configure pills** | `configure.{width,height,depth,programme,optionRows}`, each pill froze `available`/`selected`/`crossedOut`/`value`/`unit` | **`parameters.{width,height,depth,programme,options}`** — each pill is just `{label\|tier, sku}` (+ `alteration?`/`opening?`/`swatch?`). **No stored state.** §2, §2c |
+| **Configure pills** | `configure.{width,height,depth,programme,optionRows}`, each pill froze `available`/`selected`/`crossedOut`/`value`/`unit` | **`parameters.{width,height,depth,programme,options}`** — each pill is just `{label\|tier, sku}` (+ `alteration?`/`opening?`/`swatch?`; depth rows also `code`). **No stored state.** §2, §2c, §2c-1 |
 | **Pill grey/strike** | frozen per-pill `available` boolean | **`availableFromCaps(target.capabilities, toolbar)`** — the client evaluates the 8 gates against its own toolbar, exactly as the app does. §2c, §2d |
 | **Whole-card grey** | `programmeAvailability.excluded` + `programmes[]` allow-list | the card's **own `capabilities`** run through the same `availableFromCaps`. `programmeAvailability` is **gone**. §2c |
 | **Backend programme grey** | `annotateProgrammeExclusions` read `programmeAvailability` | same method, now reads **`capabilities.excludedPrograms`** — still the ONE gate computed server-side. §2c |
 | **Rule inputs** | scattered / implicit | **NEW `capabilities` object** (17 fields) on every item — the pill-gate rule inputs. §2d |
 | **Detail sections** | `configure`, `accessoryPanel`, `relatedGroups`, `specification`, `programmeBadge` | **removed.** Replaced by `parameters`, thin `alterations`/`accessories`/`companions` (hydrated via `refs`), `finishInterior`, `priceGroupRef`/`frontModifiers`/`carcaseLine`, `engineering:[{key,ok}]`, `catalogPage`. §3 |
 | **`crossedOut`** | reserved-but-never-emitted field | **does not exist** in v2. A pill is only ever live / grey / dead. |
-| **`depthClass` filter** | matched `configure.depth[].label` | matches **`parameters.depth[].label`**. §2 |
+| **`depthClass` filter** | matched `configure.depth[].label` | matches **`capabilities.depthClasses`** — the app's own `depthOk`; 58 & 63 are pass-through. §2, §2c-2 |
+| **Order codes that aren't the sku** | not modelled | **`parameters.depth[].code`** (2.1) + **`item.doorLineYCode`** and **`item.heightExtension`** (2.2) — the three code surfaces a client cannot derive. §2c-3 |
 
 **One import to internalize:** in v2 a pill has **no state of its own**. Its target sku is a pointer;
 the client looks up that target item's `capabilities`, runs `availableFromCaps` against the current
@@ -56,7 +57,7 @@ hand-authored item and an extracted one are byte-identical. Anything absent from
 |---|---|---|---|---|
 | `file` (multipart) | IN | Catalog-export upload control | Admin · Catalog import | `curl -F file=@docs/export-v781.json …/ingest` |
 | `summary.items` / `programmes` / `categories` | OUT | Import result counts | Admin · import result toast/log | `POST …/ingest` → `summary.items` |
-| `summary.catalogVersion` / `schemaVersion` | OUT | Version line of the import (`schemaVersion` = `"2.0.0"`) | Admin · import result | `POST …/ingest` → `summary.schemaVersion` |
+| `summary.catalogVersion` / `schemaVersion` | OUT | Version line of the import (`schemaVersion` = `"2.2.0"`) | Admin · import result | `POST …/ingest` → `summary.schemaVersion` |
 
 ---
 
@@ -140,7 +141,7 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `opening` | IN | **OPENING toggle** (P1 \| C1). AND-composes with `tier`/`family` | Top toolbar — "OPENING" pill | `…/items?opening=P1` |
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row | `…/items?widthMm=600` |
 | `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`) | Grid filter bar — H row | `…/items?heightClass=80` |
-| `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68). Matches when the class is among the unit's available depths (**`parameters.depth[].label`** — native or a depth alteration, incl. the 63 cm alteration) OR (no depth options AND `depthMm == class×10−20`). Carcass = class×10−20. | Grid filter bar — D row | `…/items?depthClass=58` |
+| `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68). Ports the app's `depthOk`: matches when the class is in the unit's **`capabilities.depthClasses`** (however the catalog expresses depth — see §2c-2), or the unit has no carcass depth at all (empty/absent → rides every class). **58 and 63 are pass-through** (the app short-circuits them). Carcass = class×10−20. | Grid filter bar — D row | `…/items?depthClass=68` |
 | `depthMm` / `heightMm` | IN | Exact carcass depth / height (mm) — precise, **not** the grid class rows | (precise filter) | `…/items?depthMm=560` |
 | `line` / `tallHeight` | IN | **TALL** two-row height selector (carcase LINE 73/80/86 + dynamic HEIGHT cm). TALL only. Options from `GET tall-heights` (§6b) | Tall toolbar — top + second pill rows | `…/items?zone=Tall&line=80&tallHeight=204` |
 | `suspended` | IN | **TOE-KICK "Suspended" toggle** — the `engineering` `suspended` flag (ok=true) | Top toolbar — TOE-KICK · Suspended | `…/items?suspended=true` |
@@ -183,9 +184,11 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | **`capabilities`** | OUT | **The pill-gate rule inputs** — the client reads a pill TARGET's capabilities to decide grey/live (§2c/§2d). Ships on **every** list row (NOT in `LIST_OMIT`) so the grid can gate pills without a detail fetch | Card — (drives pill state) | `…/items?limit=1` → `items[0].capabilities` |
 | `parameters.width[]` | OUT | **W** pill row | Card — Configure rows | `…/items` → `items[].parameters.width` |
 | `parameters.height[]` | OUT | **H** pill row (73/80/86) | Card — Configure rows | `…/items` → `items[].parameters.height` |
-| `parameters.depth[]` | OUT | **D** pill row (a pill may be `alteration:true` = 63 cm depth alteration). Its `label`s are the depth CLASSES the `depthClass` filter matches | Card — Configure rows | `…/items` → `items[].parameters.depth` |
+| `parameters.depth[]` | OUT | **D** pill row (a pill may be `alteration:true` = 63 cm depth alteration; depth pills also carry `code`, §2c-1). These are the classes the ROW draws — **not** what the `depthClass` filter matches (that reads `capabilities.depthClasses`, §2c-2) | Card — Configure rows | `…/items` → `items[].parameters.depth` |
 | `parameters.programme[]` | OUT | Programme / tier pills — each `{tier, sku, opening?}` | Card — bottom-right | `…/items` → `items[].parameters.programme` |
-| `parameters.options[]` | OUT | Coded rows flattened — each `{group, label, sku, swatch?}` (Ty / Mode / Config / Finish) | Card — Configure rows | `…/items` → `items[].parameters.options` |
+| `parameters.options[]` | OUT | Coded rows flattened — each `{group, label, sku, swatch?}` (Ty / Runner / Finish / Insert / …) | Card — Configure rows | `…/items` → `items[].parameters.options` |
+| `heightExtension` | OUT | **"217+" chip** appended to the H row → 230/244/250 cm (Tall only; opens the 217 cm unit + `MPHVERL`). Its own field, NOT part of `parameters.height` — §2c-3 | Card — Configure H row | `…/items?q=HP20146` → `items[].heightExtension` |
+| `doorLineYCode` | OUT | Not rendered — the ORDER CODE the ⧉ Copy button must emit when the toolbar picks door-line **Y** (Y replaces the whole code) — §2c-3 | Card — ⧉ Copy | `…/items?q=MGT601468` → `items[].doorLineYCode` |
 | `imageUrl` | OUT | Product image (built from `meta.imageUrlTemplate ⊕ sku`) | Card — image area | `…/items` → `items[].imageUrl` |
 | `widthMm` / `heightMm` / `depthMm` | OUT | Dims line ("W 800 mm · H 792 mm") | Card — under title | `…/items` → `items[].widthMm` |
 | `pts` | OUT | **Price pill NUMBER** for the priced programme (`priceProgram`, or a sole `programs`). Absent when no programme is priced | Card — bottom-right pill | `…/items?sku=GFVK8080SZ2M&priceProgram=BOSSA` → `items[].pts` |
@@ -201,9 +204,11 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 > **What `LIST_OMIT` strips from list rows** (add `full=true` to get them): `description`,
 > `restrictions`, `planningNotes`, `didYouKnow`, `modifications`, `engineering`, `finishes`,
 > `alterations`, `accessories`, `companions`. Everything else — including **`capabilities`,
-> `parameters`, `finishInterior`, `sinkFitment`, `appliance`, `inspiration`, `priceGroupRef`,
-> `frontModifiers`, `carcaseLine` — ships on every card**. `capabilities` and `parameters` are kept on
-> purpose: the grid card is a live mini-configurator and needs both to render + gate its pills.
+> `parameters`, `heightExtension`, `doorLineYCode`, `finishInterior`, `sinkFitment`, `appliance`,
+> `inspiration`, `priceGroupRef`, `frontModifiers`, `carcaseLine` — ships on every card**.
+> `capabilities` and `parameters` are kept on purpose: the grid card is a live mini-configurator and
+> needs both to render + gate its pills; `heightExtension` and `doorLineYCode` for the same reason —
+> the card draws the `217+` chip and its ⧉ Copy must emit the right order code without a second call.
 
 ---
 
@@ -232,25 +237,233 @@ Cards are **families** (same collapse as `groupBy=family`). Accepts **every** `G
 ## 2c. ⭐ Pill state — the CAPABILITIES gate model (replaces v1 §2c–§2e)
 
 How the client decides that a W / H / D / Programme / coded-row pill is **live**, **selected**, **grey**,
-or **dead**. In v2 a pill stores **no state** — only `{label\|tier, sku, …}`. State is derived per read:
+or **dead**. In v2 a pill stores **no state** — only `{label\|tier, sku, …}` (a depth pill adds `code`,
+the order code at that class — data, not state; §2c-1). State is derived per read:
 
 | State | Rule | Render | Clickable? |
 |---|---|---|---|
 | **DEAD** | `pill.sku == null` (no target code exists) | greyed, `grayscale`, `not-allowed` | **no** |
-| **SELECTED** | `pill.sku === item.sku` (this pill IS the current unit) | filled accent | inert (already here) |
+| **SELECTED** | `pill.sku === item.sku` — **except on a `depth` row**, see §2c-1 | filled accent | inert (already here) |
 | **GREY** | `availableFromCaps(targetItem.capabilities, toolbarState) === false` | grid card: **struck** · detail drawer: **greyed** | **yes** → still opens the sibling sku |
 | **LIVE** | otherwise | normal | **yes** → opens `pill.sku` |
 
 To resolve a pill the client:
 1. reads `pill.sku` → **DEAD** if null;
-2. compares to the current unit's `sku` → **SELECTED** if equal;
+2. compares to the current unit's `sku` → **SELECTED** if equal (`depth` rows: select by LABEL, §2c-1);
 3. looks up the **TARGET item's `capabilities`** (already on the card / in `refs`) and runs
    `availableFromCaps(caps, toolbar)` → **GREY** if false, else **LIVE**.
+
+
+### 2c-1. ⭐ SELECTED — navigation rows vs DEPTH (state) rows
+
+The `pill.sku === item.sku` test above holds only where every pill in the row points at a **different**
+sibling unit — `width`, `height`, `programme`, and most `options` groups. A **`depth` row is different**
+and must be rendered by the rule below, or several pills light up at once.
+
+**Why.** In the app a depth chip is `setDepth(cc)` / `pickDepth(id,cc)` — it changes depth state and
+**stays on the same unit**. There is no sibling code to go to: `u.d = [36,48,68]` says *this* cabinet is
+orderable at those depths. What changes is the **order code**, which `assemble()` re-cuts:
+
+```js
+parseCanon(c) = c.match(/^([A-Z]+)(\d+)([A-Z0-9]*)$/)          // pre · dig · fn
+if (depth !== 58 && u.d.includes(depth)) c = pre + dig + depth + fn
+// T6080IS2IZ @ 36 → T608036IS2IZ    @ 48 → T608048IS2IZ    @ 68 → T608068IS2IZ
+```
+
+So the pill keeping the unit's OWN sku is **correct** — that is the item you stay on. The depth-cut
+codes are **synthesized, never stored as units** (same status as the `P1`/`C1` prefixes), so the export
+ships them **on the pill** as **`code`**:
+
+```jsonc
+"depth": [
+  {"label":"36","sku":"T6080IS2IZ","code":"T608036IS2IZ"},
+  {"label":"48","sku":"T6080IS2IZ","code":"T608048IS2IZ"},
+  {"label":"58","sku":"T6080IS2IZ","code":"T6080IS2IZ"},
+  {"label":"63","sku":"T6080IS2IZ","code":"T6080IS2IZ","alteration":true},
+  {"label":"68","sku":"T6080IS2IZ","code":"T608068IS2IZ"}
+]
+```
+
+`code` is written on **every pill of a re-cut depth row** (9,390 pills over 2,348 items; 4,858 of them
+differ from `sku`) and is **absent everywhere else** — where the order code simply IS `sku`. So read
+**`pill.code ?? pill.sku`** and never re-derive. Absence of `code` does NOT mean "different item" — see
+§2c-2 for the actual discriminator (`pill.sku`).
+
+**Render rule for a `depth` row:**
+
+```js
+// 1. Which pills are state pills (stay here) vs real siblings (navigate).
+const isStatePill = p => p.sku === item.sku || p.code != null;   // → set the depth, re-render in place
+                                                                 // else → open p.sku (a real sibling)
+// 2. Which class is chosen — the app's cardDepth(id,u): per-card pick → top D bar → 58.
+const chosen = [cardPick[item.sku], toolbarDepthClass, 58]
+  .find(v => v != null && pills.some(p => String(p.label) === String(v)));
+
+// 3. ⚠️ Rows are commonly MIXED (siblings + self pills — 7,458 of 11,551, §2c-2). Honour `chosen`
+//    ONLY when that pill is a state of THIS item. If it maps to a sibling we are not on that item,
+//    so fall back to this item's own NATIVE pill (the self pill that is not the 63 alteration).
+//    Skip this and the sibling pill renders "selected", stops being clickable, and BLOCKS the
+//    navigation — and plain sku-equality instead lights up several pills (63 alteration + native).
+const at     = pills.find(p => String(p.label) === String(chosen));
+const own    = pills.filter(p => p.sku === item.sku);
+const native = own.find(p => !p.alteration) ?? own[0] ?? null;
+const selLabel = (at && isStatePill(at)) ? chosen : native?.label ?? null;
+const isSelected = p => selLabel != null && String(p.label) === String(selLabel);  // by LABEL, never by sku
+
+// 4. The ORDER code to display / copy at the chosen class — stored, not computed.
+const orderCode = pills.find(p => String(p.label) === String(selLabel))?.code ?? item.sku;
+// carcass mm at that class = chosen × 10 − 20
+```
+
+Worked example of step 3. `C1T3080S2Z` (mixed: 36/48/68 are siblings, 58/63 are self) with the toolbar at
+D=68 → `at` is the 68 **sibling** pill → fall back to `native` = the 58 self pill → 58 renders selected and
+68 stays clickable. Click it → you are now on `C1T308068S2Z`, whose row is `36 48 58 63* 68` with 63 and 68
+both self; `chosen`=58 maps to a sibling again → `native` = 68 (63 is the alteration) → exactly one lit.
+
+Notes:
+- **58 and 63 carry the BASE code.** `assemble()` maps depth 63 → 58; the app expresses 63 cm as base
+  cabinet **+ alteration codes** in the clipboard (`d63Set` → `ANTSP63US` · `MPRU` · `ANSVVO275` for
+  door sinks / `ANHST63` tall / `ANTST63`), not in the code itself.
+- **Zero selected pills is legal** — when the row offers neither the chosen class nor 58, the app draws
+  no highlighted chip either. Never fall back to "select the first pill".
+- **Group `options` by `.group` before counting** — `options` is one flat array, so a row is everything
+  sharing a `.group`. Every option row is plain navigation (incl. `Insert`, see §2c-3), so
+  `selected = pill.sku === item.sku` picks exactly one there. Depth is the only exception on this page.
+- **Guard against a duplicated sku anyway.** If two pills in a non-depth row ever share the item's sku
+  that is bad data, not a model — mark **none** rather than all, so nothing renders wrongly selected.
+- Reference implementation: `depthOptsForCard()` / `depthCodeFor()` / `cardDepthOf()` / `selMark()` in
+  `D4K-backend/public/design-book-ui.html`.
 
 > **The pill's own item does NOT carry the answer** — the answer lives on the item the pill points at.
 > Grid cards ship `capabilities` on every row (so same-family sibling targets are already present); the
 > detail drawer gets sibling capabilities via `refs` (§3). Strike-vs-grey is a **surface**, not a field:
 > the grid renderer strikes (`line-through`), the detail renderer greys (`opacity`). Same GREY state.
+
+### 2c-2. ⭐ The TWO depth models — how to tell them apart, and why one rule covers both
+
+The catalog expresses "this cabinet at 68 cm" in two different ways, and a single row can contain both.
+
+| | **A · depth is an ALTERATION** | **B · depth is a SEPARATE ITEM** |
+|---|---|---|
+| Source | `u.d = [36,48,68]` on the unit | an `f.dim === 'depth'` family |
+| Clicking the pill | stays on the **same item**, re-cuts the ORDER CODE | **opens a different sku** |
+| Example | `T6080IS2IZ` @68 → code `T608068IS2IZ` | `C1T3080S2Z` @68 → item `C1T308068S2Z` |
+| `pill.sku` | the item's own | the sibling's |
+| `depthMm` | native carcass only; effective = class×10−20 | the sibling's real carcass mm |
+
+#### The discriminator is `pill.sku` — NOT the presence of `code`
+
+```js
+pill.sku !== item.sku   // → B: a SEPARATE ITEM. Navigate to it.
+pill.sku === item.sku   // → A: the SAME item. Order code = pill.code ?? item.sku.
+```
+
+`code` is written on **every pill of a re-cut row** — including the `58` and `63` pills where it equals
+`sku` — so *`code` present ⟹ same item*, but **the converse does not hold**: a self-pointing pill with no
+`code` is still the same item, it simply needs no re-cut (it is the native class, the 63 alteration, or a
+unit with no real carcass depth). Always read `pill.code ?? pill.sku` for the order code, and `pill.sku`
+for navigation; both are safe on every row.
+
+#### The real row taxonomy (11,551 depth rows in v781)
+
+| shape | rows | what it looks like |
+|---|---|---|
+| **Mixed — siblings + self pills** | **7,458** | most common. Sibling pills navigate; the native-class and 63 pills point at self |
+| A — all self, with re-cut codes | 2,348 | `u.d` non-empty → 4,858 pills whose `code` differs from `sku` |
+| A — all self, no re-cut | 1,745 | e.g. a bare `58 · 63` row: same item at both, code = sku |
+
+So "depth is a separate item" is the **majority** case at row level, while "depth is an alteration" is what
+makes 4,858 pills carry a distinct order code. Neither is the general rule — which is why the gate below,
+not the row shape, decides filtering.
+
+#### One gate covers both
+
+`capabilities.depthClasses` = `D2CODE[u.D] ∪ u.dv ∪ u.d` — every class the unit can be *ordered* in, no
+matter which mechanism gets it there:
+
+```js
+depthOk = picked === 58 || picked === 63 || caps.depthClasses.includes(picked)
+```
+
+This is simultaneously the **pill/card greying** rule (§2c) and the **`depthClass` grid filter** (§2).
+Type A `T6080IS2IZ` has `[58,36,48,68]` → returned at D 36/48/68. Type B `C1T308068S2Z` has `[68]` →
+returned at 68 only. A depthless accessory has `[]` → rides every class.
+
+> ⚠️ **Never filter the grid on `parameters.depth[].label`.** That asks "does this unit's row *draw* a 68
+> pill", not "can this unit *be* 68 deep". `C1T308036S2Z` is a 340 mm cabinet whose row draws a 68 pill;
+> label-matching put 3,792 wrong cabinets under D=68 and dropped 2,369 / 4,452 units at 58 / 63 even though
+> the app passes those through unconditionally.
+
+---
+
+### 2c-3. ⭐ The rest of the order-code surface — every input that is NOT a pill target
+
+Depth is the loudest case but not the only one. The app builds the order code in **`assemble(u, ov)`**
+(`leicht_units__781_.html:2419`) from five inputs, and only one of them is a configure-pill row. Audited
+exhaustively 2026-07-21; this table is the whole surface.
+
+| input | driven by | code mutation | in the export as |
+|---|---|---|---|
+| depth `u.d` | **Depth pill row** | `pre + dig + <class> + fn` | `parameters.depth[].code` (§2c-2) |
+| depth 63 | Depth pill row | none — clipboard set `[code, ANTSP63US, MPRU, …]` | `alteration:true` on the pill; recipe documented |
+| open `P1` / `C1` | Programme pill row **and** toolbar | `c = 'P1'+c` / `'C1'+c` | the pill's `sku` already holds the synthesized code; gate = `capabilities.openP1/openC1` |
+| handle `V` | card band + toolbar (**no pill row**) | `c = 'V'+c` | derive from `capabilities.handleFree` |
+| front `E` | card band + toolbar (**no pill row**) | `c = c+'E'` | derive from `capabilities.onePieceFront` |
+| door-line `J` | card band + toolbar (**no pill row**) | `c = c+'J'` | derive from `capabilities.doorLineJ` |
+| **door-line `Y`** | card band + toolbar (**no pill row**) | **`return u.Yc`** — replaces the WHOLE code | **`item.doorLineYCode`** — see below |
+| **height `217+`** | chip appended to the **Height row** | none — opens the 217 cm unit, clipboard `[code217, MPHVERL]` | **`item.heightExtension`** — see below |
+| sinks (implicit) | no control at all | none — clipboard `[code, MPRU, (ANSVVO275)]` | recipe documented; fires for every Base/Sinks unit |
+
+**Width, Height and all 16 coded/option rows are plain navigation** — the full v781 set is
+`Ty · Runner · Unit depth · Set · Length · Insert · Thickness · Finish · Lighting · Variant · Edge finish ·
+Visible side · Edge · Operation · Configuration · Radius`. (v1's `Mode` / `Config` row labels no longer
+appear in the data.) They all go through one helper —
+`chip = (label, code) => code == null ? disabled : onclick="openDetail(f.id, code)"` — whose target is
+always a real `x.c` off `f.units`. There is **no `u.w` or `u.h` array** anywhere in the source data, so
+width and height structurally cannot have the depth problem. Measured over all 18,396 items: 0 rows with
+a duplicated sku and 0 rows with more than one self-pointing pill on any of those rows, so
+`selected = pill.sku === item.sku` stays correct everywhere except `depth`.
+
+> The `Insert` (`L3/M3` · `M8`) row used to look like an exception — both pills carried the item's own sku.
+> That was an extraction bug, not a model: `pickInsert` sets `blockIns[fid]`, which `insPool()` uses to
+> filter the family pool, so the pill *does* land on a different **stored** unit (`ZIGSUV20` ↔ `ZIGSUV20U`)
+> — its onclick just carries no target. Fixed in the extractor and backfilled; all 92 rows now navigate.
+
+#### `item.doorLineYCode` — the one code that cannot be derived
+
+`V` / `E` / `J` / `P1` / `C1` are prefixes or suffixes on the sku, so a client can build them from the
+capability flags. **`Y` replaces the whole code** (`assemble` line 1: `if (dl==='Y' && u.Yc) return u.Yc`),
+so the literal string has to ship. 11 units in v781 — exactly those with `capabilities.doorLineY`.
+
+```js
+// order code for the current toolbar
+if (toolbar.doorline === 'Y' && item.doorLineYCode) code = item.doorLineYCode;   // MGT601468 → MGT60146Y
+```
+
+`capabilities.doorLineY` is the **gate** (does this unit exist in line 66); `doorLineYCode` is the **code**.
+Set both or neither.
+
+#### `item.heightExtension` — the "217+" chip
+
+Tall products (never `Appliance housing`) whose family holds an orderable 217 cm unit can be built past
+217 cm. The app appends a collapsed `217+` chip to the **Height row**; tapping expands it to 230 / 244 /
+250 cm, and picking one opens the **217 cm unit** with `MPHVERL` ordered alongside — the height twin of the
+63 cm depth alteration. 2,046 units / 83 families in v781.
+
+```jsonc
+"heightExtension": {
+  "sku": "HP20217",                 // the unit the chip opens — the extension is ordered on THAT unit
+  "addCode": "MPHVERL",             // ordered alongside it
+  "options": [ {"label":"230","heightMm":2304},
+               {"label":"244","heightMm":2436.5},
+               {"label":"250","heightMm":2500} ]
+}
+```
+
+Render it as its own row appended after `Height`. **It is deliberately not part of `parameters.height`:**
+families like the HP20 panels also have **real** 230 / 250 cm sibling units, so the labels would collide —
+one `230` that opens a different product, another that extends this one. `GET items/HP20146` shows both at
+once (`Height: H146 … H230 H250` plus `217+: 230 244 250`).
 
 ### The 8 gates — toolbar control → `capabilities` field(s)
 
@@ -261,17 +474,17 @@ is no grid-filter param for handle / front / doorline — they are pure toolbar 
 
 | Gate | Toolbar control (`ToolbarState`) | Grid-filter param? | `capabilities.*` field(s) read |
 |---|---|---|---|
-| **progOk** | PROGRAMME picker → `progKeys[]` | `programs[]` (also greys server-side) | `excludedPrograms[]` · `excludedProgramsE[]` (only when `front=1` & `hasE`) · `isFrmat` |
-| **tierOk** | FRONTS pill → `tier` (P/A/C/P1/C1/ALL) | `tier` (grid) | `tier` (native line) · `op` (P1/C1 variant) · `tierTwins[]` (tiers with a real sibling) |
+| **progOk** | PROGRAMME picker → `progKeys[]` | `programs[]` (also greys server-side) | `excludedPrograms[]` · `excludedProgramsE[]` (only when `front=1` & `hasEFront`) · `isFrmatFamily` |
+| **tierOk** | FRONTS pill → `tier` (P/A/C/P1/C1/ALL) | `tier` (grid) | `nativeTier` (native line) · `opening` (P1/C1 variant) · `twinTiers[]` (tiers with a real sibling) |
 | **depthOk** | D pill → `depth` (default 58) | `depthClass` (grid) | `depthClasses[]` (**58 & 63 always pass**) |
 | **handleOk** | handle-free selector → `handle` (std/V) | — (client only) | `handleFree` |
-| **frontOk** | single-front / Full-E → `front` (0/1) | — (client only) | `frontE` |
+| **frontOk** | single-front / Full-E → `front` (0/1) | — (client only) | `onePieceFront` |
 | **openOk** | OPENING toggle → `open` (''/P1/C1) | `opening` (grid) | `openP1` · `openC1` · `singleHandle` (passes when true) |
-| **antosoOk** | ANTOSO suspended-install → `antoso` | `suspended`* (grid, via `engineering`) | `antosoOk` |
-| **doorOk** | door-line → `doorline` (''/J/Y) | — (client only) | `doorJ` · `doorY` |
+| **antosoOk** | ANTOSO suspended-install → `antoso` | `suspended`* (grid, via `engineering`) | `antosoApproved` |
+| **doorOk** | door-line → `doorline` (''/J/Y) | — (client only) | `doorLineJ` · `doorLineY` |
 
 `alwaysAvailable` (`u._c`) short-circuits ALL gates to live. *The grid `suspended` filter is the
-`engineering` `suspended` flag, a related-but-separate signal from the `capabilities.antosoOk` pill gate.
+`engineering` `suspended` flag, a related-but-separate signal from the `capabilities.antosoApproved` pill gate.
 
 #### Per-gate GREY condition (render reference)
 
@@ -280,21 +493,21 @@ on the card's own caps) renders **GREY** when the target FAILS any gate below. `
 
 | Gate | GREY when (target caps `c` vs toolbar `s`) |
 |---|---|
-| progOk | `s.progKeys` non-empty AND every one ∈ `c.excludedPrograms` (in Full-E, also `c.hasE` & ∈ `c.excludedProgramsE`; `c.isFrmat` special) |
-| tierOk (P/A/C) | `s.tier` ∉ {ALL, `c.tier`} AND `c.tierTwins` includes `s.tier` (a real twin exists → app swaps to it) |
-| tierOk (P1/C1) | `s.tier` ∈ {P1, C1} AND `c.op !== s.tier` |
+| progOk | `s.progKeys` non-empty AND every one ∈ `c.excludedPrograms` (in Full-E, also `c.hasEFront` & ∈ `c.excludedProgramsE`; `c.isFrmatFamily` special) |
+| tierOk (P/A/C) | `s.tier` ∉ {ALL, `c.nativeTier`} AND `c.twinTiers` includes `s.tier` (a real twin exists → app swaps to it) |
+| tierOk (P1/C1) | `s.tier` ∈ {P1, C1} AND `c.opening !== s.tier` |
 | depthOk | `s.depth` ∉ `c.depthClasses` AND `s.depth !== 58` AND `s.depth !== 63` (58 & 63 always pass) |
 | handleOk | `s.handle === 'V'` AND `!c.handleFree` |
-| frontOk | `s.front === 1` AND `!c.frontE` |
+| frontOk | `s.front === 1` AND `!c.onePieceFront` |
 | openOk | `s.open` set AND NOT (`s.open==='P1'?c.openP1:c.openC1`) AND `!c.singleHandle` |
-| antosoOk | `s.antoso` AND `!c.antosoOk` |
-| doorOk | `s.doorline` set AND NOT (`s.doorline==='J'?c.doorJ:c.doorY`) |
+| antosoOk | `s.antoso` AND `!c.antosoApproved` |
+| doorOk | `s.doorline` set AND NOT (`s.doorline==='J'?c.doorLineJ:c.doorLineY`) |
 
 > **Frontend mapping:** the client evaluates all 8 gates with `availableFromCaps(c, s)` below (single source
 > of truth) and renders per the four-state spec further down. The table above is the human-readable
 > per-gate breakdown for building/debugging. For the **authoring** side — what each field means and how to
 > SET it so a pill greys — see the CRUD guide `docs/design-book-crud-guide.md` §3a (depthClasses + the
-> 58/63 quirk), §3b (tier/op/tierTwins — the FRONTS twin-swap), §3c (the remaining six gates), §3d (master
+> 58/63 quirk), §3b (nativeTier/opening/twinTiers — the FRONTS twin-swap), §3c (the remaining six gates), §3d (master
 > greying table).
 
 ### The reference port — `availableFromCaps` (copy verbatim from the schema)
@@ -306,17 +519,17 @@ function availableFromCaps(c: Capabilities, s: ToolbarState): boolean {
   if (c.alwaysAvailable) return true;
   const pk = s.progKeys ?? [];
   const progOk  = !pk.length || pk.some(k =>
-    !c.excludedPrograms.includes(k) && !c.isFrmat &&
-    !(s.front === 1 && c.hasE && c.excludedProgramsE.includes(k)));
+    !c.excludedPrograms.includes(k) && !c.isFrmatFamily &&
+    !(s.front === 1 && c.hasEFront && c.excludedProgramsE.includes(k)));
   const tierOk  = !s.tier || s.tier === 'ALL' ? true
-    : (s.tier === 'P1' || s.tier === 'C1') ? c.op === s.tier
-    : !c.tier ? true : c.tier === s.tier ? true : !c.tierTwins.includes(s.tier);
+    : (s.tier === 'P1' || s.tier === 'C1') ? c.opening === s.tier
+    : !c.nativeTier ? true : c.nativeTier === s.tier ? true : !c.twinTiers.includes(s.tier);
   const depthOk = s.depth === 58 || s.depth === 63 || c.depthClasses.includes(s.depth ?? 58);
   const handleOk= s.handle !== 'V' || c.handleFree;
-  const frontOk = s.front !== 1 || c.frontE;
+  const frontOk = s.front !== 1 || c.onePieceFront;
   const openOk  = !s.open || (s.open === 'P1' ? c.openP1 : c.openC1) || c.singleHandle;
-  const antosoOk= !s.antoso || c.antosoOk;
-  const doorOk  = !s.doorline || (s.doorline === 'J' ? c.doorJ : c.doorY);
+  const antosoOk= !s.antoso || c.antosoApproved;
+  const doorOk  = !s.doorline || (s.doorline === 'J' ? c.doorLineJ : c.doorLineY);
   return progOk && tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk;
 }
 ```
@@ -324,7 +537,7 @@ function availableFromCaps(c: Capabilities, s: ToolbarState): boolean {
 `ToolbarState` (the app's `state`, minus render-only bits): `{ depth=58, tier='ALL', open='', front=0,
 handle='std', antoso=false, doorline='', progKeys=[] }`. **Defaults (nothing picked) leave every gate
 passing** — so with a fresh toolbar every pill with a target is LIVE. FRMAT is the one layered residual:
-also `&& !(caps.isFrmat && frmatExcluded(prog))` (layer `FRMAT_MAX[programmeName]` — 1 unit).
+also `&& !(caps.isFrmatFamily && frmatExcluded(prog))` (layer `FRMAT_MAX[programmeName]` — 1 unit).
 
 > **This RESOLVES v1's "coverage gap."** In v1 only `progOk` was live (resolved server-side); the other
 > **seven** gates were frozen at extraction in the app's DEFAULT toolbar, so pills did **not** re-strike
@@ -392,7 +605,7 @@ app's own struck chip, which keeps its `pickHeight(...)` handler. **Reference im
 
 > **No stored-pill distribution table in v2** (v1 §2c had one). In v1, pills stored an `available`
 > boolean, so it was meaningful to count "251,968 true / 4,969 dead / 0 crossedOut" across the export. In
-> v2 a pill stores **only** `{label\|tier, sku}` — the sole persisted signal is `sku` (present = has a
+> v2 a pill stores **only** `{label\|tier, sku}` (+ `code` on depth rows) — the sole persisted signal is `sku` (present = has a
 > target, `null` = DEAD); everything else is derived at read. `crossedOut` **does not exist** in v2 (it
 > was 0/256,937 catalog-wide in v1, produced by no path — dropped from the model entirely).
 
@@ -400,7 +613,7 @@ app's own struck chip, which keeps its `pickHeight(...)` handler. **Reference im
 
 `Capabilities` reproduce the app's own `available()` at **99.997%** across **313,842** combinations
 (16,518 configure-pill targets × 19 toolbar states). The only residual is **FRMAT** (1 unit), layered
-back via `isFrmat` + the `FRMAT_MAX[programmeName]` size table. This is the v2 replacement for v1's
+back via `isFrmatFamily` + the `FRMAT_MAX[programmeName]` size table. This is the v2 replacement for v1's
 frozen-`available` boolean, which was only correct at the default toolbar.
 
 ---
@@ -413,22 +626,22 @@ field is settable at creation via CRUD (`UpsertItemDto.capabilities`).
 | Field | Type | Gate it drives | Meaning (app source) |
 |---|---|---|---|
 | `alwaysAvailable` | bool | **all** (short-circuit) | `u._c` — forces `available:true`, skips every gate |
-| `tier` | `"P"\|"A"\|"C"\|null` | tierOk | native line (`u.fam`; null = line-neutral, never greys by tier) |
-| `op` | `"P1"\|"C1"\|null` | tierOk | this unit IS a premium opening variant |
-| `tierTwins` | `("P"\|"A"\|"C")[]` | tierOk | non-native tiers that have a REAL sibling sku → grey under that tier |
+| `nativeTier` | `"P"\|"A"\|"C"\|null` | tierOk | native line (`u.fam`; null = line-neutral, never greys by tier) |
+| `opening` | `"P1"\|"C1"\|null` | tierOk | this unit IS a premium opening variant |
+| `twinTiers` | `("P"\|"A"\|"C")[]` | tierOk | non-native tiers that have a REAL sibling sku → grey under that tier |
 | `excludedPrograms` | `string[]` | progOk | programme ids the unit is NOT orderable in (`u.x`) — **THE programme rule** (what the backend reads) |
 | `excludedProgramsE` | `string[]` | progOk | extra exclusions active only in single-front / "Full-E" mode (`u.xE`) |
-| `isFrmat` | bool | progOk | FRMAT max-size-table family — layer `FRMAT_MAX[programmeName]` on top |
-| `hasE` | bool | progOk | E-capable (needed for the `excludedProgramsE` path) |
+| `isFrmatFamily` | bool | progOk | FRMAT max-size-table family — layer `FRMAT_MAX[programmeName]` on top |
+| `hasEFront` | bool | progOk | E-capable (needed for the `excludedProgramsE` path) |
 | `depthClasses` | `number[]` | depthOk | nominal depth CLASSES (cm) the unit offers. **58 & 63 always pass** |
 | `handleFree` | bool | handleOk | no-handle front OR interior module (`u.V \|\| _hFree`) |
-| `frontE` | bool | frontOk | one-piece front (`u.E \|\| /\dE$/.test(code)`) |
+| `onePieceFront` | bool | frontOk | one-piece front (`u.E \|\| /\dE$/.test(code)`) |
 | `openP1` | bool | openOk | supports the P1 opening variant |
 | `openC1` | bool | openOk | supports the C1 opening variant |
 | `singleHandle` | bool | openOk | ≤1 stacked front (opening rule always passes when true) |
-| `antosoOk` | bool | antosoOk | inside the ANTOSO suspended-install approval envelope (precomputed) |
-| `doorJ` | bool | doorOk | door-line J |
-| `doorY` | bool | doorOk | door-line Y |
+| `antosoApproved` | bool | antosoOk | inside the ANTOSO suspended-install approval envelope (precomputed) |
+| `doorLineJ` | bool | doorOk | door-line J |
+| `doorLineY` | bool | doorOk | door-line Y |
 
 ---
 
@@ -469,7 +682,7 @@ NOTES** → **System Builder** (top-level `systems[]`).*
 | `item.sku` / `name` / `nameQualifier` / `handedLR` | OUT | Header code, title, amber sub-label, "L/R" badge | Detail — header | `…/items/TK6080BZ2` → `item.name` |
 | `item.toeKick` | OUT | Toe-kick installed-height | Detail — header dims | `…/items/TK6080BZ2` → `item.toeKick` |
 | **`item.capabilities`** | OUT | The pill-gate rule inputs for THIS unit (and, via `refs`, its siblings) — drives Configure pill state (§2c) | Detail — (drives Configure) | `…/items/TK6080BZ2` → `item.capabilities` |
-| **`item.parameters`** | OUT | **CONFIGURE box** — `{ width[], height[], depth[], programme[], options[] }`; each pill `{label\|tier, sku, alteration?/opening?/swatch?}`. State derived (§2c) | Detail — Configure | `…/items/TK6080BZ2` → `item.parameters` |
+| **`item.parameters`** | OUT | **CONFIGURE box** — `{ width[], height[], depth[], programme[], options[] }`; each pill `{label\|tier, sku, alteration?/opening?/swatch?}`, depth pills also `code` (the order code at that class, §2c-1). State derived (§2c) | Detail — Configure | `…/items/TK6080BZ2` → `item.parameters` |
 | `item.description` | OUT | DESCRIPTION block (`{title, bullets[]}`) | Detail — Description | `…/items/TK6080BZ2` → `item.description` |
 | **`item.alterations[]`** | OUT | Alterations tab — **sku codes**, hydrated to cards via `refs` (Standard + Unit-Specific) | Detail — Alterations tab | `…/items/T6073VE?expand=refs` → `item.alterations` |
 | **`item.accessories[]`** | OUT | Accessory / pullout cards — a sku string, or `{sku, variants:[{label,sku}]}` for runner/length variants (L3/M3 · M8, 1m/1.6m/2m). Hydrated via `refs` | Detail — accessory tabs | `…/items/T6073VE?expand=refs` → `item.accessories` |
@@ -483,6 +696,8 @@ NOTES** → **System Builder** (top-level `systems[]`).*
 | `item.modifications[]` | OUT | MODIFICATIONS — how to (handle 760/761, P1/C1; codes hydrated via `refs`) | Detail — Modifications | `…/items/TK6080BZ2?full=true` → `item.modifications` |
 | `item.planningNotes[]` | OUT | PLANNING NOTES | Detail — Planning notes | `…/items/TK6080BZ2?full=true` → `item.planningNotes` |
 | `item.didYouKnow` | OUT | 💡 Did you know? (codes hydrated via `refs`) | Detail — footer tip | `…/items/TK6080BZ2?full=true` → `item.didYouKnow` |
+| `item.heightExtension` | OUT | **"217+" chip** appended to the Height row → 230/244/250 cm (opens the 217 cm unit + `MPHVERL`) | Detail / Card — Height row | `…/items/HP20146` → `item.heightExtension` · §2c-3 |
+| `item.doorLineYCode` | OUT | not rendered — the ORDER CODE when the toolbar picks door-line **Y** (Y replaces the whole code) | Copy button / clipboard | `…/items/MGT601468` → `item.doorLineYCode` · §2c-3 |
 | `item.appliance` | OUT | **Appliances popup** (brand · category · subcategory · nicheSize) | Detail / Card — Appliances popup | `…/items/GFVK8080SM` → `item.appliance` |
 | `item.sinkFitment` | OUT | **Sink fitment** section + **"+ Add Sink"** popup | Detail — Sink fitment (Base/Sinks) | `…/items/TSP6080BZ2` → `item.sinkFitment` |
 | `item.inspiration` | OUT | **Inspiration lightbox** (imageUrl · caption · heading) | Detail / Card — camera-icon lightbox | `…/items/AGFV6080` → `item.inspiration` |
@@ -640,7 +855,7 @@ card/group carries a `filter` object = the exact `GET items` query to run when c
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|
 | `meta.imageUrlTemplate` | OUT | Builds every product/card image URL (`⊕ sku`) | (drives all `imageUrl`s) | `…/meta` → `meta.imageUrlTemplate` |
-| `meta.schemaVersion` / `catalogVersion` | OUT | Version / about (`schemaVersion` = `"2.0.0"`) | Admin · about | `…/meta` → `meta.schemaVersion` |
+| `meta.schemaVersion` / `catalogVersion` | OUT | Version / about (`schemaVersion` = `"2.2.0"`) | Admin · about | `…/meta` → `meta.schemaVersion` |
 | `meta.counts` | OUT | Catalog totals (`items` / `cabinets` / `accessories` / `categories` / `programmes`) | Admin · stats | `…/meta` → `meta.counts` |
 | `meta.recoveredArtifactSkus[]` | OUT | Codes the app's init deleted as artifacts but which are still real orderable units (recovered from the raw DOM). 9 are P1-prefixed / country-specific (CH/GB) — **filter here if unwanted** | Admin · data-hygiene note | `…/meta` → `meta.recoveredArtifactSkus` |
 | `systems[]` | OUT | Full **System Builder** registry (SENSO · LLER); per-item slice served by `GET items/:sku` (§3) | (drives the detail System Builder panel) | `…/meta` → `systems` |
@@ -665,9 +880,9 @@ Unchanged from v1.
 
 | v1 field | v2 field | Notes |
 |---|---|---|
-| `configure.width/height/depth/programme` | `parameters.width/height/depth/programme` | pills are thin (`{label\|tier, sku, …}`) |
+| `configure.width/height/depth/programme` | `parameters.width/height/depth/programme` | pills are thin (`{label\|tier, sku, …}`); depth pills carry `code` (§2c-1) |
 | `configure.optionRows[]` (`{label, options[]}`) | `parameters.options[]` (flattened `{group, label, sku, swatch?}`) | one entry per pill, `group` = row label |
-| `configure.*[].available/selected/crossedOut/value/unit` | — (derived) | selected = `sku===item.sku`; dead = `sku==null`; grey = `availableFromCaps(...)` |
+| `configure.*[].available/selected/crossedOut/value/unit` | — (derived) | selected = `sku===item.sku` **except on `depth`, where it is by LABEL** (§2c-1); dead = `sku==null`; grey = `availableFromCaps(...)` |
 | `programmeAvailability {excluded, programmes[]}` | `capabilities.excludedPrograms[]` | the programme rule; backend reads it in `annotateProgrammeExclusions` |
 | `accessoryPanel.tabs[].cards[]` | `alterations[]` · `accessories[]` · `companions[]` (sku codes) | hydrated to cards via `refs` |
 | `accessoryPanel.tabs[].swatches/visibleSideCombos/options` | `finishInterior.swatches/visibleSideCombos/optionCodes` | Vero interior finish |
@@ -678,6 +893,9 @@ Unchanged from v1.
 | `catalog {page, priceGroupRef}` | `catalogPage` (+ `priceGroupRef` on the item) | PDF url built at read via `expand=catalog` |
 | (new) | **`capabilities` (17 fields)** | the pill-gate rule inputs — §2d |
 | (new) | **`POST/PATCH/DELETE items`** | manual authoring — §1b |
+| (new, 2.1) | **`parameters.depth[].code`** | the re-cut ORDER CODE at that depth class — §2c-1 |
+| (new, 2.2) | **`doorLineYCode`** | order code for door-line Y — the one modifier that replaces the whole code — §2c-3 |
+| (new, 2.2) | **`heightExtension`** | the `217+` chip on the Height row (230/244/250 cm via the 217 unit + `MPHVERL`) — §2c-3 |
 
 ---
 
@@ -689,11 +907,11 @@ One row per v1 section / feature → where it lives in v2 (or why it is gone). `
 | v1 section / feature | v2 location | Status |
 |---|---|---|
 | Intro conventions (Base path, Dir, UI location, Sample call, Source) | Header | ✅ updated source list (adds `upsert-item.dto.ts`) |
-| §1 `POST ingest` (request + summary fields) | §1 | ✅ note: shares `normalizeItemDoc` with CRUD; `schemaVersion` = "2.0.0" |
-| §2 `GET items` — request filter rows | §2 request table | ✅ same param names; `depthClass` now matches `parameters.depth[].label` ♻️ |
+| §1 `POST ingest` (request + summary fields) | §1 | ✅ note: shares `normalizeItemDoc` with CRUD; `schemaVersion` = "2.2.0" |
+| §2 `GET items` — request filter rows | §2 request table | ✅ same param names; `depthClass` matches `capabilities.depthClasses` ♻️ |
 | §2 `GET items` — response per-card rows | §2 response table | ♻️ `configure.*` → `parameters.*`; `programmeBadge`/`cardLabel` → derive from `availableTiers`; adds `capabilities` |
 | §2 note — `availableTiers` precedence | §2 note block | ✅ unchanged |
-| §2 note — D pill = depth CLASS (not mm) | §2 `depthClass` row + note | ♻️ label source now `parameters.depth` |
+| §2 note — D pill = depth CLASS (not mm) | §2 `depthClass` row + §2c-2 | ♻️ matches **`capabilities.depthClasses`** (58/63 pass-through) — NOT `parameters.depth[].label` |
 | §2 note — tall two-row selector | §2 `line`/`tallHeight` row + §6b | ✅ unchanged |
 | §2 note — card = family / face unit / `groupBy` | §2 note block | ✅ unchanged; adds `faceForTiers` |
 | §2 note — two grouping levels (section headers) | §2b + §2e | ✅ carried (by-section endpoint + open note) |

@@ -23,27 +23,83 @@ There is **no build/test here** — it is data files + docs (it IS a git repo no
 and `*.bak.json` are gitignored, the `.gz` is committed). Big JSON files: never `Read` them whole; use
 `python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
 
-## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17). READ THIS FIRST.
+## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.2.0** since 2026-07-21). READ THIS FIRST.
 
 The model was reworked from the fat "everything pre-computed, frozen at the default toolbar" export (v1,
-`docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.0.0**). Everything below
+`docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.2.0** — 2.0.0 plus the
+additive `DimPill.code` on depth pills (2.1) and `Item.doorLineYCode` + `Item.heightExtension` (2.2);
+old readers ignore all three). Everything below
 this block that describes `configure` / `programmeAvailability` / `accessoryPanel` / `relatedGroups` /
 `specification` / `programmeBadge` and the frozen per-pill `available` boolean is **v1 — superseded**.
 Current facts:
 
 - **Contract = `docs/export-schema-v2.ts`.** An item stores INTRINSIC FACTS + plain-array RULES + THIN sku
   refs; the UI/backend DERIVE the rest. Key field changes: `configure`→**`parameters`** (thin pills
-  `{label,sku}`, no stored `available`/`selected`); `programmeAvailability`→**`capabilities.excludedPrograms`**;
+  `{label,sku}`, no stored `available`/`selected`; **depth pills add `code`** — see the depth note below); `programmeAvailability`→**`capabilities.excludedPrograms`**;
   `accessoryPanel`/`relatedGroups`→thin **`alterations`/`accessories`/`companions`** sku lists +
   **`finishInterior`** (Vero); `specification`→flat `priceGroupRef`/`frontModifiers`/`carcaseLine`/`weightKg`/
   `volumeM3`; `programmeBadge`/`cardLabel` dropped (derive); `engineering`→`[{key,ok}]`.
 - **⭐ `capabilities` (17 fields) is the pill-gate rule surface.** A configure pill greys when its TARGET
   item's capabilities fail a gate for the current toolbar: `available(u) = alwaysAvailable || (progOk &&
   tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk)`. The client reproduces all 8
-  gates via the **`availableFromCaps(caps, toolbar)`** port (in the schema). Fields: `tier, op, tierTwins[],
-  excludedPrograms[], excludedProgramsE[], isFrmat, hasE, depthClasses[], handleFree, frontE, openP1, openC1,
-  singleHandle, antosoOk, doorJ, doorY, alwaysAvailable`. **Verified 99.997%** vs the live app across 313,842
-  combinations (16,518 pill targets × 19 toolbar states); FRMAT (1 unit) the only residual (layer `isFrmat`).
+  gates via the **`availableFromCaps(caps, toolbar)`** port (in the schema). Fields: `nativeTier, opening, twinTiers[],
+  excludedPrograms[], excludedProgramsE[], isFrmatFamily, hasEFront, depthClasses[], handleFree, onePieceFront, openP1, openC1,
+  singleHandle, antosoApproved, doorLineJ, doorLineY, alwaysAvailable`. **Verified 99.997%** vs the live app across 313,842
+  combinations (16,518 pill targets × 19 toolbar states); FRMAT (1 unit) the only residual (layer `isFrmatFamily`).
+- **⭐ A DEPTH row is a STATE row, not navigation (2026-07-21, schemaVersion 2.1.0).** `u.d=[36,48,68]` means
+  *this* cabinet is orderable at those depths — there is NO sibling code, so **every depth pill repeats the
+  item's own `sku` and that is correct**. What the app changes is the ORDER CODE, re-cut in `assemble()`:
+  `parseCanon(c)=/^([A-Z]+)(\d+)([A-Z0-9]*)$/` → `pre+dig+<class>+fn` (`T6080IS2IZ` @36 → `T608036IS2IZ`).
+  Those codes are **synthesized, never stored units** (like the P1/C1 prefixes), so the export now ships them
+  **on the pill**: `depth:[{label,sku,code,alteration?}]` — 4,858 pills over 2,348 items; 58 and the 63
+  alteration keep the base code (63 = base + `ANTSP63US`·`MPRU`… in the clipboard, per `d63Set`). Absent on
+  real sibling-navigation depth rows and on width/height/programme/options, where the order code IS `sku`.
+  **⚠️ `pill.code` is DISPLAY/COPY ONLY — never fetch, route or build an image from it.** Unlike the P1/C1
+  prefixes (which the backend DOES synthesize on read), the re-cut depth codes resolve to nothing:
+  `GET items/T6080IS2IZ` → 200 but `GET items/T608036IS2IZ` → **400**, while `GET items/P1T3080S` → 200.
+  Same "synthesized, never stored" phrase, opposite API behaviour. So the frontend's depth-click condition
+  is on **`pill.sku`**: `pill.sku !== item.sku` → FETCH the sibling; `pill.sku === item.sku` → NO fetch, set
+  local depth state and show `pill.code ?? item.sku` (image stays on `sku`).
+  **SELECTED on a depth row is picked by LABEL** (per-card depth → toolbar D → 58, the app's `cardDepth`),
+  never by `sku===item.sku` — that lit up every pill. On a MIXED row honour the picked class only when that
+  pill is a state pill for THIS item; if it maps to a sibling, fall back to the item's own NATIVE pill (else
+  the sibling pill lights up "selected" and stops being clickable, blocking the navigation).
+  **TWO depth models coexist (§2c-2), and the DISCRIMINATOR IS `pill.sku`, not the presence of `code`:**
+  `pill.sku !== item.sku` → depth is a SEPARATE ITEM (navigate); `pill.sku === item.sku` → SAME item, order
+  code = `pill.code ?? item.sku`. (`code` present ⟹ same item, but not the converse — a self pill needing
+  no re-cut carries none.) Row shapes: **7,458 MIXED** (siblings + self native/63 pills — the commonest),
+  2,348 all-self with re-cut codes, 1,745 all-self without. **`capabilities.depthClasses` unifies
+  both** — it is simultaneously the pill-greying gate AND the `depthClass` grid filter (`GET items` now
+  matches it, 58 & 63 pass-through; it used to match `parameters.depth[].label`, which put 3,792 wrong
+  cabinets under D=68 and dropped 2,369/4,452 at 58/63).
+  Full rule + code: `design-book-api-ui-map-v2.md` **§2c-1** (pill state) + **§2c-2** (the two models). Codes were taken FROM the app (7,210 class→code
+  pairs via `assemble`), not re-derived. Backfilled into D4K-dev with
+  `D4K-backend/scripts/backfill-depth-pill-codes.js` (superseded by the general
+  `D4K-backend/scripts/backfill-item-fields.js <export.json> [--fields a,b] [--apply]`, dry-run by default)
+  — the HTTP `ingest` body cap is 10 MB so a 54 MB re-ingest can't go over the wire.
+- **⭐ THE REST OF THE ORDER-CODE SURFACE — audited exhaustively 2026-07-21, schemaVersion 2.2.0.** Asked
+  "does the depth pattern exist on width/height/anything else". Answer: **width, height, programme P/C/A and
+  all 16 coded/option rows are plain navigation** — one shared helper `chip(label,code) → openDetail(f.id,code)`,
+  target always a real `x.c`; there is **no `u.w`/`u.h` array** analogous to `u.d`, so they structurally can't.
+  Measured over all 18,396 items: **0 rows with a duplicated sku, 0 rows with >1 self pill** outside `depth`,
+  so `selected = pill.sku === item.sku` stays correct there. `assemble(u,ov)` has exactly 5 inputs / 6 code
+  mutations — full table in **map §2c-3**. Three real gaps found and closed:
+  1. **`options` group `Insert` (`L3/M3`·`M8`) was a mis-scrape, not a state row.** `pickInsert` sets
+     `blockIns[fid]`, which `insPool()` uses to filter the family pool — the pill DOES land on a different
+     **stored** unit (`ZIGSUV20` ↔ `ZIGSUV20U`), its onclick just carries no target, so `chipTarget()` fell
+     through to `u.c` and stamped self on both pills (dead control, nothing ever selected). One family,
+     `FP_16FRONT`, 92 units, 0 ambiguous. Extractor resolves the sibling now; export + D4K-dev backfilled.
+  2. **`Item.doorLineYCode`** (11 units) — `V/E/J/P1/C1` are derivable prefixes/suffixes but **`Y` REPLACES
+     the whole code** (`assemble` line 1: `if(dl==='Y'&&u.Yc) return u.Yc`), so the literal ships. Exactly
+     the `capabilities.doorLineY` set — that flag is the GATE, this is the CODE.
+  3. **`Item.heightExtension`** (2,046 units / 83 families) — the app's **`217+`** chip appended to the
+     Height row (Tall, not `Appliance housing`, family holds an available `hc===217` unit): 230/244/250 cm
+     open the 217 unit + `MPHVERL`, the height twin of the 63 cm depth alteration. `{sku,addCode,options[
+     {label,heightMm}]}`. Missed before because the chips only exist after a tap AND use `b.onclick=fn`
+     (a property, no attribute). **Deliberately NOT in `parameters.height`** — the HP20 panel families also
+     have REAL 230/250 cm siblings, so the labels would collide (`GET items/HP20146` shows both).
+  Also fixed: `design-book.service.ts` still queried the v1 name `'configure.programme.sku'`, which had
+  silently killed the whole P1/C1 tier-sibling synthesis path (`GET items/P1T3080S` → 400).
 - **Fresh full extraction (not a transform).** `docs/export-v781-extractor2.js` drives the app + inlines
   `scripts/compute-capabilities.js` → emits the v2 shape directly. Run it in Chrome (serve HTML, inject,
   `__H.processBatch(start,n)` in ~3000 chunks, `__H.finalize()`, `__H.post('http://localhost:8799/save')`
@@ -56,13 +112,23 @@ Current facts:
   the whole `capabilities` object settable at creation; `UpsertItemDto`). Re-ingest = **extractor wins** (no
   merge layer). `.env` currently points at **D4K-dev** (was prod — flip back when done). Migration cleanup:
   `D4K-backend/scripts/strip-legacy-designbook-fields.js`.
-- **Docs (all v2):** `docs/export-schema-v2.ts` (contract) · `docs/export-sample-v2.json` (12-item worked
-  sample) · `docs/design-book-api-ui-map-v2.md` (API↔UI, §2c the 8-gate model + per-gate GREY table +
-  `availableFromCaps` + render spec; §1b CRUD) · **`docs/design-book-crud-guide.md`** (authoring guide:
-  mental model = a card is a FAMILY of sibling items linked by pills, the rule lives on the pill TARGET;
-  §3a depthClasses+58/63 quirk, §3b tier/op/tierTwins, §3c the other 6 gates, §3d master greying table; the
-  BOSSA "disable 2 width pills" recipe). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
-  `export-sample.json`) are kept for diffing but superseded.
+- **Docs (all v2):** `docs/export-schema-v2.ts` (contract) · `docs/export-sample-v2.json` (13-item worked
+  sample — `MGT601468` is the `doorLineYCode` + `heightExtension` example) ·
+  `docs/design-book-api-ui-map-v2.md` (API↔UI, §2c the 8-gate model + per-gate GREY table +
+  `availableFromCaps` + render spec; **§2c-1 SELECTED — navigation rows vs DEPTH state rows**;
+  **§2c-2 the two depth models**; **§2c-3 the WHOLE order-code surface — every `assemble()` input, which
+  rows are plain navigation, `doorLineYCode`, `heightExtension`**; §1b CRUD) ·
+  **`docs/design-book-crud-guide.md`** (authoring guide: mental model = a card is a FAMILY of sibling items
+  linked by pills, the rule lives on the pill TARGET; §3a depthClasses+58/63 quirk + gate-vs-pill-row warning,
+  §3b nativeTier/opening/twinTiers, §3c the other 6 gates, §3d master greying table; §4/§4a the depth
+  state-row warning, **§4b `heightExtension`**, **§4c `doorLineYCode`**; the BOSSA "disable 2 width pills"
+  recipe) · `docs/design-book-greying-examples.md` (worked
+  grey/live cases per gate) · `docs/design-book-item-fields-plain-guide.md` (plain-English field-by-field
+  tour — hand this to a non-engineer). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
+  `export-sample.json`) are kept for diffing but superseded. **Deliberately NOT annotated** (2026-07-21
+  decision) — they still describe the v1 model verbatim (`configure.*`, a STORED `selected`/`available`
+  boolean, `depthClass` matching pill labels). Don't "fix" them into v2 shape; that destroys their only
+  purpose. Anything about pill state / depth belongs in the **v2** map §2c-1/§2c-2/§2c-3.
 - **UIs (dev tools in D4K-backend/public/, local/dev only):** `GET /design-book/ui` = the lite BROWSE UI
   (rebuilt for v2 — cards from `parameters`, whole-card GREY via `availableFromCaps`); **`GET /design-book/admin`**
   = a full form-based CRUD authoring UI (every field a structured control, programme picker for

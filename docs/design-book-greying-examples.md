@@ -1,226 +1,246 @@
-# Design-Book Greying — Worked Examples (real v781 items)
+# When does a button grey out? — plain-English guide
 
-Concrete, verifiable examples of **when a configurator pill / card greys**, one per gate, using REAL items
-from the v781 catalog (dev DB). Companion to `design-book-crud-guide.md` §3 (authoring) and
-`design-book-api-ui-map-v2.md` §2c (rendering).
+Real examples from the v781 catalog showing **why a product button (or whole card) greys out**.
+Companion to `design-book-crud-guide.md` (how to author these) and `design-book-api-ui-map-v2.md`
+(how the app renders them). A developer cheat-sheet is at the bottom.
 
-## How to read these
+## What "greying out" means
 
-- A pill greys when its **TARGET item's** `capabilities` fail a gate for the current toolbar. A whole card
-  greys when its **own** `capabilities` fail (GREY, DON'T HIDE). Both use the same function:
-  `available = alwaysAvailable || (progOk && tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk)`.
-- Each example shows: the real **item + the capability that matters**, a **toolbar state**, and the
-  **LIVE / GREY** verdict (which gate fired).
-- Verify any of these live: `GET /design-book/items/<sku>` returns `capabilities`; `GET /design-book/items/<parent>?programs=<id>`
-  shows the programme-greyed pills. (Backend on :8010, dev.)
+The app has a **toolbar** across the top — your current choices: which kitchen range, which front
+style, depth, handle type, and so on. Every product button checks: *"do I work with these choices?"*
 
-Reminder — **defaults never grey anything**: `depth=58, tier=ALL, open='', front=0, handle=std, antoso=false,
-doorline='', progKeys=[]`. Greying only appears once a toolbar control moves off its default.
+- **Yes** → the button is normal and clickable.
+- **No** → the button **greys out**. It still shows (so you can see the option exists), but you can't click it.
+
+Two things grey the same way:
+- a **button** on a card (a width, a front style, …) greys based on the product it would take you to;
+- a **whole card** greys based on its own product.
+
+**Nothing greys until you change a setting.** Fresh toolbar (nothing picked) = everything clickable.
+The neutral defaults are: no range picked, front style = ALL, depth 58, standard handle, not suspended,
+no opening variant, no one-piece front, no door-line filter.
+
+## The 8 questions every button asks
+
+A button stays clickable only if the answer to **all** of these is "fine":
+
+1. **Range** — is this product sold in the kitchen range you picked?
+2. **Front style (P / A / C)** — does it come in the style you picked? (If a matching sibling exists, the app sends you there instead, so this one greys.)
+3. **Opening style (P1 / C1)** — the "one handle on top" variants; only the exact opening version stays.
+4. **Depth** — does it come in the depth you picked?
+5. **Handle** — if you chose the handle-less look, does this have a handle-less front?
+6. **One-piece front** — if you turned that mode on, does this support it?
+7. **Suspended (wall-hung)** — if you turned that on, is this approved for wall-hanging?
+8. **Door line (J / Y)** — if you filtered to a door line, is this in it?
+
+Plus a shortcut: some products are marked **always available** and never grey, no matter what.
 
 ---
 
-## 1. Programme gate — `excludedPrograms`
+## 1. Range — "not sold in this range"
 
-**Item `T1580`** ("Floor unit", Base › Doors) — `capabilities.excludedPrograms` includes **`244` (BOSSA)**
-(among 20 programmes). Also `T2080` (the 20 cm sibling).
+**`T1580`** (a 15 cm floor unit) is **not sold in the BOSSA range**. (`T2080` is its 20 cm sibling.)
 
-| Toolbar | Result | Why |
+| Toolbar | Button | Why |
 |---|---|---|
-| no programme | **LIVE** | progOk passes when nothing is picked |
-| `programs=[244]` (BOSSA) | **GREY** | 244 ∈ `excludedPrograms` → progOk fails |
-| `programs=[201]`… any NOT in its list | LIVE | that programme is allowed |
-| `programs=[244, <something-it-allows>]` | LIVE | union — one allowed programme keeps it live |
+| no range picked | ✅ clickable | nothing to check yet |
+| **BOSSA** | ⬜ **greyed** | not sold in BOSSA |
+| any other range it's sold in | ✅ clickable | it's available there |
+| BOSSA **+** a range it's sold in | ✅ clickable | one allowed range is enough |
 
-**As pills (verified end-to-end):** `T6080`'s Width row links 15→`T1580`, 20→`T2080`.
-```bash
-GET /design-book/items/T6080?programs=244
-#  parameters.width[0] = {"label":"15","sku":"T1580","available":false,"programmeExcluded":true}
-#  parameters.width[1] = {"label":"20","sku":"T2080","available":false,"programmeExcluded":true}
-#  → the 15 and 20 pills render struck; all others live.
-```
-> **Authoring:** to disable a pill in a programme, put the programme id on the pill's TARGET (§5 of the guide).
+Real button example — on card `T6080`, the **Width 15** and **Width 20** buttons point to `T1580` / `T2080`,
+so both grey out the moment you pick BOSSA.
 
 ---
 
-## 2. Tier gate (FRONTS P/A/C) — `tier` + `tierTwins`
+## 2. Front style P / A / C — "comes in a different style"
 
-**Item `T1573`** ("Floor unit", Base › Doors) — `tier="P"` (native Primo), `tierTwins=["C"]` (a real Contino
-twin `CT1573` exists), `op=null`.
+**`T1573`** is a Primo (P) unit and it **also exists as a Contino (C)** version (`CT1573`).
 
-| FRONTS pill | Result | Why |
+| You pick (FRONTS) | Button | Why |
 |---|---|---|
-| ALL | **LIVE** | tier gate off |
-| P | **LIVE** | picked = native tier |
-| **C** | **GREY** | picked ≠ native AND a C twin exists → app swaps to `CT1573` |
-| A | **LIVE** | no Avance twin → nothing to swap to → stays |
+| ALL | ✅ clickable | no style filter |
+| P (Primo) | ✅ clickable | this IS the Primo one |
+| **C (Contino)** | ⬜ **greyed** | a real Contino version exists → app takes you to `CT1573` instead |
+| A (Avance) | ✅ clickable | no Avance version exists, so this one stays |
 
-> Flip side: `CT1573` (the Contino twin) has `tier="C"`, so it's LIVE under FRONTS=C and greys under P.
+The Contino twin `CT1573` behaves the mirror way: clickable under C, greys under P.
 
 ---
 
-## 3. Tier gate (FRONTS P1/C1) — `op`
+## 3. Opening style P1 / C1 — "one handle on top"
 
-**`P1TSP457368B`** ("Sink unit · blender", Base › Sinks) — `op="P1"`: this unit **IS** the P1 opening
-variant. **`C1T308036S2Z`** ("Pullout unit · S2Z") — `op="C1"`.
+Some units ARE the special opening version. **`P1TSP457368B`** is a **P1** unit; **`C1T308036S2Z`** is a **C1** unit.
 
-| FRONTS pill | `P1TSP457368B` (op=P1) | a normal unit (op=null) |
+| You pick (FRONTS) | the P1 unit | a normal unit |
 |---|---|---|
-| P1 | **LIVE** (it IS the P1 variant) | **GREY** (op ≠ P1) |
-| C1 | GREY (op ≠ C1) | GREY |
+| P1 | ✅ clickable (it IS P1) | ⬜ greyed |
+| C1 | ⬜ greyed (it's P1, not C1) | ⬜ greyed |
 
-> The P1/C1 FRONTS pills use `op`, NOT `tierTwins`. Only the unit that *is* that opening variant survives.
+Only the unit that **is** that exact opening version stays clickable.
 
 ---
 
-## 4. Depth gate (D pill) — `depthClasses` (58 & 63 always pass)
+## 4. Depth — "not offered in this depth"
 
-**`C1T3080S2Z`** ("Pullout unit · S2Z", Base › Drawers & Pullouts) — `depthClasses=[58]` (offers ONLY 58).
+**`C1T3080S2Z`** is offered **only at depth 58**.
 
-| D pill | Result | Why |
+| You pick (depth) | Button | Why |
 |---|---|---|
-| 58 | **LIVE** | 58 always passes |
-| 63 | **LIVE** | 63 always passes (depth-alteration class) |
-| 36 / 48 / 68 | **GREY** | not in `depthClasses` → depthOk fails |
+| 58 | ✅ clickable | offered |
+| 63 | ✅ clickable | 63 always passes (it's a depth tweak) |
+| 36 / 48 / 68 | ⬜ **greyed** | not offered at those depths |
 
-**`C1T308036S2Z`** — `depthClasses=[36]`: LIVE under 36 (offered) + 58/63 (always pass); **GREY** under 48/68.
+Sibling **`C1T308036S2Z`** is only 36 cm: clickable at 36 (and 58/63, which always pass), greys at 48/68.
 
-> Gotcha: a unit whose list already covers all classes (e.g. `36,48,58,68`) **never greys by depth** — every
-> D pill passes. Unchecking 63 in the admin form does nothing (63 always passes).
+> Note: a unit offered in every depth never greys on depth — every depth button passes. 58 and 63 always pass for everyone.
 
 ---
 
-## 5. Handle gate — `handleFree`
+## 5. Handle — "no handle-less version"
 
-**`GF46204`** ("Appliance door for large Fridge/Freezer", Tall › Appliance Housing) — `handleFree=true`
-(handle-less / module). A normal `CT1573` has `handleFree=false`.
+**`GF46204`** is handle-less. A normal unit like `CT1573` has a handle.
 
-| Handle toolbar | `GF46204` (handleFree=true) | `CT1573` (handleFree=false) |
+| You pick (handle) | `GF46204` (handle-less) | `CT1573` (has handle) |
 |---|---|---|
-| standard | LIVE | LIVE |
-| **V** (vertical handle) | **LIVE** | **GREY** |
+| standard | ✅ clickable | ✅ clickable |
+| **handle-less** | ✅ clickable | ⬜ **greyed** |
 
 ---
 
-## 6. Front gate (Full-E) — `frontE`
+## 6. One-piece front — "doesn't support it"
 
-**`GF46204`** — `frontE=true` (one-piece front). Most cabinets have `frontE=false`.
+**`GF46204`** has a one-piece front. Most cabinets don't.
 
-| Full-E toolbar | `frontE=true` | `frontE=false` |
+| One-piece mode | `GF46204` (supports it) | a normal cabinet |
 |---|---|---|
-| off (front=0) | LIVE | LIVE |
-| **on (front=1)** | **LIVE** | **GREY** |
+| off | ✅ clickable | ✅ clickable |
+| **on** | ✅ clickable | ⬜ **greyed** |
 
 ---
 
-## 7. Opening gate — `openP1` / `openC1` / `singleHandle`
+## 7. Opening support — single fronts always pass
 
-- **`T3073S`** ("Floor unit · S", Base › Doors) — `openP1=true`, `singleHandle=true`.
-- **`CT1573`** ("Floor unit") — `openP1=false, openC1=false, singleHandle=true`.
+- **`T3073S`** supports the P1 opening.
+- **`CT1573`** is a **single front**, so opening always works for it.
+- A **multi-front** unit that supports neither greys.
 
-| OPENING toggle | `T3073S` (openP1) | `CT1573` (singleHandle only) | a multi-front unit (all false) |
+| You pick (opening) | `T3073S` | `CT1573` (single front) | a multi-front unit |
 |---|---|---|---|
-| none | LIVE | LIVE | LIVE |
-| P1 | **LIVE** (supports P1) | **LIVE** (singleHandle passes) | **GREY** |
-| C1 | LIVE (singleHandle passes) | **LIVE** (singleHandle passes) | GREY |
+| none | ✅ | ✅ | ✅ |
+| P1 | ✅ supports P1 | ✅ single front | ⬜ **greyed** |
+| C1 | ✅ single front | ✅ single front | ⬜ **greyed** |
 
-> `singleHandle=true` makes the opening gate pass regardless of `openP1`/`openC1` — a single front can always
-> take an opening variant. A unit greys under OPENING only when it's multi-front AND lacks the variant.
+> A single front can always take an opening variant. A unit only greys here if it's multi-front **and** lacks the variant.
 
 ---
 
-## 8. ANTOSO gate (Suspended) — `antosoOk`
+## 8. Suspended (wall-hung) — "not approved"
 
-- **`CT3073`** ("Floor unit") — `antosoOk=true` (fits the suspended-install envelope).
-- **`CT1573`** ("Floor unit") — `antosoOk=false`.
+- **`CT3073`** is approved for suspended (wall-hung) install.
+- **`CT1573`** is not.
 
-| Suspended toggle | `CT3073` (true) | `CT1573` (false) |
+| Suspended toggle | `CT3073` (approved) | `CT1573` (not) |
 |---|---|---|
-| off | LIVE | LIVE |
-| **on** | **LIVE** | **GREY** |
+| off | ✅ clickable | ✅ clickable |
+| **on** | ✅ clickable | ⬜ **greyed** |
 
 ---
 
-## 9. Door gate (door-line) — `doorJ` / `doorY`
+## 9. Door line J / Y — "not in this line"
 
-- **`HVG7019768`** ("Slide-away door housing unit", Tall › Appliance Housing) — `doorJ=true, doorY=false`.
-- **`MGT601468`** ("Module Appliance niche with door · KL 80") — `doorY=true, doorJ=false`.
+- **`HVG7019768`** belongs to door line **J**.
+- **`MGT601468`** belongs to door line **Y**.
 
-| doorline toolbar | `HVG7019768` (J) | `MGT601468` (Y) |
+| Door-line filter | `HVG7019768` (J) | `MGT601468` (Y) |
 |---|---|---|
-| none | LIVE | LIVE |
-| **J** | **LIVE** | **GREY** |
-| **Y** | **GREY** | **LIVE** |
+| none | ✅ | ✅ |
+| **J** | ✅ clickable | ⬜ **greyed** |
+| **Y** | ⬜ **greyed** | ✅ clickable |
 
 ---
 
-## 10. Never greys — `alwaysAvailable` and line-neutral
+## 10. Never greys
 
-**`AT301336S`** ("Drawer unit · Special Height", Base › Special Height) — `alwaysAvailable=true`, `tier=null`.
+**`AT301336S`** is marked **always available** and is **line-neutral**.
 
-- `alwaysAvailable=true` → **LIVE under EVERY toolbar** (short-circuits all 8 gates). Use for
-  always-shown units.
-- `tier=null` (line-neutral: accessories, alterations, fillers, special-height) → **never greys by tier**
-  (the tier gate returns true for null tier), regardless of the FRONTS pill.
+- **Always available** → clickable under every toolbar, full stop.
+- **Line-neutral** (accessories, alterations, fillers, special-height) → never greys on front style, whatever you pick.
 
 ---
 
-## 11. Single-front / Full-E programme path — `hasE` + `excludedProgramsE`
+## 11. Extra range rules in one-piece mode
 
-**`GF46204`** — `hasE=true`, `excludedProgramsE=["226","228","283","613","654","669","684","726","728","783"]`.
+**`GF46204`** has extra range exclusions that only apply **when one-piece front mode is on**.
 
-These extra programme exclusions bite **only** when the **Full-E toggle is on**:
-
-| Toolbar | Result |
+| Toolbar | Button |
 |---|---|
-| `programs=[226]`, front=0 | LIVE (226 not in normal `excludedPrograms`) |
-| `programs=[226]`, **front=1** (Full-E) | **GREY** — 226 ∈ `excludedProgramsE` AND `hasE` |
-
-> The backend's `annotateProgrammeExclusions` only reads normal `excludedPrograms`; the Full-E path is
-> client-side (send the front state to `availableFromCaps`).
+| range 226, one-piece **off** | ✅ clickable (fine normally) |
+| range 226, one-piece **on** | ⬜ **greyed** (excluded only in one-piece mode) |
 
 ---
 
-## 12. FRMAT — the one special case — `isFrmat`
+## 12. FRMAT — the one odd case
 
-**`FRMAT`** ("Front panel material", Panels & surround › Surround) — `isFrmat=true`. Its programme
-availability additionally uses a size table (`FRMAT_MAX[programmeName]`), so `progOk` for FRMAT must layer
-that rule on top of `excludedPrograms`. One unit catalog-wide — special-case it.
+**`FRMAT`** (front panel material) uses an extra size table on top of the normal range rule. It's the only
+product like this in the whole catalog — handle it as a special case.
 
 ---
 
-## 13. Multiple gates at once — `CTSS12073T2`
+## 13. All rules at once — `CTSS12073T2`
 
-**`CTSS12073T2`** ("Floor unit with sliding doors", Base › Doors):
-`excludedPrograms=[201,202,…,786]` (50 programmes), `tierTwins=["P"]`, `depthClasses=[58,68]`,
-`handleFree=false`, `antosoOk=true`, `tier="C"`.
+A Contino floor unit with sliding doors. It offers depths 58 & 68, has a handle, is approved for suspended,
+and comes as a Primo twin too.
 
-A pill pointing at this unit (or the card itself) greys when **any** of these fires:
-
-| Toolbar | Verdict | Failing gate |
+| Toolbar | Button | Which rule greyed it |
 |---|---|---|
-| default | **LIVE** | — |
-| `programs=[201]` | GREY | progOk (201 excluded) |
-| FRONTS = **P** | GREY | tierOk (P twin exists) |
-| D pill = **36** or **48** | GREY | depthOk (offers only 58/68) |
-| Handle = **V** | GREY | handleOk (`handleFree=false`) |
-| Suspended = on | **LIVE** | passes (`antosoOk=true`) |
-| FRONTS = **C** (its native) | LIVE | its own tier |
-| D pill = **58 / 63 / 68** | LIVE | 58/63 always pass; 68 offered |
+| default | ✅ clickable | — |
+| range 201 | ⬜ greyed | not sold in range 201 |
+| FRONTS = **P** | ⬜ greyed | a Primo version exists |
+| depth **36** or **48** | ⬜ greyed | only offered at 58 / 68 |
+| handle-less | ⬜ greyed | it has a handle |
+| suspended = on | ✅ clickable | it's approved |
+| FRONTS = **C** (its own style) | ✅ clickable | this IS the Contino one |
+| depth **58 / 63 / 68** | ✅ clickable | 58/63 always pass, 68 offered |
 
-Only when it passes **every** gate is it LIVE. That is exactly `availableFromCaps(caps, toolbar)`.
+It's clickable only when it passes **every** rule.
 
 ---
 
-## Quick verification recipe
+## Check any example yourself
+
+The app is on `http://localhost:8000` (dev). Programme (range) ids come from `GET /design-book/programs`
+— **BOSSA = `244`**.
 
 ```bash
-# 1. read the capabilities of any example
-GET /design-book/items/T1580        # → capabilities.excludedPrograms includes "244"
+# read one product's rules
+GET /design-book/items/T1580          # → its excludedPrograms include "244" (BOSSA)
 
-# 2. see the programme gate fire on a real card's pills
-GET /design-book/items/T6080?programs=244   # width 15/20 → available:false, programmeExcluded:true
-
-# 3. the other 7 gates: evaluate availableFromCaps(target.capabilities, toolbar) client-side
-#    (the port is in export-schema-v2.ts / api-ui-map-v2.md §2c).
+# watch the range rule fire on a real card's buttons
+GET /design-book/items/T6080?programs=244   # width 15 & 20 come back greyed
 ```
-Programme ids come from `GET /design-book/programs` (BOSSA = `244`).
+
+The range rule is checked on the server; the other 7 are checked in the app from each product's rules.
+
+---
+
+## Developer cheat-sheet
+
+Plain name ↔ the toolbar control ↔ the stored `capabilities` field(s):
+
+| # | Plain name | Toolbar control | Gate | `capabilities` field(s) |
+|---|---|---|---|---|
+| 1 | Range | programme picker | progOk | `excludedPrograms` (+ `excludedProgramsE` & `hasEFront` in one-piece mode; `isFrmatFamily`) |
+| 2 | Front style | FRONTS P/A/C | tierOk | `nativeTier`, `twinTiers` |
+| 3 | Opening style | FRONTS P1/C1 | tierOk | `opening` |
+| 4 | Depth | D pill | depthOk | `depthClasses` (58 & 63 always pass) |
+| 5 | Handle | handle selector | handleOk | `handleFree` |
+| 6 | One-piece front | Full-E toggle | frontOk | `onePieceFront` |
+| 7 | Opening support | OPENING toggle | openOk | `openP1`, `openC1`, `singleHandle` |
+| 8 | Suspended | Suspended toggle | antosoOk | `antosoApproved` |
+| 9 | Door line | door-line filter | doorOk | `doorLineJ`, `doorLineY` |
+| — | Never greys | — | short-circuit | `alwaysAvailable`, `nativeTier=null` |
+
+Full logic:
+`available = alwaysAvailable || (progOk && tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk)`
+— see `availableFromCaps()` in `export-schema-v2.ts` / `design-book-api-ui-map-v2.md` §2c.

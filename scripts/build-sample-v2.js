@@ -67,7 +67,7 @@ items.push(pick('TK7080BZ2', (it) => {
   // two of them (273/561) are in this sample's programmes[], so the gate is concretely demonstrable.
   uiOn(it, 'capabilities',
     '⭐ THE RULE INPUTS. The client feeds this + its toolbar to availableFromCaps() (see schema) to decide if a ' +
-    'configure PILL that TARGETS this sku is live/grey/dead. Here: tier "P" native + tierTwins ["A"] → greys under an ' +
+    'configure PILL that TARGETS this sku is live/grey/dead. Here: nativeTier "P" native + twinTiers ["A"] → greys under an ' +
     'AVANCE-only toolbar; excludedPrograms ["273","280","281","295","561"] → greyed in those 5 programmes (273=VERVE-FS, ' +
     '561=CARRÉ-FS, both in this sample\'s programmes[]); openP1:true so the P1 opening pill resolves; depthClasses [58,68].');
   uiOn(it, 'parameters',
@@ -115,14 +115,14 @@ items.push(pick('TSPA8073BTZW', (it) => {
     'after the title, from vsub[vr]). Also a good second handedLR/engineering example.', it);
 }));
 
-/* 5 — Refrigerator appliance front: ApplianceHousing (Refrigerators shape) + frontE/hasE/excludedProgramsE
+/* 5 — Refrigerator appliance front: ApplianceHousing (Refrigerators shape) + onePieceFront/hasEFront/excludedProgramsE
  *     (the single-front "Full-E" exclusion path) + handleFree/singleHandle + InspirationBlock + frontModifiers +
  *     a DEAD DimPill (depth "63" alteration with no sku). */
 items.push(pick('GF46204', (it) => {
   trimCommon(it, { restrictions: 2, planningNotes: 2 });
   trimExcluded(it.capabilities, 8);
   uiOn(it, 'capabilities',
-    'E-MODE example. hasE:true + frontE:true (one-piece front) + a NON-empty excludedProgramsE[] — those extra exclusions apply ' +
+    'E-MODE example. hasEFront:true + onePieceFront:true (one-piece front) + a NON-empty excludedProgramsE[] — those extra exclusions apply ' +
     'ONLY when the toolbar is in single-front / "Full-E" mode (state.front===1). handleFree:true + singleHandle:true (no-handle ' +
     'appliance door). excludedPrograms/excludedProgramsE trimmed to 8 each (real, but the full lists are 27/10).');
   uiOn(it, 'appliance',
@@ -134,7 +134,7 @@ items.push(pick('GF46204', (it) => {
   uiOn(it, 'parameters',
     'Note the depth "63" pill: {label:"63", alteration:true} with NO sku → a DEAD pill (renders grey + inert, nowhere to navigate).');
   return ui('REFRIGERATOR appliance front. Exercises ApplianceHousing (Refrigerators variant), the E-mode capability path ' +
-    '(hasE/frontE/excludedProgramsE), handleFree/singleHandle, InspirationBlock, frontModifiers (spec "Modifiers" line), and a ' +
+    '(hasEFront/onePieceFront/excludedProgramsE), handleFree/singleHandle, InspirationBlock, frontModifiers (spec "Modifiers" line), and a ' +
     'dead alteration DimPill.', it);
 }));
 
@@ -149,14 +149,14 @@ items.push(pick('CGFV608061S2Z', (it) => {
     '["_","C"] (the tier contexts in which this unit is its family\'s FACE card — NOT derivable, captured from the app).', it);
 }));
 
-/* 7 — premium opening variant: Capabilities.op set. */
+/* 7 — premium opening variant: Capabilities.opening set. */
 items.push(pick('P1TSP4573B', (it) => {
   trimCommon(it, { accessories: 3 });
   trimExcluded(it.capabilities, 8);
   uiOn(it, 'capabilities',
-    'op:"P1" — THIS unit IS the premium P1 opening variant ("one handle on top"). availableTiers is ["P1"], so under any tier ≠ P1 ' +
+    'opening:"P1" — THIS unit IS the premium P1 opening variant ("one handle on top"). availableTiers is ["P1"], so under any tier ≠ P1 ' +
     'the tierOk gate fails. (P1/C1 codes are a prefix on a base; most are synthesized, but recovered/real ones like this are stored.)');
-  return ui('P1 OPENING VARIANT — exercises Capabilities.op ("P1"). The one item shape where op is non-null.', it);
+  return ui('P1 OPENING VARIANT — exercises Capabilities.opening ("P1"). The one item shape where opening is non-null.', it);
 }));
 
 /* 8 — options row: Parameters.options (OptionPill — the coded "Ty" row). */
@@ -169,24 +169,24 @@ items.push(pick('T3027Z', (it) => {
   return ui('STORAGE Z UNIT — exercises Parameters.options (the "Ty" OptionPill row) plus a second Modification[] example.', it);
 }));
 
-/* 9 — FRMAT: Capabilities.isFrmat true. */
+/* 9 — FRMAT: Capabilities.isFrmatFamily true. */
 items.push(pick('FRMAT', (it) => {
   trimCommon(it, { finishes: 3, restrictions: 3, planningNotes: 2 });
   trimExcluded(it.capabilities, 8);
   uiOn(it, 'capabilities',
-    'isFrmat:true — the 1-unit FRMAT max-size-table family. The backend layers FRMAT_MAX[programmeName] ON TOP of the normal gate ' +
+    'isFrmatFamily:true — the 1-unit FRMAT max-size-table family. The backend layers FRMAT_MAX[programmeName] ON TOP of the normal gate ' +
     '(the sole residual in the 99.997% capabilities verification). Also shows faceForTiers ["_","P","A","C"] (face in every tier context).');
-  return ui('FRMAT front-panel material — the isFrmat:true special case.', it);
+  return ui('FRMAT front-panel material — the isFrmatFamily:true special case.', it);
 }));
 
-/* 10 — recovered artifact + alwaysAvailable + tier:null. */
+/* 10 — recovered artifact + alwaysAvailable + nativeTier:null. */
 items.push(pick('L24CD', (it) => {
   trimCommon(it, { planningNotes: 2 });
   uiOn(it, 'capabilities',
-    'alwaysAvailable:true (app u._c) short-circuits EVERY gate → the pill never greys. tier:null = line-neutral (never greys by tier). ' +
+    'alwaysAvailable:true (app u._c) short-circuits EVERY gate → the pill never greys. nativeTier:null = line-neutral (never greys by tier). ' +
     'This is one of meta.recoveredArtifactSkus — a code the app\'s init deleted as an artifact but which is a real orderable unit, ' +
     'recovered from the raw <script id="DATA">.');
-  return ui('RECOVERED ARTIFACT (LED control) — from meta.recoveredArtifactSkus. Exercises Capabilities.alwaysAvailable:true + tier:null.', it);
+  return ui('RECOVERED ARTIFACT (LED control) — from meta.recoveredArtifactSkus. Exercises Capabilities.alwaysAvailable:true + nativeTier:null.', it);
 }));
 
 /* 11 — alteration kind. */
@@ -309,16 +309,16 @@ console.log('Top-level objects: meta, categories(' + categories.length + '), pro
   '), ruleTables, systems(' + systems.length + '), functionalCategories, items(' + items.length + ')\n');
 
 const rows = [
-  ['TK7080BZ2', 'cabinet', 'Item, Capabilities(excludedPrograms,tierTwins,openP1,depthClasses), Parameters(W/H/D/Programme+opening), DimPill(alteration), ProgrammePill(opening), AccessoryRef(string+{sku,variants}), VariantRef, alterations, companions, ToeKick, Description, FinishPrice, ItemFunctionalGroup'],
+  ['TK7080BZ2', 'cabinet', 'Item, Capabilities(excludedPrograms,twinTiers,openP1,depthClasses), Parameters(W/H/D/Programme+opening), DimPill(alteration), ProgrammePill(opening), AccessoryRef(string+{sku,variants}), VariantRef, alterations, companions, ToeKick, Description, FinishPrice, ItemFunctionalGroup'],
   ['T4573VE', 'cabinet', 'FinishInterior, Swatch, VisibleSideCombo, optionCodes, DidYouKnow, EngineeringFlag'],
   ['CT2073', 'cabinet', 'handedLR, Modification, didYouKnow, accessories{sku,variants} (IGS2058 L3/M3·M8)'],
   ['TSPA8073BTZW', 'cabinet', 'SinkFitment, nameQualifier'],
-  ['GF46204', 'cabinet', 'ApplianceHousing(Refrigerators), Capabilities.hasE/frontE/excludedProgramsE, handleFree/singleHandle, InspirationBlock, frontModifiers, dead DimPill'],
+  ['GF46204', 'cabinet', 'ApplianceHousing(Refrigerators), Capabilities.hasEFront/onePieceFront/excludedProgramsE, handleFree/singleHandle, InspirationBlock, frontModifiers, dead DimPill'],
   ['CGFV608061S2Z', 'cabinet', 'ApplianceHousing(Dishwashers: subcategory+note), faceForTiers'],
-  ['P1TSP4573B', 'cabinet', 'Capabilities.op="P1"'],
+  ['P1TSP4573B', 'cabinet', 'Capabilities.opening="P1"'],
   ['T3027Z', 'cabinet', 'Parameters.options / OptionPill (Ty row), Modification'],
-  ['FRMAT', 'cabinet', 'Capabilities.isFrmat=true, faceForTiers'],
-  ['L24CD', 'cabinet', 'Capabilities.alwaysAvailable=true + tier:null, recoveredArtifactSkus member'],
+  ['FRMAT', 'cabinet', 'Capabilities.isFrmatFamily=true, faceForTiers'],
+  ['L24CD', 'cabinet', 'Capabilities.alwaysAvailable=true + nativeTier:null, recoveredArtifactSkus member'],
   ['ANST', 'alteration', 'ItemKind "alteration"'],
   ['VSF135ADP', 'accessory', 'ItemKind "accessory", faceForTiers'],
 ];

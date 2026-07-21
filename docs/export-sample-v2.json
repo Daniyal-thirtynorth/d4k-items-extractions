@@ -3,10 +3,10 @@
     "_ui": "Illustrative sample of the v2 (MINIMAL + CAPABILITIES) contract. The items below between them exercise EVERY object in export-schema-v2.ts. Some refs (alterations/accessories/companions sku codes, pill targets) point at items outside this small slice; in a real export every referenced sku exists in items[]. Any key starting with `_ui` is plain-English DOCUMENTATION ONLY — the backend MUST strip every `_ui` key on ingest; `_ui` is NOT part of the schema. counts here describe THIS sample, not the full catalog.",
     "generated": "2026-07-17T08:56:11.786Z",
     "source": "leicht_units v781 (headless DOM extraction via openDetail) — SAMPLE",
-    "schemaVersion": "2.0.0",
+    "schemaVersion": "2.2.0",
     "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
     "counts": {
-      "items": 12,
+      "items": 13,
       "cabinets": 10,
       "accessories": 1,
       "categories": 3,
@@ -20,7 +20,7 @@
       "GFV5580M",
       "GFV5580SZ2M"
     ],
-    "note": "Minimal + capabilities export of v781. Each item is the THIN shape: capabilities REPLACES programmeAvailability (raw u.x excludedPrograms + tier/depth/handle/open/antoso/door gate inputs, isFrmat kept so the backend layers the FRMAT max-size rule); configure→parameters (label+sku pills only); accessoryPanel→alterations/accessories(+variants)/finishInterior; relatedGroups→companions; engineering→{key,ok}. Built by driving the app's own openDetail()/visibleBlocks()/famInTaskSub(); 23 app-deleted artifact units recovered from the raw <script id=\"DATA\"> (see meta.recoveredArtifactSkus); 21 referenced non-unit codes synthesized as minimal accessory/part/alteration stubs."
+    "note": "Minimal + capabilities export of v781. Each item is the THIN shape: capabilities REPLACES programmeAvailability (raw u.x excludedPrograms + tier/depth/handle/open/antoso/door gate inputs, isFrmatFamily kept so the backend layers the FRMAT max-size rule); configure→parameters (label+sku pills only); accessoryPanel→alterations/accessories(+variants)/finishInterior; relatedGroups→companions; engineering→{key,ok}. Built by driving the app's own openDetail()/visibleBlocks()/famInTaskSub(); 23 app-deleted artifact units recovered from the raw <script id=\"DATA\"> (see meta.recoveredArtifactSkus); 21 referenced non-unit codes synthesized as minimal accessory/part/alteration stubs."
   },
   "categories": [
     {
@@ -411,11 +411,11 @@
         "A"
       ],
       "capabilities": {
-        "_ui": "⭐ THE RULE INPUTS. The client feeds this + its toolbar to availableFromCaps() (see schema) to decide if a configure PILL that TARGETS this sku is live/grey/dead. Here: tier \"P\" native + tierTwins [\"A\"] → greys under an AVANCE-only toolbar; excludedPrograms [\"273\",\"280\",\"281\",\"295\",\"561\"] → greyed in those 5 programmes (273=VERVE-FS, 561=CARRÉ-FS, both in this sample's programmes[]); openP1:true so the P1 opening pill resolves; depthClasses [58,68].",
+        "_ui": "⭐ THE RULE INPUTS. The client feeds this + its toolbar to availableFromCaps() (see schema) to decide if a configure PILL that TARGETS this sku is live/grey/dead. Here: nativeTier \"P\" native + twinTiers [\"A\"] → greys under an AVANCE-only toolbar; excludedPrograms [\"273\",\"280\",\"281\",\"295\",\"561\"] → greyed in those 5 programmes (273=VERVE-FS, 561=CARRÉ-FS, both in this sample's programmes[]); openP1:true so the P1 opening pill resolves; depthClasses [58,68].",
         "alwaysAvailable": false,
-        "tier": "P",
-        "op": null,
-        "tierTwins": [
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [
           "A"
         ],
         "excludedPrograms": [
@@ -426,20 +426,20 @@
           "561"
         ],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [
           58,
           68
         ],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": true,
         "openC1": false,
         "singleHandle": false,
-        "antosoOk": true,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Hob unit",
@@ -534,16 +534,19 @@
         "depth": [
           {
             "label": "58",
-            "sku": "TK7080BZ2"
+            "sku": "TK7080BZ2",
+            "code": "TK7080BZ2"
           },
           {
             "label": "63",
             "sku": "TK7080BZ2",
-            "alteration": true
+            "alteration": true,
+            "code": "TK7080BZ2"
           },
           {
             "label": "68",
-            "sku": "TK7080BZ2"
+            "sku": "TK7080BZ2",
+            "code": "TK708068BZ2"
           }
         ],
         "programme": [
@@ -694,25 +697,25 @@
       ],
       "capabilities": {
         "alwaysAvailable": false,
-        "tier": "P",
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [
           58,
           36
         ],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": true,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Vero-glass floor unit",
@@ -791,11 +794,13 @@
         "depth": [
           {
             "label": "36",
-            "sku": "T4573VE"
+            "sku": "T4573VE",
+            "code": "T457336VE"
           },
           {
             "label": "58",
-            "sku": "T4573VE"
+            "sku": "T4573VE",
+            "code": "T4573VE"
           }
         ],
         "programme": [
@@ -943,9 +948,9 @@
       "handedLR": true,
       "capabilities": {
         "alwaysAvailable": false,
-        "tier": "C",
-        "op": null,
-        "tierTwins": [
+        "nativeTier": "C",
+        "opening": null,
+        "twinTiers": [
           "P"
         ],
         "excludedPrograms": [
@@ -989,8 +994,8 @@
           "705"
         ],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [
           58,
           36,
@@ -998,13 +1003,13 @@
           68
         ],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Floor unit",
@@ -1120,24 +1125,29 @@
         "depth": [
           {
             "label": "36",
-            "sku": "CT2073"
+            "sku": "CT2073",
+            "code": "CT207336"
           },
           {
             "label": "48",
-            "sku": "CT2073"
+            "sku": "CT2073",
+            "code": "CT207348"
           },
           {
             "label": "58",
-            "sku": "CT2073"
+            "sku": "CT2073",
+            "code": "CT2073"
           },
           {
             "label": "63",
             "sku": "CT2073",
-            "alteration": true
+            "alteration": true,
+            "code": "CT2073"
           },
           {
             "label": "68",
-            "sku": "CT2073"
+            "sku": "CT2073",
+            "code": "CT207368"
           }
         ],
         "programme": [
@@ -1272,9 +1282,9 @@
       "handedLR": true,
       "capabilities": {
         "alwaysAvailable": false,
-        "tier": "P",
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [
           "201",
           "202",
@@ -1316,19 +1326,19 @@
           "750"
         ],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [
           58
         ],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": true,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Sink waste bin unit for hot",
@@ -1525,7 +1535,7 @@
       ]
     },
     {
-      "_ui": "REFRIGERATOR appliance front. Exercises ApplianceHousing (Refrigerators variant), the E-mode capability path (hasE/frontE/excludedProgramsE), handleFree/singleHandle, InspirationBlock, frontModifiers (spec \"Modifiers\" line), and a dead alteration DimPill.",
+      "_ui": "REFRIGERATOR appliance front. Exercises ApplianceHousing (Refrigerators variant), the E-mode capability path (hasEFront/onePieceFront/excludedProgramsE), handleFree/singleHandle, InspirationBlock, frontModifiers (spec \"Modifiers\" line), and a dead alteration DimPill.",
       "sku": "GF46204",
       "kind": "cabinet",
       "familyId": "F1230",
@@ -1541,11 +1551,11 @@
         "P"
       ],
       "capabilities": {
-        "_ui": "E-MODE example. hasE:true + frontE:true (one-piece front) + a NON-empty excludedProgramsE[] — those extra exclusions apply ONLY when the toolbar is in single-front / \"Full-E\" mode (state.front===1). handleFree:true + singleHandle:true (no-handle appliance door). excludedPrograms/excludedProgramsE trimmed to 8 each (real, but the full lists are 27/10).",
+        "_ui": "E-MODE example. hasEFront:true + onePieceFront:true (one-piece front) + a NON-empty excludedProgramsE[] — those extra exclusions apply ONLY when the toolbar is in single-front / \"Full-E\" mode (state.front===1). handleFree:true + singleHandle:true (no-handle appliance door). excludedPrograms/excludedProgramsE trimmed to 8 each (real, but the full lists are 27/10).",
         "alwaysAvailable": false,
-        "tier": "P",
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [
           "201",
           "202",
@@ -1566,17 +1576,17 @@
           "684",
           "726"
         ],
-        "isFrmat": false,
-        "hasE": true,
+        "isFrmatFamily": false,
+        "hasEFront": true,
         "depthClasses": [],
         "handleFree": true,
-        "frontE": true,
+        "onePieceFront": true,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Appliance door for large capacity appliance",
@@ -1731,9 +1741,9 @@
       ],
       "capabilities": {
         "alwaysAvailable": false,
-        "tier": "C",
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": "C",
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [
           "201",
           "202",
@@ -1745,19 +1755,19 @@
           "701"
         ],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [
           58
         ],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Front for built-under appliance with drawer- and pullout partitioning with original recessed handle on the front",
@@ -1921,7 +1931,7 @@
       ]
     },
     {
-      "_ui": "P1 OPENING VARIANT — exercises Capabilities.op (\"P1\"). The one item shape where op is non-null.",
+      "_ui": "P1 OPENING VARIANT — exercises Capabilities.opening (\"P1\"). The one item shape where opening is non-null.",
       "sku": "P1TSP4573B",
       "kind": "cabinet",
       "familyId": "SNK2",
@@ -1939,11 +1949,11 @@
       ],
       "handedLR": true,
       "capabilities": {
-        "_ui": "op:\"P1\" — THIS unit IS the premium P1 opening variant (\"one handle on top\"). availableTiers is [\"P1\"], so under any tier ≠ P1 the tierOk gate fails. (P1/C1 codes are a prefix on a base; most are synthesized, but recovered/real ones like this are stored.)",
+        "_ui": "opening:\"P1\" — THIS unit IS the premium P1 opening variant (\"one handle on top\"). availableTiers is [\"P1\"], so under any tier ≠ P1 the tierOk gate fails. (P1/C1 codes are a prefix on a base; most are synthesized, but recovered/real ones like this are stored.)",
         "alwaysAvailable": false,
-        "tier": "P",
-        "op": "P1",
-        "tierTwins": [],
+        "nativeTier": "P",
+        "opening": "P1",
+        "twinTiers": [],
         "excludedPrograms": [
           "201",
           "202",
@@ -1955,19 +1965,19 @@
           "412"
         ],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [
           58
         ],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": true,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": true,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Sink unit",
@@ -2150,9 +2160,9 @@
       ],
       "capabilities": {
         "alwaysAvailable": false,
-        "tier": "P",
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [
           "201",
           "202",
@@ -2164,8 +2174,8 @@
           "701"
         ],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [
           58,
           36,
@@ -2173,13 +2183,13 @@
           68
         ],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Pullout unit",
@@ -2297,24 +2307,29 @@
         "depth": [
           {
             "label": "36",
-            "sku": "T3027Z"
+            "sku": "T3027Z",
+            "code": "T302736Z"
           },
           {
             "label": "48",
-            "sku": "T3027Z"
+            "sku": "T3027Z",
+            "code": "T302748Z"
           },
           {
             "label": "58",
-            "sku": "T3027Z"
+            "sku": "T3027Z",
+            "code": "T3027Z"
           },
           {
             "label": "63",
             "sku": "T3027Z",
-            "alteration": true
+            "alteration": true,
+            "code": "T3027Z"
           },
           {
             "label": "68",
-            "sku": "T3027Z"
+            "sku": "T3027Z",
+            "code": "T302768Z"
           }
         ],
         "programme": [
@@ -2439,7 +2454,7 @@
       }
     },
     {
-      "_ui": "FRMAT front-panel material — the isFrmat:true special case.",
+      "_ui": "FRMAT front-panel material — the isFrmatFamily:true special case.",
       "sku": "FRMAT",
       "kind": "cabinet",
       "familyId": "F124",
@@ -2456,11 +2471,11 @@
         "A"
       ],
       "capabilities": {
-        "_ui": "isFrmat:true — the 1-unit FRMAT max-size-table family. The backend layers FRMAT_MAX[programmeName] ON TOP of the normal gate (the sole residual in the 99.997% capabilities verification). Also shows faceForTiers [\"_\",\"P\",\"A\",\"C\"] (face in every tier context).",
+        "_ui": "isFrmatFamily:true — the 1-unit FRMAT max-size-table family. The backend layers FRMAT_MAX[programmeName] ON TOP of the normal gate (the sole residual in the 99.997% capabilities verification). Also shows faceForTiers [\"_\",\"P\",\"A\",\"C\"] (face in every tier context).",
         "alwaysAvailable": false,
-        "tier": "A",
-        "op": null,
-        "tierTwins": [
+        "nativeTier": "A",
+        "opening": null,
+        "twinTiers": [
           "P"
         ],
         "excludedPrograms": [
@@ -2474,17 +2489,17 @@
           "250"
         ],
         "excludedProgramsE": [],
-        "isFrmat": true,
-        "hasE": false,
+        "isFrmatFamily": true,
+        "hasEFront": false,
         "depthClasses": [],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Front panel material",
@@ -2547,7 +2562,7 @@
       ]
     },
     {
-      "_ui": "RECOVERED ARTIFACT (LED control) — from meta.recoveredArtifactSkus. Exercises Capabilities.alwaysAvailable:true + tier:null.",
+      "_ui": "RECOVERED ARTIFACT (LED control) — from meta.recoveredArtifactSkus. Exercises Capabilities.alwaysAvailable:true + nativeTier:null.",
       "sku": "L24CD",
       "kind": "cabinet",
       "familyId": "L2023",
@@ -2562,24 +2577,24 @@
         "P"
       ],
       "capabilities": {
-        "_ui": "alwaysAvailable:true (app u._c) short-circuits EVERY gate → the pill never greys. tier:null = line-neutral (never greys by tier). This is one of meta.recoveredArtifactSkus — a code the app's init deleted as an artifact but which is a real orderable unit, recovered from the raw <script id=\"DATA\">.",
+        "_ui": "alwaysAvailable:true (app u._c) short-circuits EVERY gate → the pill never greys. nativeTier:null = line-neutral (never greys by tier). This is one of meta.recoveredArtifactSkus — a code the app's init deleted as an artifact but which is a real orderable unit, recovered from the raw <script id=\"DATA\">.",
         "alwaysAvailable": true,
-        "tier": null,
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": null,
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "LED dynamic light control controller set DALI",
@@ -2617,22 +2632,22 @@
       ],
       "capabilities": {
         "alwaysAvailable": false,
-        "tier": "P",
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Cupboard depth alteration",
@@ -2682,22 +2697,22 @@
       ],
       "capabilities": {
         "alwaysAvailable": true,
-        "tier": null,
-        "op": null,
-        "tierTwins": [],
+        "nativeTier": null,
+        "opening": null,
+        "twinTiers": [],
         "excludedPrograms": [],
         "excludedProgramsE": [],
-        "isFrmat": false,
-        "hasE": false,
+        "isFrmatFamily": false,
+        "hasEFront": false,
         "depthClasses": [],
         "handleFree": false,
-        "frontE": false,
+        "onePieceFront": false,
         "openP1": false,
         "openC1": false,
         "singleHandle": true,
-        "antosoOk": false,
-        "doorJ": false,
-        "doorY": false
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
       },
       "description": {
         "title": "Plinth cover profile can be clipped onto 1.6 cm thick material",
@@ -2733,6 +2748,418 @@
         "A",
         "C"
       ]
+    },
+    {
+      "sku": "MGT601468",
+      "kind": "cabinet",
+      "familyId": "XMOD_MGT_80",
+      "name": "Module Appliance niche with door · KL 80",
+      "category": "Tall",
+      "subcategory": "Modular Housing Units",
+      "section": "Step 3 — Appliance Niche (MGN)",
+      "active": true,
+      "widthMm": 600,
+      "heightMm": 1457,
+      "depthMm": 20,
+      "availableTiers": [
+        "P",
+        "A"
+      ],
+      "handedLR": true,
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "A",
+        "opening": null,
+        "twinTiers": [
+          "P"
+        ],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "286",
+          "486",
+          "701",
+          "702",
+          "703",
+          "704",
+          "705",
+          "786"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": true,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": true
+      },
+      "description": {
+        "title": "Module Appliance niche with door",
+        "bullets": [
+          "1 door strap. together",
+          "145.5 cm high in front of appliance niche 140 cm"
+        ]
+      },
+      "restrictions": [
+        "No 45 degree chamfered edge",
+        "No inset handle 715",
+        "Fronts -Q handle 761",
+        "No fronts ROCCA / KERA"
+      ],
+      "planningNotes": [
+        "The appropriate appliance niche must be increased in height to the module planning dimension MGT..",
+        "(= door height)."
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 1607
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 18700
+        },
+        {
+          "finishCode": "2",
+          "price": 20700
+        },
+        {
+          "finishCode": "3",
+          "price": 26800
+        },
+        {
+          "finishCode": "4",
+          "price": 33300
+        },
+        {
+          "finishCode": "5",
+          "price": 44000
+        },
+        {
+          "finishCode": "6",
+          "price": 54600
+        },
+        {
+          "finishCode": "7",
+          "price": 60400
+        },
+        {
+          "finishCode": "8",
+          "price": 65100
+        },
+        {
+          "finishCode": "21",
+          "price": 18700
+        },
+        {
+          "finishCode": "22",
+          "price": 20700
+        },
+        {
+          "finishCode": "23",
+          "price": 26800
+        },
+        {
+          "finishCode": "24",
+          "price": 33300
+        },
+        {
+          "finishCode": "25",
+          "price": 44000
+        },
+        {
+          "finishCode": "26",
+          "price": 54600
+        },
+        {
+          "finishCode": "27",
+          "price": 60400
+        },
+        {
+          "finishCode": "31",
+          "price": 18700
+        },
+        {
+          "finishCode": "32",
+          "price": 20700
+        },
+        {
+          "finishCode": "33",
+          "price": 26800
+        },
+        {
+          "finishCode": "34",
+          "price": 33300
+        },
+        {
+          "finishCode": "35",
+          "price": 44000
+        },
+        {
+          "finishCode": "36",
+          "price": 54600
+        },
+        {
+          "finishCode": "37",
+          "price": 60400
+        },
+        {
+          "finishCode": "38",
+          "price": 65100
+        },
+        {
+          "finishCode": "39",
+          "price": 71600
+        },
+        {
+          "finishCode": "50",
+          "price": 97700
+        },
+        {
+          "finishCode": "51",
+          "price": 104200
+        },
+        {
+          "finishCode": "52",
+          "price": 110700
+        },
+        {
+          "finishCode": "53",
+          "price": 117200
+        },
+        {
+          "finishCode": "54",
+          "price": 130200
+        },
+        {
+          "finishCode": "55",
+          "price": 136700
+        },
+        {
+          "finishCode": "60",
+          "price": 97700
+        },
+        {
+          "finishCode": "70",
+          "price": 97700
+        },
+        {
+          "finishCode": "71",
+          "price": 104200
+        },
+        {
+          "finishCode": "72",
+          "price": 110700
+        },
+        {
+          "finishCode": "73",
+          "price": 117200
+        },
+        {
+          "finishCode": "74",
+          "price": 130200
+        },
+        {
+          "finishCode": "75",
+          "price": 136700
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "39.12",
+      "catalogPage": 586,
+      "frontModifiers": "Line-66 (Y) → MGT60146Y",
+      "weightKg": 1,
+      "functionalGroups": [
+        {
+          "zone": "Tall",
+          "group": "Cooking",
+          "groupKey": "t_cook",
+          "leaf": "Modular Housing Units",
+          "leafId": "t_cook#1"
+        }
+      ],
+      "parameters": {
+        "width": [
+          {
+            "label": "60",
+            "sku": "MGT601468"
+          },
+          {
+            "label": "76",
+            "sku": "MGT761468"
+          }
+        ],
+        "height": [
+          {
+            "label": "H75"
+          },
+          {
+            "label": "H80"
+          },
+          {
+            "label": "H93"
+          },
+          {
+            "label": "H98"
+          },
+          {
+            "label": "H106"
+          },
+          {
+            "label": "H125"
+          },
+          {
+            "label": "H138"
+          },
+          {
+            "label": "H146",
+            "sku": "MGT601468"
+          },
+          {
+            "label": "H151"
+          },
+          {
+            "label": "H164"
+          },
+          {
+            "label": "H178"
+          },
+          {
+            "label": "H190",
+            "sku": "MGT601908"
+          },
+          {
+            "label": "H204",
+            "sku": "MGT602048"
+          },
+          {
+            "label": "H217",
+            "sku": "MGT602178"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "MGT601468"
+          },
+          {
+            "tier": "A",
+            "sku": "AMGT601468"
+          }
+        ],
+        "options": [
+          {
+            "group": "Ty",
+            "label": "—",
+            "sku": "MGT601468"
+          },
+          {
+            "group": "Ty",
+            "label": "E",
+            "sku": "MGT60146E"
+          }
+        ]
+      },
+      "alterations": [
+        "ANST",
+        "ANSH",
+        "ANSHT",
+        "ANSB",
+        "ANSBH",
+        "ANSBT",
+        "ANSBHT",
+        "MPH1B"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": false
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "faceForTiers": [
+        "_",
+        "P",
+        "A"
+      ],
+      "doorLineYCode": "MGT60146Y",
+      "heightExtension": {
+        "sku": "MGT602178",
+        "addCode": "MPHVERL",
+        "options": [
+          {
+            "label": "230",
+            "heightMm": 2304
+          },
+          {
+            "label": "244",
+            "heightMm": 2436.5
+          },
+          {
+            "label": "250",
+            "heightMm": 2500
+          }
+        ]
+      },
+      "_ui": "Line-66 + tall-extension example. doorLineYCode = the ORDER CODE when the toolbar picks door-line Y: Y REPLACES the whole code (V/E/J/P1/C1 are only prefixes/suffixes), so it cannot be derived and ships literally; capabilities.doorLineY is the matching GATE. heightExtension = the app's \"217+\" chip appended to the Height row — picking 230/244/250 cm opens the family's 217 cm unit and orders addCode (MPHVERL) alongside it, the height twin of the 63 cm depth alteration. It is NOT part of parameters.height because some families also have real 230/250 cm siblings and the labels would collide."
     }
   ]
 }
