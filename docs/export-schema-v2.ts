@@ -82,6 +82,8 @@ export interface Item {
   section?: string;                // on-grid section header
   active?: boolean;                // false once a later export drops this code (backend sets it)
   nameQualifier?: string;          // amber sub-label after the title ("Mid 45 cm deep"; from vsub[vr])
+  radiusCm?: number;               // "R = N cm" corner-radius badge — curved side panels only (62 units;
+                                   //   value 5 | 15, from the unit's `vr`). Static, not derivable from other fields.
 
   /* dimensions (carcass, mm) */
   widthMm?: number;
@@ -138,6 +140,8 @@ export interface Item {
   priceGroupRef?: string;          // catalog/spec price-group ref, e.g. "22.09"
   frontModifiers?: string;         // spec "Modifiers" line — V/E/J/Y front-line modifiers
   carcaseLine?: number;            // carcase line (66/73/80/86) shown in the spec
+  material?: string;               // card "Material:" line — bar-handle families only (144 units;
+                                   //   "Stainless steel" | "Powder coated", raw `family.material`).
   weightKg?: number;
   volumeM3?: number;
 
@@ -380,6 +384,11 @@ export interface FinishPrice { finishCode: string; price: number; }
  *   • imageUrl (from meta.imageUrlTemplate), catalog PDF url (from catalogPage),
  *     programmeBadge (from availableTiers), pill available/selected (from capabilities + toolbar),
  *     toeKick installedHeight when omitted (heightMm + plinth), tier-sibling P1/C1 items (synthesized).
+ *   • functionalTag — the top-right card tag (app `fdesc`, "Floor unit" / "Built-in DW door"). Derive:
+ *     appliance ? (appliance.category==="Dishwashers" ? "Built-in DW door"
+ *       : /wine/i.test(name) ? "Built-in wine door" : /freezer/i.test(name) ? "Built-in freezer door"
+ *       : "Built-in refrigerator door")
+ *     : name.split("·")[0].trim().   // no export field needed
  *   • Pricing (programme-dependent). System Builder clipboard + status ticks. My Note, Ask-the-Expert,
  *     the appliance schedule, panel-sizer, LIO assistant — interactive tools, not data.
  * ════════════════════════════════════════════════════════════════════════════ */

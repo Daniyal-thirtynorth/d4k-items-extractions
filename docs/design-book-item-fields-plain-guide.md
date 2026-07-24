@@ -50,6 +50,21 @@ Sizes are the cabinet **body** measurements, in **millimetres** (so 600 = 60 cm)
 | **capabilities** | The **behind-the-scenes rules** that decide when a button **greys out** (shows but can't be clicked) because it doesn't fit your current choices. → See the plain guide `design-book-greying-examples.md`. |
 | **faceForTiers** | Which front-style views show **this exact code** as the main card. (Housekeeping — it picks which sibling is the "face" of the card.) |
 
+### Does the "217+" button talk to the server?
+
+Almost never. In everyday terms:
+
+- **Opening the "217+" button** to see 230 / 244 / 250 — **nothing is loaded.** Those three heights already
+  came with the product, so the app just shows them.
+- **Picking a height while you're on a shorter cabinet** — the app **loads one product**: the 217 cm version
+  (only that one can be built taller). This is the same "open a different product" step any button does —
+  nothing special about it.
+- **Picking a height once you're already on the 217 cm cabinet** — **nothing is loaded.** The app adds the
+  extra code and updates the order code on the spot.
+
+So there's no special "217+" request to the server — at most it quietly opens the 217 cm product the first
+time, exactly like clicking any other button that leads to a different product.
+
 ---
 
 ## 4. Things that go with it

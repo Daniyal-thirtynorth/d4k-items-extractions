@@ -508,6 +508,20 @@ const lines = here && pick?.sku === hx.sku ? [hx.sku, hx.addCode] : [depthResolv
 Reference implementation + the live trace it was verified against: `D4K-backend/public/design-book-ui.html`
 (`hextPills` / `pickDrawerHext`).
 
+##### Does clicking the `217+` chip call the server?
+
+Only when it navigates — there is **no dedicated `217+` endpoint**. In plain terms, three outcomes:
+
+- **Expanding `217+` to reveal 230 / 244 / 250** → **no call.** The options ship inside
+  `item.heightExtension.options`, so opening the collapsed chip is entirely client-local.
+- **Picking a value while on a shorter sibling** (`item.sku !== heightExtension.sku`) → **one call:**
+  `GET items/<heightExtension.sku>` — the `open(hx.sku)` above. This is the *only* network hit the chip
+  ever makes, and it is the ordinary sibling-navigation fetch every other navigating pill makes.
+- **Picking / re-clicking while already on the 217 unit** (`item.sku === heightExtension.sku`) → **no call.**
+  Pure local state — the order code just becomes `[hx.sku, hx.addCode]`, the image stays on `hx.sku`.
+
+`MPHVERL` is never fetched, routed, or imaged — it is an order/clipboard code only.
+
 ---
 
 ### 2c-4. ⭐⭐ DEPTH PILL — which one is selected, and when a click must call `GET items/:sku`
