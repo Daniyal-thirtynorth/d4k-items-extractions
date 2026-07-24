@@ -23,12 +23,12 @@ There is **no build/test here** — it is data files + docs (it IS a git repo no
 and `*.bak.json` are gitignored, the `.gz` is committed). Big JSON files: never `Read` them whole; use
 `python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
 
-## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.2.0** since 2026-07-21). READ THIS FIRST.
+## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.3.0** since 2026-07-24). READ THIS FIRST.
 
 The model was reworked from the fat "everything pre-computed, frozen at the default toolbar" export (v1,
-`docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.2.0** — 2.0.0 plus the
-additive `DimPill.code` on depth pills (2.1) and `Item.doorLineYCode` + `Item.heightExtension` (2.2);
-old readers ignore all three). Everything below
+`docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.3.0** — 2.0.0 plus the
+additive `DimPill.code` on depth pills (2.1), `Item.doorLineYCode` + `Item.heightExtension` (2.2), and
+`DimPill.showUnderLine` on width/height pills (2.3); old readers ignore all four). Everything below
 this block that describes `configure` / `programmeAvailability` / `accessoryPanel` / `relatedGroups` /
 `specification` / `programmeBadge` and the frozen per-pill `available` boolean is **v1 — superseded**.
 Current facts:
@@ -144,6 +144,23 @@ Current facts:
   (`capabilities:1` in the projection) makes `?expand=refs` fully self-sufficient.
 - **BOSSA = programme id `244`** (PRIMO/P). "Disable width 15/20 in BOSSA" = put `"244"` in the 15/20 pill
   TARGETS' `capabilities.excludedPrograms` (NOT on the parent) — see crud-guide §5.
+- **⭐ CLIENT-UI PARITY PASS (2026-07-24, schemaVersion 2.3.0).** Client kept reporting the grid diverges
+  from the app. Built a differential harness (`scripts/diff-grid-parity.js`, client rendered grid = ground
+  truth) + drove the app's own `visibleBlocks`/`selectedUnit`. Full audit + repro:
+  **`docs/client-ui-parity-audit.md`** (§A discrepancy table, §F what shipped, **§G remaining work**).
+  Shipped to D4K-dev, all data-driven (no hardcoded hides): **(1) depth grey-not-hide** — `GET items?grey=true`
+  skips the `depthClass` hard-filter so the native face returns and the client greys it via `availableFromCaps`
+  (map §2c-6); **(2) `showUnderLine`** — per-pill W/H carcase-line collapse (extractor emits it into
+  `parameters.width/height[]`, backfilled, admin-editable; map §2c-5, crud §4d); **(3) face selection order**
+  — `faceHeightClass` (keep default-line face) + `variantCore`/`faceVariantCore` (keep default variant) +
+  `depthMm` ASC tiebreak (native depth wins the face), backend-computed denormalized fields, not contract
+  (map §2 face-selection note); **(4) per-pill target caps** — list `?refs=true` projects a `refs{sku→caps}`
+  map so pills gate on the TARGET's caps. **Harness result: FACE 0 / GREY 0 mismatches** over 411 family
+  comparisons. **REMAINING (deferred, §G):** family-level MEMBERSHIP — SNK8-type families (9 combos, H86)
+  where the client shows a family that has a unit per dimension INDEPENDENTLY + a width-preferring face; ours
+  is unit-level. Broad/risky fix (could regress the width-respecting face for SNK1-type) — confirm it's
+  client-reported before doing it. Backend branch `fix/parity-face-ty-and-membership` merged to `dev`.
+  Backfills: `D4K-backend/scripts/backfill-{face-height-class,face-variant-core,show-under-line,show-under-line-wh}.js`.
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

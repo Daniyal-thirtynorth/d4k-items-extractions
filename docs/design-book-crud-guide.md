@@ -4,9 +4,9 @@ How to **add, edit, and delete** catalog items via the API, authored so the conf
 exactly like the live app. For whoever builds the admin UI or hand-authors data.
 
 - Base path `/design-book` · JWT-guarded (`Authorization: Bearer <token>`; get a dev token at `GET /design-book/dev-token`).
-- Schema **2.2.0** — contract `docs/export-schema-v2.ts`, field↔UI map `docs/design-book-api-ui-map-v2.md`.
+- Schema **2.3.0** — contract `docs/export-schema-v2.ts`, field↔UI map `docs/design-book-api-ui-map-v2.md`.
   (2.1 = 2.0 + `code` on depth pills, §4a. 2.2 = + `heightExtension` §4b and `doorLineYCode` §4c.
-  All additive; older readers ignore them.)
+  2.3 = + `showUnderLine` on width/height pills, §4d. All additive; older readers ignore them.)
 - CRUD writes the **same shape** as `POST /design-book/ingest` (one shared `normalizeItemDoc`). A hand-authored
   item and an extractor-produced item are identical.
 - **Easiest way to author:** the form-based admin UI at **`GET /design-book/admin`** — every field is a control,
@@ -57,8 +57,8 @@ One item per request. **Every field the extractor writes is settable.** Unknown 
 - **Identity:** `sku` (required), `kind` (`cabinet|alteration|accessory|part`), `familyId`, `name`,
   `category`, `subcategory`, `section`, `active`, `nameQualifier`.
 - **Dimensions:** `widthMm`, `heightMm`, `depthMm`, `heightClass` (73|80|86|null).
-- **Fronts / rules:** `availableTiers[]`, `faceForTiers[]`, **`capabilities`** (§3), `parameters` (§4),
-  `heightExtension` (§4b), `doorLineYCode` (§4c).
+- **Fronts / rules:** `availableTiers[]`, `faceForTiers[]`, **`capabilities`** (§3), `parameters` (§4;
+  width/height pills may carry `showUnderLine` §4d), `heightExtension` (§4b), `doorLineYCode` (§4c).
 - **Thin refs:** `alterations[]`, `accessories[]` (sku, or `{sku, variants:[{label,sku}]}`), `companions[]`.
 - **Vero:** `finishInterior` (`{swatches[], visibleSideCombos[], optionCodes[]}`).
 - **Text:** `description` (`{title, bullets[]}`), `restrictions[]`, `planningNotes[]`, `didYouKnow`, `modifications[]`.
@@ -348,6 +348,35 @@ so it cannot be derived and has to be stored.
 `capabilities.doorLineY` is the **gate** (does this unit exist in line 66) and `doorLineYCode` is the
 **code**. Set both or neither — a flag with no code leaves the client unable to order it, a code with no
 flag never gets reached. 11 units in v781. It is never a stored product of its own, so don't create one.
+
+---
+
+## 4d. `showUnderLine` — hide a Width/Height pill unless a carcase line is active
+
+When the toolbar picks a carcase **LINE** (73 / 80 / 86), the client **removes** (not greys) the Width and
+Height pills that don't belong to that line. Put the lines a pill shows under in `showUnderLine` on that
+**width** or **height** pill (schemaVersion 2.3):
+
+```jsonc
+"parameters": {
+  "height": [
+    { "label": "H73", "sku": "…73…", "showUnderLine": [73] },
+    { "label": "H80", "sku": "…80…", "showUnderLine": [80] },
+    { "label": "H86", "sku": "…86…", "showUnderLine": [73, 86] }  // 86 = J-door on the 73 carcase → stays with 73
+  ]
+}
+```
+
+- **Omit it ⟹ the pill always shows** (correct for height-CLASS rows on Tall/Wall that don't collapse).
+- **Never on depth pills.** Width/Height only.
+- Editable directly in the admin UI (a `showUnderLine` column on each width & height pill row).
+- **You rarely author this by hand** — the extractor captures it per family from the app. Only set it when
+  hand-building a family whose W/H row must narrow to the selected line.
+
+> **Not authored at all: `faceHeightClass`, `variantCore`, `faceVariantCore`.** These pick which unit is the
+> family's card FACE when a filter removes the default one (keep the default height / default variant). The
+> backend **computes them** from `faceForTiers` + `heightClass` + sku on ingest/backfill — leave them out of
+> your item; they are not part of the field surface you set.
 
 ---
 

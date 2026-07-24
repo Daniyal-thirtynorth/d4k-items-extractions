@@ -150,6 +150,8 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `active` | IN | Active-only flag | Admin | `…/items?active=true` |
 | `groupBy=family` | IN | **Grid card grouping** — one card per family ("N types"); pages by family | Grid — the card grid itself | `…/items?leafId=b_cool%230&groupBy=family` |
 | `full` | IN | Include the detail-only blobs (§3) that `LIST_OMIT` strips | (dev / when the card needs a detail field) | `…/items?q=T6073VE&full=true` |
+| `grey` | IN | **GREY, DON'T HIDE** — skips the `depthClass` HARD-filter so the family's native face returns as a (greyable) card instead of being hidden; the client then greys it via `availableFromCaps` (§2c-6). Depth is the one gate the backend hid rather than greyed; this routes it through the grey path. | Top toolbar — "Grey don't hide" toggle | `…/items?depthClass=68&grey=true` |
+| `refs` | IN | **Pill-target caps map** — attaches a page-level `refs{ sku → {capabilities,…} }` covering every pill's TARGET sku on the returned cards, so the grid can gate pills by the TARGET's caps (not the parent's) without a per-pill detail fetch (§2c). The list analogue of detail `expand=refs`. | (no visible control — enables per-pill greying) | `…/items?leafId=b_water%232&refs=true` |
 
 > **`availableTiers` precedence** (one filter, most-specific wins): `tier` (FRONTS pill) → `programs[]`
 > (picker) → `family` (tab). The tier gate narrows ONLY design-zone cabinet families (Base/Tall/Wall);
@@ -166,6 +168,18 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 > Grouped cards carry `unitCount`, `memberSkus[]`, `familyId`, family-wide `availableTiers`, and a
 > `section` header. The face (card) unit follows the active `tier` filter; `faceForTiers` records which
 > tier contexts a unit is the family face in.
+>
+> **⭐ Face-selection order (which unit represents the family card — reproduces the app's `selectedUnit`).**
+> When a filter removes the exact default-face unit, the face falls back so it keeps the family's DEFAULT
+> look, not the lowest/first unit. The `familyGroupStages` sort is, in order:
+> `faceForTiers` match (`_faceRank`) → tier (`_tierRank`) → `widthMm` ASC → **`faceHeightClass` match**
+> (`_faceHeightRank`: prefer the default-face HEIGHT, so H=ALL keeps the 80-line face, not 73) →
+> **`faceVariantCore` match** (`_faceVariantRank`: keep the default VARIANT — XTR_Z stays `…ZW`, not `…ZBS`)
+> → `heightMm` → `depthMm` ASC (base depth wins the face, so D=68 greys the native 58 face rather than
+> swapping to a 68 sibling) → `sku`. `faceHeightClass` / `variantCore` / `faceVariantCore` are
+> per-unit denormalized fields (backend-computed from `faceForTiers`+`heightClass`+sku, backfilled;
+> not part of the export contract). **KNOWN GAP: membership + width-preferring face are still unit-level**
+> — see `client-ui-parity-audit.md` §G (SNK8-type families).
 
 ### Response (per-card fields → card slots) — v2 names
 
@@ -608,6 +622,36 @@ grey shape-1 pill still fetches.
    round-trip that resets the local depth pick.
 4. **Filtering / routing / image-building on `code`** → nothing resolves; use `capabilities.depthClasses`
    for filtering (§2c-2) and `sku` for everything addressable.
+
+---
+
+### 2c-5. ⭐ `showUnderLine` — the WIDTH/HEIGHT row collapses to the active carcase LINE
+
+Distinct from greying. When the toolbar selects a carcase **LINE** (73 / 80 / 86), the client **narrows
+the card's Width and Height rows** to the pills that render under that line — it does not grey the others,
+it removes them. `parameters.width[].showUnderLine` / `parameters.height[].showUnderLine` is a per-pill
+`number[]` of the lines that pill shows under (schemaVersion 2.3).
+
+- **DATA, not a rule** — the mapping is family-dependent (captured from the app, backfilled), so it ships
+  on the pill, not as a formula.
+- **H86 stays paired with 73** — 86 is the J-door on the 73 carcase, so `H86.showUnderLine = [73, 86]`;
+  picking line 73 keeps both 73 and 86.
+- **Absent ⟹ always show** (height-CLASS rows on Tall/Wall/Midway don't collapse — §A #1b). **Depth rows
+  never carry it.** No line selected ⟹ show every pill.
+- **Render:** `visibleByLine(pills)` = `pills.filter(p => !p.showUnderLine || p.showUnderLine.includes(line))`
+  where `line` = the active toolbar line (or the card's `heightClass` when the toolbar has none). Applies to
+  the W and H rows only.
+- **Editable** in admin (per-pill `showUnderLine` column on the width & height pill rows).
+
+### 2c-6. ⭐ GREY, DON'T HIDE — depth routes through the grey gate (`?grey=true`)
+
+The client keeps non-orderable cards **visible-but-greyed**; the backend historically **hard-filtered**
+(hid) on `depthClass`. `GET items?...&grey=true` **skips the `depthClass` `$match`** so the family's native
+face returns as a card, and the client greys it via `availableFromCaps(card.capabilities, toolbar)` (the
+whole-card rule below). The face stays the NATIVE unit (the `depthMm` ASC tiebreak, §face-selection above) —
+D=68 greys the 58 face, it does NOT swap to a 68 sibling. `depthClasses` is unchanged (the gate input); only
+the hide-vs-grey behaviour moves. Tier/width/height greying rides the same whole-card rule once the card is
+returned.
 
 ---
 

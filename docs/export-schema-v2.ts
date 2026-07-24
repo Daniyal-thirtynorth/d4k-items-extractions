@@ -33,7 +33,8 @@
  *   meta.imageUrlTemplate.replace("<CODE>", sku)`.
  *
  * ── VERSIONING ──────────────────────────────────────────────────────────────
- *   `meta.schemaVersion` = "2.2.0"  (2.1 added DimPill.code; 2.2 adds Item.doorLineYCode + Item.heightExtension — all additive).
+ *   `meta.schemaVersion` = "2.3.0"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
+ *   2.3 DimPill.showUnderLine on width/height pills — all additive, old readers ignore).
  *   The extractor emits this shape directly
  *   (`docs/export-v781-extractor2.js`); ingest AND the CRUD endpoints write it
  *   through one `normalizeItemDoc`, so hand-authored and extracted items match.
@@ -53,7 +54,7 @@ export interface CatalogExport {
 export interface ExportMeta {
   generated: string;               // ISO datetime
   source: string;                  // e.g. "leicht_units v781 (headless DOM extraction via openDetail)"
-  schemaVersion: string;           // "2.2.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension
+  schemaVersion: string;           // "2.3.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine
   imageUrlTemplate: string;        // ".../itemData/<CODE>.jpg" — build every image from this + sku
   counts: { items: number; cabinets: number; accessories: number; categories: number; programmes: number };
   recoveredArtifactSkus?: string[]; // codes the app's init deleted as artifacts but which are still real
@@ -267,6 +268,11 @@ export interface DimPill {
   sku: string | null;
   alteration?: boolean;            // the 63 cm depth-alteration pill
   code?: string;                   // depth rows: the order code at this class (may equal `sku`)
+  showUnderLine?: number[];        // WIDTH/HEIGHT rows only: the toolbar carcase-LINE values (73/80/86) this
+                                   // pill renders under. Family-dependent, captured from the app (not a rule):
+                                   // when a Line is picked the row collapses to pills whose showUnderLine
+                                   // includes it (H86 stays paired with 73 — J-door on the 73 carcase).
+                                   // Absent ⟹ pill always shows. Depth rows never carry it. See map §2c-5.
 }
 export interface ProgrammePill { tier: ProgrammeTier; sku: string | null; opening?: boolean; }
 /**
