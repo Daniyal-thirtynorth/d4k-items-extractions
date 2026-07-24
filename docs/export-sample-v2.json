@@ -1,0 +1,3165 @@
+{
+  "meta": {
+    "_ui": "Illustrative sample of the v2 (MINIMAL + CAPABILITIES) contract. The items below between them exercise EVERY object in export-schema-v2.ts. Some refs (alterations/accessories/companions sku codes, pill targets) point at items outside this small slice; in a real export every referenced sku exists in items[]. Any key starting with `_ui` is plain-English DOCUMENTATION ONLY — the backend MUST strip every `_ui` key on ingest; `_ui` is NOT part of the schema. counts here describe THIS sample, not the full catalog.",
+    "generated": "2026-07-17T08:56:11.786Z",
+    "source": "leicht_units v781 (headless DOM extraction via openDetail) — SAMPLE",
+    "schemaVersion": "2.2.0",
+    "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
+    "counts": {
+      "items": 13,
+      "cabinets": 10,
+      "accessories": 1,
+      "categories": 3,
+      "programmes": 6
+    },
+    "recoveredArtifactSkus": [
+      "TK5580BZ2",
+      "TK5580SZ2",
+      "GFV5580SM",
+      "P1GFV5580SM",
+      "GFV5580M",
+      "GFV5580SZ2M"
+    ],
+    "note": "Minimal + capabilities export of v781. Each item is the THIN shape: capabilities REPLACES programmeAvailability (raw u.x excludedPrograms + tier/depth/handle/open/antoso/door gate inputs, isFrmatFamily kept so the backend layers the FRMAT max-size rule); configure→parameters (label+sku pills only); accessoryPanel→alterations/accessories(+variants)/finishInterior; relatedGroups→companions; engineering→{key,ok}. Built by driving the app's own openDetail()/visibleBlocks()/famInTaskSub(); 23 app-deleted artifact units recovered from the raw <script id=\"DATA\"> (see meta.recoveredArtifactSkus); 21 referenced non-unit codes synthesized as minimal accessory/part/alteration stubs."
+  },
+  "categories": [
+    {
+      "_ui": "LEFT SIDEBAR TYPE taxonomy (distinct from functionalCategories). Trimmed: only 3 of the real 14 categories, and Base keeps only the sub-categories this sample's items live in. On each item: category/subcategory/section.",
+      "id": "base",
+      "name": "Base",
+      "itemCount": 6935,
+      "subcategories": [
+        {
+          "id": "doors",
+          "name": "Doors",
+          "itemCount": 218,
+          "sections": [
+            "Standard Door Cabinets",
+            "Door + Drawer Combinations"
+          ]
+        },
+        {
+          "id": "sinks",
+          "name": "Sinks",
+          "itemCount": 1444,
+          "sections": [
+            "Fronts & Panels · USA Sink Alterations",
+            "Alterations & Modifications"
+          ]
+        },
+        {
+          "id": "cooktops-downdrafts",
+          "name": "Cooktops & Downdrafts",
+          "itemCount": 2682,
+          "sections": [
+            "Cooktop Units",
+            "Cooktop Unit with Drawers"
+          ]
+        },
+        {
+          "id": "appliance-housing",
+          "name": "Appliance housing",
+          "itemCount": 373,
+          "sections": [
+            "Wine Units",
+            "Oven & Base Housings"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lighting",
+      "name": "Lighting",
+      "itemCount": 212,
+      "subcategories": [
+        {
+          "id": "led",
+          "name": "LED",
+          "itemCount": 107,
+          "sections": [
+            "Interior & Spot",
+            "Linear Lights"
+          ]
+        },
+        {
+          "id": "niche-shelf",
+          "name": "Niche Shelf",
+          "itemCount": 78
+        }
+      ]
+    },
+    {
+      "id": "alteration",
+      "name": "Alteration",
+      "itemCount": 148,
+      "subcategories": [
+        {
+          "id": "accessory",
+          "name": "Accessory",
+          "itemCount": 52,
+          "sections": [
+            "Carcass & Structure",
+            "Wall Unit Alterations"
+          ]
+        },
+        {
+          "id": "cabinet-modifications",
+          "name": "Cabinet Modifications",
+          "itemCount": 19,
+          "sections": [
+            "Tall Unit Alterations",
+            "Carcass & Structure"
+          ]
+        },
+        {
+          "id": "sink",
+          "name": "Sink",
+          "itemCount": 1,
+          "sections": [
+            "Sink, Fillers & Panels"
+          ]
+        }
+      ]
+    }
+  ],
+  "programmes": [
+    {
+      "_ui": "TOP-LEFT dropdown kitchen lines. Items refer to these ids in Capabilities.excludedPrograms. 6 shown (real export = 120), covering PRIMO/AVANCE/CONTINO/CONTINO-12. \"273\" (VERVE-FS) and \"561\" (CARRÉ-FS) appear in TK7080BZ2.capabilities.excludedPrograms above — so that item greys in exactly those programmes.",
+      "id": "201",
+      "name": "ROCCA 01",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 51
+    },
+    {
+      "id": "273",
+      "name": "VERVE-FS",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 4
+    },
+    {
+      "id": "561",
+      "name": "CARRÉ-FS",
+      "family": "PRIMO",
+      "tier": "P",
+      "priceField": 4
+    },
+    {
+      "id": "410",
+      "name": "LAIKA-A",
+      "family": "AVANCE",
+      "tier": "A",
+      "priceField": 26
+    },
+    {
+      "id": "701",
+      "name": "ROCCA-C 01",
+      "family": "CONTINO",
+      "tier": "C",
+      "priceField": 71
+    },
+    {
+      "id": "613",
+      "name": "CLASSIC-FS-C12",
+      "family": "CONTINO-12",
+      "tier": "C",
+      "priceField": 35
+    }
+  ],
+  "ruleTables": {
+    "_ui": "Passthrough reference tables (handle/opening/antoso/lighting/…). Trimmed to 2 of the real 10 for readability — the backend passes the whole object through unchanged (RuleTables = Record<string, unknown>). Omit entirely or send {} if unused.",
+    "handle_systems": {
+      "metal_bow": {
+        "label": "Metal Bow Handle",
+        "note": "Standard handle option, free with cabinet"
+      },
+      "bar": {
+        "label": "Bar Handle",
+        "note": "Length by door/drawer width; extra charge"
+      },
+      "grip_rail": {
+        "label": "Grip Rail Profile",
+        "note": "Solid wood (Kyoto); door handle 5cm shorter"
+      },
+      "inset": {
+        "label": "Inset Handle",
+        "code": "809/810",
+        "note": "Built into door shape"
+      }
+    },
+    "opening_systems": {
+      "P1": {
+        "label": "P1 — Primo, one handle on top",
+        "code_prefix": "P1",
+        "example": "P1T8080Z3",
+        "note": "One handle on top; the bottom drawers open via 760 (touch) or 761 (electric). Primo programmes; only on P1-marked units."
+      },
+      "C1": {
+        "label": "C1 — Contino, one top channel",
+        "code_prefix": "C1",
+        "note": "One Contino channel on top; the bottom drawers open via 760 (touch) or 761 (electric)."
+      },
+      "tip_soft": "Tip-Softclose",
+      "sensomatic": "SensoMatic"
+    }
+  },
+  "systems": [
+    {
+      "_ui": "SYSTEM BUILDER bundle. Attaches to an item's detail screen when its sku ∈ triggerSkus. required[]/optional[] are SystemSlots; each slot lists SlotOption skus with an optional default (e.g. the 100/160/200 cm connecting-cable pick). Only the runtime clipboard + status ticks are UI-only; this COMPOSITION is exported.",
+      "id": "SENSO",
+      "name": "SensoMatic System",
+      "note": "Works with drawers & pullouts",
+      "triggerSkus": [
+        "MPEZS",
+        "MPC1EZS",
+        "MPP1EZS",
+        "MPEHAA"
+      ],
+      "required": [
+        {
+          "role": "Power Supply",
+          "options": [
+            {
+              "sku": "SMNT"
+            }
+          ]
+        },
+        {
+          "role": "Power Lead (USA)",
+          "options": [
+            {
+              "sku": "SMNK200US"
+            }
+          ]
+        },
+        {
+          "role": "Connecting Cable between cupboards",
+          "options": [
+            {
+              "sku": "SMVK100",
+              "label": "100 cm"
+            },
+            {
+              "sku": "SMVK160",
+              "label": "160 cm"
+            },
+            {
+              "sku": "SMVK200",
+              "label": "200 cm"
+            }
+          ],
+          "default": "SMVK200"
+        }
+      ],
+      "optional": [
+        {
+          "role": "Tip-Softclose",
+          "options": [
+            {
+              "sku": "MPMZS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LLER",
+      "name": "LLE-R Recessed Light System",
+      "note": "Recessed LED lamp — 7.8 cm drill hole; position decides the drilling type.",
+      "triggerSkus": [
+        "LLERUS"
+      ],
+      "required": [
+        {
+          "role": "Drill hole (by position)",
+          "options": [
+            {
+              "sku": "BO78",
+              "label": "Shelf (BO78)"
+            },
+            {
+              "sku": "BO78U",
+              "label": "Lower wall shelf + conduit (BO78U)"
+            },
+            {
+              "sku": "BO78O",
+              "label": "Upper shelf (BO78O)"
+            }
+          ],
+          "default": "BO78"
+        },
+        {
+          "role": "Power Supply (USA)",
+          "options": [
+            {
+              "sku": "L24NT75US"
+            }
+          ]
+        }
+      ],
+      "optional": [
+        {
+          "role": "Switch / Control",
+          "options": [
+            {
+              "sku": "L24CB"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "functionalCategories": {
+    "_ui": "The \"Design Tasks\" SECOND sidebar (render-ready; distinct from categories[]). Trimmed to show shape: inspiration + allCategories + ONE zone (Base) with ONE group (Water) and 2 of its leaves + ONE moreCategory (Alteration, 2 subs). A leaf claims an item when ANY of its match[] rules hits the item's cat/sub/section/familyId; membership is materialized per item in Item.functionalGroups[]. Real export has 4 zones + 7 moreCategories.",
+    "inspiration": {
+      "key": "__INSP__",
+      "label": "Designer Inspiration",
+      "emoji": "✨"
+    },
+    "allCategories": {
+      "key": "ALL",
+      "label": "All categories",
+      "count": 1714
+    },
+    "zones": [
+      {
+        "zone": "Base",
+        "label": "BASE",
+        "count": 234,
+        "groups": [
+          {
+            "groupKey": "b_water",
+            "name": "Water",
+            "emoji": "💧",
+            "count": 87,
+            "allRow": {
+              "label": "All Base Water",
+              "count": 87
+            },
+            "leaves": [
+              {
+                "leafId": "b_water#0",
+                "name": "Sink Cabinets",
+                "count": 18,
+                "match": [
+                  {
+                    "category": "Base",
+                    "subcategory": "Sinks",
+                    "sectionExclude": "^(Accessories|Towel Rails|Sink Equipment|Fronts & Panels|Alterations)"
+                  }
+                ]
+              },
+              {
+                "leafId": "b_water#1",
+                "name": "Trash Pullouts",
+                "count": 5,
+                "match": [
+                  {
+                    "category": "Base",
+                    "subcategory": "Trash Pullout"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "moreCategories": [
+      {
+        "category": "Alteration",
+        "count": 98,
+        "subs": [
+          {
+            "name": "Cabinet Modifications",
+            "count": 23,
+            "filter": {
+              "category": "Alteration",
+              "subcategory": "Cabinet Modifications"
+            }
+          },
+          {
+            "name": "Front Combination",
+            "count": 3,
+            "filter": {
+              "category": "Alteration",
+              "subcategory": "Front Combination"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "_ui": "RICH CABINET — one orderable code + its detail screen. Exercises Capabilities (the pill-gate rule inputs), Parameters (W/H/D/Programme pills incl. P1/C1 opening), thin ref lists (alterations = sku codes; accessories = a mix of plain sku strings AND {sku,variants} for the L3/M3·M8 runner + 1m/1.6m/2m cable rows), companions, finishes (trimmed to 3), toeKick, and one functionalGroups leaf. Note accessories[] here shows BOTH AccessoryRef shapes.",
+      "sku": "TK7080BZ2",
+      "kind": "cabinet",
+      "familyId": "F1571_BZ2",
+      "name": "Cooktop Unit · Top Blender · BZ2",
+      "category": "Base",
+      "subcategory": "Cooktops & Downdrafts",
+      "section": "Cooktop Units",
+      "active": true,
+      "widthMm": 700,
+      "heightMm": 795,
+      "depthMm": 560,
+      "heightClass": 80,
+      "availableTiers": [
+        "P",
+        "A"
+      ],
+      "capabilities": {
+        "_ui": "⭐ THE RULE INPUTS. The client feeds this + its toolbar to availableFromCaps() (see schema) to decide if a configure PILL that TARGETS this sku is live/grey/dead. Here: nativeTier \"P\" native + twinTiers [\"A\"] → greys under an AVANCE-only toolbar; excludedPrograms [\"273\",\"280\",\"281\",\"295\",\"561\"] → greyed in those 5 programmes (273=VERVE-FS, 561=CARRÉ-FS, both in this sample's programmes[]); openP1:true so the P1 opening pill resolves; depthClasses [58,68].",
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [
+          "A"
+        ],
+        "excludedPrograms": [
+          "273",
+          "280",
+          "281",
+          "295",
+          "561"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [
+          58,
+          68
+        ],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": true,
+        "openC1": false,
+        "singleHandle": false,
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Hob unit",
+        "bullets": [
+          "1 blender",
+          "2 pullouts"
+        ]
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "Cupboards 45 degree chamfered edge on both sides",
+        "No fronts, 70 cm"
+      ],
+      "planningNotes": [
+        "Control panel on top."
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 945
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 73700
+        },
+        {
+          "finishCode": "2",
+          "price": 77000
+        },
+        {
+          "finishCode": "3",
+          "price": 82500
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "22.09",
+      "catalogPage": 267,
+      "carcaseLine": "80",
+      "weightKg": 52.4,
+      "volumeM3": 0.34,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Cooking",
+          "groupKey": "b_cook",
+          "leaf": "Cooktop Units",
+          "leafId": "b_cook#0"
+        }
+      ],
+      "parameters": {
+        "_ui": "The H/W/D/Programme pill rows (card + Configure box). THIN in v2 — each pill is just {label, sku}; availability + selected state are DERIVED at read (selected = pill.sku===item.sku; grey = availableFromCaps(target.caps)===false; dead = sku null/absent). The \"63\" depth pill carries alteration:true; programme pills P1/C1 carry opening:true.",
+        "width": [
+          {
+            "label": "60",
+            "sku": "TK6080BZ2"
+          },
+          {
+            "label": "70",
+            "sku": "TK7080BZ2"
+          },
+          {
+            "label": "80",
+            "sku": "TK8080BZ2"
+          },
+          {
+            "label": "90",
+            "sku": "TK9080BZ2"
+          },
+          {
+            "label": "100",
+            "sku": "TK10080BZ2"
+          },
+          {
+            "label": "120",
+            "sku": "TK12080BZ2"
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "sku": "TK7073BZ2"
+          },
+          {
+            "label": "H80",
+            "sku": "TK7080BZ2"
+          },
+          {
+            "label": "H86",
+            "sku": "TK7086BZ2"
+          }
+        ],
+        "depth": [
+          {
+            "label": "58",
+            "sku": "TK7080BZ2",
+            "code": "TK7080BZ2"
+          },
+          {
+            "label": "63",
+            "sku": "TK7080BZ2",
+            "alteration": true,
+            "code": "TK7080BZ2"
+          },
+          {
+            "label": "68",
+            "sku": "TK7080BZ2",
+            "code": "TK708068BZ2"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "TK7080BZ2"
+          },
+          {
+            "tier": "P1",
+            "sku": "P1TK7080BZ2",
+            "opening": true
+          },
+          {
+            "tier": "C",
+            "sku": "CTK7080BZ2"
+          },
+          {
+            "tier": "C1",
+            "sku": "C1TK7080BZ2",
+            "opening": true
+          },
+          {
+            "tier": "A",
+            "sku": "ATK7080BZ2"
+          }
+        ]
+      },
+      "alterations": [
+        "ANBLBO",
+        "ANBLBO3",
+        "ANBLBOGL",
+        "ANBLBOGL3"
+      ],
+      "accessories": [
+        "FS8056",
+        "FS8061",
+        {
+          "sku": "SMVK100",
+          "variants": [
+            {
+              "label": "1 m",
+              "sku": "SMVK100"
+            },
+            {
+              "label": "1.6 m",
+              "sku": "SMVK160"
+            },
+            {
+              "label": "2 m",
+              "sku": "SMVK200"
+            }
+          ]
+        },
+        "SMNK200"
+      ],
+      "companions": [
+        "ANBLBO",
+        "ANBLBO3",
+        "ANBLBOGL"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": true
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "modifications": [
+        {
+          "title": "P1 — Primo, one handle on top",
+          "text": "order P1TK7080BZ2. Bottom drawers open 760 (touch) or 761 (electric).",
+          "codes": [
+            {
+              "label": "P1TK7080BZ2",
+              "sku": "TK7080BZ2"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "didYouKnow": {
+        "text": "This cabinet can also be ordered 63 / 68 cm deep — same front, deeper carcase. 63 cm = the 68 cm cabinet with a factory depth alteration."
+      }
+    },
+    {
+      "_ui": "VERO FRONT — the only kind with finishInterior. Exercises FinishInterior/Swatch/VisibleSideCombo, DidYouKnow, and the engineering[] {key,ok} flags.",
+      "sku": "T4573VE",
+      "kind": "cabinet",
+      "familyId": "F333",
+      "name": "Vero-glass floor unit · With Lights",
+      "category": "Base",
+      "subcategory": "Open & Lights",
+      "section": "Glass Units",
+      "active": true,
+      "widthMm": 450,
+      "heightMm": 730,
+      "depthMm": 560,
+      "heightClass": 73,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [
+          58,
+          36
+        ],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Vero-glass floor unit",
+        "bullets": [
+          "1 glass door with anodised aluminium frame and integrated handle",
+          "2 adjustable shelves",
+          "2 vertical, dynamic lights for cupboard sides",
+          "Light temperature 2700K or variable of 2700 to 5000K with dimmer possible",
+          "Power capacity 20 W per cupboard",
+          "Energy efficiency class F"
+        ]
+      },
+      "restrictions": [
+        "No 45 degree chamfered edge",
+        "Vero glass front"
+      ],
+      "planningNotes": [
+        "Cupboard interior colour = cupboard exterior colour.",
+        "Please indicate colour of the frame on the order!",
+        "Change of handle or glass not possible."
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 94200
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "20.27",
+      "catalogPage": 237,
+      "carcaseLine": "73",
+      "weightKg": 28.5,
+      "volumeM3": 0.2,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Design",
+          "groupKey": "b_design",
+          "leaf": "Glass Cabinets",
+          "leafId": "b_design#1"
+        }
+      ],
+      "parameters": {
+        "width": [
+          {
+            "label": "45",
+            "sku": "T4573VE"
+          },
+          {
+            "label": "50",
+            "sku": "T5073VE"
+          },
+          {
+            "label": "60",
+            "sku": "T6073VE"
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "sku": "T4573VE"
+          },
+          {
+            "label": "H80",
+            "sku": "T4580VE"
+          },
+          {
+            "label": "H86",
+            "sku": "T4586VE"
+          }
+        ],
+        "depth": [
+          {
+            "label": "36",
+            "sku": "T4573VE",
+            "code": "T457336VE"
+          },
+          {
+            "label": "58",
+            "sku": "T4573VE",
+            "code": "T4573VE"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "T4573VE"
+          }
+        ],
+        "options": [
+          {
+            "group": "Ty",
+            "label": "Lights",
+            "sku": "T4573VE"
+          },
+          {
+            "group": "Ty",
+            "label": "No Lights",
+            "sku": "T4573VENL"
+          }
+        ]
+      },
+      "alterations": [
+        "ANGF",
+        "ANST",
+        "ANSH",
+        "ANSHT"
+      ],
+      "accessories": [
+        "L24CB",
+        "L24CF",
+        "L24CSH"
+      ],
+      "finishInterior": {
+        "_ui": "The Vero \"Finish interior\" sub-panel (NOT sku refs). swatches[] = the colour-square grid (trimmed 19→3; img built from the Finish host); visibleSideCombos[] = the \"which visible-side finishes are allowed per interior finish\" table (catalog ch.11, trimmed →3); optionCodes[] = extra-charge interior-style CHIPS — plain codes (MPK/KH/KG …), do NOT make cards/lookups from them.",
+        "swatches": [
+          {
+            "code": "032",
+            "label": "032",
+            "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+032.jpg"
+          },
+          {
+            "code": "100",
+            "label": "100",
+            "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+100.jpg"
+          },
+          {
+            "code": "103",
+            "label": "103",
+            "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+103.jpg"
+          }
+        ],
+        "visibleSideCombos": [
+          {
+            "interior": "K 273 / K 284",
+            "allowed": [
+              "K",
+              "KH",
+              "KG",
+              "FF",
+              "FS",
+              "FG",
+              "H",
+              "MC",
+              "ME",
+              "PF",
+              "VM 152",
+              "VM 284",
+              "VM 286"
+            ]
+          },
+          {
+            "interior": "K",
+            "allowed": [
+              "K",
+              "FF",
+              "FS"
+            ]
+          },
+          {
+            "interior": "KH",
+            "allowed": [
+              "KH"
+            ]
+          }
+        ],
+        "optionCodes": [
+          "MPK/KH/KG",
+          "MPFF/PF/VM",
+          "MPFS/ME",
+          "MPKM",
+          "MPFG/MC",
+          "MPH"
+        ]
+      },
+      "companions": [
+        "L24CB",
+        "L24CF",
+        "L24CSH"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": true
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "didYouKnow": {
+        "_ui": "The 💡 \"Did you know?\" cross-order tip. codes[] each carry a sibling sku the tip links to.",
+        "text": "This cabinet can also be ordered 36 cm deep — same front, deeper carcase."
+      }
+    },
+    {
+      "_ui": "DOOR CABINET — carries handedLR:true (the \"L/R\" left/right-hinge badge), modifications[] (\"Modifications — how to\": 760/761 handle-less recipes), didYouKnow, and accessories[] with the IGS2058 {sku,variants:[{label:\"L3/M3\"},{label:\"M8\"}]} pair. Exercises Modification + handedLR + the variant AccessoryRef.",
+      "sku": "CT2073",
+      "kind": "cabinet",
+      "familyId": "F805",
+      "name": "Floor unit",
+      "category": "Base",
+      "subcategory": "Doors",
+      "section": "Standard Door Cabinets",
+      "active": true,
+      "widthMm": 200,
+      "heightMm": 730,
+      "depthMm": 560,
+      "heightClass": 73,
+      "availableTiers": [
+        "P",
+        "C"
+      ],
+      "handedLR": true,
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "C",
+        "opening": null,
+        "twinTiers": [
+          "P"
+        ],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "272",
+          "283",
+          "410",
+          "412",
+          "413",
+          "415",
+          "417",
+          "418",
+          "419",
+          "421",
+          "422",
+          "424",
+          "431",
+          "433",
+          "438",
+          "439",
+          "441",
+          "453",
+          "454",
+          "455",
+          "468",
+          "469",
+          "476",
+          "486",
+          "488",
+          "491",
+          "493",
+          "494",
+          "701",
+          "702",
+          "703",
+          "704",
+          "705"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [
+          58,
+          36,
+          48,
+          68
+        ],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Floor unit",
+        "bullets": [
+          "1 door",
+          "2 adjustable shelves"
+        ]
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "Programmes CONTINO + K35",
+        "Cupboards 45 degree chamfered edge not on both sides"
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "finishes": [
+        {
+          "finishCode": "31",
+          "price": 23600
+        },
+        {
+          "finishCode": "32",
+          "price": 25400
+        },
+        {
+          "finishCode": "33",
+          "price": 27100
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "20.01",
+      "catalogPage": 183,
+      "carcaseLine": "73",
+      "weightKg": 23.9,
+      "volumeM3": 0.09,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Storage",
+          "groupKey": "b_store",
+          "leaf": "Door Cabinets",
+          "leafId": "b_store#1"
+        }
+      ],
+      "parameters": {
+        "_ui": "accessories below carry the IGS2058 L3/M3·M8 variant pair — the canonical {sku,variants} AccessoryRef.",
+        "width": [
+          {
+            "label": "15",
+            "sku": "CT1573"
+          },
+          {
+            "label": "20",
+            "sku": "CT2073"
+          },
+          {
+            "label": "30",
+            "sku": "CT3073"
+          },
+          {
+            "label": "40",
+            "sku": "CT4073"
+          },
+          {
+            "label": "45",
+            "sku": "CT4573"
+          },
+          {
+            "label": "50",
+            "sku": "CT5073"
+          },
+          {
+            "label": "60",
+            "sku": "CT6073"
+          },
+          {
+            "label": "70",
+            "sku": "CT7073"
+          },
+          {
+            "label": "80",
+            "sku": "CT8073"
+          },
+          {
+            "label": "90",
+            "sku": "CT9073"
+          },
+          {
+            "label": "100",
+            "sku": "CT10073"
+          },
+          {
+            "label": "120",
+            "sku": "CT12073"
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "sku": "CT2073"
+          },
+          {
+            "label": "H80",
+            "sku": "CT2080"
+          },
+          {
+            "label": "H86",
+            "sku": "CT2086"
+          }
+        ],
+        "depth": [
+          {
+            "label": "36",
+            "sku": "CT2073",
+            "code": "CT207336"
+          },
+          {
+            "label": "48",
+            "sku": "CT2073",
+            "code": "CT207348"
+          },
+          {
+            "label": "58",
+            "sku": "CT2073",
+            "code": "CT2073"
+          },
+          {
+            "label": "63",
+            "sku": "CT2073",
+            "alteration": true,
+            "code": "CT2073"
+          },
+          {
+            "label": "68",
+            "sku": "CT2073",
+            "code": "CT207368"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "T2073"
+          },
+          {
+            "tier": "C",
+            "sku": "CT2073"
+          }
+        ]
+      },
+      "alterations": [
+        "ANST",
+        "ANSH",
+        "ANSHT",
+        "ANSB"
+      ],
+      "accessories": [
+        "FSUE7358",
+        "MPTSCH155",
+        {
+          "sku": "IGS2058",
+          "variants": [
+            {
+              "label": "L3/M3",
+              "sku": "IGS2058"
+            },
+            {
+              "label": "M8",
+              "sku": "IGS2058U"
+            }
+          ]
+        },
+        {
+          "sku": "IGZ2058",
+          "variants": [
+            {
+              "label": "L3/M3",
+              "sku": "IGZ2058"
+            },
+            {
+              "label": "M8",
+              "sku": "IGZ2058U"
+            }
+          ]
+        }
+      ],
+      "companions": [
+        "FSUE7358"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": true
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "didYouKnow": {
+        "text": "This cabinet can also be ordered 36 / 48 / 63 / 68 cm deep — same front, deeper carcase. 63 cm = the 68 cm cabinet with a factory depth alteration."
+      }
+    },
+    {
+      "_ui": "TRASH/SINK PULLOUT (Base · Sinks) — exercises sinkFitment AND nameQualifier (\"Trash Pullout\", the amber sub-label after the title, from vsub[vr]). Also a good second handedLR/engineering example.",
+      "sku": "TSPA8073BTZW",
+      "kind": "cabinet",
+      "familyId": "SNK7",
+      "name": "Instant Hot Sink Blender — 30 cm door",
+      "category": "Base",
+      "subcategory": "Sinks",
+      "section": "Instant Hot Sink Units",
+      "active": true,
+      "nameQualifier": "Trash Pullout",
+      "widthMm": 800,
+      "heightMm": 730,
+      "depthMm": 560,
+      "heightClass": 73,
+      "availableTiers": [
+        "P"
+      ],
+      "handedLR": true,
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "250",
+          "410",
+          "412",
+          "413",
+          "415",
+          "417",
+          "418",
+          "419",
+          "421",
+          "422",
+          "424",
+          "431",
+          "433",
+          "438",
+          "439",
+          "441",
+          "453",
+          "454",
+          "455",
+          "468",
+          "469",
+          "476",
+          "486",
+          "488",
+          "491",
+          "493",
+          "494",
+          "701",
+          "702",
+          "703",
+          "704",
+          "705",
+          "750"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [
+          58
+        ],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Sink waste bin unit for hot",
+        "bullets": [
+          "water taps",
+          "no back panel",
+          "1 fixed blender",
+          "1 door 30 cm wide in front of compartment for taps accessories",
+          "1 middle side removable",
+          "1 pullout 50 cm wide",
+          "(depth 50 cm)",
+          "1 odour trap",
+          "1 frame with 3 waste bins, contents 1x 14 ltr., 1x 10 ltr. and 1x 10 ltr. with bio lid, in addition 2x 2.5 ltr.",
+          "1 metal water drip floor"
+        ]
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "No 45 degree chamfered edge",
+        "Programmes KL73 / KL86 only XML"
+      ],
+      "planningNotes": [
+        "The compartment for taps accessories determines style left or right.",
+        "The true width for the installation of boilers and cartridges is 26.7 cm.",
+        "Please plan sink installation above pullout, available height 28 cm to carcase top edge!"
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "sinkFitment": {
+        "_ui": "The Base/Sinks \"Max Sink Size: NN″\" line + \"＋ Add Sink\" popup + detail \"Sink fitment\" section. showOnCard:true drives the card ＋Add-Sink button; maxSinkSizeInch/cabinetWidthCm come from the width; customAboveInch:42 is the \"needs a custom unit\" cutoff.",
+        "maxSinkSizeInch": 30,
+        "cabinetWidthCm": 80,
+        "customAboveInch": 42,
+        "isDoor": false,
+        "showOnCard": true,
+        "notes": [
+          "Cabinet width 80 cm → fits sink bowls up to 30″.",
+          "Sinks over 42″ (or wider than 120 cm base) require a custom sink unit.",
+          "Drawer/pullout sink — no hinge modification (ANSVVO275 does not apply)."
+        ]
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 71500
+        },
+        {
+          "finishCode": "2",
+          "price": 74100
+        },
+        {
+          "finishCode": "3",
+          "price": 78700
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "20.23",
+      "catalogPage": 233,
+      "carcaseLine": "73",
+      "weightKg": 36,
+      "volumeM3": 0.35,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Water",
+          "groupKey": "b_water",
+          "leaf": "Sink Cabinets",
+          "leafId": "b_water#0"
+        }
+      ],
+      "parameters": {
+        "width": [
+          {
+            "label": "80",
+            "sku": "TSPA807368BTZW"
+          },
+          {
+            "label": "90",
+            "sku": "TSPA907368BTZW"
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "sku": "TSPA807368BTZW"
+          },
+          {
+            "label": "H80",
+            "sku": "TSPA808068BTZW"
+          },
+          {
+            "label": "H86",
+            "sku": "TSPA808668BTZW"
+          }
+        ],
+        "depth": [
+          {
+            "label": "58",
+            "sku": "TSPA8073BTZW"
+          },
+          {
+            "label": "63",
+            "sku": "TSPA807368BTZW",
+            "alteration": true
+          },
+          {
+            "label": "68",
+            "sku": "TSPA807368BTZW"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "TSPA8073BTZW"
+          },
+          {
+            "tier": "A",
+            "sku": "ATSPA8073BTZW"
+          }
+        ],
+        "options": [
+          {
+            "group": "Ty",
+            "label": "BTZW",
+            "sku": "TSPA807368BTZW"
+          },
+          {
+            "group": "Ty",
+            "label": "BZW",
+            "sku": "TSPA807368BZW"
+          },
+          {
+            "group": "Ty",
+            "label": "BTBS",
+            "sku": "TSPA907368BTBS"
+          },
+          {
+            "group": "Ty",
+            "label": "BTZ",
+            "sku": "TSPA907368BTZ"
+          }
+        ]
+      },
+      "alterations": [
+        "ANTSP63US",
+        "ANTSPZAUS",
+        "ANST",
+        "ANSH"
+      ],
+      "accessories": [
+        "HFO3",
+        "MPRU",
+        "FS7356"
+      ],
+      "companions": [
+        "HFO3",
+        "MPRU"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": true
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_ui": "REFRIGERATOR appliance front. Exercises ApplianceHousing (Refrigerators variant), the E-mode capability path (hasEFront/onePieceFront/excludedProgramsE), handleFree/singleHandle, InspirationBlock, frontModifiers (spec \"Modifiers\" line), and a dead alteration DimPill.",
+      "sku": "GF46204",
+      "kind": "cabinet",
+      "familyId": "F1230",
+      "name": "Appliance door for large Fridge/Freezer",
+      "category": "Tall",
+      "subcategory": "Appliance Housing",
+      "section": "Appliance Doors & Fronts",
+      "active": true,
+      "widthMm": 460,
+      "heightMm": 2039,
+      "depthMm": 20,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "_ui": "E-MODE example. hasEFront:true + onePieceFront:true (one-piece front) + a NON-empty excludedProgramsE[] — those extra exclusions apply ONLY when the toolbar is in single-front / \"Full-E\" mode (state.front===1). handleFree:true + singleHandle:true (no-handle appliance door). excludedPrograms/excludedProgramsE trimmed to 8 each (real, but the full lists are 27/10).",
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "211",
+          "214",
+          "244"
+        ],
+        "excludedProgramsE": [
+          "226",
+          "228",
+          "283",
+          "613",
+          "654",
+          "669",
+          "684",
+          "726"
+        ],
+        "isFrmatFamily": false,
+        "hasEFront": true,
+        "depthClasses": [],
+        "handleFree": true,
+        "onePieceFront": true,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Appliance door for large capacity appliance",
+        "bullets": [
+          "Handle and hinge drill holes on site"
+        ]
+      },
+      "restrictions": [
+        "No fronts 61, 76, 91 cm",
+        "No 45 degree chamfered edge"
+      ],
+      "planningNotes": [
+        "Also available for SUB-ZERO 700 series, Miele and B/S/H appliances.",
+        "Please state appliance manufacturer and appliance type."
+      ],
+      "appliance": {
+        "_ui": "APPLIANCES popup (card button, tooltip \"Appliances\"). Refrigerators shape = brand·category·nicheSize ONLY (no subcategory/note — those are Dishwashers-only). category \"Refrigerators\" picks the fridge glyph; nicheSize \"18\"\" derives from width 460 mm.",
+        "category": "Refrigerators",
+        "brand": "Gaggenau",
+        "nicheSize": "18\""
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 31000
+        },
+        {
+          "finishCode": "2",
+          "price": 35600
+        },
+        {
+          "finishCode": "3",
+          "price": 43800
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "37.05",
+      "catalogPage": 525,
+      "frontModifiers": "Vertical handle (V) · One-piece front (E)",
+      "weightKg": 10,
+      "volumeM3": 0.07,
+      "functionalGroups": [
+        {
+          "zone": "Tall",
+          "group": "Cooling",
+          "groupKey": "t_cool",
+          "leaf": "Appliance Doors & Fronts",
+          "leafId": "t_cool#0"
+        }
+      ],
+      "parameters": {
+        "_ui": "Note the depth \"63\" pill: {label:\"63\", alteration:true} with NO sku → a DEAD pill (renders grey + inert, nowhere to navigate).",
+        "width": [
+          {
+            "label": "46",
+            "sku": "GF46204"
+          },
+          {
+            "label": "61",
+            "sku": "GF61204"
+          },
+          {
+            "label": "76",
+            "sku": "GF76204"
+          },
+          {
+            "label": "91",
+            "sku": "GF91204"
+          }
+        ],
+        "height": [
+          {
+            "label": "H204",
+            "sku": "GF46204"
+          },
+          {
+            "label": "H210",
+            "sku": "GF46210"
+          },
+          {
+            "label": "H217",
+            "sku": "GF46217"
+          },
+          {
+            "label": "H224",
+            "sku": "GF46224"
+          }
+        ],
+        "depth": [
+          {
+            "label": "58",
+            "sku": "GF46204"
+          },
+          {
+            "label": "63",
+            "alteration": true
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "GF46204"
+          }
+        ]
+      },
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": false
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "inspiration": {
+        "_ui": "The camera-icon lightbox photo (top-level card mirror so the list API returns it). heading = code/dims line; imageUrl on the inspiration host; fullScreen → \"View full screen\".",
+        "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Units-stage/GF.jpg",
+        "caption": "Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style.",
+        "fullScreen": true,
+        "heading": "GF46204 — Appliance door for large Fridge/Freezer · W 460 × H 2039 × D 20 mm"
+      }
+    },
+    {
+      "_ui": "DISHWASHER FRONT (Base · Appliance housing) — the DW ApplianceHousing shape (subcategory + note), plus faceForTiers [\"_\",\"C\"] (the tier contexts in which this unit is its family's FACE card — NOT derivable, captured from the app).",
+      "sku": "CGFV608061S2Z",
+      "kind": "cabinet",
+      "familyId": "GFVO",
+      "name": "Front for Built-in Appliances · Original handle D61",
+      "category": "Base",
+      "subcategory": "Appliance housing",
+      "section": "Front for Dishwasher Appliances · Original handle D61",
+      "active": true,
+      "widthMm": 600,
+      "heightMm": 795,
+      "depthMm": 20,
+      "heightClass": 80,
+      "availableTiers": [
+        "C"
+      ],
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "C",
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "286",
+          "486",
+          "701"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [
+          58
+        ],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Front for built-under appliance with drawer- and pullout partitioning with original recessed handle on the front",
+        "bullets": [
+          "If necessary, flush-with-carcase blender behind the front for fully integrated dishwasher, height 82 - 87 cm."
+        ]
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "Programmes CONTINO + K35"
+      ],
+      "planningNotes": [
+        "⚠ D61 special door: the recessed handle runs through the front (door thickness 50 mm). If the plinth is too low for a continuous recessed handle, a fitted recessed handle is used (e.g. CGFV…61 S2Z). Beware — this front needs a 3 cm deeper cupboard run (worktop depth min. 63 cm).",
+        "Permitted appliances: Miele (min."
+      ],
+      "appliance": {
+        "_ui": "DISHWASHER shape of the popup — adds subcategory (\"Built-In\"; \"Built-In ADA\" when heightClass 73) AND a note (leg/cross-brand fitment). Popup reads \"Gaggenau · Dishwashers · Built-In · 24\"\" then the note line.",
+        "category": "Dishwashers",
+        "brand": "Gaggenau",
+        "nicheSize": "24\"",
+        "subcategory": "Built-In",
+        "note": "Can work with Miele, CGFV608061S2Z + 100 legs - BSH CGFV608061S2Z with 12 cm legs."
+      },
+      "finishes": [
+        {
+          "finishCode": "31",
+          "price": 36500
+        },
+        {
+          "finishCode": "32",
+          "price": 39200
+        },
+        {
+          "finishCode": "33",
+          "price": 43600
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "22.10",
+      "catalogPage": 226,
+      "carcaseLine": "80",
+      "weightKg": 8,
+      "volumeM3": 0.03,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Water",
+          "groupKey": "b_water",
+          "leaf": "Dishwasher Fronts",
+          "leafId": "b_water#2"
+        }
+      ],
+      "parameters": {
+        "width": [
+          {
+            "label": "60",
+            "sku": "CGFV608061S2Z"
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "sku": "CGFV607361S2Z"
+          },
+          {
+            "label": "H80",
+            "sku": "CGFV608061S2Z"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "C",
+            "sku": "CGFV608061S2Z"
+          },
+          {
+            "tier": "C1",
+            "sku": "C1GFV608061S2Z",
+            "opening": true
+          }
+        ]
+      },
+      "accessories": [
+        "VSF135ADP",
+        "VSF270ADP"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": false
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "didYouKnow": {
+        "text": "This cabinet also comes as Contino Plus — C1GFV608061S2Z.",
+        "codes": [
+          {
+            "label": "Show me →",
+            "sku": "C1GFV608061S2Z"
+          }
+        ]
+      },
+      "inspiration": {
+        "imageUrl": "https://leicht-store.s3.us-west-1.amazonaws.com/Units-stage/CGFV..61SZ2.jpg",
+        "caption": "Example of a fully integrated dishwasher front. Actual finish depends on the selected programme and door style.",
+        "fullScreen": true,
+        "heading": "CGFV608061S2Z — Front for Built-in Appliances · Original handle D61 · W 600 × H 795 × D 20 mm"
+      },
+      "faceForTiers": [
+        "_",
+        "C"
+      ]
+    },
+    {
+      "_ui": "P1 OPENING VARIANT — exercises Capabilities.opening (\"P1\"). The one item shape where opening is non-null.",
+      "sku": "P1TSP4573B",
+      "kind": "cabinet",
+      "familyId": "SNK2",
+      "name": "Sink unit · blender",
+      "category": "Base",
+      "subcategory": "Sinks",
+      "section": "Sink Units",
+      "active": true,
+      "widthMm": 450,
+      "heightMm": 730,
+      "depthMm": 560,
+      "heightClass": 73,
+      "availableTiers": [
+        "P1"
+      ],
+      "handedLR": true,
+      "capabilities": {
+        "_ui": "opening:\"P1\" — THIS unit IS the premium P1 opening variant (\"one handle on top\"). availableTiers is [\"P1\"], so under any tier ≠ P1 the tierOk gate fails. (P1/C1 codes are a prefix on a base; most are synthesized, but recovered/real ones like this are stored.)",
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": "P1",
+        "twinTiers": [],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "272",
+          "410",
+          "412"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [
+          58
+        ],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": true,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": true,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Sink unit",
+        "bullets": [
+          "no back panel",
+          "1 fixed blender",
+          "1 door",
+          "1 metal water drip floor"
+        ]
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "Cupboards 45 degree chamfered edge not on both sides",
+        "Programmes KL73 / KL86 only XML"
+      ],
+      "planningNotes": [
+        "If a rear panel is required for a sink unit, please always order this unit with the code MP RU."
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 880
+      },
+      "sinkFitment": {
+        "maxSinkSizeInch": 12,
+        "cabinetWidthCm": 45,
+        "customAboveInch": 42,
+        "isDoor": true,
+        "showOnCard": true,
+        "notes": [
+          "Cabinet width 45 cm → fits sink bowls up to 12″.",
+          "Sinks over 42″ (or wider than 120 cm base) require a custom sink unit.",
+          "Deep-basin door rule: if basin depth exceeds 8″ (203 mm), add ANSVVO275 (top hinge dropped 27.5 cm for clearance). Not needed for basins ≤ 8″."
+        ]
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 26300
+        },
+        {
+          "finishCode": "2",
+          "price": 27700
+        },
+        {
+          "finishCode": "3",
+          "price": 30300
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "20.17",
+      "catalogPage": 227,
+      "carcaseLine": "73",
+      "weightKg": 24.8,
+      "volumeM3": 0.2,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Water",
+          "groupKey": "b_water",
+          "leaf": "Sink Cabinets",
+          "leafId": "b_water#0"
+        }
+      ],
+      "parameters": {
+        "width": [
+          {
+            "label": "45",
+            "sku": "P1TSP457368B"
+          },
+          {
+            "label": "50",
+            "sku": "P1TSP507368B"
+          },
+          {
+            "label": "60",
+            "sku": "P1TSP607368B"
+          },
+          {
+            "label": "70",
+            "sku": "P1TSP707368B"
+          }
+        ],
+        "height": [
+          {
+            "label": "H73",
+            "sku": "P1TSP457368B"
+          },
+          {
+            "label": "H80",
+            "sku": "P1TSP458068B"
+          },
+          {
+            "label": "H86",
+            "sku": "P1TSP458668B"
+          }
+        ],
+        "depth": [
+          {
+            "label": "58",
+            "sku": "P1TSP4573B"
+          },
+          {
+            "label": "63",
+            "sku": "P1TSP457368B",
+            "alteration": true
+          },
+          {
+            "label": "68",
+            "sku": "P1TSP457368B"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "P1TSP4573B"
+          },
+          {
+            "tier": "P1",
+            "sku": "P1P1TSP4573B",
+            "opening": true
+          },
+          {
+            "tier": "A",
+            "sku": "AP1TSP4573B"
+          }
+        ]
+      },
+      "alterations": [
+        "ANTSP63US",
+        "ANTSPZAUS",
+        "ANSVVO275",
+        "ANST"
+      ],
+      "accessories": [
+        "MPRU",
+        "FS7356",
+        "FS7361"
+      ],
+      "companions": [
+        "MPRU"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": true
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": true
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ]
+    },
+    {
+      "_ui": "STORAGE Z UNIT — exercises Parameters.options (the \"Ty\" OptionPill row) plus a second Modification[] example.",
+      "sku": "T3027Z",
+      "kind": "cabinet",
+      "familyId": "F1313",
+      "name": "Drawer unit · Special Height",
+      "category": "Base",
+      "subcategory": "Special Height",
+      "section": "Drawers & Pullouts",
+      "active": true,
+      "widthMm": 300,
+      "heightMm": 265,
+      "depthMm": 560,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "286",
+          "486",
+          "701"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [
+          58,
+          36,
+          48,
+          68
+        ],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Pullout unit",
+        "bullets": [
+          "1 pullout"
+        ]
+      },
+      "restrictions": [
+        "No recessed handle vertical",
+        "Cupboards 45 degree chamfered edge on both sides"
+      ],
+      "planningNotes": [
+        "Floor units with carcase heights of 26.5 / 39.75 and 53.0 cm have the standard plinth with the heights of between 7 and 20 cm.",
+        "This type is intended for planning to use finishing tops or further cupboards."
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 415
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 27400
+        },
+        {
+          "finishCode": "2",
+          "price": 27700
+        },
+        {
+          "finishCode": "3",
+          "price": 29700
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "23.01",
+      "catalogPage": 297,
+      "weightKg": 16.1,
+      "volumeM3": 0.05,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Storage",
+          "groupKey": "b_store",
+          "leaf": "Special Height",
+          "leafId": "b_store#3"
+        }
+      ],
+      "parameters": {
+        "_ui": "options[] = the flattened coded selector row(s) beyond W/H/D/Programme — here \"Ty\" (S7 · Z · SZ). Each OptionPill is {group,label,sku}; clicking opens that sibling. (swatch is set only on the handle \"Finish\" row — none in this sample; 0 in the real export.)",
+        "width": [
+          {
+            "label": "30",
+            "sku": "T3027Z"
+          },
+          {
+            "label": "40",
+            "sku": "T4027Z"
+          },
+          {
+            "label": "45",
+            "sku": "T4527Z"
+          },
+          {
+            "label": "50",
+            "sku": "T5027Z"
+          },
+          {
+            "label": "60",
+            "sku": "T6027Z"
+          },
+          {
+            "label": "70",
+            "sku": "T7027Z"
+          },
+          {
+            "label": "80",
+            "sku": "T8027Z"
+          },
+          {
+            "label": "90",
+            "sku": "T9027Z"
+          },
+          {
+            "label": "100",
+            "sku": "T10027Z"
+          },
+          {
+            "label": "120",
+            "sku": "T12027Z"
+          }
+        ],
+        "height": [
+          {
+            "label": "H27",
+            "sku": "T3027Z"
+          },
+          {
+            "label": "H33",
+            "sku": "T3033Z"
+          },
+          {
+            "label": "H40",
+            "sku": "T3040Z"
+          },
+          {
+            "label": "H53"
+          },
+          {
+            "label": "H60"
+          },
+          {
+            "label": "H93"
+          }
+        ],
+        "depth": [
+          {
+            "label": "36",
+            "sku": "T3027Z",
+            "code": "T302736Z"
+          },
+          {
+            "label": "48",
+            "sku": "T3027Z",
+            "code": "T302748Z"
+          },
+          {
+            "label": "58",
+            "sku": "T3027Z",
+            "code": "T3027Z"
+          },
+          {
+            "label": "63",
+            "sku": "T3027Z",
+            "alteration": true,
+            "code": "T3027Z"
+          },
+          {
+            "label": "68",
+            "sku": "T3027Z",
+            "code": "T302768Z"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "T3027Z"
+          },
+          {
+            "tier": "C",
+            "sku": "CT3027Z"
+          },
+          {
+            "tier": "A",
+            "sku": "AT3027Z"
+          }
+        ],
+        "options": [
+          {
+            "group": "Ty",
+            "label": "S7",
+            "sku": "T5093S7"
+          },
+          {
+            "group": "Ty",
+            "label": "Z",
+            "sku": "T3027Z"
+          },
+          {
+            "group": "Ty",
+            "label": "SZ",
+            "sku": "T3040SZ"
+          }
+        ]
+      },
+      "alterations": [
+        "ANST",
+        "ANSH",
+        "ANSHT",
+        "ANSB"
+      ],
+      "accessories": [
+        {
+          "sku": "SMVK100",
+          "variants": [
+            {
+              "label": "1 m",
+              "sku": "SMVK100"
+            },
+            {
+              "label": "1.6 m",
+              "sku": "SMVK160"
+            },
+            {
+              "label": "2 m",
+              "sku": "SMVK200"
+            }
+          ]
+        },
+        "SMNK200",
+        "SMNT",
+        "ARE3058"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": true
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "didYouKnow": {
+        "text": "This cabinet can also be ordered 36 / 48 / 63 / 68 cm deep — same front, deeper carcase. 63 cm = the 68 cm cabinet with a factory depth alteration."
+      }
+    },
+    {
+      "_ui": "FRMAT front-panel material — the isFrmatFamily:true special case.",
+      "sku": "FRMAT",
+      "kind": "cabinet",
+      "familyId": "F124",
+      "name": "Front panel material",
+      "category": "Panels & surround",
+      "subcategory": "Surround",
+      "section": "Panels & Edges",
+      "active": true,
+      "widthMm": 1200,
+      "heightMm": 2760,
+      "depthMm": 20,
+      "availableTiers": [
+        "P",
+        "A"
+      ],
+      "capabilities": {
+        "_ui": "isFrmatFamily:true — the 1-unit FRMAT max-size-table family. The backend layers FRMAT_MAX[programmeName] ON TOP of the normal gate (the sole residual in the 99.997% capabilities verification). Also shows faceForTiers [\"_\",\"P\",\"A\",\"C\"] (face in every tier context).",
+        "alwaysAvailable": false,
+        "nativeTier": "A",
+        "opening": null,
+        "twinTiers": [
+          "P"
+        ],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "226",
+          "228",
+          "250"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": true,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Front panel material",
+        "bullets": [
+          "4 sides with blind edge",
+          "Bevelled edges not possible! thickness and reverse side décor correspond with the respective front finish"
+        ]
+      },
+      "restrictions": [
+        "Height alteration not possible",
+        "No fronts, IOS, IOS-M",
+        "No 45 degree chamfered edge"
+      ],
+      "planningNotes": [
+        "Please state length and width.",
+        "Texture direction = length Ordered size of less than 0.4 m² are calculated on the price of 0.4 m²."
+      ],
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 21300
+        },
+        {
+          "finishCode": "2",
+          "price": 21900
+        },
+        {
+          "finishCode": "3",
+          "price": 39800
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "71.18",
+      "catalogPage": 806,
+      "weightKg": 17,
+      "volumeM3": 0.07,
+      "parameters": {
+        "width": [
+          {
+            "label": "120",
+            "sku": "FRMAT"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "FRMAT"
+          },
+          {
+            "tier": "A",
+            "sku": "AFRMAT"
+          }
+        ]
+      },
+      "faceForTiers": [
+        "_",
+        "P",
+        "A",
+        "C"
+      ]
+    },
+    {
+      "_ui": "RECOVERED ARTIFACT (LED control) — from meta.recoveredArtifactSkus. Exercises Capabilities.alwaysAvailable:true + nativeTier:null.",
+      "sku": "L24CD",
+      "kind": "cabinet",
+      "familyId": "L2023",
+      "name": "LED dynamic light control",
+      "category": "Lighting",
+      "subcategory": "LED",
+      "active": true,
+      "widthMm": 0,
+      "heightMm": 0,
+      "depthMm": 0,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "_ui": "alwaysAvailable:true (app u._c) short-circuits EVERY gate → the pill never greys. nativeTier:null = line-neutral (never greys by tier). This is one of meta.recoveredArtifactSkus — a code the app's init deleted as an artifact but which is a real orderable unit, recovered from the raw <script id=\"DATA\">.",
+        "alwaysAvailable": true,
+        "nativeTier": null,
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "LED dynamic light control controller set DALI",
+        "bullets": [
+          "2 pole",
+          "1 DALI controller with 9-way distributor for connection to power supply unit L24 NT ..."
+        ]
+      },
+      "planningNotes": [
+        "Control using home control with DALI DT8 protocol.",
+        "Integration in KNX systems possible with customer's KNX module for DALI DT8 control."
+      ],
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 10500
+        }
+      ],
+      "priceUnit": "HLP",
+      "priceGroupRef": "91.05",
+      "catalogPage": 983
+    },
+    {
+      "_ui": "ALTERATION item (kind:\"alteration\") — the target of every cabinet's alterations[] sku list (e.g. TK7080BZ2 above lists \"ANST\"). One code, referenced by thousands of units, stored ONCE.",
+      "sku": "ANST",
+      "kind": "alteration",
+      "familyId": "MRG_CUPALT1",
+      "name": "Cupboard alteration · one dimension",
+      "category": "Alteration",
+      "subcategory": "Cabinet Modifications",
+      "section": "Carcass & Structure",
+      "active": true,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Cupboard depth alteration",
+        "bullets": []
+      },
+      "planningNotes": [
+        "Extra charge = cupboard reduction / front reduction Base type is the next bigger order unit."
+      ],
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 13700
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "14.01",
+      "catalogPage": 179,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Layout",
+          "groupKey": "b_layout",
+          "leaf": "Modifications",
+          "leafId": "b_layout#3"
+        },
+        {
+          "zone": "Tall",
+          "group": "Layout",
+          "groupKey": "t_layout",
+          "leaf": "Modifications",
+          "leafId": "t_layout#4"
+        }
+      ]
+    },
+    {
+      "_ui": "ACCESSORY item (kind:\"accessory\") — a plinth cover. The target of an accessories[] / companions[] ref, stored once. Also carries faceForTiers. (kind \"part\" has ZERO instances in v781 — the fourth ItemKind value is valid but unused here.)",
+      "sku": "VSF135ADP",
+      "kind": "accessory",
+      "familyId": "XAG_Pa_370e98",
+      "name": "Plinth cover profile",
+      "category": "Panels & surround",
+      "subcategory": "Plinth Accessories",
+      "active": true,
+      "widthMm": 1350,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "alwaysAvailable": true,
+        "nativeTier": null,
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Plinth cover profile can be clipped onto 1.6 cm thick material",
+        "bullets": [
+          "KF = Plastic coloured",
+          "273 platinum  284 carbon grey"
+        ]
+      },
+      "planningNotes": [
+        "Please state colour."
+      ],
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 1200
+        }
+      ],
+      "priceUnit": "HLP",
+      "priceGroupRef": "70.02",
+      "catalogPage": 776,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Design",
+          "groupKey": "b_design",
+          "leaf": "Plinth (Toe-Kick)",
+          "leafId": "b_design#3"
+        }
+      ],
+      "faceForTiers": [
+        "_",
+        "P",
+        "A",
+        "C"
+      ]
+    },
+    {
+      "sku": "MGT601468",
+      "kind": "cabinet",
+      "familyId": "XMOD_MGT_80",
+      "name": "Module Appliance niche with door · KL 80",
+      "category": "Tall",
+      "subcategory": "Modular Housing Units",
+      "section": "Step 3 — Appliance Niche (MGN)",
+      "active": true,
+      "widthMm": 600,
+      "heightMm": 1457,
+      "depthMm": 20,
+      "availableTiers": [
+        "P",
+        "A"
+      ],
+      "handedLR": true,
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "A",
+        "opening": null,
+        "twinTiers": [
+          "P"
+        ],
+        "excludedPrograms": [
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "286",
+          "486",
+          "701",
+          "702",
+          "703",
+          "704",
+          "705",
+          "786"
+        ],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": true,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": true
+      },
+      "description": {
+        "title": "Module Appliance niche with door",
+        "bullets": [
+          "1 door strap. together",
+          "145.5 cm high in front of appliance niche 140 cm"
+        ]
+      },
+      "restrictions": [
+        "No 45 degree chamfered edge",
+        "No inset handle 715",
+        "Fronts -Q handle 761",
+        "No fronts ROCCA / KERA"
+      ],
+      "planningNotes": [
+        "The appropriate appliance niche must be increased in height to the module planning dimension MGT..",
+        "(= door height)."
+      ],
+      "toeKick": {
+        "addCm": 15,
+        "installedHeightMm": 1607
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 18700
+        },
+        {
+          "finishCode": "2",
+          "price": 20700
+        },
+        {
+          "finishCode": "3",
+          "price": 26800
+        },
+        {
+          "finishCode": "4",
+          "price": 33300
+        },
+        {
+          "finishCode": "5",
+          "price": 44000
+        },
+        {
+          "finishCode": "6",
+          "price": 54600
+        },
+        {
+          "finishCode": "7",
+          "price": 60400
+        },
+        {
+          "finishCode": "8",
+          "price": 65100
+        },
+        {
+          "finishCode": "21",
+          "price": 18700
+        },
+        {
+          "finishCode": "22",
+          "price": 20700
+        },
+        {
+          "finishCode": "23",
+          "price": 26800
+        },
+        {
+          "finishCode": "24",
+          "price": 33300
+        },
+        {
+          "finishCode": "25",
+          "price": 44000
+        },
+        {
+          "finishCode": "26",
+          "price": 54600
+        },
+        {
+          "finishCode": "27",
+          "price": 60400
+        },
+        {
+          "finishCode": "31",
+          "price": 18700
+        },
+        {
+          "finishCode": "32",
+          "price": 20700
+        },
+        {
+          "finishCode": "33",
+          "price": 26800
+        },
+        {
+          "finishCode": "34",
+          "price": 33300
+        },
+        {
+          "finishCode": "35",
+          "price": 44000
+        },
+        {
+          "finishCode": "36",
+          "price": 54600
+        },
+        {
+          "finishCode": "37",
+          "price": 60400
+        },
+        {
+          "finishCode": "38",
+          "price": 65100
+        },
+        {
+          "finishCode": "39",
+          "price": 71600
+        },
+        {
+          "finishCode": "50",
+          "price": 97700
+        },
+        {
+          "finishCode": "51",
+          "price": 104200
+        },
+        {
+          "finishCode": "52",
+          "price": 110700
+        },
+        {
+          "finishCode": "53",
+          "price": 117200
+        },
+        {
+          "finishCode": "54",
+          "price": 130200
+        },
+        {
+          "finishCode": "55",
+          "price": 136700
+        },
+        {
+          "finishCode": "60",
+          "price": 97700
+        },
+        {
+          "finishCode": "70",
+          "price": 97700
+        },
+        {
+          "finishCode": "71",
+          "price": 104200
+        },
+        {
+          "finishCode": "72",
+          "price": 110700
+        },
+        {
+          "finishCode": "73",
+          "price": 117200
+        },
+        {
+          "finishCode": "74",
+          "price": 130200
+        },
+        {
+          "finishCode": "75",
+          "price": 136700
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "39.12",
+      "catalogPage": 586,
+      "frontModifiers": "Line-66 (Y) → MGT60146Y",
+      "weightKg": 1,
+      "functionalGroups": [
+        {
+          "zone": "Tall",
+          "group": "Cooking",
+          "groupKey": "t_cook",
+          "leaf": "Modular Housing Units",
+          "leafId": "t_cook#1"
+        }
+      ],
+      "parameters": {
+        "width": [
+          {
+            "label": "60",
+            "sku": "MGT601468"
+          },
+          {
+            "label": "76",
+            "sku": "MGT761468"
+          }
+        ],
+        "height": [
+          {
+            "label": "H75"
+          },
+          {
+            "label": "H80"
+          },
+          {
+            "label": "H93"
+          },
+          {
+            "label": "H98"
+          },
+          {
+            "label": "H106"
+          },
+          {
+            "label": "H125"
+          },
+          {
+            "label": "H138"
+          },
+          {
+            "label": "H146",
+            "sku": "MGT601468"
+          },
+          {
+            "label": "H151"
+          },
+          {
+            "label": "H164"
+          },
+          {
+            "label": "H178"
+          },
+          {
+            "label": "H190",
+            "sku": "MGT601908"
+          },
+          {
+            "label": "H204",
+            "sku": "MGT602048"
+          },
+          {
+            "label": "H217",
+            "sku": "MGT602178"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "MGT601468"
+          },
+          {
+            "tier": "A",
+            "sku": "AMGT601468"
+          }
+        ],
+        "options": [
+          {
+            "group": "Ty",
+            "label": "—",
+            "sku": "MGT601468"
+          },
+          {
+            "group": "Ty",
+            "label": "E",
+            "sku": "MGT60146E"
+          }
+        ]
+      },
+      "alterations": [
+        "ANST",
+        "ANSH",
+        "ANSHT",
+        "ANSB",
+        "ANSBH",
+        "ANSBT",
+        "ANSBHT",
+        "MPH1B"
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": false
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "modifications": [
+        {
+          "title": "Handle-less mechanical (760)",
+          "text": "Tip-Softclose touch latch. eOpus: set handle 760",
+          "codes": [
+            {
+              "label": "set handle 760",
+              "sku": "760"
+            }
+          ]
+        },
+        {
+          "title": "Handle-less electric (761)",
+          "text": "SensoMatic. eOpus: set handle 761 +SMNK200US +SMVK200 +SMNT (transformer)",
+          "codes": [
+            {
+              "label": "set handle 761",
+              "sku": "761"
+            },
+            {
+              "label": "+SMNK200US",
+              "sku": "SMNK200US"
+            },
+            {
+              "label": "+SMVK200",
+              "sku": "SMVK200"
+            },
+            {
+              "label": "+SMNT (transformer)",
+              "sku": "SMNT"
+            }
+          ],
+          "warn": "761 electric ALWAYS needs the SMNT transformer — not added automatically"
+        }
+      ],
+      "faceForTiers": [
+        "_",
+        "P",
+        "A"
+      ],
+      "doorLineYCode": "MGT60146Y",
+      "heightExtension": {
+        "sku": "MGT602178",
+        "addCode": "MPHVERL",
+        "options": [
+          {
+            "label": "230",
+            "heightMm": 2304
+          },
+          {
+            "label": "244",
+            "heightMm": 2436.5
+          },
+          {
+            "label": "250",
+            "heightMm": 2500
+          }
+        ]
+      },
+      "_ui": "Line-66 + tall-extension example. doorLineYCode = the ORDER CODE when the toolbar picks door-line Y: Y REPLACES the whole code (V/E/J/P1/C1 are only prefixes/suffixes), so it cannot be derived and ships literally; capabilities.doorLineY is the matching GATE. heightExtension = the app's \"217+\" chip appended to the Height row — picking 230/244/250 cm opens the family's 217 cm unit and orders addCode (MPHVERL) alongside it, the height twin of the 63 cm depth alteration. It is NOT part of parameters.height because some families also have real 230/250 cm siblings and the labels would collide."
+    }
+  ]
+}
