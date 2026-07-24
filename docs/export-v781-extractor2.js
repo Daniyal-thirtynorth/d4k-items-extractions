@@ -5,7 +5,9 @@
  * (this replaces export-v781-extractor.js + scripts/transform-min.js in one pass).
  *
  * Same driver contract as v1: inject once (sets window.__H), then the main thread
- * calls H.buildJobs() → H.processBatch(start,n) in chunks → H.finalize() → H.post(url).
+ * calls H.buildJobs() → H.processBatch(start,n) in chunks → await H.buildShowUnderLine()
+ * → H.finalize() → H.post(url). (buildShowUnderLine drives the browse grid per line to
+ * capture per-family height `showUnderLine`; finalize stamps it onto parameters.height.)
  * It drives the app's OWN openDetail(f.id,u.c) and scrapes #pin, and now ALSO:
  *   • emits per-item `capabilities` (inlined scripts/compute-capabilities.js) that
  *     REPLACES the old programmeAvailability (raw u.x + tier/depth/handle/open gates);
@@ -120,7 +122,7 @@ function computeCapabilities(u, f, codeIx){
   return {
     alwaysAvailable: !!u._c,                 // available() short-circuit
     // ── tierOk ──
-    nativeTier: u.fam || null,               // 'P'|'A'|'C'|null (native line; null = line-neutral)
+    nativeTier: ['P', 'A', 'C'].includes(u.fam) ? u.fam : null, // 'P'|'A'|'C'|null; guard dup-family ids (F1961__CKDUP…) from leaking in as a "tier"
     opening: u.op || null,                   // 'P1'|'C1'|null (this unit IS a premium opening variant)
     twinTiers: tierTwins(u, codeIx),         // tiers with a real sibling SKU
     // ── progOk ──  excludedPrograms = RAW u.x (backend layers the FRMAT-table rule via isFrmatFamily)
@@ -765,6 +767,39 @@ H.buildFaces=function(){
   return face;
 };
 
+// U1 — per-family `showUnderLine` for BASE carcase-line height pills (73/80/86): the toolbar-LINE
+// values each pill renders under, so the grid H row narrows to the selected line like the client
+// (73→[73], 86→[73,86]). FAMILY-DEPENDENT — the client's `lineHFilterB` alone does NOT reproduce the
+// rendered H row (verified: diverges for ~60% of families), so we DRIVE the browse grid per line and
+// scrape the rendered card H row (the authoritative what-the-user-sees). Base groups only; height-CLASS
+// families (Tall/Wall H47/H190…) don't collapse → no showUnderLine. ASYNC (render is async):
+//   run BEFORE finalize →  await __H.buildShowUnderLine();  __H.finalize();
+// finalize reads H.sul and stamps parameters.height[].showUnderLine. Matches scripts backfill exactly.
+H.buildShowUnderLine=async function(){
+  const out={}; H.sul=out;
+  if(typeof TASKS==='undefined'||typeof setTask!=='function') return out;
+  if(!window.CODE2FAM){ window.CODE2FAM={}; FAMS.forEach(ff=>{ if(ff.hid) return; (ff.units||[]).forEach(x=>{ if(!window.CODE2FAM[x.c]) window.CODE2FAM[x.c]=ff; }); }); }
+  const tick=ms=>new Promise(r=>setTimeout(r,ms||200));
+  const clickLine=txt=>{ const b=[...document.querySelectorAll('button')].filter(x=>x.textContent.trim()===txt&&x.onclick).find(x=>{const s=[...x.parentElement.children].map(y=>y.textContent.trim());return s.includes('73')&&s.includes('80')&&s.includes('86');}); if(b)b.click(); return !!b; };
+  const hLabels=card=>{ const g=[...card.querySelectorAll('.wchips')].find(x=>{const l=x.querySelector('.dlbl');return l&&l.textContent.trim()==='H';}); return g?[...g.querySelectorAll('button.wchip')].map(b=>b.textContent.trim()).filter(t=>/^(73|80|86)$/.test(t)):[]; };
+  const save={task:state.task,tsub:state.tsub,cat:state.cat,sub:state.sub,line:state.line,prog:state.prog,per:state.per};
+  state.per=99999;
+  const acc={};   // famId -> { label -> Set(lines) }
+  for(const g of TASKS.filter(t=>t.zone==='Base')){
+    try{ setTask(g.k); }catch(e){ continue; } await tick(180);
+    for(const L of ['73','80','86']){ clickLine(L); await tick(210);
+      document.querySelectorAll('.card').forEach(c=>{
+        const code=((c.querySelector('.icode,.code')||{}).textContent||'').trim();
+        const cf=window.CODE2FAM[code]; if(!cf) return; const fid=cf.id;
+        hLabels(c).forEach(lab=>{ const m=acc[fid]=acc[fid]||{}; (m[lab]=m[lab]||new Set()).add(Number(L)); });
+      });
+    }
+  }
+  Object.keys(acc).forEach(fid=>{ out[fid]={}; Object.keys(acc[fid]).forEach(lab=>{ out[fid][lab]=[...acc[fid][lab]].sort((a,b)=>a-b); }); });
+  Object.assign(state,save);
+  return out;
+};
+
 H.finalize=function(){
   const items=window.__ITEMS||[];
   // dedupe by sku (first wins; prefer non-error)
@@ -810,6 +845,12 @@ H.finalize=function(){
     Object.keys(o).forEach(k=>{ const key=fid+'|'+o[k]; (faceOf[key]=faceOf[key]||[]); if(faceOf[key].indexOf(k)<0) faceOf[key].push(k); }); });
   const FORD={'_':0,P:1,A:2,C:3};
   all.forEach(it=>{ const fc=faceOf[it.familyId+'|'+it.sku]; if(fc&&fc.length) it.faceForTiers=fc.slice().sort((a,b)=>FORD[a]-FORD[b]); });
+
+  // U1 — stamp per-pill `showUnderLine` onto BASE carcase-line height pills from H.buildShowUnderLine()
+  // (run it before finalize). label "H73" → line 73 → the toolbar lines that pill renders under.
+  const SUL=H.sul||{};
+  all.forEach(it=>{ const h=it.parameters&&it.parameters.height; const m=SUL[it.familyId]; if(!h||!m) return;
+    h.forEach(p=>{ const lab=String(p.label||'').replace(/^H/,''); if(m[lab]) p.showUnderLine=m[lab]; }); });
 
   const cabinets=all.filter(i=>i.kind==='cabinet').length;
   const cats=H.buildCategories(); const progs=H.buildProgrammes();

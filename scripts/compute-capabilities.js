@@ -137,7 +137,7 @@ function computeCapabilities(u, f, codeIx) {
     alwaysAvailable: !!u._c,
 
     // ── tierOk ──
-    nativeTier: u.fam || null,           // 'P' | 'A' | 'C' | null (native line; null = line-neutral)
+    nativeTier: ['P', 'A', 'C'].includes(u.fam) ? u.fam : null, // 'P'|'A'|'C'|null; guard against dup-family ids (F1961__CKDUP…) leaking in as a "tier"
     opening: u.op || null,               // 'P1' | 'C1' | null (this unit IS a premium opening variant)
     twinTiers: tierTwins(u, codeIx),     // ('P'|'A'|'C')[] tiers with a real sibling SKU
 
