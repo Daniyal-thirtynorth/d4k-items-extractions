@@ -72,7 +72,9 @@ Current facts:
   both** — it is simultaneously the pill-greying gate AND the `depthClass` grid filter (`GET items` now
   matches it, 58 & 63 pass-through; it used to match `parameters.depth[].label`, which put 3,792 wrong
   cabinets under D=68 and dropped 2,369/4,452 at 58/63).
-  Full rule + code: `design-book-api-ui-map-v2.md` **§2c-1** (pill state) + **§2c-2** (the two models). Codes were taken FROM the app (7,210 class→code
+  Full rule + code: `design-book-api-ui-map-v2.md` **§2c-1** (pill state) + **§2c-2** (the two models)
+  + **§2c-4** (the dedicated depth-pill section: selection by label + the fetch / don't-fetch click handler,
+  4 pill shapes, the `code`→400 warning). Codes were taken FROM the app (7,210 class→code
   pairs via `assemble`), not re-derived. Backfilled into D4K-dev with
   `D4K-backend/scripts/backfill-depth-pill-codes.js` (superseded by the general
   `D4K-backend/scripts/backfill-item-fields.js <export.json> [--fields a,b] [--apply]`, dry-run by default)
@@ -115,7 +117,8 @@ Current facts:
 - **Docs (all v2):** `docs/export-schema-v2.ts` (contract) · `docs/export-sample-v2.json` (13-item worked
   sample — `MGT601468` is the `doorLineYCode` + `heightExtension` example) ·
   `docs/design-book-api-ui-map-v2.md` (API↔UI, §2c the 8-gate model + per-gate GREY table +
-  `availableFromCaps` + render spec; **§2c-1 SELECTED — navigation rows vs DEPTH state rows**;
+  `availableFromCaps` + render spec; **§2c-4 DEPTH PILL — selection + when to call `/items/:sku`**;
+  **§2c-1 SELECTED — navigation rows vs DEPTH state rows**;
   **§2c-2 the two depth models**; **§2c-3 the WHOLE order-code surface — every `assemble()` input, which
   rows are plain navigation, `doorLineYCode`, `heightExtension`**; §1b CRUD) ·
   **`docs/design-book-crud-guide.md`** (authoring guide: mental model = a card is a FAMILY of sibling items
