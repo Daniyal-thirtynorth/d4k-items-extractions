@@ -221,3 +221,62 @@ cd data-from-client && python3 -m http.server 8777   # open http://localhost:877
 # backend running on :8000 (node dist/main.js from D4K-backend root); dev token via /design-book/dev-token
 # client sweeps: drive page globals + scrape grid (see scratchpad/*.json for outputs)
 ```
+
+## F. What SHIPPED (parity achieved — on `dev`)
+
+Verified with the grid-parity differential harness (`scripts/diff-grid-parity.js`, 48 sink toolbar combos,
+411 family comparisons, client rendered grid = ground truth):
+
+| Dimension | Result |
+|---|---|
+| **FACE** (which variant renders per card) | **0 mismatches** ✅ |
+| **GREY** (available vs disabled per card) | **0 mismatches** ✅ |
+| **MEMBERSHIP** (which families render) | 9 combos differ (1 family, see §G) |
+
+Backend fixes landed on `dev` (all data-driven, no hardcoded hides):
+- **Depth grey-not-hide** — depth routes through the `availableFromCaps` grey gate (`?grey=true` skips the
+  `depthClass` hard-filter, returns-and-greys); native face kept, greyed. `depthMm:1` face tiebreak so the
+  base unit wins the face (not a 68 sibling).
+- **Face default HEIGHT** — `faceHeightClass` + `_faceHeightRank` keep the family's default-line face when a
+  width filter removes the exact default-face unit (H=ALL default face 80, not lowest 73).
+- **Face default VARIANT (Ty)** — `variantCore`/`faceVariantCore` + `_faceVariantRank` keep the family's
+  default variant across heights (XTR_Z default `TSP6080ZW` → at H73 shows `TSP6073ZW`, not `TSP6073ZBS`).
+- **Per-pill target caps** — `resolveRefs` + list `?refs=true` project `capabilities` onto pill targets so
+  per-pill greying uses `availableFromCaps(targetCaps, toolbar)`, not the parent's caps.
+- **Height + Width `showUnderLine`** — per-family per-pill line-collapse data (extracted from the app),
+  backfilled; UI narrows W/H rows to the active line (H86↔73 pairing preserved). Settable via admin.
+- Extractor `nativeTier` guard (P/A/C only, was leaking family-id); emits `showUnderLine` for W+H.
+
+Backfills applied to D4K-dev: `backfill-face-height-class.js`, `backfill-face-variant-core.js`,
+`backfill-show-under-line.js`, `backfill-show-under-line-wh.js`.
+
+## G. REMAINING WORK — family-level membership (SNK8-type, deferred)
+
+**Symptom (client complaint "same filters showing different items"):** 9 toolbar combos, **all 1 family
+(`SNK8`), all at H86** (W60/80/120 × D58/63/68) — client shows the family, our API hides it.
+
+**Root cause (isolated):** the client's `selectedUnit` **pool logic** is family-level, ours is unit-level.
+- Client: a family renders if it has a unit matching **each selected dimension INDEPENDENTLY** (a W60 unit
+  in one variant AND an H86 unit in another). The face is the family's **default variant shown at its own
+  width**, ignoring the toolbar width when that variant lacks it.
+  - SNK8 @ W60/H86: face variant `…BTZW` ("40 cm blender") only exists at **W90/100**, so the client shows
+    `TSPQ9086BTZW` (W900, h86, LIVE) and its width row reads `90,100` — the W60 filter is ignored for it.
+- Ours: `buildItemFilter` matches `widthMm`/`heightClass` at the **unit** level → SNK8 needs one unit at
+  600×86 (none) → hidden.
+
+**Why NOT fixed yet (risk):** matching it needs (1) family-level W/H/D membership and (2) a
+**width-preferring face** (default variant at the selected width if it exists, else the variant's native
+width). Removing the unit-level width filter risks regressing the **width-respecting** face that is correct
+for most families (SNK1 @ W45 → `TSP4580`, W45; must NOT become the W60 default). The grid-parity harness
+only covers sinks (48 combos), so a broad change could regress Tall/Wall undetected.
+
+**Proposed fix (when prioritised):**
+1. `buildItemFilter` grey mode: drop unit-level W/H/D `$match`; add a post-`$group` `$match` requiring the
+   family to have ≥1 unit per selected dim independently (`hasWidth`/`hasHeight`/`hasDepth` booleans).
+2. Face sort: prefer `variantCore == faceVariantCore`, then `widthMm == selectedWidth` (if present in that
+   variant), then the existing `_faceHeightRank`/`_faceVariantRank`/`depthMm` chain.
+3. Re-run `diff-grid-parity.js` (FACE + GREY must stay 0, MEMBERSHIP → 0) AND spot-check Tall/Wall leaves
+   for face regressions before merging.
+
+**Recommendation:** confirm SNK8/H86 is an actual client-reported case before the broad rework — it is 1
+family / 9 combos against a whole-catalog regression surface. FACE + GREY (the core complaints) are 100%.
