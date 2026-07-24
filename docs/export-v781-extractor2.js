@@ -781,21 +781,31 @@ H.buildShowUnderLine=async function(){
   if(!window.CODE2FAM){ window.CODE2FAM={}; FAMS.forEach(ff=>{ if(ff.hid) return; (ff.units||[]).forEach(x=>{ if(!window.CODE2FAM[x.c]) window.CODE2FAM[x.c]=ff; }); }); }
   const tick=ms=>new Promise(r=>setTimeout(r,ms||200));
   const clickLine=txt=>{ const b=[...document.querySelectorAll('button')].filter(x=>x.textContent.trim()===txt&&x.onclick).find(x=>{const s=[...x.parentElement.children].map(y=>y.textContent.trim());return s.includes('73')&&s.includes('80')&&s.includes('86');}); if(b)b.click(); return !!b; };
-  const hLabels=card=>{ const g=[...card.querySelectorAll('.wchips')].find(x=>{const l=x.querySelector('.dlbl');return l&&l.textContent.trim()==='H';}); return g?[...g.querySelectorAll('button.wchip')].map(b=>b.textContent.trim()).filter(t=>/^(73|80|86)$/.test(t)):[]; };
+  const rowLabels=(card,dlbl,re)=>{ const g=[...card.querySelectorAll('.wchips')].find(x=>{const l=x.querySelector('.dlbl');return l&&l.textContent.trim()===dlbl;}); return g?[...g.querySelectorAll('button.wchip')].map(b=>b.textContent.trim()).filter(t=>re.test(t)):[]; };
   const save={task:state.task,tsub:state.tsub,cat:state.cat,sub:state.sub,line:state.line,prog:state.prog,per:state.per};
   state.per=99999;
-  const acc={};   // famId -> { label -> Set(lines) }
+  const acc={};   // famId -> { W:{label->Set(lines)}, H:{label->Set(lines)} }
   for(const g of TASKS.filter(t=>t.zone==='Base')){
     try{ setTask(g.k); }catch(e){ continue; } await tick(180);
-    for(const L of ['73','80','86']){ clickLine(L); await tick(210);
+    for(const L of ['73','80','86']){ clickLine(L); await tick(210); const Ln=Number(L);
       document.querySelectorAll('.card').forEach(c=>{
         const code=((c.querySelector('.icode,.code')||{}).textContent||'').trim();
         const cf=window.CODE2FAM[code]; if(!cf) return; const fid=cf.id;
-        hLabels(c).forEach(lab=>{ const m=acc[fid]=acc[fid]||{}; (m[lab]=m[lab]||new Set()).add(Number(L)); });
+        const e=acc[fid]=acc[fid]||{W:{},H:{}};
+        rowLabels(c,'W',/^\d+$/).forEach(lab=>{ (e.W[lab]=e.W[lab]||new Set()).add(Ln); });
+        rowLabels(c,'H',/^(73|80|86)$/).forEach(lab=>{ (e.H[lab]=e.H[lab]||new Set()).add(Ln); });
       });
     }
   }
-  Object.keys(acc).forEach(fid=>{ out[fid]={}; Object.keys(acc[fid]).forEach(lab=>{ out[fid][lab]=[...acc[fid][lab]].sort((a,b)=>a-b); }); });
+  // serialize; keep a dim ONLY where some label collapses (shows under fewer lines than the family total)
+  Object.keys(acc).forEach(fid=>{ const e=acc[fid]; const o={};
+    [['W','width'],['H','height']].forEach(([k,field])=>{ const m=e[k]; const labs=Object.keys(m); if(!labs.length) return;
+      const allLines=new Set(); labs.forEach(l=>m[l].forEach(x=>allLines.add(x))); const n=allLines.size;
+      const dd={}; let varies=false; labs.forEach(l=>{ const arr=[...m[l]].sort((a,b)=>a-b); dd[l]=arr; if(arr.length<n) varies=true; });
+      if(varies) o[field]=dd;
+    });
+    if(Object.keys(o).length) out[fid]=o;
+  });
   Object.assign(state,save);
   return out;
 };
@@ -846,11 +856,12 @@ H.finalize=function(){
   const FORD={'_':0,P:1,A:2,C:3};
   all.forEach(it=>{ const fc=faceOf[it.familyId+'|'+it.sku]; if(fc&&fc.length) it.faceForTiers=fc.slice().sort((a,b)=>FORD[a]-FORD[b]); });
 
-  // U1 — stamp per-pill `showUnderLine` onto BASE carcase-line height pills from H.buildShowUnderLine()
-  // (run it before finalize). label "H73" → line 73 → the toolbar lines that pill renders under.
+  // U1 — stamp per-pill `showUnderLine` onto BASE width + height pills from H.buildShowUnderLine()
+  // (run it before finalize). H label "H73"→line 73; W label is the raw width. Depth doesn't collapse.
   const SUL=H.sul||{};
-  all.forEach(it=>{ const h=it.parameters&&it.parameters.height; const m=SUL[it.familyId]; if(!h||!m) return;
-    h.forEach(p=>{ const lab=String(p.label||'').replace(/^H/,''); if(m[lab]) p.showUnderLine=m[lab]; }); });
+  all.forEach(it=>{ const m=SUL[it.familyId]; const P=it.parameters; if(!m||!P) return;
+    ['width','height'].forEach(dim=>{ const dm=m[dim], pills=P[dim]; if(!dm||!pills) return;
+      pills.forEach(p=>{ const lab=dim==='height'?String(p.label||'').replace(/^H/,''):String(p.label||''); if(dm[lab]) p.showUnderLine=dm[lab]; }); }); });
 
   const cabinets=all.filter(i=>i.kind==='cabinet').length;
   const cats=H.buildCategories(); const progs=H.buildProgrammes();
