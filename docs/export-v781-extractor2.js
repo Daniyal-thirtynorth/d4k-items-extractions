@@ -596,6 +596,19 @@ function buildItem(f,u,recovered){
   it.subcategory=(typeof subDisp==='function'?subDisp(f):f.sub);
   if(f.sec) it.section=f.sec;
   it.active=true;
+  // Catalog ORDER + curated SECTION order — drive the grid/section sort and the single-card
+  // header-merge in GET items/by-section (see api-ui-map §2b). `catalogRank`=family `pri`
+  // (nullable), `familyIndex`=FAMS position (stable tiebreak for equal/null pri), `sectionRank`
+  // =index of `f.sec` in the app's SECTION_ORDER[sub] (999 = no curated order → pri fallback).
+  try{
+    if(!buildItem._fi){ buildItem._fi=new Map(); FAMS.forEach((x,i)=>buildItem._fi.set(x.id,i)); }
+    it.catalogRank = (f.pri==null?null:f.pri);
+    it.familyIndex = buildItem._fi.has(f.id)?buildItem._fi.get(f.id):null;
+    const _sok=(typeof secOrderKey==='function')?secOrderKey(f.sub):f.sub;
+    const _so=(typeof SECTION_ORDER!=='undefined'&&(SECTION_ORDER[_sok]||SECTION_ORDER[f.sub]))||[];
+    const _r=_so.indexOf(f.sec);
+    it.sectionRank = _r<0?999:_r;
+  }catch(e){}
   // amber sub-label = family vsub[vr] (hidden when a special display name exists)
   try{ if(!u.sd && f.vsub && f.vsub[u.vr]) it.nameQualifier=f.vsub[u.vr]; }catch(e){}
 

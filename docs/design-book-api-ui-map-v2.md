@@ -249,6 +249,38 @@ Cards are **families** (same collapse as `groupBy=family`). Accepts **every** `G
 > `section` on scroll. **Send `programs`** here so the backend greys the PROGRAMME half of each card's
 > pills (§2c) — this is the endpoint the grid actually calls.
 
+### ⭐ Section ORDER + the single-card header-suppression rule (2026-07-27, audit §J)
+
+The response now reproduces the app's `renderGrid` bucketing **exactly** — two rules the old endpoint
+(alphabetical `section`, one header per section) got wrong:
+
+1. **Sections are in CATALOG order, not alphabetical.** Cards sort by family `pri` (denormalized
+   `catalogRank`, nulls last, tiebreak on FAMS position `familyIndex`); section buckets then order by
+   the app's curated `SECTION_ORDER[sub]` (denormalized `sectionRank`, `999` = no curated order →
+   pri/first-seen fallback). E.g. Sinks: **Sink Units → …with Drawers → …with Trash Pullout → Instant
+   Hot Sink Units → Sink without drill fronts** (not the alphabetical order, which floated "without
+   drill" to 2nd because SNK1_ZV shares `pri` 1 with SNK1).
+2. **A lone card in a non-FORCE_SEC section gets NO header and FLOWS INTO the previous section.** The
+   app emits a header only when a bucket has ≥2 cards OR the section is in `FORCE_SEC` (a fixed 111-name
+   set ported verbatim). So when a filter leaves a section with a single surviving family, that card
+   renders under the PREVIOUS section's header. This is why **W50 Sink Cabinets shows 5 cards under
+   "Sink Units with Trash Pullout"** — the sole "Instant Hot Sink Units" survivor `TSPQ9073BTZW` has no
+   header of its own and joins the Trash-Pullout run. The endpoint already returns this merged (the lone
+   card is appended to the prior `sections[]` entry, its `count` bumped); a lone LEADING card with no
+   prior section comes back as `section: ""`.
+
+Client rule (React app): **render `sections[]` in the given order and DON'T re-sort or re-bucket** —
+the merge + order are already the app's. `card.section` still names the card's true section (only the
+GROUPING header was suppressed). Bucketing runs per PAGE, so at a page edge a lone card may arrive
+headerless (`section:""`) and gain a header on the next page — merge by `section` on infinite scroll as
+before. Denormalized fields `catalogRank`/`familyIndex`/`sectionRank` are now **in the export**
+(`export-v781-fresh.json` + `.gz`) AND emitted by the extractor's `buildItem` (from `f.pri` / FAMS
+index / `SECTION_ORDER[sub]`), so a re-ingest carries them — **no post-ingest re-backfill needed** (the
+`backfill-catalog-rank.js` + `backfill-section-rank.js` scripts remain for topping up a DB ingested from
+an older export). D4K-dev **and D4K-prd** both hold them (18,366 items each). `SECTION_ORDER` itself is
+deferred as a per-item rank, not a stored map; catalog `pri` order matches it for all pri-fallback subs
+verified so far.
+
 ---
 
 ## 2c. ⭐ Pill state — the CAPABILITIES gate model (replaces v1 §2c–§2e)
@@ -690,6 +722,17 @@ Clicking "73" on the LINE bar does exactly three things:
    H → `[73]`, W loses 55 (a line-80-only width).
 3. **Changes membership NOT AT ALL.** Same families, same sections, same counts.
 
+**⚠️ THE STALE-HIGHLIGHT TRAP (2026-07-27).** A screenshot appeared to show v781 at `W45 + H73 + D58`
+rendering `TSP4580*` default-line faces with FULL H rows — impossible per the rules above. Root cause:
+**v781's `#lineSeg` chip highlight does not re-sync from `state.line` on render** — the highlight is set
+only inside the seg's own click handler, and the tall selector's LINE row drives the *same*
+`state.line` without updating the Base seg (and vice versa). So a "73" chip can stay lit while
+`state.line` is actually `'ALL'`, and the screenshot's grid was byte-for-byte v781's **W45 + H-All**
+grid (`TSP4580/…Z/…B/…BZ`, H row `[73, 80*, 86]` with line underlines, W row incl. 55 — reproduced
+exactly, stale highlight included). When line 73 genuinely applies, v781 gives `TSP4573` + H `[73]`
+in EVERY state (verified live: both click orders, filters-before-leaf, `lineGrey` on/off). **When
+comparing screenshots against the app, trust the CARDS (face sku + row shape), not the toolbar chip.**
+
 **What the UI must therefore do with its H bar** (do NOT send `heightClass` to the server for the grid —
 that hard-filters membership AND collapses the face to the LOWEST width, `TSP4573` instead of `TSP6073`):
 
@@ -741,6 +784,43 @@ d68 targets ARE the app's detail behaviour there.
 
 Verified: `TSPA8073TZW` @H-pick 73 renders `H:[73*] W:[80*,90] Ty:[TZW*,TZ,TZBS]`; Ty `TZ` →
 `TSPA9073TZ` (w90, native depth), `TSPQ9073BTZW` Ty `BTZ` → `TSPQ10073BTZ` — matching the app.
+
+---
+
+### 2c-9. ⭐⭐ W filter is FAMILY-LEVEL; the face prefers the width INSIDE the default face's tier pool
+
+*(2026-07-27, audit §I — client report "W50 + Sink Cabinets shows different cards than the app".)*
+
+Two facts about the app's W pill (`unitsInWidth` + `_selUnit`), now ported into `groupBy=family` /
+`by-section`:
+
+1. **Membership is family-level, tier/height-blind.** A family stays in the grid if ANY unit —
+   any tier, any height, including stored Contino/Avance siblings — matches the W pill. SNK3 has
+   W50 only as `CTSP5073Z2` (a stored C article): the family still SHOWS at W50.
+2. **The face never leaves the default face's TIER POOL for a width match.** The app's `ppool`
+   restricts the face to the default programme line; a W match outside it loses to the default-width
+   face. So SNK3 @W50 faces **`TSP6080Z2` (W60!)** — the W50-matching C article never faces. But
+   `XSPL_ARWF` @W90 faces `ARWF9066` (['A']) because its default face `ARWF6066` is `['P','A']` —
+   the pool is **the flagged `faceForTiers` unit's own `availableTiers`**, not a hardcoded 'P'
+   (C-only / A-only families keep their width preference).
+
+Backend implementation (`familyGroupStages`): `widthMm` is LIFTED out of `$match` into ranks —
+`_famFaceTiers` ($setWindowFields per family = the `faceForTiers`-flagged unit's tiers, computed
+**before** any heightClass post-match so a flagged face at another height still defines the pool),
+`_widthRank` (0 = W match ∩ pool ≠ ∅ — sorts **before** `_faceRank`, so an in-pool width match beats
+the stored default face), `_wHits` post-group membership (`> 0`, skipped for `familyId`-scoped
+swap queries: membership implied, width is a wish — SNK4's H73 swap must return `TSP6073BZ2` even
+though its only W50 units are C@86). **W buckets** also ported (`width_groups`): the 60 chip matches
+610/650 mm, 76→750, 80→820, 90→910/920 (`WIDTH_BUCKETS` in the service).
+
+Client rule (React app): nothing new — keep sending `widthMm` on grid lists and swap queries; the
+server now returns app-identical families AND faces. Do NOT client-filter cards by
+`card.widthMm === W`: a card whose face width ≠ the W pill is CORRECT (the app does the same).
+
+Verified vs v781 (24-combo sweep, W∈{ALL,45,50,60,90,100} × line∈{ALL,73,80,86}, whole catalog,
+12,240 face comparisons): mismatches 937 → **883** (60 fixed — every client-reported sink case —
+6 moved *within* the already-defective GF-housing tall families §H residue), family membership
+byte-identical to before the change, Sink Cabinets leaf **14/14 faces exact** in every tested state.
 
 ---
 

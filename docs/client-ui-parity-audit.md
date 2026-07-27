@@ -357,3 +357,101 @@ filter + per-card pre-select re-face + `showUnderLine` row collapse. All three n
   `backfill-show-under-line-all0.js` (7,723 docs: two-system talls stamped `[0,80]`/`[73,86]`, all
   pre-existing arrays get `0` prepended); extractor drives 'All' + Tall groups. Verified: `HP20190` H row
   at All = `154/190/204/217/250`, at 73 = `153/197/210/224` (app-exact); Base rows unchanged.
+
+### §H-2. THE STALE-HIGHLIGHT TRAP — a "W45 + H73" screenshot that was really W45 + H-All (2026-07-27, later same day)
+
+Screenshot #3 appeared to show v781 at **Sink Cabinets + W45 + H73 + D58** rendering `TSP4580/…Z/…B/…BZ`
+(default-line h80 faces, H row FULL `[73, 80*, 86]` with line underlines, W row incl. 55) while our UI
+showed `TSP4573*` + collapsed `[73]` rows. First hypothesis ("width beats line", briefly shipped) was
+WRONG and is reverted.
+
+**Real cause — v781 seg-highlight desync.** Verified live:
+- v781 with line 73 genuinely applied gives `TSP4573` + H `[73]` in EVERY state — real clicks, both
+  click orders, filters-set-before-leaf, `lineGrey` on/off, `_selUnit`/`hvals` sims. No state produces
+  the screenshot with `state.line='73'` (face h=80 requires line ALL; full H row requires
+  `lineHFilterB` pass-through = line ALL).
+- v781 at **W45 + H-All + D58** reproduces the screenshot EXACTLY — same 4 faces in the same order,
+  same rows, same "6 types" — **including the stale lit "73" chip**: `#lineSeg` button classes are set
+  only in the seg's own click handler and are never re-synced from `state.line` on render, and the tall
+  selector's LINE row drives the same `state.line` without touching the Base seg. Set `state.line`
+  programmatically (or via the other control) and the old highlight stays.
+
+**Outcome: our UI was already correct** (it matches v781 for W45+H73 → `TSP4573*` collapsed, and for
+W45+H-All → `TSP4580*` full rows). The temporary width-beats-line change in `design-book-ui.html`
+(`applyHeightPreselect` skip + `visibleByLine` fallback on `F.widthMm`) is **reverted**. Lesson for all
+future screenshot comparisons: **trust the cards (face sku + row shape), never the toolbar chip
+highlight** — v781's chip can lie.
+
+### §I. W FILTER = FAMILY MEMBERSHIP + TIER-POOL FACE — the "W50 Sink Cabinets" report (2026-07-27, evening)
+
+Client report: Sink Cabinets + W50 + H73 + D58 — our grid showed different cards than the app
+(screenshots: app cards `TSP6073BZ2`-type with W rows starting at 60; ours showed `CTSP50*` C-article
+faces at the "right" width). Driven live against v781:
+
+- **Membership was NEVER the gap** — both sides showed the same 14 families. v781's `unitsInWidth`
+  counts ALL units (any tier/height): SNK3 passes W50 via its stored Contino sibling `CTSP5073Z2`.
+- **The FACE was the gap.** v781's `_selUnit` picks the face from `ppool` — the default programme
+  line — and falls back to the default width when the pool has no W match at the picked height:
+  SNK3 @W50+line73 faces `TSP6073Z2` (W60, P), never the W50 C article. Our pipeline hard-filtered
+  `widthMm` and face-ranked the surviving (all-C) units → `CTSP5073Z2` ✗.
+
+**Fix (backend `familyGroupStages`, D4K-dev):** lift `widthMm` from `$match` into ranks —
+`_famFaceTiers` (window: the `faceForTiers`-flagged unit's `availableTiers`, computed BEFORE the
+heightClass post-match so a flagged face at another height still defines the pool), `_widthRank`
+(W match ∩ face-tier-pool, sorted before `_faceRank`), `_wHits > 0` post-group membership (skipped
+when `familyId`-scoped: swaps treat width as a wish — SNK4 H73 swap → `TSP6073BZ2` though its W50
+units are C@86 only). Plus `WIDTH_BUCKETS` (app `width_groups`: 60→610/650, 76→750, 80→820,
+90→910/920) and a `$ifNull` so missing `widthMm` still counts as a null match (agg `$in` doesn't
+equate missing with null; the old query-side `$in` did).
+
+**Dead ends kept for the record:** (1) global "pool = P" broke A/C-only families (F1304 `CT45*`,
+F970 `AH45*`, SNK9) — the app's `_hasP` fallback pools ALL units there; (2) window AFTER the
+heightClass match erased the pool on swaps (XTR_Z2 H73+W50 → wrongly `CTSP5073Z2W`). The pool is
+per-family = the FLAGGED FACE's own tier set, computed pre-height-filter.
+
+**Verification (24-combo × whole-catalog sweep, 12,240 face comparisons vs v781 `visibleBlocks`):**
+faces 937 → **883** (fixed 60 — all client-visible sink/K cases; broke 6, all inside the GF-housing
+tall families already wrong at baseline §H residue); **membership deltas 0**; Sink Cabinets leaf
+14/14 exact at W50/W50+H73/W45+H73/W60/defaults. Residual 883 = pre-existing tall/appliance-housing
+face-data defects (baseline-wrong at ALL|ALL too) + unmodeled `nowf`/hidden-family membership — not
+touched by this change. Map §2c-9 has the contract + client rule.
+
+### §J. SECTION ORDER + single-card header-suppression — "W50 Trash Pullout shows 4 vs client 5" (2026-07-27, late evening)
+
+Client report: Sink Cabinets + W50 + H73 + D58 — under "Sink Units with Trash Pullout" the app shows 5
+cards, ours 4. The 5th = `TSPQ9073BTZW` (family SNK8, "Instant Hot Sink Blender — 40 cm door").
+
+Driven against v781: SNK8's `sec` is literally **"Instant Hot Sink Units"** (static family field) — so
+this is NOT a data error (both sides agree SNK8 is Instant-Hot). It's the app's SECTION RENDER rule in
+`renderGrid`, which ours didn't port:
+
+- Bucket the (pri-sorted) blocks by `sec`; **emit a header only when the bucket has ≥2 cards OR the sec
+  is in `FORCE_SEC`** (a fixed 111-name set). A single-card non-forced section gets NO header and its
+  card flows into the previous section's run. At W50 the ONLY Instant-Hot family with a W50 unit is SNK8
+  (SNK5/6/7 W80, ADD W100 drop) → "Instant Hot Sink Units" bucket = 1 card → header suppressed → SNK8
+  renders as the 5th card under "Sink Units with Trash Pullout".
+- Section order = **`SECTION_ORDER[sub]`** (curated), else catalog `pri` first-seen — NOT alphabetical.
+  Our old by-section sorted `section` alphabetically, which also floated "Sink without drill fronts" to
+  2nd (SNK1_ZV shares pri 1 with SNK1).
+
+**Fix (backend, D4K-dev, all data-driven):**
+- Backfilled 3 denormalized fields (backfill-only, like `faceHeightClass`; re-run after ingest):
+  `catalogRank` (family `pri`, nulls→999), `familyIndex` (FAMS position tiebreak),
+  `sectionRank` (index in the app's `SECTION_ORDER[sub]`, 999 = pri fallback). Scripts:
+  `backfill-catalog-rank.js`, `backfill-section-rank.js`.
+- `familyGroupStages`/`listItemFamilies`/`listItemsBySection` sort by `(catalogRank, familyIndex, sku)`.
+- New `bucketSections()` ports `renderGrid` verbatim: bucket by `section`, order buckets by
+  `(sectionRank, first-seen)`, emit a header only for `len≥2 || FORCE_SEC.has(sec)`, else append the
+  lone card to the previous emitted section (headerless leading group → `section:""`). `FORCE_SEC`
+  ported as a 111-entry constant.
+
+**Verification (app `visibleBlocks`/`.sechead` vs our by-section):**
+- Sink Cabinets W50: section order + card order + the 5-under-Trash-Pullout merge **byte-exact** (lite
+  UI, after per-card H73 pre-select: `Sink Units[4] · with Drawers[3] · with Trash Pullout[5 incl.
+  TSPQ9073BTZW] · without drill[2]`).
+- Cross-leaf spot check: Cooktop Units headers+cards 8/8, Sinks & Faucets 27/27 — identical.
+- Face parity sweep unchanged (883, no regression — the sort/bucket change doesn't touch face selection).
+
+Deferred: `SECTION_ORDER` is modeled as a per-family `sectionRank` (not a stored sub→order map); this
+matches every pri-fallback + single-sub view tested. A multi-sub leaf whose app order differs from
+min-sectionRank would need the full map + `secOrderKey`/`disp` logic — add if one is ever reported.
