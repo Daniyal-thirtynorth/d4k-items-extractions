@@ -142,7 +142,8 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `tier` | IN | **FRONTS pill** (P·P1·A·C·C1) | Top toolbar — "FRONTS" pill group | `…/items?tier=P1` |
 | `opening` | IN | **OPENING toggle** (P1 \| C1). AND-composes with `tier`/`family` | Top toolbar — "OPENING" pill | `…/items?opening=P1` |
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row | `…/items?widthMm=600` |
-| `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`) | Grid filter bar — H row | `…/items?heightClass=80` |
+| `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`). ⚠️ **Do NOT use as the grid's toolbar-H filter** — the app's "H All 73 80 86" bar is its LINE selector: pre-select + row collapse, never a hard filter (§2c-7). Valid as a precise API filter (e.g. inside a family swap query, §2c-8) | Grid filter bar — H row | `…/items?familyId=SNK5&heightClass=73` |
+| `variantCore` | IN | **Variant identity** (denormalized, e.g. `TSPATZW`) — resolve a family sibling of a specific Ty/option variant: `familyId + variantCore (+ heightClass/widthMm)`. The grid's option-pill navigation route (§2c-8) | (internal — pill navigation) | `…/items?familyId=SNK5&variantCore=TSPATZ&heightClass=73&groupBy=family` |
 | `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68). Ports the app's `depthOk`: matches when the class is in the unit's **`capabilities.depthClasses`** (however the catalog expresses depth — see §2c-2), or the unit has no carcass depth at all (empty/absent → rides every class). **58 and 63 are pass-through** (the app short-circuits them). Carcass = class×10−20. | Grid filter bar — D row | `…/items?depthClass=68` |
 | `depthMm` / `heightMm` | IN | Exact carcass depth / height (mm) — precise, **not** the grid class rows | (precise filter) | `…/items?depthMm=560` |
 | `line` / `tallHeight` | IN | **TALL** two-row height selector (carcase LINE 73/80/86 + dynamic HEIGHT cm). TALL only. Options from `GET tall-heights` (§6b) | Tall toolbar — top + second pill rows | `…/items?zone=Tall&line=80&tallHeight=204` |
@@ -151,7 +152,7 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `groupBy=family` | IN | **Grid card grouping** — one card per family ("N types"); pages by family | Grid — the card grid itself | `…/items?leafId=b_cool%230&groupBy=family` |
 | `full` | IN | Include the detail-only blobs (§3) that `LIST_OMIT` strips | (dev / when the card needs a detail field) | `…/items?q=T6073VE&full=true` |
 | `grey` | IN | **GREY, DON'T HIDE** — skips the `depthClass` HARD-filter so the family's native face returns as a (greyable) card instead of being hidden; the client then greys it via `availableFromCaps` (§2c-6). Depth is the one gate the backend hid rather than greyed; this routes it through the grey path. | Top toolbar — "Grey don't hide" toggle | `…/items?depthClass=68&grey=true` |
-| `refs` | IN | **Pill-target caps map** — attaches a page-level `refs{ sku → {capabilities,…} }` covering every pill's TARGET sku on the returned cards, so the grid can gate pills by the TARGET's caps (not the parent's) without a per-pill detail fetch (§2c). The list analogue of detail `expand=refs`. | (no visible control — enables per-pill greying) | `…/items?leafId=b_water%232&refs=true` |
+| `refs` | IN | **Pill-target caps map** — attaches a page-level `refs{ sku → {capabilities, variantCore, widthMm, heightClass, …} }` covering every pill's TARGET sku on the returned cards, so the grid can gate pills by the TARGET's caps (not the parent's) without a per-pill detail fetch (§2c), and resolve option-pill variant navigation (§2c-8). The list analogue of detail `expand=refs`. | (no visible control — enables per-pill greying + variant navigation) | `…/items?leafId=b_water%232&refs=true` |
 
 > **`availableTiers` precedence** (one filter, most-specific wins): `tier` (FRONTS pill) → `programs[]`
 > (picker) → `family` (tab). The tier gate narrows ONLY design-zone cabinet families (Base/Tall/Wall);
@@ -269,8 +270,11 @@ To resolve a pill the client:
 3. looks up the **TARGET item's `capabilities`** (already on the card / in `refs`) and runs
    `availableFromCaps(caps, toolbar)` → **GREY** if false, else **LIVE**.
 
-On CLICK every row navigates (`GET items/{pill.sku}`) — **except a `depth` pill that points at the item
-itself, which must NOT fetch**. Full handler: **§2c-4**.
+On CLICK, **in the DETAIL drawer** every row navigates (`GET items/{pill.sku}`) — **except a `depth` pill
+that points at the item itself, which must NOT fetch** (full handler: **§2c-4**). ⚠️ **In the GRID the
+W/H/Ty rows must NOT navigate by `pill.sku`** — the stored skus are detail-model (they point at the
+68-depth sibling); resolve through the family instead, and mark SELECTED by label / `variantCore` there —
+**§2c-8**. The toolbar's own "H 73/80/86" bar is a pre-select, not a filter — **§2c-7**.
 
 
 ### 2c-1. ⭐ SELECTED — navigation rows vs DEPTH (state) rows
@@ -634,13 +638,21 @@ it removes them. `parameters.width[].showUnderLine` / `parameters.height[].showU
 
 - **DATA, not a rule** — the mapping is family-dependent (captured from the app, backfilled), so it ships
   on the pill, not as a formula.
-- **H86 stays paired with 73** — 86 is the J-door on the 73 carcase, so `H86.showUnderLine = [73, 86]`;
+- **H86 stays paired with 73** — 86 is the J-door on the 73 carcase, so `H86.showUnderLine = [0, 73, 86]`;
   picking line 73 keeps both 73 and 86.
-- **Absent ⟹ always show** (height-CLASS rows on Tall/Wall/Midway don't collapse — §A #1b). **Depth rows
-  never carry it.** No line selected ⟹ show every pill.
-- **Render:** `visibleByLine(pills)` = `pills.filter(p => !p.showUnderLine || p.showUnderLine.includes(line))`
-  where `line` = the active toolbar line (or the card's `heightClass` when the toolbar has none). Applies to
-  the W and H rows only.
+- **⭐ `0` = the "All / no line" state** (2026-07-27, additive). Needed because **two-system TALL H rows**
+  (146/190/204/217 [80-system] + 153/197/210/224 [73-system] — 97 families: `HP20146…`, `HPEEW9190…`,
+  `GF46204…`, `GFR46217E…`) hide their 73-system pills **even with no line selected** (the app defaults to
+  the 80 system): 80-system pills → `[0, 80]`, 73-system → `[73, 86]`. Base carcase pills are all
+  `[0, …]` (visible at All): `H73 [0,73,86] · H80 [0,80] · H86 [0,86]`. Single-system tall rows never
+  collapse → stay bare.
+- **Absent ⟹ always show.** **Depth rows never carry it.**
+- **Render (one generic line):** `visible = !p.showUnderLine || p.showUnderLine.includes(line ?? 0)`
+  where `line` = the toolbar's 73/80/86 pick — that pick IS the app's LINE selector whichever row it lives
+  in: the tall two-row selector's LINE row **and** the grid toolbar's "H All 73 80 86" bar are the same
+  `state.line` control (§2c-7). Applies to the W and H rows only.
+- Backfill: `D4K-backend/scripts/backfill-show-under-line-all0.js` (applied to D4K-dev — 7,723 docs);
+  extractor `buildShowUnderLine` now drives the 'All' state too and covers Tall groups.
 - **Editable** in admin (per-pill `showUnderLine` column on the width & height pill rows).
 
 ### 2c-6. ⭐ GREY, DON'T HIDE — depth routes through the grey gate (`?grey=true`)
@@ -652,6 +664,83 @@ whole-card rule below). The face stays the NATIVE unit (the `depthMm` ASC tiebre
 D=68 greys the 58 face, it does NOT swap to a 68 sibling. `depthClasses` is unchanged (the gate input); only
 the hide-vs-grey behaviour moves. Tier/width/height greying rides the same whole-card rule once the card is
 returned.
+
+### 2c-7. ⭐⭐ The toolbar "H 73/80/86" bar = the app's LINE selector — PRE-SELECT, never a filter
+
+*(2026-07-27, audit §H. This is why "same section, different SKUs" happened.)*
+
+The app's grid toolbar shows **"H · All 73 80 86"** — but it is **not a height filter, in ANY category**.
+It is the **LINE selector** (`#lineSeg` → `state.line`), one control shown in two places: the grid
+toolbar's "H" bar (Base) and the tall selector's LINE row (Tall) — same state, same behaviour everywhere.
+
+**Scope — the two height controls, don't conflate them:**
+- **LINE (73/80/86)** — never a filter, in Base AND Tall. Pre-select + row collapse only (this section).
+- **The TALL dynamic HEIGHT row** (190/204/217 … — `state.height`, §6b) — **IS a real filter**:
+  family-level membership (`unitsInHeight`: family has SOME unit at that tall height, `tallHC`-snapped)
+  + face pre-select (`_gH`) + a mismatch-warn badge. It only ever offers TALL heights
+  (`availHeights`/`tallHC`; anything else is force-reset to All), so it never applies to Base
+  carcase-line cards — which is why 73/80/86 can't reach it.
+
+Clicking "73" on the LINE bar does exactly three things:
+
+1. **Re-faces every card** to its 73-line sibling (`_selUnit` line pick) — width and depth preserved
+   (`TSP6080 → TSP6073`, `TSPA8080TZW → TSPA8073TZW`). A family with no unit at that line **keeps its
+   default face** — it is neither hidden nor greyed.
+2. **Collapses each card's W/H rows** via `lineHFilterB` — exactly the stored `showUnderLine` data (§2c-5):
+   H → `[73]`, W loses 55 (a line-80-only width).
+3. **Changes membership NOT AT ALL.** Same families, same sections, same counts.
+
+**What the UI must therefore do with its H bar** (do NOT send `heightClass` to the server for the grid —
+that hard-filters membership AND collapses the face to the LOWEST width, `TSP4573` instead of `TSP6073`):
+
+```js
+// on H pick (73/80/86): load the grid UNFILTERED, then per card:
+//   card has an H pill for the pick?  → swap the card via the FAMILY (not the pill sku — §2c-8):
+//        GET items?familyId=<fam>&heightClass=<pick>&widthMm=<card's>&groupBy=family&limit=1
+//        (retry without widthMm — the app switches width when the line exists only elsewhere)
+//   no such pill / no result           → leave the card as-is (app parity: visible, ungreyed)
+// and feed the pick into visibleByLine (§2c-5) so the W/H rows collapse like the app's.
+```
+
+Verified vs the app per-card `pickHeight`: 16/18 sink families exact (the 2: heights that exist only under
+another tier — `XTR_Z2`/`XTR_BZ2` h73 is C/C1-only, the app's pool hides that chip; per-tier pill existence
+is the known deferred gap, audit §C2/§H).
+
+### 2c-8. ⭐⭐⚠️ Grid W/H/Ty pill NAVIGATION — never navigate by `pill.sku`
+
+*(2026-07-27, audit §H. Applies to the GRID CARD pills only — the detail drawer keeps `pill.sku`.)*
+
+The stored `parameters.width/height/options[]` pill skus were captured from the app's **DETAIL panel** —
+and on sibling-depth families (§2c-2 model A, stored 58 + 68 cm units) **the app's own detail chips target
+the 68-depth sibling** (the family lists d68 units first): `TSP6080B`'s detail has `H73 → TSP607368B`,
+`60 → TSP608068B` — **even `H80 → TSP608068B`, not itself**, and `TSPA8073TZW`'s Ty row has
+`TZW → TSPA807368TZW` (its own d68 twin). The app's **GRID** chips (`pickHeight`/`pickHWidth`/variant pick)
+instead re-face **preserving the other dims** (d58 stays d58).
+
+So a grid card that navigates by `pill.sku` reproduces the app's *detail* behaviour in the *grid* — wrong
+codes (`…68…`) and a self pill that never shows selected. The rules:
+
+| Row | Grid click resolves via | Selected pill |
+|---|---|---|
+| **W** | `items?familyId&widthMm=label×10&heightClass=card's&groupBy=family&limit=1` | sku match, else numeric label == card's `widthMm/10` |
+| **H** | `items?familyId&heightClass=label&widthMm=card's&groupBy=family&limit=1` (retry w/o width) | sku match, else numeric label == card's `heightClass` |
+| **Ty / options** | `items?familyId&variantCore=<target's>&heightClass=card's&widthMm=card's&groupBy=family&limit=1` (retry w/o width, then w/o height) | target `variantCore` == card's `variantCore` |
+| **Depth** | unchanged — §2c-4 (state pill vs sibling by `pill.sku`) | by label (§2c-4) |
+| **Programme** | unchanged — `pill.sku` (tier codes, backend-synthesized) | `pill.sku === card.sku` |
+
+The face rank's `depthMm` ASC tiebreak makes the family query land the **native-depth** unit
+(`TSP6073B`, `TSPA9073TZ`) — no depth math in the client. The target's `variantCore` comes from the
+`?refs=true` map (which projects `variantCore`/`widthMm`/`heightClass`, §2's `refs` row). ⚠️ **Keep that
+map covering swapped-in cards:** a card swapped in after page load brings pill targets the page map has
+never seen — without them the variant SELECTED mark and per-pill greying silently stop working
+(`TSP6073ZW`'s ZW pill rendered unselected). So **every swap query itself passes `refs=true` and merges
+the response's `refs` into the page map** (`Object.assign(pageRefs, resp.refs)`); last resort, fetch a
+single missing target (`items?sku=<pill.sku>&limit=1`) and read `variantCore` off it. A skuless option
+pill stays dead (struck `BSZW` etc. — §2c). **The DETAIL drawer keeps navigating by `pill.sku`** — the
+d68 targets ARE the app's detail behaviour there.
+
+Verified: `TSPA8073TZW` @H-pick 73 renders `H:[73*] W:[80*,90] Ty:[TZW*,TZ,TZBS]`; Ty `TZ` →
+`TSPA9073TZ` (w90, native depth), `TSPQ9073BTZW` Ty `BTZ` → `TSPQ10073BTZ` — matching the app.
 
 ---
 
@@ -1016,7 +1105,9 @@ in `item.functionalGroups[]`; filter the grid with `GET items?leafId=` / `?group
 Unchanged from v1. Powers the TALL toolbar's two stacked pill rows (LINE 73/80/86 + dynamic HEIGHT).
 Reproduces the app's `availHeights()` over the visible set (heights DERIVED by snapping `heightMm` to a
 tall height ±8 mm — no export/schema change). Accepts the same context filters as `GET items`; feed the
-picked `line` + `tallHeight` back to `GET items` (§2).
+picked `line` + `tallHeight` back to `GET items` (§2). **Of the two rows, only the HEIGHT row is a real
+filter** (family-level membership, the app's `unitsInHeight`); the LINE row is the pre-select/collapse
+control of §2c-7 — same rule there as on the Base "H" bar.
 
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|

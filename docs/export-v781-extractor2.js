@@ -767,12 +767,15 @@ H.buildFaces=function(){
   return face;
 };
 
-// U1 — per-family `showUnderLine` for BASE carcase-line height pills (73/80/86): the toolbar-LINE
-// values each pill renders under, so the grid H row narrows to the selected line like the client
-// (73→[73], 86→[73,86]). FAMILY-DEPENDENT — the client's `lineHFilterB` alone does NOT reproduce the
-// rendered H row (verified: diverges for ~60% of families), so we DRIVE the browse grid per line and
-// scrape the rendered card H row (the authoritative what-the-user-sees). Base groups only; height-CLASS
-// families (Tall/Wall H47/H190…) don't collapse → no showUnderLine. ASYNC (render is async):
+// U1 — per-family `showUnderLine` for W/H pills: the toolbar-LINE values each pill renders under,
+// so the grid W/H rows narrow to the selected line like the client (73→[73], 86→[73,86]).
+// `0` = the "All / no line" state (map §2c-5): TWO-SYSTEM tall H rows (146/190/204/217 + 153/197/
+// 210/224 — HP20…, HPEEW9…, GF46…) hide their 73-system pills EVEN AT All, so the All state must be
+// captured too (80-system → [0,80], 73-system → [73,86]). FAMILY-DEPENDENT — the client's
+// `lineHFilterB` alone does NOT reproduce the rendered H row (verified: diverges for ~60% of
+// families), so we DRIVE the browse grid per line INCLUDING 'All' and scrape the rendered card rows
+// (the authoritative what-the-user-sees). Base + Tall groups; single-system height-CLASS families
+// never collapse → no showUnderLine emitted (bare = always visible). ASYNC (render is async):
 //   run BEFORE finalize →  await __H.buildShowUnderLine();  __H.finalize();
 // finalize reads H.sul and stamps parameters.height[].showUnderLine. Matches scripts backfill exactly.
 H.buildShowUnderLine=async function(){
@@ -785,15 +788,15 @@ H.buildShowUnderLine=async function(){
   const save={task:state.task,tsub:state.tsub,cat:state.cat,sub:state.sub,line:state.line,prog:state.prog,per:state.per};
   state.per=99999;
   const acc={};   // famId -> { W:{label->Set(lines)}, H:{label->Set(lines)} }
-  for(const g of TASKS.filter(t=>t.zone==='Base')){
+  for(const g of TASKS.filter(t=>t.zone==='Base'||t.zone==='Tall')){
     try{ setTask(g.k); }catch(e){ continue; } await tick(180);
-    for(const L of ['73','80','86']){ clickLine(L); await tick(210); const Ln=Number(L);
+    for(const L of ['All','73','80','86']){ clickLine(L); await tick(210); const Ln=L==='All'?0:Number(L);   // 0 = the All state
       document.querySelectorAll('.card').forEach(c=>{
         const code=((c.querySelector('.icode,.code')||{}).textContent||'').trim();
         const cf=window.CODE2FAM[code]; if(!cf) return; const fid=cf.id;
         const e=acc[fid]=acc[fid]||{W:{},H:{}};
         rowLabels(c,'W',/^\d+$/).forEach(lab=>{ (e.W[lab]=e.W[lab]||new Set()).add(Ln); });
-        rowLabels(c,'H',/^(73|80|86)$/).forEach(lab=>{ (e.H[lab]=e.H[lab]||new Set()).add(Ln); });
+        rowLabels(c,'H',/^\d{2,3}$/).forEach(lab=>{ (e.H[lab]=e.H[lab]||new Set()).add(Ln); });   // carcase 73/80/86 AND tall 146…224
       });
     }
   }

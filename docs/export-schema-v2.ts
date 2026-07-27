@@ -269,9 +269,13 @@ export interface DimPill {
   alteration?: boolean;            // the 63 cm depth-alteration pill
   code?: string;                   // depth rows: the order code at this class (may equal `sku`)
   showUnderLine?: number[];        // WIDTH/HEIGHT rows only: the toolbar carcase-LINE values (73/80/86) this
-                                   // pill renders under. Family-dependent, captured from the app (not a rule):
-                                   // when a Line is picked the row collapses to pills whose showUnderLine
-                                   // includes it (H86 stays paired with 73 — J-door on the 73 carcase).
+                                   // pill renders under, PLUS the value `0` = the "All / no line" state
+                                   // (2026-07-27, additive). Family-dependent, captured from the app (not a
+                                   // rule): the row renders pills whose showUnderLine includes the active
+                                   // line, or 0 when none is picked (H86 stays paired with 73 — J-door on
+                                   // the 73 carcase). `0` matters for TWO-SYSTEM tall H rows (146/190/204/
+                                   // 217 + 153/197/210/224 — HP20…): the app hides the 73-system pills even
+                                   // at All → [0,80] vs [73,86]. Base rows are [0,…] (visible at All).
                                    // Absent ⟹ pill always shows. Depth rows never carry it. See map §2c-5.
 }
 export interface ProgrammePill { tier: ProgrammeTier; sku: string | null; opening?: boolean; }

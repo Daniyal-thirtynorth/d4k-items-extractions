@@ -161,6 +161,39 @@ Current facts:
   is unit-level. Broad/risky fix (could regress the width-respecting face for SNK1-type) — confirm it's
   client-reported before doing it. Backend branch `fix/parity-face-ty-and-membership` merged to `dev`.
   Backfills: `D4K-backend/scripts/backfill-{face-height-class,face-variant-core,show-under-line,show-under-line-wh}.js`.
+- **⭐ GLOBAL HEIGHT ≠ FILTER + W/H pill skus are DETAIL-model (2026-07-27, audit §H).** Client report
+  "same section, different SKUs" (grid showed 6073 faces vs app 6080). Three findings, all fixed UI-only in
+  `design-book-ui.html` (no backend/data change): **(1)** the app has NO global 73/80/86 filter — its Height
+  row is tall-heights-only (`availHeights`/`tallHC`, `renderHeightSel` resets anything else); `state.height`
+  = family membership + face PRE-select (v329 `_gH`) + warn badge. Our `H 73/80/86` bar no longer sends
+  `heightClass`; it per-card pre-selects (`applyHeightPreselect`): membership unchanged, swap to the height
+  sibling where the family has one, else card stays. **(2)** stored `parameters.width/height` pill skus come
+  from the DETAIL panel, where THE APP ITSELF targets the 68-depth sibling (family lists d68 first:
+  `TSP6080B` detail has `H80→TSP608068B`, not self!) while the GRID's `pickHeight`/`pickHWidth` preserve
+  depth — so grid card W/H pills now resolve via `swapCardTo` (`items?familyId&heightClass/widthMm&groupBy=
+  family`; `depthMm` ASC face rank → native d58); detail drawer keeps pill skus (that IS app behaviour).
+  The client React app must do the same — never grid-navigate by W/H `pill.sku`. **(3) CORRECTED same day:**
+  the app's top "H All 73 80 86" bar DOES exist in Base — it is the LINE selector (`#lineSeg`→`state.line`),
+  which re-faces cards AND collapses W/H rows via `lineHFilterB`; so `visibleByLine` DOES feed `F.heightClass`
+  (then `F.line`) into the `showUnderLine` narrowing (H bar = no server filter + pre-select + row collapse).
+  **(4) Ty/option pills — same detail-scrape disease:** targets are d68 codes incl. the SELF variant's own
+  d68 twin (never marked selected). Fix: API `variantCore` query filter + refs project `variantCore/widthMm/
+  heightClass`; UI option picks resolve `familyId+variantCore(target)+dims` via `swapCardTo`; selected =
+  target variantCore == card's (`markVar`), W/H selection falls back to label==own-dim (`markDim`).
+  **Swap queries pass `refs=true` and merge into the page refs map** — swapped-in cards otherwise lose
+  variant selection + pill greying (the `TSP6073ZW` ZW case; map §2c-8 has the React-app rule).
+  **(5) `showUnderLine` `0` = the "All/no-line" state** (additive): two-system tall H rows (97 fams,
+  HP20…/HPEEW9…/GF46…) hide their 73-system pills (153/197/210/224) EVEN AT All — plain per-line lists
+  couldn't express it and 0/97 had data. Render = `includes(line ?? 0)`; two-system pills stamped
+  `[0,80]`/`[73,86]`, all pre-existing arrays got `0` prepended (`backfill-show-under-line-all0.js`,
+  D4K-dev, 7,723 docs); extractor drives 'All'+Tall now. Single-system tall rows never collapse (stay
+  bare). Verified HP20190: All → 80-system set, @73 → 73-system set; Base unchanged. Map §2c-5.
+  **Export JSON synced with the DB** (2026-07-27): `export-v781-fresh.json`(+.gz) now carries ALL
+  showUnderLine data (base W/H + the 0-convention) — it never had the base arrays (DB-backfill-only
+  before), so a re-ingest would have wiped them. Re-ingest is now safe. Verified: Ty TZ → `TSPA9073TZ`, BTZ → `TSPQ10073BTZ`; cards at H73
+  render `H:[73*] Ty:[TZW*,TZ,TZBS]` / `[BSZW†,BTZW*,BTBS,BTZ]` matching the client screenshot.
+  Residual 2/18: heights existing only under another tier (`XTR_Z2/BZ2` h73 = C/C1-only —
+  app's `ppool` hides the chip, we still show/swap it) — the §C2 per-tier pill-existence gap, deferred.
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

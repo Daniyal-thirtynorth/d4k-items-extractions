@@ -280,3 +280,80 @@ only covers sinks (48 combos), so a broad change could regress Tall/Wall undetec
 
 **Recommendation:** confirm SNK8/H86 is an actual client-reported case before the broad rework — it is 1
 family / 9 combos against a whole-catalog regression surface. FACE + GREY (the core complaints) are 100%.
+
+## H. GLOBAL HEIGHT (73/80/86) IS NOT A FILTER — and the W/H pill skus are DETAIL-model (2026-07-27)
+
+Client report: "same section, different SKUs" under Sink Cabinets (our grid showed `TSP6073…` faces where
+the app shows `TSP6080…`). Root-caused by driving the app; **three separate findings**:
+
+1. **The app has NO global carcase-height (73/80/86) filter.** Its toolbar Height row is the TALL
+   selector: `availHeights()` offers only standard tall heights (`tallHC` — 146/190/204/217 @line80,
+   153/197/210/224 @line73) present in the result set; `renderHeightSel` RESETS any other value to All
+   (verified: `state.height=73; render()` → back to `'ALL'`). `state.height` does exactly three things:
+   family-level membership `unitsInHeight` (some unit, tall-canonicalized), face PRE-SELECT in `_selUnit`
+   (v329 `_gH` — only when the pool has that height, else face untouched), and an `hwarn` badge. Our lite
+   UI offered `H 73/80/86` as a server `heightClass` hard-filter — producing grids the app can never render
+   (membership dropped + face fell to the LOWEST width: SNK1 → `TSP4573`, not `TSP6073`).
+   **Fixed (UI-only):** `params()` never sends `heightClass`; the pick is applied as a per-card pre-select
+   (`applyHeightPreselect`): same membership, card swaps to its height sibling where the family has one,
+   stays on its default face otherwise (SNK9 at 86 stays `CTSP6080BSZ`, not hidden). Verified 16/18 exact
+   vs per-card `pickHeight(fid,73)` (the 2: see #3).
+
+2. **Stored W/H pill skus are the DETAIL panel's, which the app itself points at the 68-DEPTH sibling.**
+   Sibling-depth families (§2c-2 model A) list d68 units FIRST, and `openDetail`'s W/H chips resolve
+   through that order: the app's own detail for `TSP6080B` (d58) has `H73→TSP607368B`, `60→TSP608068B` —
+   **even H80 → `TSP608068B`, not self**. The GRID's `pickHeight`/`pickHWidth` instead preserve the other
+   dims (d58). So navigating card pills by stored sku reproduced the app's *detail* behaviour in the *grid*.
+   **Fixed (UI-only):** card W/H pill clicks + the pre-select route through `swapCardTo` — an
+   `items?familyId=…&heightClass/widthMm=…&groupBy=family` query; the face rank's `depthMm` ASC tiebreak
+   lands the native-depth unit (`TSP6073B`). The detail drawer keeps pill-sku navigation (that IS app
+   behaviour there). Verified: card `TSP6080B` → W45 → `TSP4580B` (was `TSP458068B`).
+   ⚠️ The client React app must do the same: never navigate grid W/H pills by `pill.sku` directly —
+   resolve through the family (or the API grows a "grid-target" pill field later).
+
+3. **`visibleByLine` conflation removed:** the H pick was feeding the `showUnderLine` narrowing as if it
+   were a LINE. The app collapses W/H rows ONLY under a selected LINE (`lineHFilterB`: 73→[73], 80→[80],
+   86→[73,86] — our stored `showUnderLine` data matches it exactly); a height pick just moves the
+   selection. Now only `F.line` narrows.
+
+**Residual (2/18, new §G-class entry):** families whose requested height exists only under another
+TIER/variant (`XTR_Z2`/`XTR_BZ2`: h73 units are C/C1-only, so the app's `ppool`-derived H row is [80,86]
+— no 73 chip at base tier; our static pills still show H73 and the pre-select swaps into the C-tier face).
+Needs per-tier pill existence (the §C2 tier-resolution gap). Deferred with SNK8.
+
+### §H CORRECTION + Ty pills (same day, follow-up screenshot)
+
+**Correction to #1:** the app DOES have a top toolbar "H All 73 80 86" bar in Base context — it is the
+**LINE selector** (`#lineSeg` → `state.line`, a STRING). Clicking 73 both **re-faces** every card
+(`_selUnit` lineH) and **collapses** its W/H rows via `lineHFilterB` (SNK1: H → `[73*]`, W loses 55) —
+verified fresh-DOM (the earlier "no collapse" scrape was stale). Membership unchanged. So the earlier
+change disconnecting the H pick from `showUnderLine` narrowing was wrong — **reverted**: `visibleByLine`
+feeds `F.heightClass` (then `F.line`) again. Net model for our H bar = the app's line bar: no server
+filter + per-card pre-select re-face + `showUnderLine` row collapse. All three now shipped together.
+
+**Ty/option pills had the same detail-panel disease as W/H (#2)** — stored targets are the app detail's
+68-depth codes (`TSPA8073TZW`: `TZW→TSPA807368TZW` (its own d68 twin!), `TZ→TSPA907368TZ`), so:
+- clicks landed d68 cards, and the SELF variant never showed selected (sku equality can't match the twin).
+- **Fix (API + UI):** new `QueryItemsDto.variantCore` filter (`buildItemFilter`) + `resolveRefs` projects
+  `variantCore`/`widthMm`/`heightClass` onto refs. UI option-pill picks resolve
+  `familyId + variantCore(target) + heightClass + widthMm` through `swapCardTo` (fallbacks drop width,
+  then height); when the refs map lacks the target (a swapped-in card), the pick fetches the target once
+  for its `variantCore`. Selected = target `variantCore` == card's (`markVar`); W/H rows also
+  label-match selection (`markDim`) since the self pill's sku is the d68 twin.
+- **Verified:** `TSPA8073TZW` card @H73 renders `H:[73*] W:[80*,90] Ty:[TZW*,TZ,TZBS]`,
+  `TSPQ9073BTZW` renders `Ty:[BSZW†,BTZW*,BTBS,BTZ]` (struck BSZW dead) — pixel-matching the client
+  screenshot; Ty TZ → `TSPA9073TZ`, BTZ → `TSPQ10073BTZ` (native depth, correct width switch).
+- **Follow-up (same day):** swapped-in cards weren't covered by the page `refs` map → variant SELECTED
+  mark + per-pill greying silently dropped on them (`TSP6073ZW` Ty ZW unselected vs client). Fix: the
+  swap queries pass `refs=true` and merge the response refs into the page map. Rule for the React app:
+  **whenever a card is replaced from a follow-up query, merge that response's `refs` too** (map §2c-8).
+- **Follow-up 2 — `showUnderLine` completeness audit + the `0` convention (same day).** Question: can the
+  W/H hide rule stay 100% admin data? Measured: Base ✅ (already shipped) · single-system tall rows never
+  collapse (the app's filter would empty the row → falls back to full set; this is what #1b actually
+  observed) · **two-system tall rows (97 families — `HP20146…`, `HPEEW9190…`, `GF46204…`) DO collapse AND
+  hide the 73-system pills even at "All"** — inexpressible under "no line → show all", and NO
+  showUnderLine data existed for them (0/97). Fix, still pure data: `0` = the All state as a valid array
+  value (schema note, additive); render = `includes(line ?? 0)`; backfill
+  `backfill-show-under-line-all0.js` (7,723 docs: two-system talls stamped `[0,80]`/`[73,86]`, all
+  pre-existing arrays get `0` prepended); extractor drives 'All' + Tall groups. Verified: `HP20190` H row
+  at All = `154/190/204/217/250`, at 73 = `153/197/210/224` (app-exact); Base rows unchanged.
