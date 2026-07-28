@@ -19,7 +19,7 @@
  *     artifacts (re-parsed from the still-present <script id="DATA"> JSON).
  *
  * Output top level: { meta, categories, programmes, ruleTables, systems,
- *                     functionalCategories, items }  (meta.schemaVersion '2.4.0').
+ *                     functionalCategories, items }  (meta.schemaVersion '2.5.0').
  * ==========================================================================*/
 (function(){
 const H = window.__H = {};
@@ -630,6 +630,34 @@ function buildItem(f,u,recovered){
   // capabilities — REPLACES the old programmeAvailability
   try{ it.capabilities=computeCapabilities(u,f,CODEIX); }catch(e){ warn('computeCapabilities failed for '+u.c+': '+(e&&e.message)); }
 
+  // GRID-ROW INPUTS (audit §L) — the app draws a card's W/H/D/Ty rows from the FAMILY POOL
+  // (ppool → hvals / wsAtH / dAll / variantOpts), not from the one unit's detail panel that
+  // `parameters.*` is scraped from. These are the pool inputs, read straight off the app.
+  try{
+    it.unitFacts={
+      tier: (u.fam&&/^[PCA]$/.test(u.fam))?u.fam:null,   // dup-synthetic families put a fid in u.fam
+      opening: u.op||null, agnostic: !!u._ag, siblingTiers: u.sib||null,
+      widthCode: u.w!=null?u.w:null, depthCode: u.dv!=null?u.dv:null,
+      variantCode: u.vr!=null?u.vr:null,
+      depthAlterations: (Array.isArray(u.d)&&u.d.length)?u.d.slice():null,   // u.d — the D STATE row
+    };
+    const _rkL=l=>String(l||'').toLowerCase().replace(/·\s*[a-z0-9]{1,5}\s*$/,'').replace(/45°\s*(mitre|miter)\s*/g,'').replace(/·\s*island/g,'').replace(/·\s*special[^·]*/g,'').replace(/special height|special usa[^·]*/g,'').replace(/[^a-z]+/g,' ').trim();
+    it.familyFacts={
+      label: f.label||null, labelGroup: _rkL(f.label), isSpecial: /special/i.test(f.label||''),
+      dim: f.dim||'none', variantLabel: f.vlbl||null, numericLabel: f.slbl||null,
+      variantFormat: f.vfmt||null, variantOrder: f.cho||null,
+      variantLabels: (function(){ const o={}; const xig=f.id&&f.id.startsWith('XIG_')&&f.id.endsWith('_B'); const seen=[];
+        f.units.forEach(x=>{ if(x.vr!=null&&!seen.includes(x.vr)) seen.push(x.vr); });
+        seen.forEach(vv=>{ const l=(f.vmap&&f.vmap[vv])||(typeof veroTypeLabel==='function'?veroTypeLabel(vv):null)||(xig?({D:'L3/M3',DU:'M8'})[vv]:null)||(f.vfmt==='cm'?String(vv).replace(/^[A-Za-z]+/,'')+' cm':null); if(l&&l!==vv)o[vv]=l; });
+        return Object.keys(o).length?o:null; })(),
+      byProgramme: !!f.byprog, hasOpeningArticles: !!f._hasOp, hasPrimo: !!f._hasP, noLine: !!f.noline,
+      memberTiers: f._mem||null,
+      isAccessory: !!(typeof isAccessory==='function'&&isAccessory(f)),
+      isProgrammeAgnostic: !!(typeof isProgAgnostic==='function'&&isProgAgnostic(f)),
+      depth63: (typeof d63Cfg==='function'&&d63Cfg(f))?{mode:d63Cfg(f).mode,force68:!!d63Cfg(f).force68}:null,
+    };
+  }catch(e){ warn('grid facts failed for '+u.c+': '+(e&&e.message)); }
+
   // raw structured blocks
   const desc=descOf(f,u); if(desc) it.description=desc;
   const rs=restrictionsOf(u); if(rs) it.restrictions=rs;
@@ -893,7 +921,7 @@ H.finalize=function(){
     meta:{
       generated:new Date().toISOString(),
       source:'leicht_units v781 (headless DOM extraction via openDetail)',
-      schemaVersion:'2.4.0',
+      schemaVersion:'2.5.0',
       imageUrlTemplate:IMGT,
       counts:{ items:all.length, cabinets, accessories:all.length-cabinets, categories:cats.length, programmes:progs.length, recovered:recoveredSkus.length },
       recoveredArtifactSkus:recoveredSkus,   // app-suppressed "not-in-pricelist" units re-included by the coverage fix

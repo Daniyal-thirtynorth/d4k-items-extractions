@@ -516,3 +516,100 @@ still relax the width first. Verified: `T3027Z` + W50 → `T5027Z` (H row `27*`)
 **Residual (not part of the report, unchanged):** the Ty row on these cards renders unavailable variants
 as dead-grey where v781 strikes them through (`7Z`/`7ZH`/`8Z`/`8ZH`), and a swapped-in tall card can mark
 two Ty pills selected (`markVar` + `selMark` both firing). Cosmetic; no data change needed.
+
+---
+
+### §L. FULL CATEGORY SWEEP — Base · Tall · Wall · Midway, every toolbar state (2026-07-28)
+
+Previous passes were report-driven (a client screenshot → one family → one fix). This pass is the
+**mechanical version of that loop**: drive BOTH UIs over the same (category × sub-category × toolbar)
+matrix and diff the rendered grids card-for-card, pill-for-pill. Same method as §F's harness, but the
+truth side is now the app's own `renderGrid()` DOM (not a hand-built JSON) and the comparison side is our
+lite UI's DOM (not the raw API) — so it measures what a user actually sees, end to end.
+
+#### Harness (`d4k-items-extraction/scripts/parity/`)
+
+| file | role |
+|---|---|
+| `sink.js` | CORS-open exfil + script server on **8799** (`POST /save?name=`, `GET /js?f=`) — the extension redacts big tool returns |
+| `dump-client.js` | injected into v781: resets `state`/`cardMod`/`cardJump`, applies the combo, calls the app's own `renderGrid()`, scrapes `#grid` |
+| `dump-ours.js` | injected into `/design-book/ui`: resets `F`, applies the combo, `await load()` + settle, scrapes `#grid` |
+| `make-plan.js` | builds the combo matrix (both sides' driver input under one key) |
+| `diff.js` | diffs the two dumps into 9 buckets |
+
+Normalized card shape (identical both sides):
+`{fid, sku, code, grey, rows:[{l, p:[{l, s, o}]}], tiers:[{l,s}]}` — `s`=selected, `o`=off/greyed.
+`fid` = family id (the app's `openDetail` 1st arg / our `item.familyId`), so cards line up even when the
+faces differ. Run: serve v781 on 8777, backend on 8000, `node scripts/parity/sink.js scripts/parity/out`,
+inject both dumpers, `__P.sweep(plan)` / `await __Q.sweep(plan)`, then `node scripts/parity/diff.js`.
+
+**Toolbar mapping** — `depth`↔`depthClass`, `width`(cm)↔`widthMm`, `line`↔`heightClass`+`line`,
+`prog`(key)↔`programs`, `tier`↔`tier`. 16 states per sub-category: `base`, `d48/d63/d68`,
+`line73/80/86`, `w60/w90`, `progP_BOSSA(244)/progA_LAIKA(410)/progC_ROCCA(701)`, `tierC/tierA`,
+`w60_line73`, `progP_d68`.
+
+#### Coverage + result (720 combos: Base 192 · Tall 272 · Wall+Midway 256)
+
+| bucket | Base | Tall | Wall+Mid | total | meaning |
+|---|---|---|---|---|---|
+| `CODE` | 0 | 0 | 0 | **0** | displayed ORDER code — identical everywhere the face agrees ✅ |
+| `ROWSET` | 402 | 285 | 63 | **750** | a card's pill-ROW set differs (580 = a row the app shows and we don't) |
+| `FACE` | 274 | 32 | 76 | **382** | same family, different face sku |
+| `STATE` | 305 | 34 | 20 | **359** | same pills, different selected/greyed flags |
+| `PILLS` | 76 | 220 | 51 | **347** | same row, different pill VALUES (337 of them the H row) |
+| `MEMBER` | 133 | 56 | 93 | **282** | family shown on one side only |
+| `SECT` | 110 | 66 | 92 | **268** | section header list/order differs (mostly downstream of MEMBER) |
+| `ORDER` | 7 | 43 | 20 | **70** | card order inside a section |
+| `GREY_NOT_HIDE` | 34 | 17 | 46 | **97** | *deliberate*: we grey where the app hides (`?grey=true`, §F1) — normalized out |
+
+#### Root causes (ranked; every one reproduced on a named family)
+
+1. **⭐ Grid pill rows are UNIT-scoped for us, FAMILY-POOL-scoped in the app.** Explains ~all of
+   `ROWSET`+`PILLS` and most of `STATE`. Our card rows come from the stored `parameters.*`, which were
+   scraped from ONE unit's DETAIL panel; the app builds the grid rows from `ppool(b)`/`hvals(b)`/`wsAtH`
+   — the whole family, variant-scoped, and "a height greys only if NO type has it". Evidence:
+   `F1715` pool heights = 37/43/50/66, our `parameters.height` = 37/50/66 (43 missing);
+   `F1716_A` pool = one height (80) and the app still renders a 1-pill H row, we render none;
+   `GFVA_B` at line 80 → app H row `[80]`, ours `[73,80,86]` (no `showUnderLine` for that family);
+   Closet talls → ours adds `230/244/250` (real sibling units the app keeps out of the H row).
+2. **Tier chip must RE-FACE the card** (`visibleBlocks` v675: `state.tier` → the family's tier twin,
+   preserving w/hc/vr). We filter but never swap the face: `tierC` → app `CTW58058`, ours `TW58058`.
+   101+79 `FACE` diffs at `tierC`/`tierA`; 42 are pure prefix, the rest also lose the width/variant.
+3. **Line/height pre-select doesn't re-face where the H row is wrong** (a consequence of #1):
+   `line73` → app `TWS7358`, ours stays `TWS8058`; Closet `line73` → app `H60197GAIZ` (W60), ours
+   `H45197GAIZ`. 114 `FACE` diffs across `line73/86` + `w60_line73`.
+4. **Accessories/alterations must NEVER grey** (`isAccessory(b)` → `av` forced true, app v163).
+   188 of 219 `GREY` diffs are ours-only, dominated by `AN*` alteration codes (`ANW5GSM`, `ANRWFU85`,
+   `ANHDTVR3`…) and panel families we grey by `depthClasses` at d48/d68 or by programme.
+   `isAccessory` is a family predicate (label regex + `ACC_SUBS` + `cat==='Alteration'` + `^[AC]?AN`
+   codes) — capture it from the app like `faceForTiers`, don't re-derive.
+5. **Depth 63 = family ELIGIBILITY, not a pass-through** (`d63Eligible(b)` = `d63Cfg(b)!=null`).
+   Our gate treats 63 as "always OK" so nothing filters: Base/Accessories&Surround at d63 → app 0 cards,
+   ours 20; Base/Fillers 0 vs 12. 30 `MEMBER` combos.
+6. **Width membership needs a REAL unit at that width.** The app's `unitsInWidth` matches unit widths
+   only; our `$ifNull` null-match keeps width-less families in (`F354`, `F64`, `ANW5*`… at w60/w90).
+   33 `MEMBER` combos. (The `$ifNull` was added for the §I face pool — keep it there, drop it from the
+   membership test.)
+7. **No per-card LINE row.** The app renders a `Line` row (73/80/86 · `J`/`Y`/`E` suffix chips) on
+   two-system tall cards; we render none — 119 `ROWSET` diffs, all Tall.
+8. **Card order inside a section.** The app sorts `(available desc, pri, accessory last, label-group,
+   special last, maxHeight desc, index)` BEFORE bucketing into sections; we sort
+   `(catalogRank, familyIndex, sku)`. `XHTAF` before `XHTAL`, `F132` before `TABL` (Wine Units). 70 diffs.
+9. **Row LABEL for depth-dimension families.** `b.dim==='depth'` families (`PNL_END`, `PNL_ISL_END`,
+   `XTWSP`) show a **D** row in the app; our stored pills live in `parameters.width` so we print **W**
+   (`WF68K45`: widths 10/36/48/58/68/80/90/100/120 = depths). Data-side (extractor) mislabel.
+10. **Selected-pill grey inheritance** (cosmetic): when a card is greyed the app also marks its SELECTED
+    chip `wn`; we leave it clean (and vice-versa on some programme states) — the tail of `STATE`.
+
+#### Deliberate deviations (NOT bugs, normalized out of the diff)
+
+- `GREY_NOT_HIDE` (97): our `?grey=true` shows the depth-mismatched family greyed where the app hides it
+  (shipped in §F1 on purpose — the app has the same behaviour behind its "Grey don't hide" checkbox).
+- Global H bar = per-card pre-select, no server filter (§H/§2c-7) — membership stays put by design.
+
+#### Status
+
+Harness + measurements committed; **no fixes applied yet** — the fix order is #1/#2/#3 (they carry the
+`FACE`/`PILLS`/`ROWSET` mass and #1 is a contract-level change: grid rows would come from the family pool,
+computed backend-side, instead of the detail-panel `parameters.*`), then the cheap data-driven ones
+(#4/#5/#6), then #7/#8/#9/#10.

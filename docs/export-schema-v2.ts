@@ -33,8 +33,9 @@
  *   meta.imageUrlTemplate.replace("<CODE>", sku)`.
  *
  * ── VERSIONING ──────────────────────────────────────────────────────────────
- *   `meta.schemaVersion` = "2.4.0"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
- *   2.3 DimPill.showUnderLine on width/height pills; 2.4 Item.heightCode — all additive, old readers ignore).
+ *   `meta.schemaVersion` = "2.5.0"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
+ *   2.3 DimPill.showUnderLine on width/height pills; 2.4 Item.heightCode; 2.5 Item.unitFacts + Item.familyFacts
+ *   — all additive, old readers ignore).
  *   The extractor emits this shape directly
  *   (`docs/export-v781-extractor2.js`); ingest AND the CRUD endpoints write it
  *   through one `normalizeItemDoc`, so hand-authored and extracted items match.
@@ -54,7 +55,7 @@ export interface CatalogExport {
 export interface ExportMeta {
   generated: string;               // ISO datetime
   source: string;                  // e.g. "leicht_units v781 (headless DOM extraction via openDetail)"
-  schemaVersion: string;           // "2.4.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode
+  schemaVersion: string;           // "2.5.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode; 2.5 unitFacts + familyFacts
   imageUrlTemplate: string;        // ".../itemData/<CODE>.jpg" — build every image from this + sku
   counts: { items: number; cabinets: number; accessories: number; categories: number; programmes: number };
   recoveredArtifactSkus?: string[]; // codes the app's init deleted as artifacts but which are still real
@@ -120,6 +121,13 @@ export interface Item {
                                     //   exactly those with `capabilities.doorLineY` — that flag is the GATE,
                                     //   this is the code. Never a stored item of its own.
 
+  /* ⭐ 2.5 — GRID-ROW INPUTS. A card's W/H/D/Ty rows come from the FAMILY POOL in the app
+     (`ppool(b)` → `hvals(b)` / `wsAtH` / `dAll` / `variantOpts`), NOT from the one unit's detail
+     panel that `parameters.*` was scraped from. These two objects are those pool inputs, captured
+     from the app; with them a reader rebuilds the app's rows exactly (audit §L). */
+  unitFacts?: UnitFacts;            // per unit — the row VALUES + pool scoping + the Fronts twin rule
+  familyFacts?: FamilyFacts;        // per family, denormalized on each member item
+
   /* configurator pills — thin: label + navigation target only. State is DERIVED. */
   parameters?: Parameters;
   heightExtension?: HeightExtension; // Tall only: the "217+" chip appended to the HEIGHT row.
@@ -173,6 +181,45 @@ export interface Item {
  * backend evaluates only the programme half server-side (see `GET items/:sku?programs=`).
  * Every field is user-settable at creation via the CRUD endpoints.
  */
+/* ═══════════ 2.5 — grid-row inputs (the app's family-pool row builders) ═══════════
+ * The app never asks a unit what its rows are; it asks the FAMILY. `ppool(b)` narrows the family's
+ * units by programme line / opening, `hvals(b)` is the distinct `hc` set of that pool (line-filtered),
+ * `wsAtH` the widths at the selected height, `dAll` the depths, `variantOpts(b)` the Ty chips. Our
+ * `parameters.*` are the DETAIL-panel pills of ONE unit, so they miss heights the current variant
+ * lacks and render rows the app doesn't. Ship both objects and a reader reproduces the grid exactly.
+ */
+export interface UnitFacts {
+  tier: ProgrammeTier | null;      // u.fam — the article's own line (P/C/A). null on line-neutral codes.
+  opening: 'P1' | 'C1' | null;     // u.op — a REAL premium-opening ARTICLE (not the synthesized prefix)
+  agnostic: boolean;               // u._ag — belongs to every line; never removed by a tier filter
+  siblingTiers: string | null;     // u.sib e.g. "PA" — lines this model is shared with. Drives the
+                                   //   Fronts-chip TWIN rule: an article with no twin in the selected
+                                   //   line is line-NEUTRAL (stays), one with a twin filters out.
+  widthCode: number | null;        // u.w  — the W ROW value in cm (≠ widthMm/10 on panels)
+  depthCode: number | null;        // u.dv — the D ROW value in cm (58/68/…)
+  variantCode: string | null;      // u.vr — Ty/variant key; pools are variant-scoped when vlbl is set
+}
+
+export interface FamilyFacts {
+  dim: 'height' | 'width' | 'depth' | 'hd' | 'none';  // b.dim — WHICH numeric row the card renders.
+                                   //   'depth' families show a **D** row built from widthCode values —
+                                   //   labelling them W is wrong (audit §L #9).
+  variantLabel: string | null;     // b.vlbl — the Ty/Mode/Config row's on-screen label
+  numericLabel: string | null;     // b.slbl — override label for the numeric row ("Depth", "Length")
+  variantFormat: string | null;    // b.vfmt — 'cm' → variant labels are lengths, sorted numerically
+  variantOrder: Record<string, number> | null;   // b.cho — curated variant sort
+  byProgramme: boolean;            // b.byprog — pool is scoped by the ZONE programme, not by u.fam
+  hasOpeningArticles: boolean;     // b._hasOp — family holds REAL P1/C1 articles → pool by (opening, line)
+  hasPrimo: boolean;               // b._hasP  — a P article exists (pool fallback when no line is picked)
+  noLine: boolean;                 // b.noline — skip the carcase-line H filter for this family
+  isAccessory: boolean;            // isAccessory(b) — ⭐ accessories/alterations NEVER grey (app v163):
+                                   //   no programme, depth or height gate applies to the CARD.
+  isProgrammeAgnostic: boolean;    // isProgAgnostic(b) — cat/sub is outside the programme system
+  depth63: { mode: 'base' | 'sink' | 'cooktop' | 'tall'; force68: boolean } | null;
+                                   //   d63Cfg(b). null ⇒ the family is NOT orderable at depth 63, so a
+                                   //   D=63 toolbar state must drop it (app `d63Eligible`).
+}
+
 export interface Capabilities {
   alwaysAvailable: boolean;        // app `u._c` — short-circuits every gate to available:true
   // tierOk

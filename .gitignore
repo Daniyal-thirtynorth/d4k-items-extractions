@@ -18,3 +18,7 @@ obseleted/duplicate-data/
 # v2 fresh full exports (raw >50MB) — committed as .gz instead
 docs/export-v781-fresh.json
 docs/export-v781-min.json
+
+# parity sweep dumps (regenerate with scripts/parity/*)
+scripts/parity/out/
+scripts/parity/plan*.json

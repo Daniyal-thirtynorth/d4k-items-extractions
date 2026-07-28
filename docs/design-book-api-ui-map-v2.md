@@ -1063,6 +1063,65 @@ field is settable at creation via CRUD (`UpsertItemDto.capabilities`).
 
 ---
 
+### 2c-11. ⭐⭐ `gridRows` — the CARD's rows come from the FAMILY POOL, not from `parameters.*`
+
+**The rule.** In the app a grid card's **W / H / D / Ty / Line** rows are built from the FAMILY:
+`ppool(b)` (the family's units under the current programme + opening) → `hvals(b)` (its distinct
+`u.hc`, line-collapsed by `lineHFilterB`) → `wsAtH` (widths at the selected height) → `dAll` (depths
+at that height, greyed where the current width can't take them) → `variantOpts(b)` (the Ty chips, over
+the family's WHOLE unit list — the pool only decides which are greyed/disabled). `parameters.*` is a
+different question: it is ONE unit's DETAIL-panel pill list, so it misses heights the current variant
+lacks and offers rows the grid never draws.
+
+**The contract.** `GET items?groupBy=family` and `GET items/by-section` now ship **`gridRows`** on
+every card — the rows already built, already toolbar-narrowed:
+
+```jsonc
+gridRows: [
+  { label: "H",  kind: "height",  pills: [ { label: "73", value: 73, sku: "TSP6073", selected: false, off: false } ] },
+  { label: "W",  kind: "width",   pills: [ … ] },
+  { label: "D",  kind: "depth",   pills: [ { label: "63", value: 63, sku: "TSP6080", selected: false, off: false } ] },
+  { label: "Ty", kind: "variant", pills: [ { label: "S2Z", value: "S2Z", sku: null, selected: false, off: true, dead: true } ] },
+  { label: "Line", kind: "line",  pills: [ … ] }   // tall two-system cards only
+]
+```
+
+* `selected` — the card's own value on that row. `off` — greyed (`wn`; the app still lets you click).
+  `dead` — `disabled` (no unit behind it). `sku` — the unit the pill lands on (null ⇒ resolve by value).
+* **Render `gridRows` verbatim on grid cards.** Do not re-derive, do not fall back to `parameters.*`
+  there. The DRAWER keeps `parameters.*` — that IS the app's detail model (§2c-4, §2c-10).
+* Row order is the app's: `Line → H → W → D → Ty` (+ the `217+` chip on H, §2c-3).
+
+**Toolbar inputs.** Rows are computed for the request's toolbar, so a card fetched for a swap must
+carry the same state or its rows come back uncollapsed:
+
+| param | meaning |
+|---|---|
+| `lineState=73\|80\|86` | ⭐ the H bar / LINE selector — **display state, never a filter** (§2c-7). Collapses H (and W) to that line. `line` (tall filter) and `heightClass` are accepted as aliases |
+| `depthClass` | greys the D/W/H pills whose unit isn't orderable at that depth; drives `depthFamilyOk` |
+| `tier`, `opening`, `programs` | the pool (`ppool`) + the per-pill `off` gates |
+
+**Supporting fields on the card** (both from schemaVersion 2.5.0, see `export-schema-v2.ts`):
+
+| field | why the client cares |
+|---|---|
+| `familyFacts.isAccessory` | ⭐ an accessory/alteration CARD never greys (app v163) — the pills still gate |
+| `familyFacts.depth63` | null ⇒ the family cannot be ordered at 63; the app drops it from a D=63 grid |
+| `familyFacts.dim` | which numeric row exists; `'depth'` families label it **D** even though the pills live in `parameters.width` |
+| `depthFamilyOk` | false ⇒ no unit at the toolbar depth — the app HIDES the card, grey-mode dims it |
+| `unitFacts.*` | pool inputs (tier / opening / agnostic / siblingTiers / widthCode / depthCode / variantCode / depthAlterations) — needed only if a client rebuilds rows itself |
+
+**Fronts chip = `tierOk`, not `availableTiers`.** `?tier=C` keeps a family when SOME unit passes the
+app's twin rule (`capabilities.nativeTier` / `twinTiers`), and the face swaps to that unit at the same
+width/height/variant (`faceWidthMm` + `faceHeightClass` + `faceVariantCore` ranks). Filtering by
+`availableTiers` hid 415 families the app shows.
+
+**Card ORDER** is the app's `visibleBlocks` sort — `(available desc, pri, accessory last, label-group,
+special last, family max height desc, FAMS index)` — applied to the whole result before paging, so
+greyed cards sink and a variant stays next to its product.
+
+---
+
 ## 2e. ⚠️ OPEN — section bucketing may not match the app (unverified, carried from v1)
 
 Still open in v2 (the `section` field is unchanged — stored per item straight from the app's family data
