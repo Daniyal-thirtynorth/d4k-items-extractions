@@ -167,6 +167,117 @@ pick (the app's `pickHWidth` keeps the width and lets the height move, not the r
 
 ---
 
+# How the frontend calls the API — quick reference
+
+Every request below is verified against the running backend; the arrows show the actual answer.
+
+## 1. The grid list — never send a height key
+
+```
+GET /design-book/items/by-section
+      ?leafId=t_water%230 &programs=244 &depthClass=58
+      &groupBy=family &grey=true &refs=true &page=1 &limit=40
+```
+
+No `heightClass`, no `heightCode`. Both are exact filters — sending either cuts family membership (R1).
+The response carries `sections[]` (already ordered + header-merged, R6), each card with its own
+`capabilities`, `heightCode`, `variantCore`, plus the page-level `refs` map (R3).
+
+## 2. Drawing a card's H row — no request at all
+
+Pills come from `card.parameters.height[]`:
+
+```js
+selected = hNum(pill.label) === card.heightCode      // "H42" → 42
+disabled = false                                     // ← never disable on a missing pill.sku (R7)
+```
+
+`HGA6029BK` has `heightCode: 29`, and ten of its twelve pills carry **no** `sku`. All twelve render live.
+
+## 3. The four click handlers
+
+| Pill clicked | Request (always `&groupBy=family&limit=1&refs=true`) | Retry when empty |
+|---|---|---|
+| **H** | `items?familyId=F674&heightCode=42&widthMm=600` | drop `widthMm` |
+| **W** | `items?familyId=F1313&widthMm=500&heightCode=27` | drop `heightCode` (**keep the width**) |
+| **Ty** | `items?familyId=SNK5&variantCore=TSPATZ&heightCode=73&widthMm=900` | drop `widthMm`, then `heightCode` |
+| **Depth / Programme** | unchanged — navigate by `pill.sku` | — |
+
+Real answers:
+
+```
+familyId=F674  &heightCode=42 &widthMm=600  → HGA6042
+familyId=XHGSP &heightCode=204&widthMm=550  → HGSP552047Z
+familyId=SNK2  &heightCode=73 &widthMm=600  → TSP6073B      (line family — same answer heightClass gave)
+familyId=F1313 &widthMm=500  &heightCode=27 → T5027Z
+familyId=F1313 &widthMm=500                 → T5093S7  ← what you get if you forget the height
+```
+
+Take `items[0]`, replace the card with it, and **merge the response's `refs` into the page map** — without
+that, the swapped-in card loses its variant marking and per-pill greying (R3).
+
+The retry direction matters: relax the dimension the user did **not** pick. A W click that drops the width
+instead of the height just returns the card you were already standing on.
+
+## 4. The top "H 73 80 86" bar
+
+Not a filter (R1). Reload nothing; for each card that has a pill for that number, run the same H swap:
+
+```
+items?familyId=SNK2&heightCode=73&widthMm=<card's>&groupBy=family&limit=1&refs=true
+```
+
+Cards whose family has no such height stay exactly as they are. The card count never changes.
+
+## 5. The detail drawer — untouched
+
+Keep navigating by `pill.sku`, and keep a null `pill.sku` disabled. That IS the app's behaviour on the
+detail page — the grid is the only place the rule differs (R2, R7).
+
+---
+
+## The same thing in plain English
+
+**The idea in one line.** A card never says "open product X" when you click a height. It says *"find me the
+product in this family that is this height"*, and the server answers with the right one.
+
+**When the grid loads.** The page asks for the cards using the filters the user picked — category,
+programme, depth. It does not mention height at all. Height isn't a filter; it only decides which button on
+a card looks selected.
+
+**When the card draws its height buttons.** Nothing is asked. The card already carries its list of height
+buttons and its own height number; the button whose number matches gets highlighted. The important part: a
+button is never switched off just because it has no product link attached. Those links come from the detail
+page, which only knows the version you are looking at. On the card, every height is reachable.
+
+**When you click a button.** Each click is one small question to the server, and what stays the same in the
+question is what you did NOT click:
+
+* click a **height** → "in this family, which product is 42 cm — and keep the width I'm on?"
+* click a **width** → "in this family, which product is 50 cm wide — and keep the height I'm on?"
+* click a **type (Ty)** → "in this family, which product is this type — same width, same height?"
+
+The answer comes back as one product, and the card turns into it.
+
+**If the family has no exact match.** Say you're on a 27 cm drawer and click width 50, but that family has
+no 50 cm drawer at 27 cm. The app asks again, dropping the part you did not click — you clicked a width, so
+keep the width and let the height move. Whatever you touched is the thing it honours.
+
+**The two mistakes to avoid.**
+
+1. *Asking with the wrong number.* There are two height numbers on a product. One only exists for ordinary
+   base and tall cabinets (73/80/86); the other exists for everything. Ask with the first one on a
+   dishwasher housing and the server rejects the question — the button looks like it does nothing.
+2. *Forgetting the height when clicking a width.* If the "keep my height" half of the question uses the
+   number that is empty for that product, it quietly disappears and the server returns *some* product at
+   that width. That is how clicking "50 cm" on a 27 cm drawer produced a 93 cm one.
+
+**The detail panel is the exception.** In the drawer the old behaviour is correct: buttons carry a product
+link, you follow it, and a button with no link really is dead. Only the grid cards use the
+"ask the family" style.
+
+---
+
 # Implementation
 
 ## Step 1 — `api/types.ts`
