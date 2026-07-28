@@ -98,7 +98,7 @@ stays free ("customize anything" inside the known surface). `PatchItemDto` = `Pa
 | `sku` **(required)** | string | Order code — primary key |
 | `kind` | `cabinet\|alteration\|accessory\|part` | item-type |
 | `familyId` · `name` · `category` · `subcategory` · `section` · `nameQualifier` | string | taxonomy + card/detail title + amber sub-label |
-| `widthMm` · `heightMm` · `depthMm` · `heightClass` | number | carcass dims + H bucket |
+| `widthMm` · `heightMm` · `depthMm` · `heightClass` · `heightCode` | number | carcass dims · H bucket (73/80/86 LINE) · **H-ROW key** (`u.hc`: the line on line families, the unit's cm height elsewhere — §2c-10) |
 | `availableTiers[]` · `faceForTiers[]` | string[] | FRONTS tier badges · which tiers this unit is the family FACE card |
 | **`capabilities`** | object (17 fields — §2d) | **the pill-gate rule inputs** — how every configure pill greys |
 | **`parameters`** | `{ width[], height[], depth[], programme[], options[] }` | the W/H/D/Programme + coded pill rows (§2) |
@@ -142,8 +142,9 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `tier` | IN | **FRONTS pill** (P·P1·A·C·C1) | Top toolbar — "FRONTS" pill group | `…/items?tier=P1` |
 | `opening` | IN | **OPENING toggle** (P1 \| C1). AND-composes with `tier`/`family` | Top toolbar — "OPENING" pill | `…/items?opening=P1` |
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row | `…/items?widthMm=600` |
-| `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`). ⚠️ **Do NOT use as the grid's toolbar-H filter** — the app's "H All 73 80 86" bar is its LINE selector: pre-select + row collapse, never a hard filter (§2c-7). Valid as a precise API filter (e.g. inside a family swap query, §2c-8) | Grid filter bar — H row | `…/items?familyId=SNK5&heightClass=73` |
-| `variantCore` | IN | **Variant identity** (denormalized, e.g. `TSPATZW`) — resolve a family sibling of a specific Ty/option variant: `familyId + variantCore (+ heightClass/widthMm)`. The grid's option-pill navigation route (§2c-8) | (internal — pill navigation) | `…/items?familyId=SNK5&variantCore=TSPATZ&heightClass=73&groupBy=family` |
+| `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`). ⚠️ **Do NOT use as the grid's toolbar-H filter** — the app's "H All 73 80 86" bar is its LINE selector: pre-select + row collapse, never a hard filter (§2c-7). Valid as a precise API filter, but for a family SWAP prefer **`heightCode`** — `heightClass` is null outside carcase-line families (§2c-10) | Grid filter bar — H row | `…/items?familyId=SNK5&heightClass=73` |
+| `heightCode` | IN | **CARD H pill** — the app's per-unit H-row key `u.hc` (73/80/86 on carcase-line families, the unit's **cm height** everywhere else: 29, 42, 204…). The ONE key that resolves an H pick on any family; **exact, not null-inclusive** (§2c-10) | (internal — grid H pill navigation) | `…/items?familyId=F674&heightCode=42&widthMm=600&groupBy=family` |
+| `variantCore` | IN | **Variant identity** (denormalized, e.g. `TSPATZW`) — resolve a family sibling of a specific Ty/option variant: `familyId + variantCore (+ heightCode/widthMm — `heightCode`, so the height survives on non-line families, §2c-10)`. The grid's option-pill navigation route (§2c-8) | (internal — pill navigation) | `…/items?familyId=SNK5&variantCore=TSPATZ&heightClass=73&groupBy=family` |
 | `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68). Ports the app's `depthOk`: matches when the class is in the unit's **`capabilities.depthClasses`** (however the catalog expresses depth — see §2c-2), or the unit has no carcass depth at all (empty/absent → rides every class). **58 and 63 are pass-through** (the app short-circuits them). Carcass = class×10−20. | Grid filter bar — D row | `…/items?depthClass=68` |
 | `depthMm` / `heightMm` | IN | Exact carcass depth / height (mm) — precise, **not** the grid class rows | (precise filter) | `…/items?depthMm=560` |
 | `line` / `tallHeight` | IN | **TALL** two-row height selector (carcase LINE 73/80/86 + dynamic HEIGHT cm). TALL only. Options from `GET tall-heights` (§6b) | Tall toolbar — top + second pill rows | `…/items?zone=Tall&line=80&tallHeight=204` |
@@ -200,7 +201,8 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `faceForTiers[]` | OUT | Which tier contexts this unit is the family FACE card in (`_`/`P`/`A`/`C`) | (grouping / face selection) | `…/items?full=true` → `items[].faceForTiers` |
 | **`capabilities`** | OUT | **The pill-gate rule inputs** — the client reads a pill TARGET's capabilities to decide grey/live (§2c/§2d). Ships on **every** list row (NOT in `LIST_OMIT`) so the grid can gate pills without a detail fetch | Card — (drives pill state) | `…/items?limit=1` → `items[0].capabilities` |
 | `parameters.width[]` | OUT | **W** pill row | Card — Configure rows | `…/items` → `items[].parameters.width` |
-| `parameters.height[]` | OUT | **H** pill row (73/80/86) | Card — Configure rows | `…/items` → `items[].parameters.height` |
+| `parameters.height[]` | OUT | **H** pill row — labels are the family's height keys (73/80/86 on line families, cm heights like 29/42/204 elsewhere). ⚠️ A pill's `sku` may be **null** (detail-panel, variant-scoped) — that is NOT a dead chip on a CARD: resolve the click by label through `heightCode` (§2c-10) | Card — Configure rows | `…/items` → `items[].parameters.height` |
+| `heightCode` | OUT | Not rendered — the card's own H-row key; the SELECTED H pill is the one whose label equals it, and an H pick swaps by it (§2c-10) | Card — H row selection | `…/items?q=HGA6029BK` → `items[].heightCode` (= 29) |
 | `parameters.depth[]` | OUT | **D** pill row (a pill may be `alteration:true` = 63 cm depth alteration; depth pills also carry `code`, §2c-1). These are the classes the ROW draws — **not** what the `depthClass` filter matches (that reads `capabilities.depthClasses`, §2c-2) | Card — Configure rows | `…/items` → `items[].parameters.depth` |
 | `parameters.programme[]` | OUT | Programme / tier pills — each `{tier, sku, opening?}` | Card — bottom-right | `…/items` → `items[].parameters.programme` |
 | `parameters.options[]` | OUT | Coded rows flattened — each `{group, label, sku, swatch?}` (Ty / Runner / Finish / Insert / …) | Card — Configure rows | `…/items` → `items[].parameters.options` |
@@ -739,7 +741,9 @@ that hard-filters membership AND collapses the face to the LOWEST width, `TSP457
 ```js
 // on H pick (73/80/86): load the grid UNFILTERED, then per card:
 //   card has an H pill for the pick?  → swap the card via the FAMILY (not the pill sku — §2c-8):
-//        GET items?familyId=<fam>&heightClass=<pick>&widthMm=<card's>&groupBy=family&limit=1
+//        GET items?familyId=<fam>&heightCode=<pick>&widthMm=<card's>&groupBy=family&limit=1
+//        (73/80/86 → heightCode returns the same unit heightClass did; heightCode also works on
+//         non-line families, where heightClass is null and would 400 — §2c-10)
 //        (retry without widthMm — the app switches width when the line exists only elsewhere)
 //   no such pill / no result           → leave the card as-is (app parity: visible, ungreyed)
 // and feed the pick into visibleByLine (§2c-5) so the W/H rows collapse like the app's.
@@ -765,11 +769,17 @@ codes (`…68…`) and a self pill that never shows selected. The rules:
 
 | Row | Grid click resolves via | Selected pill |
 |---|---|---|
-| **W** | `items?familyId&widthMm=label×10&heightClass=card's&groupBy=family&limit=1` | sku match, else numeric label == card's `widthMm/10` |
-| **H** | `items?familyId&heightClass=label&widthMm=card's&groupBy=family&limit=1` (retry w/o width) | sku match, else numeric label == card's `heightClass` |
-| **Ty / options** | `items?familyId&variantCore=<target's>&heightClass=card's&widthMm=card's&groupBy=family&limit=1` (retry w/o width, then w/o height) | target `variantCore` == card's `variantCore` |
+| **W** | `items?familyId&widthMm=label×10&heightCode=card's` (+`heightClass` when set) `&groupBy=family&limit=1` — retry by dropping the **HEIGHT**, not the width | sku match, else numeric label == card's `widthMm/10` |
+| **H** | `items?familyId&heightCode=label&widthMm=card's&groupBy=family&limit=1` (retry w/o width) — **`heightCode`, not `heightClass`: see §2c-10** | sku match, else numeric label == card's `heightCode` |
+| **Ty / options** | `items?familyId&variantCore=<target's>&heightCode=card's` (+`heightClass`) `&widthMm=card's&groupBy=family&limit=1` (retry w/o width, then w/o height) | target `variantCore` == card's `variantCore` |
 | **Depth** | unchanged — §2c-4 (state pill vs sibling by `pill.sku`) | by label (§2c-4) |
 | **Programme** | unchanged — `pill.sku` (tier codes, backend-synthesized) | `pill.sku === card.sku` |
+
+⚠️ **"Preserve the other dimension" means `heightCode`, not `heightClass`** (§2c-10): `heightClass` is null
+outside carcase-line families, so a W/Ty swap that carries only it silently loses the height —
+`T3027Z` + W50 returned `T5093S7` (h93) instead of `T5027Z`. And the RETRY relaxes the dimension the user
+did **not** pick: a W pick drops the height keys and keeps `widthMm` (the app's `pickHWidth` holds the
+width); an H or Ty pick drops `widthMm` first.
 
 The face rank's `depthMm` ASC tiebreak makes the family query land the **native-depth** unit
 (`TSP6073B`, `TSPA9073TZ`) — no depth math in the client. The target's `variantCore` comes from the
@@ -821,6 +831,55 @@ Verified vs v781 (24-combo sweep, W∈{ALL,45,50,60,90,100} × line∈{ALL,73,80
 12,240 face comparisons): mismatches 937 → **883** (60 fixed — every client-reported sink case —
 6 moved *within* the already-defective GF-housing tall families §H residue), family membership
 byte-identical to before the change, Sink Cabinets leaf **14/14 faces exact** in every tested state.
+
+---
+
+### 2c-10. ⭐⭐ `Item.heightCode` — the H-row key for EVERY family (and why H pills must never be dead)
+
+*(2026-07-28, audit §K — client report "our grid greys out most H pills; the app doesn't".
+schemaVersion **2.4.0**, additive.)*
+
+The app has ONE per-unit height key, `u.hc`, and the grid H row is built from the FAMILY's set of them
+(`hs=[...new Set(ppool(b).map(x=>x.hc))]`, click → `pickHeight(famId, hc)`). What `hc` MEANS depends on
+the family:
+
+| Family kind | `hc` is | Example |
+|---|---|---|
+| base / tall **carcase-line** families | the LINE — 73 \| 80 \| 86 (this is what we already stored as `heightClass`) | `TSP6080B` → 80 |
+| **everything else** (appliance housings, supports, drawers, tall specials …) | the unit's **cm HEIGHT** | `HGA6029BK` → 29, `HGSP552047Z` → 204 |
+
+We only stored the first case (`heightClass`), so **outside line families an H pill was unresolvable**:
+`heightClass` is null there and `?heightClass=29` is a 400 (the param is the 73/80/86 enum). `heightCode`
+is now stored on every unit that has one (12,048/18,396) and IS the query key:
+
+```
+GET /design-book/items?familyId=F674&heightCode=42&widthMm=600&groupBy=family&limit=1   → HGA6042
+GET /design-book/items?familyId=SNK2&heightCode=73&widthMm=600&groupBy=family&limit=1   → TSP6073B   (same answer heightClass gave)
+```
+
+`heightCode` is EXACT (not null-inclusive like `heightClass`) — a swap must land on a unit that really has
+that height, never on a dimensionless sibling. On line families both keys return the same unit, so the
+client has **one rule for all H picks: `familyId + heightCode` (+ `widthMm`, retry without it).**
+`heightClass` keeps its own job: the toolbar H bar / LINE pre-select (§2c-7) and the `showUnderLine`
+narrowing — do not swap one for the other there.
+
+**⚠️ A NULL `parameters.height[].sku` does NOT mean a dead pill.** Those skus were scraped from the DETAIL
+panel, which is variant-scoped: on `HGA6029BK` (Ty `BK`, a variant that only exists at 29 + 34 cm) the
+detail chips for 42/47/74/…/118 have no target, so the export stores `{label:"H42"}` with no sku — 2,560
+pills over 1,188 items. **The app still renders every one of them LIVE on the CARD** (`pickHeight` jumps
+the variant: `alt = ppool(b).find(u => u.hc === h)`), and a client that renders "no sku ⇒ disabled" greys
+most of the H row on every housing card — exactly the reported bug. Rules:
+
+* **Grid card:** an H pill is never dead. Route the click by LABEL through `heightCode` (above); ignore
+  `pill.sku` completely (§2c-8).
+* **Detail drawer:** unchanged — `pill.sku === null` IS the app's dead chip there; keep it disabled.
+* **Greying:** with no target sku there is no target `capabilities`, so the pill renders LIVE. (The app
+  greys a height only when NO unit at that height passes `available()`; per-height gate evaluation across
+  the whole family is not modelled — deferred, it over-shows rather than over-greys.)
+
+Verified against v781 (BOSSA · Tall→Water→Dishwasher · D58): `HGA6029BK` renders
+`H:[29* 34 42 47 74 79 87 92 100 105 113 118]` all live, `HGSP55103Z` `H:[103* 109 116 122 204 217]`,
+clicks land `HGA6042` / `HGSP552047Z`; line-family regression `TSP6080B` + H73 → `TSP6073B` unchanged.
 
 ---
 

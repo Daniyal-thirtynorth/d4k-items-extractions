@@ -23,12 +23,12 @@ There is **no build/test here** — it is data files + docs (it IS a git repo no
 and `*.bak.json` are gitignored, the `.gz` is committed). Big JSON files: never `Read` them whole; use
 `python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
 
-## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.3.0** since 2026-07-24). READ THIS FIRST.
+## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.4.0** since 2026-07-28). READ THIS FIRST.
 
 The model was reworked from the fat "everything pre-computed, frozen at the default toolbar" export (v1,
-`docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.3.0** — 2.0.0 plus the
-additive `DimPill.code` on depth pills (2.1), `Item.doorLineYCode` + `Item.heightExtension` (2.2), and
-`DimPill.showUnderLine` on width/height pills (2.3); old readers ignore all four). Everything below
+`docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.4.0** — 2.0.0 plus the
+additive `DimPill.code` on depth pills (2.1), `Item.doorLineYCode` + `Item.heightExtension` (2.2),
+`DimPill.showUnderLine` on width/height pills (2.3), and `Item.heightCode` (2.4); old readers ignore all five). Everything below
 this block that describes `configure` / `programmeAvailability` / `accessoryPanel` / `relatedGroups` /
 `specification` / `programmeBadge` and the frozen per-pill `available` boolean is **v1 — superseded**.
 Current facts:
@@ -172,6 +172,8 @@ Current facts:
   `TSP6080B` detail has `H80→TSP608068B`, not self!) while the GRID's `pickHeight`/`pickHWidth` preserve
   depth — so grid card W/H pills now resolve via `swapCardTo` (`items?familyId&heightClass/widthMm&groupBy=
   family`; `depthMm` ASC face rank → native d58); detail drawer keeps pill skus (that IS app behaviour).
+  **⚠️ SUPERSEDED 2026-07-28 (§K/map §2c-10): the key is `heightCode`, not `heightClass`** — the latter is
+  null outside carcase-line families, so H picks 400'd there and W/Ty picks lost the height.
   The client React app must do the same — never grid-navigate by W/H `pill.sku`. **(3) CORRECTED same day:**
   the app's top "H All 73 80 86" bar DOES exist in Base — it is the LINE selector (`#lineSeg`→`state.line`),
   which re-faces cards AND collapses W/H rows via `lineHFilterB`; so `visibleByLine` DOES feed `F.heightClass`
@@ -239,6 +241,31 @@ Current facts:
   export-v781-fresh.json(+.gz) now carries all 3 (extractor `buildItem` emits them from `f.pri`/FAMS
   index/SECTION_ORDER) → re-ingest safe, no post-ingest re-backfill needed (unlike faceHeightClass/
   faceVariantCore/variantCore, which are still backend-computed backfill-only and NOT in the export).**
+
+- **⭐ `Item.heightCode` — the H-ROW KEY, 2026-07-28, schemaVersion 2.4.0 (audit §K, map §2c-10).** Client:
+  "our UI disables lots of H pills, the app doesn't" (BOSSA · Tall→Water→Dishwasher · D58). The app has ONE
+  per-unit height key, `u.hc`, and the grid H row is the FAMILY's set of them (`pickHeight(fid,hc)`). We
+  stored it ONLY when it was 73/80/86 (`heightClass`), but outside carcase-line families `hc` is the unit's
+  **cm HEIGHT** (29, 42, 103, 204, 217…). Two consequences, both fixed: (a) `?heightClass=29` is a 400
+  (enum) → every H pill on a housing/support card was a silent no-op; (b) `parameters.height[].sku` is the
+  DETAIL panel's VARIANT-scoped target, so it is **null** for every height the current variant lacks (2,560
+  pills / 1,188 items — `HGA6029BK` is Ty `BK`, only 29+34 exist) and our `optState` read "no sku ⇒ dead"
+  — the app renders them LIVE and `pickHeight` jumps the variant (`HGA6042`). **`heightCode` = raw `u.hc`
+  on every unit** (12,048/18,396), dumped FROM the app (`docs/height-code-v781.json`) — NOT inferable from
+  `heightMm` (`AT3037Z` is 367 mm, hc 37 not 40). Extractor emits it; `scripts/backfill-height-code.js`
+  patched the export (+.gz, meta 2.4.0); D4K-dev backfilled via `backfill-item-fields.js --fields heightCode`.
+  API `GET items?heightCode=<n>` — **exact, NOT null-inclusive** (a swap must land on a unit that HAS the
+  height); `@Prop`+`UpsertItemDto`+admin field. UI: H picks resolve `familyId+heightCode` (was heightClass),
+  grid W/H rows label-routed (`optState(o,caps,byLabel)` → a skuless pill is NOT dead), `markDim` on
+  `heightCode ?? heightClass`. `heightClass` keeps its own job (H-bar/LINE pre-select §2c-7, showUnderLine).
+  **Client rule: one H rule for all families — `items?familyId&heightCode=<label>&widthMm&groupBy=family`;
+  never disable an H pill because `pill.sku` is null; `pill.sku` is DRAWER-only.** Same key fixes a SECOND
+  bug found in the pass: W/Ty swaps carried only `heightClass` to "preserve the height" (null outside line
+  families) → `T3027Z`+W50 gave `T5093S7` (h93); they now carry `heightCode`, and `swapCardTo` takes a
+  RELAX ORDER (W pick relaxes height first and keeps the width; H/Ty relax width first). Verified: full live H rows
+  on both reported cards, H42→`HGA6042`, H204→`HGSP552047Z`, line-family `TSP6080B`+H73→`TSP6073B` unchanged.
+  **D4K-dev + D4K-prd both backfilled** (12,048 docs each; prd is a data-only write — the deployed prd
+  code needs no release, the extra field is inert until the `dev` branch ships).
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

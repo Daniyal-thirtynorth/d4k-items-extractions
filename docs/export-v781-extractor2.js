@@ -19,7 +19,7 @@
  *     artifacts (re-parsed from the still-present <script id="DATA"> JSON).
  *
  * Output top level: { meta, categories, programmes, ruleTables, systems,
- *                     functionalCategories, items }  (meta.schemaVersion '2.2.0').
+ *                     functionalCategories, items }  (meta.schemaVersion '2.4.0').
  * ==========================================================================*/
 (function(){
 const H = window.__H = {};
@@ -615,6 +615,12 @@ function buildItem(f,u,recovered){
   // dimensions
   if(u.W!=null) it.widthMm=mm(u.W); if(u.H!=null) it.heightMm=mm(u.H); if(u.D!=null) it.depthMm=mm(u.D);
   const hc=[73,80,86].includes(u.hc)?u.hc:null; if(hc!=null) it.heightClass=hc;
+  // heightCode = the app's RAW `u.hc` — the key its H row is built on for EVERY family:
+  // the carcase LINE on base/tall line families (73/80/86, same value as heightClass) and the
+  // unit's CM HEIGHT everywhere else (29, 42, 103, 204, 217…). `pickHeight(fid,hc)` resolves an
+  // H pill through the family by this key, so without it non-line H pills are unresolvable
+  // (their stored parameters.height[].sku is null whenever the current variant lacks that height).
+  if(u.hc!=null) it.heightCode=+u.hc;
 
   // tiers
   try{ const tiers=unitTiers(u); if(tiers&&tiers.length) it.availableTiers=tiers; }catch(e){}
@@ -887,7 +893,7 @@ H.finalize=function(){
     meta:{
       generated:new Date().toISOString(),
       source:'leicht_units v781 (headless DOM extraction via openDetail)',
-      schemaVersion:'2.2.0',
+      schemaVersion:'2.4.0',
       imageUrlTemplate:IMGT,
       counts:{ items:all.length, cabinets, accessories:all.length-cabinets, categories:cats.length, programmes:progs.length, recovered:recoveredSkus.length },
       recoveredArtifactSkus:recoveredSkus,   // app-suppressed "not-in-pricelist" units re-included by the coverage fix

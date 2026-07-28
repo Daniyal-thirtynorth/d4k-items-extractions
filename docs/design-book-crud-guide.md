@@ -56,7 +56,11 @@ One item per request. **Every field the extractor writes is settable.** Unknown 
 
 - **Identity:** `sku` (required), `kind` (`cabinet|alteration|accessory|part`), `familyId`, `name`,
   `category`, `subcategory`, `section`, `active`, `nameQualifier`.
-- **Dimensions:** `widthMm`, `heightMm`, `depthMm`, `heightClass` (73|80|86|null).
+- **Dimensions:** `widthMm`, `heightMm`, `depthMm`, `heightClass` (73|80|86|null), `heightCode`.
+  `heightCode` is the app's per-unit **H-row key** (`u.hc`): the same 73/80/86 on carcase-line families,
+  the unit's **cm height** everywhere else (29, 42, 103, 204, 217 …). The grid resolves an H pill by it
+  (`items?familyId&heightCode=…`), so a new unit without it has an unclickable H pill — set it whenever
+  the card shows an H row. See map §2c-10.
 - **Fronts / rules:** `availableTiers[]`, `faceForTiers[]`, **`capabilities`** (§3), `parameters` (§4;
   width/height pills may carry `showUnderLine` §4d), `heightExtension` (§4b), `doorLineYCode` (§4c).
 - **Thin refs:** `alterations[]`, `accessories[]` (sku, or `{sku, variants:[{label,sku}]}`), `companions[]`.
@@ -377,6 +381,30 @@ Height pills that don't belong to that line. Put the lines a pill shows under in
 > family's card FACE when a filter removes the default one (keep the default height / default variant). The
 > backend **computes them** from `faceForTiers` + `heightClass` + sku on ingest/backfill — leave them out of
 > your item; they are not part of the field surface you set.
+
+---
+
+## 4e. `heightCode` — the number a NEW item needs before its H pill works
+
+**Nothing derives it. You type it, and it must equal the LABEL the H row uses for this unit.**
+
+- On a **carcase-line** family (base/tall 73/80/86) it is the line: `heightCode = heightClass = 80`.
+- On every other family it is the unit's **cm height as the app labels it**: `HGA6029BK → 29`,
+  `HGA60113 → 113`, `HGSP552047Z → 204`.
+- **Do NOT compute it from `heightMm`.** The label is not `round(heightMm/10)`: `HGA60113` is 1136 mm but
+  113, `HGA6074` is 737 mm but 74, and `AT3037Z` is 367 mm but **37** (an A-tier sibling that shares the
+  40 slot). Copy the number from the family's existing H pills (`parameters.height[].label`) — a new unit
+  MUST reuse the sibling's label for the same slot, or it lands in a slot of its own.
+
+What breaks if you leave it out: the item still renders, but it is **invisible to H navigation** —
+`items?familyId&heightCode=<label>` can't find it, so no sibling's H pill can reach it, and its own H pill
+never shows as selected (§2c-10). Symptom: an H row where one height does nothing.
+
+Checklist for a new unit with an H row:
+1. `heightCode` set, matching the sibling label for that height;
+2. `heightClass` set **only** if that value is 73/80/86 (it is the LINE, and it drives `showUnderLine`);
+3. the family's other units already list that label in `parameters.height[]` — add the pill there too if
+   this is a brand-new height (a pill with no `sku` is fine: the grid resolves by label, §2c-10).
 
 ---
 

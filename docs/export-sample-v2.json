@@ -3,7 +3,7 @@
     "_ui": "Illustrative sample of the v2 (MINIMAL + CAPABILITIES) contract. The items below between them exercise EVERY object in export-schema-v2.ts. Some refs (alterations/accessories/companions sku codes, pill targets) point at items outside this small slice; in a real export every referenced sku exists in items[]. Any key starting with `_ui` is plain-English DOCUMENTATION ONLY — the backend MUST strip every `_ui` key on ingest; `_ui` is NOT part of the schema. counts here describe THIS sample, not the full catalog.",
     "generated": "2026-07-17T08:56:11.786Z",
     "source": "leicht_units v781 (headless DOM extraction via openDetail) — SAMPLE",
-    "schemaVersion": "2.2.0",
+    "schemaVersion": "2.4.0",
     "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
     "counts": {
       "items": 13,
@@ -405,6 +405,7 @@
       "widthMm": 700,
       "heightMm": 795,
       "depthMm": 560,
+      "heightCode": 80,
       "heightClass": 80,
       "availableTiers": [
         "P",
@@ -691,6 +692,7 @@
       "widthMm": 450,
       "heightMm": 730,
       "depthMm": 560,
+      "heightCode": 73,
       "heightClass": 73,
       "availableTiers": [
         "P"
@@ -940,6 +942,7 @@
       "widthMm": 200,
       "heightMm": 730,
       "depthMm": 560,
+      "heightCode": 73,
       "heightClass": 73,
       "availableTiers": [
         "P",
@@ -1275,6 +1278,7 @@
       "widthMm": 800,
       "heightMm": 730,
       "depthMm": 560,
+      "heightCode": 73,
       "heightClass": 73,
       "availableTiers": [
         "P"
@@ -1547,6 +1551,7 @@
       "widthMm": 460,
       "heightMm": 2039,
       "depthMm": 20,
+      "heightCode": 204,
       "availableTiers": [
         "P"
       ],
@@ -1735,6 +1740,7 @@
       "widthMm": 600,
       "heightMm": 795,
       "depthMm": 20,
+      "heightCode": 80,
       "heightClass": 80,
       "availableTiers": [
         "C"
@@ -1943,6 +1949,7 @@
       "widthMm": 450,
       "heightMm": 730,
       "depthMm": 560,
+      "heightCode": 73,
       "heightClass": 73,
       "availableTiers": [
         "P1"
@@ -2155,6 +2162,7 @@
       "widthMm": 300,
       "heightMm": 265,
       "depthMm": 560,
+      "heightCode": 27,
       "availableTiers": [
         "P"
       ],
@@ -2761,6 +2769,7 @@
       "widthMm": 600,
       "heightMm": 1457,
       "depthMm": 20,
+      "heightCode": 146,
       "availableTiers": [
         "P",
         "A"

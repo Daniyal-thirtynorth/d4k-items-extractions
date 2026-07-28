@@ -305,7 +305,9 @@ the app shows `TSP6080…`). Root-caused by driving the app; **three separate fi
    **even H80 → `TSP608068B`, not self**. The GRID's `pickHeight`/`pickHWidth` instead preserve the other
    dims (d58). So navigating card pills by stored sku reproduced the app's *detail* behaviour in the *grid*.
    **Fixed (UI-only):** card W/H pill clicks + the pre-select route through `swapCardTo` — an
-   `items?familyId=…&heightClass/widthMm=…&groupBy=family` query; the face rank's `depthMm` ASC tiebreak
+   `items?familyId=…&heightClass/widthMm=…&groupBy=family` query **(⚠️ superseded by §K: the height key is
+   `heightCode`, which also exists outside carcase-line families; W/Ty swaps must carry it too)**;
+   the face rank's `depthMm` ASC tiebreak
    lands the native-depth unit (`TSP6073B`). The detail drawer keeps pill-sku navigation (that IS app
    behaviour there). Verified: card `TSP6080B` → W45 → `TSP4580B` (was `TSP458068B`).
    ⚠️ The client React app must do the same: never navigate grid W/H pills by `pill.sku` directly —
@@ -455,3 +457,62 @@ this is NOT a data error (both sides agree SNK8 is Instant-Hot). It's the app's 
 Deferred: `SECTION_ORDER` is modeled as a per-family `sectionRank` (not a stored sub→order map); this
 matches every pri-fallback + single-sub view tested. A multi-sub leaf whose app order differs from
 min-sectionRank would need the full map + `secOrderKey`/`disp` logic — add if one is ever reported.
+
+---
+
+### §K. H PILLS RENDERED DEAD — the missing per-unit height key `heightCode` (2026-07-28)
+
+**Client report:** "our UI is disabling a lot of height pills under these filters, the client HTML is
+not" — screenshots: Programme **BOSSA** · Design-Tasks leaf **Tall → Water → Dishwasher** · **D 58**.
+Our grid: `HGA6029BK` renders `H29* H34` live and **H42 H47 H74 H79 H87 H92 H100 H105 H113 H118 grey**;
+`HGSP55103Z` greys **H204 H217**. v781 renders every one of those chips live and clickable.
+
+**Root cause — one missing field, two symptoms.** The app's per-unit H key is `u.hc`, and the grid H row
+is the FAMILY's set of them (`pickHeight(fid,hc)`). We only stored `hc` when it was 73/80/86
+(`heightClass`; extractor line `const hc=[73,80,86].includes(u.hc)?u.hc:null`). Outside carcase-line
+families `hc` is the unit's **cm height** (29, 42, 103, 204, 217 …) — so for those families:
+
+1. **Nothing to resolve a pill with.** `heightClass` is null and `?heightClass=29` is a 400 (enum
+   73|80|86) → every H pill on those cards was a no-op even when it had a sku (silent 400 inside
+   `swapCardTo`). Not visible in the screenshots, but broken.
+2. **The pills that looked dead.** `parameters.height[].sku` is the DETAIL panel's target and the detail
+   row is VARIANT-scoped: `HGA6029BK` is Ty `BK`, which exists only at 29 + 34 cm, so the export stores
+   `{label:"H42"}` with **no sku** — 2,560 such pills over 1,188 items. Our UI's `optState` treats
+   "no sku ⇒ dead" (correct in the drawer, wrong on the card): the app's grid chip is live and
+   `pickHeight` JUMPS THE VARIANT (`alt = ppool(b).find(u=>u.hc===h)` → `HGA6042`).
+
+Not a greying/capabilities bug at all — `availableFromCaps` was never consulted for those pills.
+
+**Fix (schemaVersion 2.4.0, additive):**
+- **`Item.heightCode`** = the app's raw `u.hc`, for every family. Dumped FROM the live app
+  (`FAMS[].units[].hc`, 12,048 skus → `docs/height-code-v781.json`), never re-derived — nearest-cm
+  inference is provably wrong (`AT3037Z` is 367 mm but `hc` 37, not 40). Extractor emits it now
+  (`if(u.hc!=null) it.heightCode=+u.hc`); existing export patched by
+  `scripts/backfill-height-code.js`; D4K-dev backfilled with `backfill-item-fields.js --fields heightCode`
+  (12,048 docs) — **D4K-prd backfilled identically** (data-only, no prd release needed; re-verified: 0 differ).
+  Invariant checked: `heightClass != null ⇒ heightClass === heightCode` (0 mismatches).
+- **API:** `GET items?heightCode=<n>` (exact, NOT null-inclusive — a swap must land on a unit that has
+  the height), also lifted into the width post-match, `@Prop` + `UpsertItemDto` + admin form field.
+- **UI (`design-book-ui.html`):** H picks resolve `familyId + heightCode` (was `heightClass`);
+  `optState(o, targetCaps, byLabel)` — the label-routed grid W/H rows no longer treat a missing pill sku
+  as dead; `markDim` selects on `heightCode ?? heightClass`.
+
+**Verified (lite UI, same filter state as the report):** `HGA6029BK` →
+`H:[29* 34 42 47 74 79 87 92 100 105 113 118]` all live; `HGSP55103Z` → `H:[103* 109 116 122 204 217]`;
+click H42 → `HGA6042` (not `HGAG6042` — matches the app's pool order), H204 → `HGSP552047Z`.
+Line-family regression: `TSP6080B` + H73 → `TSP6073B` via either key, identical to §H.
+
+**Client rule (React app):** one rule for every H pill — `GET items?familyId=…&heightCode=<label>&widthMm=
+<card's>&groupBy=family&limit=1` (retry without `widthMm`); never disable an H pill because
+`pill.sku` is null; keep `pill.sku` for the DETAIL drawer only. See map §2c-10.
+
+**Second gap found by the same key (fixed in the same pass):** a **W** or **Ty** swap carries "the card's
+height" so the other dimension survives — but it carried only `heightClass`, which is **null** outside line
+families, so the constraint silently vanished: `T3027Z` + W50 → **`T5093S7` (h93)** instead of `T5027Z`.
+Both picks now carry `heightCode` too, and `swapCardTo` takes a caller-supplied RELAX ORDER: a W pick
+relaxes the HEIGHT first and keeps `widthMm` (the app's `pickHWidth` holds the width), while H/Ty picks
+still relax the width first. Verified: `T3027Z` + W50 → `T5027Z` (H row `27*`).
+
+**Residual (not part of the report, unchanged):** the Ty row on these cards renders unavailable variants
+as dead-grey where v781 strikes them through (`7Z`/`7ZH`/`8Z`/`8ZH`), and a swapped-in tall card can mark
+two Ty pills selected (`markVar` + `selMark` both firing). Cosmetic; no data change needed.

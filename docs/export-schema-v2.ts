@@ -33,8 +33,8 @@
  *   meta.imageUrlTemplate.replace("<CODE>", sku)`.
  *
  * ── VERSIONING ──────────────────────────────────────────────────────────────
- *   `meta.schemaVersion` = "2.3.0"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
- *   2.3 DimPill.showUnderLine on width/height pills — all additive, old readers ignore).
+ *   `meta.schemaVersion` = "2.4.0"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
+ *   2.3 DimPill.showUnderLine on width/height pills; 2.4 Item.heightCode — all additive, old readers ignore).
  *   The extractor emits this shape directly
  *   (`docs/export-v781-extractor2.js`); ingest AND the CRUD endpoints write it
  *   through one `normalizeItemDoc`, so hand-authored and extracted items match.
@@ -54,7 +54,7 @@ export interface CatalogExport {
 export interface ExportMeta {
   generated: string;               // ISO datetime
   source: string;                  // e.g. "leicht_units v781 (headless DOM extraction via openDetail)"
-  schemaVersion: string;           // "2.3.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine
+  schemaVersion: string;           // "2.4.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode
   imageUrlTemplate: string;        // ".../itemData/<CODE>.jpg" — build every image from this + sku
   counts: { items: number; cabinets: number; accessories: number; categories: number; programmes: number };
   recoveredArtifactSkus?: string[]; // codes the app's init deleted as artifacts but which are still real
@@ -91,6 +91,17 @@ export interface Item {
   heightMm?: number;
   depthMm?: number;
   heightClass?: 73 | 80 | 86 | null;
+  heightCode?: number;             // ⭐ 2.4 — the app's raw `u.hc`: the key its H ROW is built on, for EVERY
+                                   //   family. On base/tall LINE families it IS the carcase line (73|80|86,
+                                   //   same value as heightClass); everywhere else it is the unit's CM
+                                   //   HEIGHT (29, 42, 103, 204, 217 …) and heightClass is null. The grid H
+                                   //   pill is `pickHeight(familyId, hc)` — resolve it through the family by
+                                   //   THIS field (`GET items?familyId=…&heightCode=42&widthMm=…&groupBy=family`),
+                                   //   NEVER by `parameters.height[].sku`: that sku is the DETAIL panel's
+                                   //   target, which is null for every height the current variant lacks
+                                   //   (2,560 pills — the app still shows those pills LIVE on the card) and
+                                   //   points at the d68 sibling on depth-sibling families. 12,048/18,396
+                                   //   units; absent where the app has no hc (accessories, alterations).
 
   /* programme / tier */
   availableTiers?: ProgrammeTier[]; // FRONTS tier badges the front comes in (P/P1/C/C1/A) — grid tier filter

@@ -35,6 +35,7 @@ Sizes are the cabinet **body** measurements, in **millimetres** (so 600 = 60 cm)
 | **heightMm** | How **tall** it is. |
 | **depthMm** | How **deep** it is. |
 | **heightClass** | For tall units, which **height line** it belongs to — 73, 80, or 86. |
+| **heightCode** | The number the **H buttons on the card** are made of. On line units it is the same 73/80/86; on everything else (dishwasher housings, supports…) it is the height in cm — 29, 42, 204. Clicking an H button looks up the family member with this number. |
 
 ---
 
