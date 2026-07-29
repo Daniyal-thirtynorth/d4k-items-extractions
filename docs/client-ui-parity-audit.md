@@ -772,6 +772,46 @@ chip: our lite UI builds them into a `display:none` span that expands on click, 
 its own on click and so has nothing in the DOM. `dump-ours.js` scraped every `.cp` regardless of
 visibility. It now filters on `getClientRects().length > 0`. Re-measure before reading this number.
 
+#### M9. Round 3 — `dupFamilies` deployed, and four more causes in the residue
+
+`report-Base10` / `report-Tall3` / `report-WallMidway3`, with `dupFamilies` live and the dumper's
+visibility fix in:
+
+| bucket | Base base → B10 | Tall base → T3 | Wall+Mid base → WM3 |
+|---|---|---|---|
+| ROWSET | 402 → 24 | 285 → 42 | 63 → 40 |
+| STATE | 305 → **0** | — → **0** | — → 1 |
+| PILLS | 76 → **0** | 220 → 40 | 51 → **0** |
+| GREY | 123 → **0** | — → **0** | — → **0** |
+| ORDER | 7 → **0** | 43 → 7 | — → **0** |
+| MEMBER | 133 → **10** | 56 → **7** | 93 → **6** |
+| FACE | 274 → 79 | 32 → 5 | 76 → **2** |
+| SECT | 110 → 60 | — → 61 | 92 → 48 |
+| CODE | 0 → **0** | — → **0** | — → **0** |
+
+`dupFamilies` alone took Base MEMBER 57 → 10 and Tall 19 → 7. What was left resolved to four more
+rules:
+
+1. **An empty `gridRows` is an ANSWER, not missing data.** The lite UI required
+   `gridRows.length` before using them and otherwise fell through to the `parameters.*` path, which
+   drew a **W** row on cards the app leaves bare — two-unit accessory families where only ONE unit
+   has a width, so the app's `vsd.length > 1` fails (`F2013__DRWDUP`/`ANK45`, `F1965__DRWDUP`,
+   `F12`, `F52`, `F804`). That was ALL of Base ROWSET 24 and Tall ROWSET 42. Only an ABSENT
+   `gridRows` may use the legacy pills now. The dup cards did not cause this — they exposed it, by
+   putting these accessory families into a swept subcategory for the first time.
+2. **`cardSys(b)` is not the line.** `state.line!=='ALL' ? (line==='80' ? '80' : '73') : '80'` — 86
+   is a 73-SYSTEM line. We read the raw line, so at line 86 the Line row offered `66 · Y` where the
+   app offers `86 · J` + `E`.
+3. **The `217+` chip needs an AVAILABLE 217 unit.** The app appends it only when the family has one;
+   under a programme that excludes it the chip is absent (`F1091` @ROCCA). The H row in `gridRows`
+   already answers that, so the UI asks it instead of rendering the chip unconditionally.
+4. **The PROGRAMME tier filter read the wrong field.** `tierHas(b, letter)` is
+   `u.fam === letter || u._ag` — i.e. `capabilities.nativeTier`, exactly what the FRONTS chip
+   already used — but the programme branch tested `availableTiers`. An article whose only Contino
+   representation is the **C1 opening variant** carries `['C1']` in `availableTiers` and `'C'` in
+   `nativeTier`, and the app counts it as Contino. Base/Appliance housing under ROCCA: app 20
+   families, ours 14 → now 20.
+
 #### Still open — the FACE residue is one rule: `_selUnit`
 
 79 Base / 5 Tall FACE diffs remain, and they are all the same class: our face is picked by
