@@ -24,7 +24,7 @@ v2.3 is in `dev` yet"), **both are now in `origin/dev` in full**:
 | v2.2 | 3 card: depth state row · `217+` · order code | ✅ landed (`unit-card.tsx:464-489`, `:713-720`, `:673`) |
 | v2.2 | 4 drawer | ✅ landed |
 | v2.2 | 5 types | ✅ landed (`ConfigureOption.code`/`alteration` `:180-183`, `HeightExtension` `:266`) |
-| v2.2 | 6 CRM authoring form | ✅ landed (`design-book-item-dialog.tsx`) |
+| v2.2 | 6 CRM authoring form | ⚠️ **partly** — `design-book-item-dialog.tsx` exists and covers everything up to 2.2, but **nothing from 2.3 onward**. See Step 7 |
 | v2.3 | 1 types | ✅ landed (`Capabilities` `:141`, `RefRow` `:308`, `heightCode` `:298`, query keys `:464-477`) |
 | v2.3 | 2 `data/caps.ts` | ✅ landed (75 lines, `availableFromCaps` `:11`) |
 | v2.3 | 3 stop sending `heightClass` for the line bar | ✅ landed — **and improved**: `params.ts:87` still sends `line` in TALL context only |
@@ -48,11 +48,16 @@ them when you see the deletions.
 | 4 | Grid card — render `gridRows` verbatim; one click dispatcher; `cardAvailable`; `heightExtensionOk`; **delete** the per-card line re-face | `components/unit-card.tsx` |
 | 5 | Grid — nothing to do, but do not "fix" the React key to `sku` (dup families) | `components/catalog-grid.tsx` |
 | 6 | Drawer — nothing to do. `parameters.*` IS the drawer model | `components/detail-panel.tsx` |
-| 7 | *(optional)* CRM authoring form — the card-order fields are writable now | `design-book-item-dialog.tsx` |
+| 7 | Item authoring dialog — `showUnderLine` on the W/H rows, five scalar fields, the structured blocks read-only | `design-book-item-dialog.tsx` |
 
-**Out of scope** — unchanged from v2.3: the dead `api/adapt.ts` + `data/filter.ts`; the
+**Out of scope** — the dead `api/adapt.ts` + `data/filter.ts`; the
 `handle`/`front`/`open`/`doorline` toolbar controls (they still don't exist, so those four gates stay
 inert); the detail drawer's pill model.
+
+⚠️ **Step 7 is not optional any more.** It was listed as a nice-to-have before; a field-by-field
+audit of the authoring dialog against `origin/dev` found that **every contract field added from 2.3
+onward is missing from it** — including `showUnderLine` on the W/H pill rows, which means any item
+edited through that dialog today silently loses its per-line pill visibility. Details in Step 7.
 
 ---
 
@@ -877,30 +882,98 @@ sku-keyed de-duplication when merging pages.
 **No change.** `gridRows` is a grid contract; the drawer's model is `parameters.*` and `pill.sku`
 navigation (§2c-4, §2c-10), which is what `CfgChip` (`:163-177`) already does.
 
-## Step 7 *(optional)* — the CRM authoring form
+## Step 7 — the item authoring dialog
 
-`design-book-item-dialog.tsx` renders explicit fields (SKU, kind, familyId, cat/sub/section,
-capabilities, heightClass, availableTiers, faceForTiers, …). Three card-order fields plus two v2.5
-ones are now writable through `POST`/`PATCH /design-book/items`
-(`upsert-item.dto.ts:220/230/238/101/198`), where they used to 400:
+`src/views/lead-management-view/modules/design-book-item-management/design-book-item-dialog.tsx`
+(980 lines on `origin/dev`).
+
+**What it already covers** — don't redo any of this: SKU · kind · familyId · name · category ·
+subcategory · section · nameQualifier · active · the dimension block · `heightClass` ·
+`availableTiers` · `faceForTiers` · `doorLineYCode` · **all 17 `capabilities`** · `parameters` W/H/D
++ programme + options (including the depth row's `code` and `alteration` columns) ·
+`heightExtension` · `alterations`/`companions`/`accessories` · `swatches` ·
+`visibleSideCombos` · `optionCodes` · `description`.
+
+**What is missing.** Every field added to the contract from 2.3 onward. All of them are already
+accepted by `POST`/`PATCH /design-book/items` (`upsert-item.dto.ts`) — verified live, they round-trip
+today — so this is purely form work.
+
+### 7a. `showUnderLine` on the W and H pill rows
+
+The one authoring gap that is not new: the **depth** row grew extra columns but **width** and
+**height** never did, so their `showUnderLine` is unauthorable and any edit through this dialog
+silently drops it.
+
+It is a `number[]` — the carcase lines that pill renders under, with **`0` meaning the "All / no
+line" state** (two-system tall H rows hide their 73-system pills even at All, which a plain per-line
+list cannot express). Absent ⇒ always visible. W/H only; depth rows never carry it.
+
+Verified live — `GET items/TSP6080?expand=all`:
+
+```jsonc
+height: [ { "label": "H73", "sku": "TSP6073", "showUnderLine": [0, 73, 86] },
+          { "label": "H80", "sku": "TSP6080", "showUnderLine": [0, 80] },
+          { "label": "H86", "sku": "TSP6086", "showUnderLine": [0, 86] } ]
+width:  [ { "label": "45",  "sku": "TSP4580", "showUnderLine": [0, 73, 80, 86] },
+          { "label": "55",  "sku": "TSP5580", "showUnderLine": [0, 80] } ]
+```
+
+Add a third column to both rows, same `RowList` shape the depth row uses — a comma-separated
+`number[]` is fine:
+
+```diff
+   <Field label="width (W)" hint="label + target sku">
+     <RowList
+       addLabel="width pill"
+       cols={[
+         { key: "label", placeholder: "label (15)" },
+         { key: "sku", placeholder: "target sku — blank = dead pill" },
++        { key: "showUnderLine", placeholder: "lines: 0,73,80,86 — 0 = All. blank = always" },
+       ]}
+```
+
+…and the same extra column on the `height (H)` row. Parse to `number[]` on save, join on load; blank
+⇒ omit the key entirely (**not** `[]`, which would mean "never visible").
+
+### 7b. The scalar fields
 
 | Field | What it does |
 |---|---|
-| `catalogRank` | the family's `pri` — its position in the catalog order. **`null` is meaningful** (unnumbered family, sorts last) and is *not* the same as "leave unchanged" |
-| `sectionRank` | its section's index in `SECTION_ORDER[sub]` (999 = no curated order) |
-| `familyIndex` | its position in FAMS — the last sort tiebreak |
-| `heightCode` | v2.4 — the H-row key (73/80/86 on line families, the cm height elsewhere) |
-| `gridHidden` | never render this code as a grid card (R10) |
+| `heightCode` | the H-ROW key — 73/80/86 on carcase-line families, the unit's **cm height** everywhere else (29, 42, 204 …). Not derivable from `heightMm` (`AT3037Z` is 367 mm but `heightCode` 37). A number input |
+| `catalogRank` | the family's `pri` — its position in the catalog order. **`null` is meaningful** (unnumbered family) and is *not* "leave unchanged"; it is also **not** 999 — 294 families have a real `pri` above 999. Needs an explicit empty-vs-zero distinction in the form |
+| `sectionRank` | its section's index in the curated per-subcategory section order (999 = that subcategory has no curated order) |
+| `familyIndex` | its position in the app's family list — the last sort tiebreak |
+| `gridHidden` | a checkbox. Never render this code as a grid card; it stays fetchable by sku (R10) |
 
-`unitFacts` / `familyFacts` / `dupFamilies` are settable too but are dumped-from-the-app structures —
-leave them to the backfill scripts unless you are deliberately authoring a synthetic family.
+### 7c. The structured blocks — expose as read-only JSON, not as forms
 
-⚠️ If you *do* expose `familyFacts`, note the 18th key added 2026-07-29: **`rawSub`** — the app's raw
-`f.sub`, which is **not** the same as the item's own `subcategory` (that one is the display name, and
-`TALL_MERGE` folds `Accessory surround` / `Fillers` / `Back & Side Panels` into
-`Panels, Fillers & Surrounds`). The programme-tier HIDE tests the raw one: Fillers and Accessory
-surround are exempt from it, `Back & Side Panels` is not. Getting it wrong hides or shows whole
-families under a non-Primo programme. The admin UI at `/design-book/admin` has the field.
+`unitFacts`, `familyFacts` and `dupFamilies` are settable, but they are **dumped from the app** and
+owned by the backfill scripts. Hand-editing them is how a card silently loses its rows. Render them
+as pretty-printed, **read-only** JSON so an author can *see* what a card is made of, and only make
+them writable behind an explicit "advanced / synthetic family" affordance.
+
+Two traps if you do make them editable:
+
+* **`familyFacts.rawSub`** (the 18th key) is the app's raw sub and is **not** the item's own
+  `subcategory` — that one is a display name, and three Tall subs (`Accessory surround`, `Fillers`,
+  `Back & Side Panels`) are folded into `Panels, Fillers & Surrounds`. The programme-tier hide tests
+  the raw one, and it is not uniform across the fold: Fillers and Accessory surround are exempt from
+  the hide, `Back & Side Panels` is not. Getting it wrong hides or shows whole families under a
+  non-Primo programme.
+* **`dupFamilies`** entries carry their own cat/sub/section/order **and their own `familyFacts`** —
+  50 of the 79 entries differ from the item's primary ones. Copying the primary block into a dup is
+  not a no-op.
+
+The backend's own authoring UI at `/design-book/admin` has all of these as structured controls; use
+it as the reference for field semantics and validation.
+
+### 7d. *(optional)* the detail drawer's W/H rows
+
+The drawer does **not** apply `showUnderLine` (0 occurrences in `detail-panel.tsx`). The grid no
+longer needs it — the server collapses grid rows — but the drawer still renders every pill for every
+line. Ship this only if the drawer's W/H rows visibly diverge from the app; the helper already
+exists (`data/caps.ts` exports `showsUnderLine` and `lineNum`). Everything else about the drawer
+stays as it is: `pill.sku` navigation, and a null `pill.sku` IS a dead chip there.
 
 Skip this step entirely if the item-management tab isn't in scope this sprint; nothing in the grid
 depends on it.
@@ -932,6 +1005,9 @@ depends on it.
 | 16 | Click D `63` on `TSP6080` | **no network request**; the displayed order code changes via `parameters.depth[].code`; the image does not change (v2.2 §2c-2 / Step 4d) |
 | 17 | Open the detail drawer, click a W pill | still navigates by `pill.sku` (drawer exempt) |
 | 18 | Screenshot diff vs the app | compare **card face sku + row shape**, ignore the toolbar chip highlight (stale-highlight trap, R6) |
+| 19 | Open `TSP6080` in the authoring dialog, save with no edits, re-fetch it | its W/H pills still carry `showUnderLine` (`H73 → [0,73,86]`, `H80 → [0,80]`). If they came back without it, the form is dropping the field on save (Step 7a) |
+| 20 | Same dialog | `heightCode`, `catalogRank`, `sectionRank`, `familyIndex`, `gridHidden` are all present and editable (Step 7b); `unitFacts` / `familyFacts` / `dupFamilies` are visible but read-only (Step 7c) |
+| 21 | Clear `catalogRank` on a family and save | it becomes `null` (unnumbered → sorts last), **not** `0` and not 999. If the form cannot express "empty", that field is not done |
 
 Ground truth: `d4k-items-extraction/docs/design-book-api-ui-map-v2.md` — **§2c-11** (`gridRows` +
 toolbar inputs), **§2c-12** (membership: `gridHidden`, `dupFamilies`, the family gates, card order),
