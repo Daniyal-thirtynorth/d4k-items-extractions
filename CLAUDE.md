@@ -304,7 +304,9 @@ Current facts:
   `scripts/parity/extract-grid-facts.js` in the app tab), extractor emits all of it → **re-ingest safe**;
   D4K-dev backfilled (`backfill-item-fields.js --fields unitFacts,familyFacts,gridHidden,dupFamilies`) plus
   the backend-computed `faceWidthMm`. **D4K-prd still owes `unitFacts`/`familyFacts`/`faceWidthMm`/
-  `gridHidden`/`dupFamilies`** — see `docs/parity-session-handoff-2026-07-28.md` §3a for the commands.
+  `gridHidden`/`dupFamilies`** (and, since 2026-07-29, a **STALE `sectionRank`** — it carries the old
+  bad capture, so it is wrong rather than merely absent) — commands in
+  **`docs/parity-session-handoff-2026-07-29.md` §3** (supersedes the 07-28 §3a).
 
 - **⭐ SWEEP ROUND 3 — section order + the RAW SUB + the v98 sibling swap (2026-07-29 late,
   schemaVersion 2.5.3, audit §N).** Round 2's `grey=false` residue was Base MEMBER 1 · Tall MEMBER 3 /
