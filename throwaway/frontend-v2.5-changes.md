@@ -1,5 +1,41 @@
 # D4K-frontend — design-book v2.5 (`gridRows`, card membership) implementation
 
+## Before you start — what to point at
+
+Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `9dc6a834`
+or later**, running against the **D4K-dev** database. Neither half is optional:
+
+* The code is only on `dev` — it has **not** been released to prd.
+* **D4K-prd is missing the data** (`unitFacts`, `familyFacts`, `gridHidden`, `dupFamilies`,
+  `faceWidthMm`) and its `sectionRank` is **stale** — wrong values, not absent. A grid built against
+  prd will look plausible and be subtly wrong.
+
+```bash
+cd D4K-backend && git checkout dev && git pull && npm run build && node dist/main.js   # :8000
+#   .env → MONGO_URI must be the D4K-dev cluster (it is line 2 by default)
+```
+
+`NEXT_PUBLIC_API_URL=http://localhost:8000/` is already the default in the frontend `.env`.
+
+**30-second smoke test** — if this returns what is shown, you have the right backend and DB:
+
+```
+GET /design-book/items/by-section?category=Base&subcategory=Sinks&programs=244
+      &depthClass=58&lineState=73&groupBy=family&grey=false&refs=true&limit=5
+
+→ sections: [ { "section": "Sink Units", "count": 5 } ]
+  first card: TSP6073   ← re-faced to the 73 line by lineState
+  cardAvailable: true
+  gridRows[0]: { "label":"H", "kind":"height",
+                 "pills":[ { "label":"73","value":73,"sku":"TSP4573","selected":true,"off":false } ] }
+  refs: 45 entries
+```
+
+Note that H pill: the card is a **60 cm** unit and the pill's sku is a **45 cm** one. That is correct
+and is the whole point of R3 — never click a grid pill by `pill.sku`.
+
+---
+
 Line refs are `origin/dev` = `25b19af9`. Everything below is additive on the API side — no field is
 removed or renamed — but it **deletes** a large slice of client logic that v2.3 asked you to write.
 The backend half already shipped (D4K-dev; `dev` branch code, `design-book.grid-rows.ts`); this
