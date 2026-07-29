@@ -5,6 +5,13 @@ removed or renamed — but it **deletes** a large slice of client logic that v2.
 The backend half already shipped (D4K-dev; `dev` branch code, `design-book.grid-rows.ts`); this
 document is only the frontend work to *consume* it.
 
+> **Re-checked 2026-07-29 (late).** `origin/dev` is **still `25b19af9`** — no frontend commits since
+> this document was written, so every line ref below is still accurate (spot-verified:
+> `useCardSwap` `hooks.ts:239`, `key={card.familyId || card.sku}` `catalog-grid.tsx:63`,
+> `params.ts:87`, `unit-card.tsx:422`/`:464`, `caps.ts:11`, `detail-panel.tsx:177`).
+> **The API moved, though** — see the next section. None of it changes the work list; one item
+> (R9b) changes what you should EXPECT on screen under a programme.
+
 ## ⭐ v2.2 and v2.3 HAVE landed — this composes with them
 
 I diffed `origin/dev` against both earlier guides. Unlike when v2.3 was written ("Neither v2.2 nor
@@ -46,6 +53,23 @@ them when you see the deletions.
 **Out of scope** — unchanged from v2.3: the dead `api/adapt.ts` + `data/filter.ts`; the
 `handle`/`front`/`open`/`doorline` toolbar controls (they still don't exist, so those four gates stay
 inert); the detail drawer's pill model.
+
+---
+
+## ⭐ API changes since this document was written (2026-07-29, sweep round 3 — audit §N)
+
+Backend `dev` branch + D4K-dev data. **schemaVersion 2.5.2 → 2.5.3.** Four server-side fixes; the
+only one with a visible consequence for you is the first.
+
+| # | Change | What it means for the frontend |
+|---|---|---|
+| **1** | **The v98 sibling-family swap is now applied** (`applySiblingFamilySwap`). Under a zone programme, a card whose face is in another tier but whose model has a twin in the active one resolves to that twin — which usually lives in a **different family** — and the app's own dedupe then collapses the pair into ONE card. | **Card COUNT drops under a programme, and a familyId can vanish.** `F115` and `F209` are two cards with no programme and **one** card (`F209`) under an Avance programme; same for `F93` ⇄ `F106` in Wall › Corner. This is correct — it is what the app does. See **R9b**. |
+| 2 | **Section ORDER fixed.** `sectionRank` had been captured with the wrong key (`SECTION_ORDER[f.sub]` instead of `SECTION_ORDER[subDisp(f)]`), so on Tall every section of a merged sub came out in the wrong order. Re-captured, 78 families / 1,130 items. Plus the app's `_subs.size===1` guard: a task leaf spanning several subs falls back to first-seen/`pri` order. | Nothing to do — **reinforces R10**. Render `sections[]` in the order given; never sort them client-side. |
+| 3 | **Card ORDER inside a section fixed.** The `maxh` sort tiebreak was computed over the *filtered* group, not the family's whole member list, so any unit-level filter (`line=80`, `tier=C`) reshuffled sections whose families have no `pri`. Now taken from the unfiltered pool. | Nothing to do — **reinforces R10**. Do not re-sort cards. |
+| 4 | **`familyFacts.rawSub`** added (2.5.3) — the app's raw `f.sub`. `Item.subcategory` is the DISPLAY name and `TALL_MERGE` folds three Tall subs into one, so the raw one is needed for the programme-tier hide. | Client does **not** need it (same as `unitFacts`/`familyFacts` — don't type it). Authoring only — see Step 7. |
+
+Not yet on D4K-prd: the 2.5.x data backfills (`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`,
+`dupFamilies`, `faceWidthMm`, `sectionRank`). Point at D4K-dev while building against this document.
 
 ---
 
@@ -288,6 +312,40 @@ while the item's own record is `F1970` / Base / **Sinks**.
 **Any React `key` or client-side dedupe keyed on `sku` will drop or collide those cards.** Key on
 `familyId` (or `familyId + sku`). `catalog-grid.tsx:63` is already `card.familyId || card.sku` —
 **correct as-is; do not "simplify" it to `card.sku`.** The rule is a landmine warning, not a task.
+
+### R9b · Under a programme, TWO families can collapse into ONE card (§N4)
+
+Added 2026-07-29. The mirror image of R9: R9 says one sku can be two cards, R9b says two families can
+be one card.
+
+`visibleBlocks` runs a swap the earlier port missed — "the card pre-selects the article of the zone's
+pricebook":
+
+```js
+const fl = activeFamFor(b.cat);                    // the programme's tier letter
+if (fl && u.fam && u.fam !== fl && String(u.sib||'').includes(fl)) {
+  const sc = sibCode(u, fl), loc = sc ? codeLoc(sc) : null;
+  if (loc && loc.fid !== b.id) { b = FAM_BY_ID[loc.fid]; u = …; }   // → ANOTHER family
+}
+…
+{ const seen = new Set(); … }                      // then dedupe by b.id, keeping the FIRST
+```
+
+So a Contino-faced card under an Avance programme becomes its Avance twin, that twin usually lives in
+a different family, and the pair collapses. Measured: Tall › Panels, Fillers & Surrounds returns
+**28 families under LAIKA and under ROCCA** (the app: 28), where an unswapped list returns 29 —
+`F115` (`CHP20154`) becomes `F209` (`AHP20154`) under Avance and vice-versa. Wall › Corner: `F93` ⇄
+`F106`, 6 cards either way.
+
+**Nothing to implement — this is a warning about expectations.** But three things follow:
+
+* **The card count legitimately changes when the programme changes**, beyond greying. Do not treat a
+  drop as a lost-data bug.
+* **`familyId` is not stable across toolbar states.** If anything keys client state (open drawer,
+  scroll anchor, selection) on `familyId`, it can point at a family that is not in the next response.
+  Key on it for React identity (R9 still stands) but re-resolve it after a programme change.
+* **Do not re-add any client-side "prefer the programme's article" logic.** The server already did it,
+  and doing it twice would swap a card that was already swapped.
 
 ### R10 · The FACE, the card ORDER and the section ORDER are all server-final (§2c-12, §M2, §M6)
 
@@ -837,6 +895,13 @@ ones are now writable through `POST`/`PATCH /design-book/items`
 `unitFacts` / `familyFacts` / `dupFamilies` are settable too but are dumped-from-the-app structures —
 leave them to the backfill scripts unless you are deliberately authoring a synthetic family.
 
+⚠️ If you *do* expose `familyFacts`, note the 18th key added 2026-07-29: **`rawSub`** — the app's raw
+`f.sub`, which is **not** the same as the item's own `subcategory` (that one is the display name, and
+`TALL_MERGE` folds `Accessory surround` / `Fillers` / `Back & Side Panels` into
+`Panels, Fillers & Surrounds`). The programme-tier HIDE tests the raw one: Fillers and Accessory
+surround are exempt from it, `Back & Side Panels` is not. Getting it wrong hides or shows whole
+families under a non-Primo programme. The admin UI at `/design-book/admin` has the field.
+
 Skip this step entirely if the item-management tab isn't in scope this sprint; nothing in the grid
 depends on it.
 
@@ -860,6 +925,9 @@ depends on it.
 | 12 | Same card under a programme with no available 217 unit | the `217+` chip **disappears** (`heightExtensionOk:false`) while the H row is unchanged (R8) |
 | 13 | Base → Cooktops & Downdrafts → Accessories & Modifications | `ANTSPSAUS` appears there **and** under Base → Sinks; both render; no React key warning (R9) |
 | 14 | Cooktop Units @ D68 | greyed `BZ`/`BSZ` sit **in the middle** of `BZ2 BSZ2 BZ BSZ BZIZ`, not pushed to the end (R10/§M6) |
+| 14a | Tall → Panels, Fillers & Surrounds, no programme → then LAIKA (410) → then ROCCA (701) | 29 cards → **28** → **28**. Under LAIKA `F115` is gone and `F209` is present; under ROCCA the reverse. A count drop here is CORRECT (R9b), not a lost card |
+| 14b | Wall → Corner under LAIKA vs ROCCA | 6 cards either way; `F93` under LAIKA, `F106` under ROCCA — never both (R9b) |
+| 14c | Tall → Panels, Fillers & Surrounds, line 80 | sections read `Tall End Panels · Tall Fillers · Tall Blenders · Tall Corner Blenders · Tall Angle Blenders · Wall Blenders · Rear Panels in Front Finish · Carcase Side Extension · Tall Visible Carcase Side · Support Panel with Plinth` — in that order, from the server (§N2). Do not sort them |
 | 15 | A W=90 filter on a family whose face is 50 cm | the card is correct — do not "fix" the face (R10/§2c-9) |
 | 16 | Click D `63` on `TSP6080` | **no network request**; the displayed order code changes via `parameters.depth[].code`; the image does not change (v2.2 §2c-2 / Step 4d) |
 | 17 | Open the detail drawer, click a W pill | still navigates by `pill.sku` (drawer exempt) |
@@ -868,7 +936,7 @@ depends on it.
 Ground truth: `d4k-items-extraction/docs/design-book-api-ui-map-v2.md` — **§2c-11** (`gridRows` +
 toolbar inputs), **§2c-12** (membership: `gridHidden`, `dupFamilies`, the family gates, card order),
 **§2c-5/6/7/8/9/10** (unchanged v2.3 material), **§2b** (section order + header merge) — and
-`docs/client-ui-parity-audit.md` **§M1–M9**.
+`docs/client-ui-parity-audit.md` **§M1–M9** and **§N** (the round-3 fixes above).
 
 ---
 
