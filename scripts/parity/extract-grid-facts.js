@@ -64,7 +64,11 @@
         d63: c63 ? { mode: c63.mode, force68: !!c63.force68 } : null,
       };
       b.units.forEach(u => {
-        units[u.c] = {
+        // KEYED BY FAMILY + CODE. A unit record belongs to ONE family, and a code that is a member
+        // of several families has a SEPARATE record in each — `TR90LL3` is `w: 90` in L32345 and
+        // `w: null` in its other family. Keying by code alone let the last family written win,
+        // which stripped the width off that unit and killed L32345's whole W row.
+        units[b.id + '|' + u.c] = {
           fid: b.id,
           fam: u.fam || null, op: u.op || null, ag: !!u._ag, sib: u.sib || null,
           hc: u.hc != null ? u.hc : null, w: u.w != null ? u.w : null,

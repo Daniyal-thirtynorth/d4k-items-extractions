@@ -121,9 +121,20 @@ function dupEntry(fid) {
   };
 }
 
+// `facts.units` is keyed FAMILY|CODE: a unit record belongs to one family, and a code that is a
+// member of several has a separate record in each (`TR90LL3` is w:90 in L32345, null in its other
+// family). Fall back to a code-only scan for the handful of items whose stored familyId is not the
+// dump's owner, and for dumps produced before the re-key.
+const unitsByCode = new Map();
+for (const [k, v] of Object.entries(facts.units)) {
+  const code = k.includes('|') ? k.slice(k.indexOf('|') + 1) : k;
+  if (!unitsByCode.has(code)) unitsByCode.set(code, v);
+}
+const unitFactsFor = (it) => facts.units[it.familyId + '|' + it.sku] || unitsByCode.get(it.sku);
+
 let setU = 0, setF = 0, noUnit = 0, noFamily = 0, hidden = 0, dupItems = 0, dupEntries = 0;
 for (const it of data.items || []) {
-  const u = facts.units[it.sku];
+  const u = unitFactsFor(it);
   if (u) { it.unitFacts = unitFacts(u); setU++; } else noUnit++;
   const fid = it.familyId || (u && u.fid);
   const f = fid && facts.families[fid];
