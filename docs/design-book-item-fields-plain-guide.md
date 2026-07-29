@@ -20,6 +20,8 @@ ID, the way a barcode identifies a tin of beans. Everything else below describes
 | **subcategory** | The **finer group** under that: Sinks, Cooktops, Storage, Doors… |
 | **section** | An optional **smaller heading** inside a sub-category on the page. |
 | **familyId** | Which **product card** it belongs to. All the size/style versions of one product share this, so they show up as a single card in the grid. |
+| **dupFamilies** | The handful of products that are **deliberately listed twice** — the same code appears as a second card in another part of the catalog (a sink alteration also shown under cooktops). Each entry is a whole second card: its own group, heading and position. 74 products do this. |
+| **gridHidden** | "**Never show this as a card.**" A few codes exist only to be *referred to* — reached from another product's "planned together" list, or leftovers the app itself drops. You can still open them by code; they just never appear in a grid. |
 | **nameQualifier** | The small **amber note** next to the title, e.g. "Mid 45 cm deep" — a quick clarification. |
 | **active** | Whether the product is **still current**. If a newer catalog drops the code, it's switched off (hidden) but kept for history. |
 
@@ -44,7 +46,11 @@ Sizes are the cabinet **body** measurements, in **millimetres** (so 600 = 60 cm)
 | Field | In plain words |
 |---|---|
 | **availableTiers** | Which **front styles** the product comes in — the little **P · P1 · A · C · C1** badges (Primo, Avance, Contino, plus the "one handle on top" opening variants). |
-| **parameters** | All the **option buttons** on the product: Width, Height, Depth, front style, and any coded rows. Most buttons jump you to a specific sibling product. **Depth is the exception** — see below. |
+| **parameters** | All the **option buttons on the detail screen**: Width, Height, Depth, front style, and any coded rows. Most buttons jump you to a specific sibling product. **Depth is the exception** — see below. (The buttons on the *card* in the grid are a separate thing — see §3b.) |
+| **gridRows** | ⭐ The **buttons on the card**, worked out for you. Not stored on the product — the server builds them from the *whole family* and sends them ready to draw: which buttons, which one is on, which are dimmed, which are dead. See §3b. |
+| **cardAvailable** | Whether the **whole card** can be ordered with your current choices. If it's off, the card shows greyed. Worked out by the server because it depends on facts about the family, not just this product. |
+| **heightExtensionOk** | Whether the **"217+" button** should appear on this card right now. It's a question about the family (is there an orderable 217 cm version?), so it can't be read off the buttons. |
+| **unitFacts / familyFacts** | The **raw ingredients** the server uses to build the card's buttons: this product's width/depth/type numbers, and the family's shape (which rows it has, what the type row is called, how the chips are ordered). Housekeeping — nobody reads these on screen. |
 | **parameters.depth** | The Depth buttons usually **don't** change the product: the *same* cabinet can be built 36 / 48 / 58 / 68 cm deep, so every Depth button carries **this product's own code** — that repetition is correct, not a bug. What changes is the **order code**, which is stored on the button as **`code`** (`T6080IS2IZ` at 36 cm → `T608036IS2IZ`). 58 and the 63 cm alteration keep the plain code. Because the buttons share a code, the highlighted one is chosen by its **label**, never by matching codes. |
 | **heightExtension** | Only on **tall** products that can be built **higher than 217 cm**. It's the small **"217+"** button beside the Height buttons; tapping it offers **230 / 244 / 250 cm**. Picking one doesn't open a new product — you order the **217 cm version plus one extra code** (`MPHVERL`), the same way the 63 cm depth works. It's kept separate from the Height buttons because a few families (tall panels) genuinely *do* sell a real 230 and 250 cm product, so both have to be shown side by side. |
 | **doorLineYCode** | Only on a handful of products. Most front-line choices just tack a letter onto the code, so the app can work them out. **Door-line "Y" (line 66) uses a completely different code**, so it can't be worked out — the code is written down here (`MGT601468` → `MGT60146Y`). |
@@ -65,6 +71,26 @@ Almost never. In everyday terms:
 
 So there's no special "217+" request to the server — at most it quietly opens the 217 cm product the first
 time, exactly like clicking any other button that leads to a different product.
+
+### 3b. Why the card's buttons and the detail screen's buttons are different
+
+They answer different questions, so they are allowed to disagree.
+
+- The **detail screen** shows the buttons of the product **you are looking at**. If you're on the black
+  version of a cabinet and black only comes in two heights, that's what the screen offers.
+- The **card in the grid** shows the buttons of the **whole family** — every height the product comes in,
+  whatever version you happen to be standing on. Click one and it finds the family member that matches.
+
+That's why the card's buttons are worked out on the server and sent ready-made (**gridRows**), instead of
+being read off the product. Three things about them worth knowing:
+
+- **An empty list is an answer.** Some cards genuinely have no buttons — a two-item accessory family where
+  only one has a size. Empty means "no buttons here", not "we couldn't work it out".
+- **The code on a button is not where it takes you.** A 60 cm sink card's height buttons carry the codes of
+  the 45 cm versions, exactly as the original app does — they're a label, not a destination. The click asks
+  the family for the right member.
+- **Dimmed and dead are different.** Dimmed means "doesn't fit your current choices" (you can still click
+  it). Dead means there's no product behind it.
 
 ---
 
@@ -145,9 +171,12 @@ time, exactly like clicking any other button that leads to a different product.
 ### A quick recap
 
 - The **order code (sku)** is the product; everything else describes it.
-- **Category → subcategory → section** decide **where you find it** in the menus.
+- **Category → subcategory → section** decide **where you find it** in the menus (and a few products are
+  deliberately filed in two places at once).
 - **Width / height / depth** are its **size**; **front styles** and **option buttons** are the **choices** you
   click; **capabilities** are the **rules** that grey those choices out.
+- The **detail screen's** buttons belong to the product; the **card's** buttons belong to the whole family
+  and arrive ready-made from the server.
 - **Alterations / accessories / companions** are the **things that go with it**.
 - The rest is **words, badges, price and catalog** detail shown around the product.
 

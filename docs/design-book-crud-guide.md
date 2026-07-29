@@ -4,9 +4,14 @@ How to **add, edit, and delete** catalog items via the API, authored so the conf
 exactly like the live app. For whoever builds the admin UI or hand-authors data.
 
 - Base path `/design-book` · JWT-guarded (`Authorization: Bearer <token>`; get a dev token at `GET /design-book/dev-token`).
-- Schema **2.3.0** — contract `docs/export-schema-v2.ts`, field↔UI map `docs/design-book-api-ui-map-v2.md`.
+- Schema **2.5.2** — contract `docs/export-schema-v2.ts`, field↔UI map `docs/design-book-api-ui-map-v2.md`.
   (2.1 = 2.0 + `code` on depth pills, §4a. 2.2 = + `heightExtension` §4b and `doorLineYCode` §4c.
-  2.3 = + `showUnderLine` on width/height pills, §4d. All additive; older readers ignore them.)
+  2.3 = + `showUnderLine` on width/height pills, §4d. 2.4 = + `heightCode` §4e.
+  **2.5 = + `unitFacts` / `familyFacts`, 2.5.1 + `gridHidden`, 2.5.2 + `dupFamilies` — all §4f, and all
+  about the GRID card rather than the detail screen.** All additive; older readers ignore them.)
+- ⭐ **Read §4f before you author anything that shows a card.** Since 2.5 the grid card's W/H/D/Ty rows are
+  **not** drawn from `parameters` — the server rebuilds them from the FAMILY (`gridRows`). `parameters` is
+  now the DETAIL-screen model. Authoring only `parameters` gets you a correct drawer and an empty card.
 - CRUD writes the **same shape** as `POST /design-book/ingest` (one shared `normalizeItemDoc`). A hand-authored
   item and an extractor-produced item are identical.
 - **Easiest way to author:** the form-based admin UI at **`GET /design-book/admin`** — every field is a control,
@@ -32,6 +37,14 @@ So the Width row on `T6080` is just **shortcuts to its siblings**. Clicking "15"
 
 **Why it matters for editing:** a pill's behaviour is a fact about the item it POINTS TO, not the card you're
 on. "Disable width-15 in BOSSA" is stored on `T1580`, not on `T6080`. See §5.
+
+**Two corollaries added in 2.5** (both §4f):
+
+- The card's ROWS are a fact about the **family**, not about the item you happen to be editing. The server
+  collects every member (`familyId`) and builds the rows from their `unitFacts`. So "add a 70 cm width to
+  this card" = *create the 70 cm member with the right `unitFacts.widthCode`*, not "add a pill".
+- One item can belong to **more than one family** — i.e. show up as two separate cards in two different
+  sub-categories (`dupFamilies`). 74 items do.
 
 ---
 
@@ -63,6 +76,12 @@ One item per request. **Every field the extractor writes is settable.** Unknown 
   the card shows an H row. See map §2c-10.
 - **Fronts / rules:** `availableTiers[]`, `faceForTiers[]`, **`capabilities`** (§3), `parameters` (§4;
   width/height pills may carry `showUnderLine` §4d), `heightExtension` (§4b), `doorLineYCode` (§4c).
+- **⭐ Grid card (2.5, §4f):** **`unitFacts`** (this unit's row VALUES + pool scoping), **`familyFacts`**
+  (the family's row SHAPE, denormalized onto every member), `gridHidden` (never render as a card),
+  `dupFamilies[]` (extra card memberships).
+- **⭐ Card order (§4f):** `catalogRank` (the family's catalog `pri`; **`null` is meaningful** — unnumbered,
+  sorts last), `sectionRank` (its section's index in the curated order, 999 = none), `familyIndex` (position
+  in FAMS — the last sort tiebreak). These went in read-only at first; the write API accepts them now.
 - **Thin refs:** `alterations[]`, `accessories[]` (sku, or `{sku, variants:[{label,sku}]}`), `companions[]`.
 - **Vero:** `finishInterior` (`{swatches[], visibleSideCombos[], optionCodes[]}`).
 - **Text:** `description` (`{title, bullets[]}`), `restrictions[]`, `planningNotes[]`, `didYouKnow`, `modifications[]`.
@@ -88,6 +107,14 @@ available(unit) = alwaysAvailable || (progOk && tierOk && depthOk && handleOk &&
 
 A pill is **DEAD** when its `sku` is null (no target), **GREY** when `available(target) === false`, else live.
 `alwaysAvailable:true` forces LIVE and skips every gate.
+
+> ⭐ **A whole CARD greys by a bigger rule than this** (2.5). `capabilities` answers "is this UNIT
+> orderable"; a card also has to pass two FAMILY questions no single unit can answer — does the family
+> belong to the picked programme's front line (`famOkB`/`famOkU`, from `familyFacts.memberTiers` +
+> `unitFacts.tier`/`siblingTiers`), and does it have anything at the picked line/depth. The server ships the
+> combined verdict as **`cardAvailable`** on every grid card, and an **accessory or alteration card NEVER
+> greys** whatever its capabilities say (`familyFacts.isAccessory`). Author the unit rules here; do not try
+> to reproduce the card verdict from them. See §4f and `design-book-greying-examples.md` §14.
 
 ### Every field, and what it does
 
@@ -198,7 +225,13 @@ Verified 99.997% vs the live app (313,842 combinations = 16,518 pill targets × 
 
 ---
 
-## 4. `parameters` — the pills
+## 4. `parameters` — the pills (⚠️ the DETAIL screen's pills)
+
+> ⭐ **Scope changed in 2.5.** `parameters` is what the **detail drawer** renders. The **grid card** does
+> NOT render it any more: the server rebuilds the card's rows from the family pool and ships them as
+> `gridRows` (§4f). They disagree on purpose — `parameters` was scraped from ONE unit's detail panel, so it
+> misses heights that unit's variant lacks and offers rows the grid never draws. Everything in §4/§4a is
+> still exactly right **for the drawer**; for the card, read §4f.
 
 The W/H/D/Programme rows + coded rows. Each pill is thin — a **label + the SKU it opens**. No stored
 `available`/`selected` — those are derived (selected = `pill.sku === item.sku`; grey = `availableFromCaps(target, toolbar)`).
@@ -371,6 +404,11 @@ Height pills that don't belong to that line. Put the lines a pill shows under in
 }
 ```
 
+> ⚠️ **Drawer-only since 2.5.** The grid card no longer consults `showUnderLine` — the server collapses the
+> card's H/W rows itself (`lineHFilter`, driven by the `lineState` query param), so the field does not appear
+> anywhere in the grid-row builder. It is still stored, still exported, and still correct for the detail
+> drawer. Don't delete it; just don't expect editing it to move a card's row.
+
 - **Omit it ⟹ the pill always shows** (correct for height-CLASS rows on Tall/Wall that don't collapse).
 - **Never on depth pills.** Width/Height only.
 - Editable directly in the admin UI (a `showUnderLine` column on each width & height pill row).
@@ -405,6 +443,96 @@ Checklist for a new unit with an H row:
 2. `heightClass` set **only** if that value is 73/80/86 (it is the LINE, and it drives `showUnderLine`);
 3. the family's other units already list that label in `parameters.height[]` — add the pill there too if
    this is a brand-new height (a pill with no `sku` is fine: the grid resolves by label, §2c-10).
+
+---
+
+## 4f. ⭐⭐ `unitFacts` / `familyFacts` — what actually draws the GRID card (2.5)
+
+**The one thing to understand:** the app never asks a *unit* what its rows are. It asks the **family** —
+`ppool(b)` (the family's units under the current programme + opening) → `hvals(b)` (their distinct height
+codes) → `wsAtH` (the widths at the selected height) → `dAll` (the depths there) → `variantOpts(b)` (the Ty
+chips). The backend now does the same and ships the finished rows as **`gridRows`** on every card:
+
+```jsonc
+gridRows: [
+  { label: "H", kind: "height", pills: [ { label:"73", value:73, sku:"TSP4573", selected:false, off:false } ] },
+  { label: "W", kind: "width",  pills: [ … ] },
+  { label: "D", kind: "depth",  pills: [ … ] },
+  { label: "Ty", kind: "variant", pills: [ { label:"S2Z", value:"S2Z", sku:null, selected:false, off:true, dead:true } ] }
+]
+```
+
+**`gridRows` is COMPUTED — never author it, never send it.** What you author are its two inputs.
+
+### `unitFacts` — this unit's values (one per item)
+
+| Field | App | What it decides |
+|---|---|---|
+| `widthCode` | `u.w` | the number this unit contributes to the **W row**, in cm. ⚠️ *not* `widthMm/10` on panels |
+| `depthCode` | `u.dv` | its value on the **D row**, in cm. `0` means 58 (the app reads `dv \|\| 58`) |
+| `variantCode` | `u.vr` | its **Ty** key; pools are variant-scoped whenever `familyFacts.variantLabel` is set |
+| `depthAlterations` | `u.d` | the depth classes this *same* cabinet can be built at → the D **state** row (§4a model A) |
+| `tier` / `opening` / `agnostic` / `siblingTiers` | `u.fam` / `u.op` / `u._ag` / `u.sib` | pool scoping + the FRONTS twin rule. `agnostic:true` = belongs to every line, never filtered out |
+| `heightCodeNull` | — | set it **only** when `u.hc` is literally `null` rather than absent. The app compares heights with strict `===`, so a null unit never matches an absent one — which is why ANBL's card draws no W and no D row. 4 units in v781; if you are unsure, leave it out |
+
+The **H row** value is not in here — it is the top-level `heightCode` (§4e).
+
+### `familyFacts` — the family's shape (denormalized onto EVERY member)
+
+Same object on every unit of a family; if you edit it, edit it on all of them (`dupFamilies` entries carry
+their own copy, §below).
+
+| Field | App | What it decides |
+|---|---|---|
+| `dim` | `b.dim` | **which numeric row exists**: `height` (H+W+D), `hd` (H+D), `width`, `depth`, `none`. A `depth` family labels its row **D** even though the values come from `widthCode`. `none` = variant chips only, and those chips **never grey** |
+| `variantLabel` | `b.vlbl` | the Ty/Mode/Config row's on-screen label — and the switch that makes pools variant-scoped |
+| `variantLabels` / `variantOrder` / `variantFormat` | `_vrLbl` / `b.cho` / `b.vfmt` | the chip TEXT, the curated chip order, and "labels are lengths in cm" |
+| `numericLabel` | `b.slbl` | overrides the numeric row's label ("Depth", "Length") |
+| `byProgramme` | `b.byprog` | pool is scoped by the ZONE programme instead of by the unit's own line |
+| `hasOpeningArticles` / `hasPrimo` / `noLine` | `b._hasOp` / `b._hasP` / `b.noline` | pool selection, and `noLine` skips the carcase-line H filter |
+| `memberTiers` | `b._mem` | every line the FAMILY appears in ("PAC") — the `famOkB` half of the card grey |
+| **`isAccessory`** | `isAccessory(b)` | ⭐ the CARD never greys. No programme, depth or height gate applies to it |
+| `isProgrammeAgnostic` | `isProgAgnostic(b)` | cat/sub sits outside the programme system |
+| `depth63` | `d63Cfg(b)` | `null` ⟹ the family **cannot** be ordered at 63, so a D=63 toolbar drops it |
+| `label` / `labelGroup` / `isSpecial` | `b.label` / `rk(label)` | card title + the sort that keeps a variant next to its product |
+
+### `gridHidden` — never render this code as a card
+
+`true` = this code belongs to no visible family: the app's `visibleBlocks()` skips `b.hid` families
+outright (detail-only, reached through "Planned together"), and some codes belong to no app family at all —
+the units the app's own init deletes (`meta.recoveredArtifactSkus`) and ItemRef-only stubs (`760`, `761`,
+`SZIZ`, `US`…). 57 items. They stay **fetchable by sku** and still resolve as refs; they are only dropped
+from every LIST. Set it when you add a code that exists purely to be referenced.
+
+### `dupFamilies[]` — one code, several cards
+
+41 synthetic families (`*__CKDUP`, `*__DRWDUP`, `*__SNKDUP`, `*__TRDUP`, `MRG_*`) re-list an accessory under
+a second task area, and a few families genuinely share units. `familyId` is the PRIMARY card; each entry
+here is **another whole card identity**, because a dup normally sits in a different sub-category with its
+own catalog order — and 50 of the 79 entries have different `familyFacts` too:
+
+```jsonc
+"familyId": "F1970",                      // Base / Sinks — the primary card
+"dupFamilies": [{
+  "familyId": "F1970__CKDUP",
+  "category": "Base", "subcategory": "Cooktops & Downdrafts",
+  "section": "Accessories & Modifications",
+  "catalogRank": 58, "sectionRank": 5, "familyIndex": 1672,
+  "familyFacts": { /* the DUP family's own facts */ }
+}]
+```
+
+A dup family's member POOL is collected from `familyId` **OR** `dupFamilies.familyId`, so every member of
+the dup family needs the entry — otherwise that card renders with no rows. Worked example in
+`docs/export-sample-v2.json` (`ANTSPSAUS`).
+
+### Card order — `catalogRank` / `sectionRank` / `familyIndex`
+
+Cards inside a section are ordered by the raw catalog `pri` **alone** — availability is *not* a key, so a
+greyed card keeps its catalog position instead of sinking. `catalogRank` is that `pri`; **store `null` for
+an unnumbered family** (it sorts last — do not use `999`, 294 families have a `pri` above it).
+`sectionRank` orders the sections themselves, `familyIndex` is the final tiebreak. All three are backfilled
+from the app; author them only for a family the extractor doesn't emit.
 
 ---
 
@@ -470,6 +598,18 @@ PATCH /design-book/items/T1580
 "accessories": [ "FS8056", { "sku":"IGS6058", "variants":[ {"label":"L3/M3","sku":"IGS6058"}, {"label":"M8","sku":"IGS6058U"} ] } ]
 ```
 
+**Add a width to an existing CARD (2.5):** create the member with the family's ids + facts. Adding a pill to
+`parameters.width` only changes the drawer — the card's W row is built from the members' `unitFacts`.
+```json
+POST /design-book/items
+{ "sku":"Z7080", "kind":"cabinet", "name":"Floor unit", "familyId":"ZFAM",
+  "category":"Base", "subcategory":"Doors", "widthMm":700, "heightClass":80, "heightCode":80,
+  "capabilities": { "...": "as the siblings" },
+  "unitFacts":   { "tier":"P", "opening":null, "agnostic":false, "siblingTiers":null,
+                   "widthCode":70, "depthCode":58, "variantCode":null, "depthAlterations":null },
+  "familyFacts": { "...": "copy VERBATIM from a sibling — it must be identical on every member" } }
+```
+
 **Delete:** `DELETE /design-book/items/Z6080` (soft, `active:false`) · `…?hard=true` (remove).
 
 ---
@@ -495,17 +635,37 @@ PATCH /design-book/items/T1580
   230/250 cm siblings too, so both must coexist (§4b).
 - **`doorLineY: true` without `doorLineYCode` is unusable** — Y replaces the whole code, so the client
   has nothing to order (§4c).
+- **⭐ Editing `parameters` does NOT change the grid card.** Since 2.5 the card's rows come from the family
+  (`gridRows`, built from `unitFacts`/`familyFacts`); `parameters` is the detail drawer. A pill you add
+  shows in the drawer only, and a member you add shows on the card only (§4f).
+- **`familyFacts` must be IDENTICAL on every member of a family.** It is denormalized, not joined — one
+  member with a stale copy is a coin-flip, since the card reads whichever unit is the face.
+- **A new member with no `unitFacts` is invisible on the card.** It will still open, still resolve as a ref,
+  and still appear in the drawer's pills — it simply contributes nothing to any row (§4f).
+- **`catalogRank: null` ≠ "leave unchanged".** Null is a real value (unnumbered family, sorts last), so a
+  PATCH that clears it must send an explicit `null`.
+- **Card grey ≠ `availableFromCaps`.** Use the server's `cardAvailable`; the local 8-gate port sees ONE unit
+  and cannot answer the two family questions (§3, `design-book-greying-examples.md` §14).
 
 ---
 
 ## 8. Verify your work
 
 ```bash
-GET    /design-book/items/Z6080                    # round-trips: capabilities + parameters intact
+GET    /design-book/items/Z6080                    # round-trips: capabilities + parameters + unitFacts intact
 GET    /design-book/items/Z6080?programs=244        # programme rule: width 15/20 → available:false, programmeExcluded:true
 GET    /design-book/items?category=Base&subcategory=Doors&q=Z6080   # shows in the grid
+
+# ⭐ 2.5 — the CARD, not the item. This is the only check that proves your facts are right:
+GET    /design-book/items?familyId=ZFAM&groupBy=family&limit=1      # → gridRows[] · cardAvailable
+GET    /design-book/items?familyId=ZFAM&groupBy=family&limit=1&depthClass=68&programs=244&lineState=73
+                                                    # rows collapse + pills go `off` under a real toolbar
 DELETE /design-book/items/Z6080?hard=true           # clean up a test
 ```
+Reading `gridRows`: `selected` = the card's own value · `off` = greyed but still clickable · `dead` =
+disabled (no unit behind it) · `sku` = the unit it lands on (informational — a grid client resolves by
+`value`). An **empty** `gridRows` means "this card has no rows", which is a legitimate answer for a
+two-member accessory family; a **missing** row usually means a member is short a `unitFacts` value.
 Fastest UI check — the **admin UI** at `http://localhost:8000/design-book/admin`: fill the form, watch the live
 grey preview. Or the **lite UI** (`http://localhost:8000/design-book/ui`): pick BOSSA in the programme dropdown
 to watch pills/cards grey.
@@ -514,8 +674,11 @@ to watch pills/cards grey.
 
 ## 9. Reference
 
-- **Contract:** `docs/export-schema-v2.ts` (types + `availableFromCaps`).
-- **Field ↔ UI map:** `docs/design-book-api-ui-map-v2.md`.
+- **Contract:** `docs/export-schema-v2.ts` (types + `availableFromCaps`; `UnitFacts` / `FamilyFacts` / `DupFamily`).
+- **Field ↔ UI map:** `docs/design-book-api-ui-map-v2.md` — **§2c-11** (`gridRows`) and **§2c-12**
+  (card membership: `gridHidden`, `dupFamilies`, the family gates, card order) are the §4f reference.
+- **Why every 2.5 rule exists (measured):** `docs/client-ui-parity-audit.md` §L (the sweep that found
+  `parameters` ≠ the grid) and §M1–M9 (the membership + grey + order rules).
 - **Worked greying examples (plain English):** `docs/design-book-greying-examples.md`.
 - **What each field means (plain English, for non-programmers):** `docs/design-book-item-fields-plain-guide.md`.
 - **Worked sample:** `docs/export-sample-v2.json`.

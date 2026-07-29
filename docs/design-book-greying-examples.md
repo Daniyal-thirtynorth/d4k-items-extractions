@@ -12,9 +12,14 @@ style, depth, handle type, and so on. Every product button checks: *"do I work w
 - **Yes** → the button is normal and clickable.
 - **No** → the button **greys out**. It still shows (so you can see the option exists), but you can't click it.
 
-Two things grey the same way:
+Two things grey, but **not** by the same rule:
 - a **button** on a card (a width, a front style, …) greys based on the product it would take you to;
-- a **whole card** greys based on its own product.
+- a **whole card** greys based on its product **plus two questions about the whole family** — see **§14**.
+  The server works the card's answer out and sends it (`cardAvailable`), because no single product knows it.
+
+There is also a third state, easy to confuse with greying: a button can be **dead** — it shows the option
+exists but there is no product behind it at all. Greyed = "exists, doesn't fit your choices, still
+clickable in the app". Dead = "nothing to click".
 
 **Nothing greys until you change a setting.** Fresh toolbar (nothing picked) = everything clickable.
 The neutral defaults are: no range picked, front style = ALL, depth 58, standard handle, not suspended,
@@ -166,6 +171,10 @@ Sibling **`C1T308036S2Z`** is only 36 cm: clickable at 36 (and 58/63, which alwa
 
 - **Always available** → clickable under every toolbar, full stop.
 - **Line-neutral** (accessories, alterations, fillers, special-height) → never greys on front style, whatever you pick.
+- ⭐ **An accessory or alteration CARD never greys at all** — not on range, not on depth, not on line. The
+  whole `AN…` family of modification codes stays live under every toolbar. (That one rule was 188 of the 219
+  card-grey mismatches we measured against the app.) Its *buttons* still follow the 8 rules above; only the
+  card is exempt.
 
 ---
 
@@ -207,6 +216,31 @@ It's clickable only when it passes **every** rule.
 
 ---
 
+## 14. ⭐ Whole cards — the two rules a single product can't answer
+
+Everything above is about **one product**. A **card** is a whole family (all the widths, heights and styles
+of one thing), and it asks two more questions that only make sense for a family:
+
+| Question | What happens when the answer is "no" |
+|---|---|
+| **Does this family exist in the range's front style?** e.g. you picked a Contino range, but every member of this family is Primo-only | the card greys |
+| **Does this family have anything at the height line you picked?** e.g. line 73 on a family that is 80-only | the card **disappears** (see below) |
+| **Does this family have anything at the depth you picked?** e.g. depth 48 on a family that only builds 58 | the card **disappears** (see below) |
+
+**Disappears, not greys — unless you tick "Grey don't hide".** That is the app's own behaviour: at line 73 a
+family with nothing at 73 is simply not in the grid, and the "Grey don't hide" checkbox brings it back
+greyed instead. So a shrinking card count when you change the height line is **correct**, not a bug.
+
+Two more things about a greyed card, both easy to misread:
+
+- **A greyed card keeps its place.** The catalog order decides where it sits; being greyed does not push it
+  to the bottom. `Cooktop Units` at depth 68 reads `BZ2 · BSZ2 · BZ · BSZ · BZIZ` with the two middle ones
+  greyed, exactly like that.
+- **A greyed card can still have live buttons.** On the families that show only style chips (no width or
+  height row), the chips never grey even when the whole card does.
+
+---
+
 ## Check any example yourself
 
 The app is on `http://localhost:8000` (dev). Programme (range) ids come from `GET /design-book/programs`
@@ -243,4 +277,23 @@ Plain name ↔ the toolbar control ↔ the stored `capabilities` field(s):
 
 Full logic:
 `available = alwaysAvailable || (progOk && tierOk && depthOk && handleOk && frontOk && openOk && antosoOk && doorOk)`
+
+### The CARD is a different rule (§14) — don't compute it locally
+
+```
+av = vertCatOk(b,u) && (isAccessory(b)
+      || (available(u) && (isProgAgnostic(b) || (famOkB(b,fl) && famOkU(u,fl))) && lineCardOk(b)))
+```
+
+| Plain name | Field(s) | Note |
+|---|---|---|
+| Family is in the range's style | `familyFacts.memberTiers` + `unitFacts.tier`/`siblingTiers`/`agnostic` | `famOkB` / `famOkU` — **needs the family**, so `availableFromCaps` on one unit cannot answer it |
+| Accessories never grey | `familyFacts.isAccessory` | short-circuits the whole card verdict to LIVE |
+| Nothing at this line | `lineFamilyOk` (from every member's `heightCode`) | **hides** the card unless `grey=true` |
+| Nothing at this depth | `depthFamilyOk` (from every member's `capabilities.depthClasses`) | **hides** the card unless `grey=true` |
+| The combined verdict | **`cardAvailable`** on every grid card | ⭐ the client USES this; the local 8-gate port is only the fallback when it's absent (bare toolbar = everything available) |
+
+Per-BUTTON state on a grid card is shipped too, so a client greys nothing itself:
+`gridRows[].pills[]` carry `selected`, `off` (greyed, still clickable) and `dead` (disabled). Details:
+`design-book-api-ui-map-v2.md` §2c-11 / §2c-12; the measurements behind them: `client-ui-parity-audit.md` §M.
 — see `availableFromCaps()` in `export-schema-v2.ts` / `design-book-api-ui-map-v2.md` §2c.

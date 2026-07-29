@@ -3,14 +3,15 @@
     "_ui": "Illustrative sample of the v2 (MINIMAL + CAPABILITIES) contract. The items below between them exercise EVERY object in export-schema-v2.ts. Some refs (alterations/accessories/companions sku codes, pill targets) point at items outside this small slice; in a real export every referenced sku exists in items[]. Any key starting with `_ui` is plain-English DOCUMENTATION ONLY — the backend MUST strip every `_ui` key on ingest; `_ui` is NOT part of the schema. counts here describe THIS sample, not the full catalog.",
     "generated": "2026-07-17T08:56:11.786Z",
     "source": "leicht_units v781 (headless DOM extraction via openDetail) — SAMPLE",
-    "schemaVersion": "2.4.0",
+    "schemaVersion": "2.5.2",
     "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
     "counts": {
-      "items": 13,
+      "items": 14,
       "cabinets": 10,
       "accessories": 1,
       "categories": 3,
-      "programmes": 6
+      "programmes": 6,
+      "alterations": 1
     },
     "recoveredArtifactSkus": [
       "TK5580BZ2",
@@ -442,6 +443,46 @@
         "doorLineJ": false,
         "doorLineY": false
       },
+      "unitFacts": {
+        "tier": "P",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": "PA",
+        "widthCode": 70,
+        "depthCode": 58,
+        "variantCode": "BZ2",
+        "depthAlterations": [
+          68
+        ]
+      },
+      "familyFacts": {
+        "label": "Cooktop Unit · Top Blender · BZ2",
+        "labelGroup": "cooktop unit top blender",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "BZ2": 1,
+          "BZIZ": 2,
+          "BSZ": 3,
+          "BZ": 4,
+          "BSZ2": 5
+        },
+        "variantLabels": null,
+        "byProgramme": true,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "PAC",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": {
+          "mode": "cooktop",
+          "force68": false
+        }
+      },
       "description": {
         "title": "Hob unit",
         "bullets": [
@@ -718,6 +759,40 @@
         "antosoApproved": true,
         "doorLineJ": false,
         "doorLineY": false
+      },
+      "unitFacts": {
+        "tier": "P",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": "P",
+        "widthCode": 45,
+        "depthCode": 58,
+        "variantCode": "Lights",
+        "depthAlterations": [
+          36
+        ]
+      },
+      "familyFacts": {
+        "label": "Vero-glass floor unit · With Lights",
+        "labelGroup": "vero glass floor unit with lights",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "Lights": 1,
+          "No Lights": 2
+        },
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "P",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": null
       },
       "description": {
         "title": "Vero-glass floor unit",
@@ -1013,6 +1088,47 @@
         "antosoApproved": false,
         "doorLineJ": false,
         "doorLineY": false
+      },
+      "unitFacts": {
+        "tier": "C",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": "PC",
+        "widthCode": 20,
+        "depthCode": 58,
+        "variantCode": "Doors",
+        "depthAlterations": [
+          36,
+          48,
+          68
+        ]
+      },
+      "familyFacts": {
+        "label": "Floor unit",
+        "labelGroup": "floor unit",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "S": 1,
+          "IS2IZ": 1,
+          "ISIZ2": 4,
+          "Doors": 1
+        },
+        "variantLabels": null,
+        "byProgramme": true,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "PC",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": {
+          "mode": "base",
+          "force68": false
+        }
       },
       "description": {
         "title": "Floor unit",
@@ -1344,6 +1460,43 @@
         "doorLineJ": false,
         "doorLineY": false
       },
+      "unitFacts": {
+        "tier": "P",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": null,
+        "widthCode": 80,
+        "depthCode": 58,
+        "variantCode": "BTZW",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Instant Hot Sink Blender — 30 cm door",
+        "labelGroup": "instant hot sink blender cm door",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "BTZW": 1,
+          "BZW": 2,
+          "BTBS": 3,
+          "BTZ": 4
+        },
+        "variantLabels": null,
+        "byProgramme": true,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "PA",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": {
+          "mode": "sink",
+          "force68": true
+        }
+      },
       "description": {
         "title": "Sink waste bin unit for hot",
         "bullets": [
@@ -1593,6 +1746,41 @@
         "doorLineJ": false,
         "doorLineY": false
       },
+      "unitFacts": {
+        "tier": "P",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": "P",
+        "widthCode": 46,
+        "depthCode": null,
+        "variantCode": "—",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Appliance door for large Fridge/Freezer",
+        "labelGroup": "appliance door for large fridge freezer",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "-": 1,
+          "ZIZ": 1
+        },
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "P",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": {
+          "mode": "tall",
+          "force68": false
+        }
+      },
       "description": {
         "title": "Appliance door for large capacity appliance",
         "bullets": [
@@ -1774,6 +1962,41 @@
         "antosoApproved": false,
         "doorLineJ": false,
         "doorLineY": false
+      },
+      "unitFacts": {
+        "tier": "C",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": null,
+        "widthCode": 60,
+        "depthCode": 58,
+        "variantCode": "S2Z",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Front for Built-in Appliances · Original handle D61",
+        "labelGroup": "front for built in appliances original handle d",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "S": 2,
+          "S3Z": 3,
+          "SZ2": 4,
+          "S2Z": 5,
+          "GSZ2": 9
+        },
+        "variantLabels": null,
+        "byProgramme": true,
+        "hasOpeningArticles": true,
+        "hasPrimo": false,
+        "noLine": false,
+        "memberTiers": "C",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": null
       },
       "description": {
         "title": "Front for built-under appliance with drawer- and pullout partitioning with original recessed handle on the front",
@@ -1985,6 +2208,44 @@
         "antosoApproved": true,
         "doorLineJ": false,
         "doorLineY": false
+      },
+      "unitFacts": {
+        "tier": "P",
+        "opening": "P1",
+        "agnostic": false,
+        "siblingTiers": null,
+        "widthCode": 45,
+        "depthCode": 58,
+        "variantCode": "Doors",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Sink unit · blender",
+        "labelGroup": "sink unit blender",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "BZ": 2,
+          "BZV": 3,
+          "BZW": 4,
+          "BZBS": 5,
+          "Doors": 1
+        },
+        "variantLabels": null,
+        "byProgramme": true,
+        "hasOpeningArticles": true,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "PA",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": {
+          "mode": "sink",
+          "force68": true
+        }
       },
       "description": {
         "title": "Sink unit",
@@ -2198,6 +2459,46 @@
         "antosoApproved": false,
         "doorLineJ": false,
         "doorLineY": false
+      },
+      "unitFacts": {
+        "tier": "P",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": "P",
+        "widthCode": 30,
+        "depthCode": 58,
+        "variantCode": "Z",
+        "depthAlterations": [
+          36,
+          48,
+          68
+        ]
+      },
+      "familyFacts": {
+        "label": "Drawer unit · Special Height",
+        "labelGroup": "drawer unit",
+        "isSpecial": true,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "S7": 1,
+          "SZ": 3,
+          "Z": 2
+        },
+        "variantLabels": null,
+        "byProgramme": true,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "PAC",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": {
+          "mode": "base",
+          "force68": false
+        }
       },
       "description": {
         "title": "Pullout unit",
@@ -2509,6 +2810,37 @@
         "doorLineJ": false,
         "doorLineY": false
       },
+      "unitFacts": {
+        "tier": "A",
+        "opening": null,
+        "agnostic": true,
+        "siblingTiers": "PA",
+        "widthCode": 120,
+        "depthCode": null,
+        "variantCode": null,
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Front panel material",
+        "labelGroup": "front panel material",
+        "isSpecial": false,
+        "dim": "width",
+        "variantLabel": null,
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "-": 1
+        },
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": false,
+        "noLine": false,
+        "memberTiers": "PA",
+        "isAccessory": false,
+        "isProgrammeAgnostic": true,
+        "depth63": null
+      },
       "description": {
         "title": "Front panel material",
         "bullets": [
@@ -2570,7 +2902,7 @@
       ]
     },
     {
-      "_ui": "RECOVERED ARTIFACT (LED control) — from meta.recoveredArtifactSkus. Exercises Capabilities.alwaysAvailable:true + nativeTier:null.",
+      "_ui": "RECOVERED ARTIFACT (LED control) — from meta.recoveredArtifactSkus. Exercises Capabilities.alwaysAvailable:true + nativeTier:null. Also exercises gridHidden:true (schemaVersion 2.5.1) — never render this code as a grid CARD: the app's own init deletes it (b.hid / no family lists it), so it belongs to no card. It stays fetchable by sku and still resolves as a ref, it is simply dropped from every LIST. 57 items in v781.",
       "sku": "L24CD",
       "kind": "cabinet",
       "familyId": "L2023",
@@ -2604,6 +2936,7 @@
         "doorLineJ": false,
         "doorLineY": false
       },
+      "gridHidden": true,
       "description": {
         "title": "LED dynamic light control controller set DALI",
         "bullets": [
@@ -2656,6 +2989,39 @@
         "antosoApproved": false,
         "doorLineJ": false,
         "doorLineY": false
+      },
+      "unitFacts": {
+        "tier": "P",
+        "opening": null,
+        "agnostic": true,
+        "siblingTiers": "P",
+        "widthCode": null,
+        "depthCode": null,
+        "variantCode": "D",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Cupboard alteration · one dimension",
+        "labelGroup": "cupboard alteration one dimension",
+        "isSpecial": false,
+        "dim": "none",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "W": 1,
+          "H": 1,
+          "D": 1
+        },
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "P",
+        "isAccessory": true,
+        "isProgrammeAgnostic": false,
+        "depth63": null
       },
       "description": {
         "title": "Cupboard depth alteration",
@@ -2721,6 +3087,37 @@
         "antosoApproved": false,
         "doorLineJ": false,
         "doorLineY": false
+      },
+      "unitFacts": {
+        "tier": null,
+        "opening": null,
+        "agnostic": true,
+        "siblingTiers": null,
+        "widthCode": null,
+        "depthCode": null,
+        "variantCode": "ADP",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Plinth cover profile",
+        "labelGroup": "plinth cover profile",
+        "isSpecial": false,
+        "dim": "none",
+        "variantLabel": null,
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "ADP": 1
+        },
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": false,
+        "noLine": false,
+        "memberTiers": "PAC",
+        "isAccessory": true,
+        "isProgrammeAgnostic": true,
+        "depth63": null
       },
       "description": {
         "title": "Plinth cover profile can be clipped onto 1.6 cm thick material",
@@ -2809,6 +3206,35 @@
         "antosoApproved": false,
         "doorLineJ": false,
         "doorLineY": true
+      },
+      "unitFacts": {
+        "tier": "A",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": "PA",
+        "widthCode": 60,
+        "depthCode": null,
+        "variantCode": "—",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Module Appliance niche with door · KL 80",
+        "labelGroup": "module appliance niche with door kl",
+        "isSpecial": false,
+        "dim": "height",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": null,
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": false,
+        "noLine": false,
+        "memberTiers": "PAC",
+        "isAccessory": false,
+        "isProgrammeAgnostic": true,
+        "depth63": null
       },
       "description": {
         "title": "Module Appliance niche with door",
@@ -3169,6 +3595,158 @@
         ]
       },
       "_ui": "Line-66 + tall-extension example. doorLineYCode = the ORDER CODE when the toolbar picks door-line Y: Y REPLACES the whole code (V/E/J/P1/C1 are only prefixes/suffixes), so it cannot be derived and ships literally; capabilities.doorLineY is the matching GATE. heightExtension = the app's \"217+\" chip appended to the Height row — picking 230/244/250 cm opens the family's 217 cm unit and orders addCode (MPHVERL) alongside it, the height twin of the 63 cm depth alteration. It is NOT part of parameters.height because some families also have real 230/250 cm siblings and the labels would collide."
+    },
+    {
+      "_ui": "DUP-FAMILY ALTERATION — the ONE code that gets TWO cards. Its own familyId (F1970, Base/Sinks) is the primary card; `dupFamilies[0]` (F1970__CKDUP, Base/Cooktops & Downdrafts) is a SECOND card in another sub-category, carrying its own identity + catalog order + familyFacts because they differ from the primary's. 74 items / 79 entries in v781. A grid client must key cards on familyId, never on sku, or one of the two disappears. Also exercises unitFacts/familyFacts — the FAMILY-POOL inputs the server builds a card's gridRows from (schemaVersion 2.5).",
+      "sku": "ANTSPSAUS",
+      "kind": "alteration",
+      "familyId": "F1970",
+      "name": "Alteration pullout Siphon Cutout",
+      "category": "Base",
+      "subcategory": "Sinks",
+      "section": "Fronts & Panels · USA Sink Alterations",
+      "active": true,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "alwaysAvailable": false,
+        "nativeTier": "P",
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "description": {
+        "title": "Alteration drawer style",
+        "bullets": [
+          "The drawer has a back section in wood as well as a cutout covering for pop-up waste, for on-site installation.",
+          "Cutout width 14.5 up to 29.5 cm"
+        ]
+      },
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 4100
+        }
+      ],
+      "priceUnit": "pts",
+      "priceGroupRef": "14.06",
+      "catalogPage": 184,
+      "functionalGroups": [
+        {
+          "zone": "Base",
+          "group": "Water",
+          "groupKey": "b_water",
+          "leaf": "Sink Accessories",
+          "leafId": "b_water#4"
+        }
+      ],
+      "engineering": [
+        {
+          "key": "suspended",
+          "ok": false
+        },
+        {
+          "key": "sensomatic",
+          "ok": true
+        },
+        {
+          "key": "tipSoftclose",
+          "ok": true
+        },
+        {
+          "key": "openingP1",
+          "ok": false
+        },
+        {
+          "key": "depth68",
+          "ok": false
+        }
+      ],
+      "faceForTiers": [
+        "_",
+        "P"
+      ],
+      "catalogRank": 9503,
+      "familyIndex": 36,
+      "sectionRank": 7,
+      "unitFacts": {
+        "tier": "P",
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": "P",
+        "widthCode": null,
+        "depthCode": null,
+        "variantCode": "Drawer",
+        "depthAlterations": null
+      },
+      "familyFacts": {
+        "label": "Alteration pullout Siphon Cutout",
+        "labelGroup": "alteration pullout siphon cutout",
+        "isSpecial": false,
+        "dim": "none",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "Drawer": 1,
+          "Pullout": 2
+        },
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": true,
+        "noLine": false,
+        "memberTiers": "P",
+        "isAccessory": false,
+        "isProgrammeAgnostic": false,
+        "depth63": null
+      },
+      "dupFamilies": [
+        {
+          "familyId": "F1970__CKDUP",
+          "category": "Base",
+          "subcategory": "Cooktops & Downdrafts",
+          "section": "Accessories & Modifications",
+          "catalogRank": 58,
+          "sectionRank": 5,
+          "familyIndex": 1672,
+          "familyFacts": {
+            "label": "Alteration pullout Siphon Cutout",
+            "labelGroup": "alteration pullout siphon cutout",
+            "isSpecial": false,
+            "dim": "none",
+            "variantLabel": "Type",
+            "numericLabel": null,
+            "variantFormat": null,
+            "variantOrder": {
+              "Drawer": 1,
+              "Pullout": 2
+            },
+            "variantLabels": null,
+            "byProgramme": false,
+            "hasOpeningArticles": false,
+            "hasPrimo": true,
+            "noLine": false,
+            "memberTiers": "P",
+            "isAccessory": true,
+            "isProgrammeAgnostic": false,
+            "depth63": null
+          }
+        }
+      ]
     }
   ]
 }

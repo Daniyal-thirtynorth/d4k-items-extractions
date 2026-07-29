@@ -114,8 +114,10 @@ Current facts:
   the whole `capabilities` object settable at creation; `UpsertItemDto`). Re-ingest = **extractor wins** (no
   merge layer). `.env` currently points at **D4K-dev** (was prod — flip back when done). Migration cleanup:
   `D4K-backend/scripts/strip-legacy-designbook-fields.js`.
-- **Docs (all v2):** `docs/export-schema-v2.ts` (contract) · `docs/export-sample-v2.json` (13-item worked
-  sample — `MGT601468` is the `doorLineYCode` + `heightExtension` example) ·
+- **Docs (all v2, refreshed to 2.5.2 on 2026-07-29):** `docs/export-schema-v2.ts` (contract) ·
+  `docs/export-sample-v2.json` (**14**-item worked sample — `MGT601468` = `doorLineYCode` +
+  `heightExtension`; **every item now carries `unitFacts`/`familyFacts`; `L24CD` = `gridHidden`;
+  `ANTSPSAUS` = `dupFamilies`**) ·
   `docs/design-book-api-ui-map-v2.md` (API↔UI, §2c the 8-gate model + per-gate GREY table +
   `availableFromCaps` + render spec; **§2c-4 DEPTH PILL — selection + when to call `/items/:sku`**;
   **§2c-1 SELECTED — navigation rows vs DEPTH state rows**;
@@ -124,10 +126,15 @@ Current facts:
   **`docs/design-book-crud-guide.md`** (authoring guide: mental model = a card is a FAMILY of sibling items
   linked by pills, the rule lives on the pill TARGET; §3a depthClasses+58/63 quirk + gate-vs-pill-row warning,
   §3b nativeTier/opening/twinTiers, §3c the other 6 gates, §3d master greying table; §4/§4a the depth
-  state-row warning, **§4b `heightExtension`**, **§4c `doorLineYCode`**; the BOSSA "disable 2 width pills"
+  state-row warning, **§4b `heightExtension`**, **§4c `doorLineYCode`**, §4d `showUnderLine` (now
+  DRAWER-only), §4e `heightCode`, **⭐§4f `unitFacts`/`familyFacts`/`gridHidden`/`dupFamilies`/card-order —
+  what actually draws the GRID card**; the BOSSA "disable 2 width pills"
   recipe) · `docs/design-book-greying-examples.md` (worked
-  grey/live cases per gate) · `docs/design-book-item-fields-plain-guide.md` (plain-English field-by-field
-  tour — hand this to a non-engineer). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
+  grey/live cases per gate + **§14 the CARD rules a single unit can't answer — `cardAvailable`, isAccessory,
+  hide-vs-grey**) · `docs/design-book-item-fields-plain-guide.md` (plain-English field-by-field
+  tour + **§3b why the card's buttons ≠ the detail screen's** — hand this to a non-engineer) ·
+  **`throwaway/frontend-v2.5-changes.md`** (the React client's `gridRows` implementation guide, against
+  `D4K-frontend` `origin/dev` 25b19af9; v2.2/v2.3 guides in the same folder are already merged there). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
   `export-sample.json`) are kept for diffing but superseded. **Deliberately NOT annotated** (2026-07-21
   decision) — they still describe the v1 model verbatim (`configure.*`, a STORED `selected`/`available`
   boolean, `depthClass` matching pill labels). Don't "fix" them into v2 shape; that destroys their only
