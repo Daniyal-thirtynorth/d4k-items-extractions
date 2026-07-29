@@ -67,8 +67,19 @@ function familyFacts(f) {
     depth63: f.d63 ? { mode: f.d63.mode, force68: !!f.d63.force68 } : null,
   };
 }
-function unitFacts(u) {
+// position of the code inside its family's own unit list — the app's `b.units` order, which
+// `_selUnit` reads directly (`pool.find(u => u.hc === h) || pool[0]` returns the FIRST match).
+// A shared code sits at a different index in each family, so this is per (family, unit) like the
+// rest of unitFacts: FS10734 is index 0 in F340 and 0 in F2599, but our docs are stored in F2599's
+// ingest order, which put FS10746 first in F340's pool and mis-faced the card.
+const codeIndex = new Map();
+for (const [fid, f] of Object.entries(facts.families)) {
+  (f.codes || []).forEach((c, i) => codeIndex.set(fid + '|' + c, i));
+}
+
+function unitFacts(u, key) {
   return {
+    unitIndex: key != null && codeIndex.has(key) ? codeIndex.get(key) : undefined,
     tier: u.fam && /^[PCA]$/.test(u.fam) ? u.fam : null,   // dup-synthetic families store a fid here
     opening: u.op || null,
     agnostic: !!u.ag,
@@ -107,10 +118,16 @@ for (const [fid, f] of Object.entries(facts.families)) {
 // cat/sub/sec, catalog order AND familyFacts (50 of 79 differ from the primary's), so the whole
 // card identity travels with the entry.
 const DUP_FAMILY = /__(?:CK|DRW|SNK|TR)DUP$|^MRG_/;
-function dupEntry(fid) {
+function dupEntry(fid, sku) {
   const f = facts.families[fid];
+  // A unit record belongs to a FAMILY, so a shared code has a different one in each: FS10734 is
+  // `dv:34, vr:'FS'` in F340 but has neither in F2599. 34 of the 74 shared codes diverge (fam 25,
+  // vr 20, w 5, sib 2, dv 1 — hc/op/d never do). The doc stores the PRIMARY family's unitFacts, so
+  // the dup entry has to carry its own or the dup card mis-faces and drops pills.
+  const du = facts.units[fid + '|' + sku];
   return {
     familyId: fid,
+    unitFacts: du ? unitFacts(du, fid + '|' + sku) : undefined,
     category: f.cat || null,
     subcategory: f.subDisp || f.sub || null,
     section: f.sec || null,
@@ -135,7 +152,7 @@ const unitFactsFor = (it) => facts.units[it.familyId + '|' + it.sku] || unitsByC
 let setU = 0, setF = 0, noUnit = 0, noFamily = 0, hidden = 0, dupItems = 0, dupEntries = 0;
 for (const it of data.items || []) {
   const u = unitFactsFor(it);
-  if (u) { it.unitFacts = unitFacts(u); setU++; } else noUnit++;
+  if (u) { it.unitFacts = unitFacts(u, it.familyId + '|' + it.sku); setU++; } else noUnit++;
   const fid = it.familyId || (u && u.fid);
   const f = fid && facts.families[fid];
   if (f) { it.familyFacts = familyFacts(f); setF++; } else noFamily++;
@@ -149,7 +166,7 @@ for (const it of data.items || []) {
     ? it.familyId
     : (owners.find((x) => !DUP_FAMILY.test(x)) || owners[0]);
   const dups = owners.filter((x) => x !== primary);
-  if (dups.length) { it.dupFamilies = dups.map(dupEntry); dupItems++; dupEntries += dups.length; }
+  if (dups.length) { it.dupFamilies = dups.map((fid) => dupEntry(fid, it.sku)); dupItems++; dupEntries += dups.length; }
   else delete it.dupFamilies;
 }
 const prevVersion = data.meta && data.meta.schemaVersion;

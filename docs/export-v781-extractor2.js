@@ -580,6 +580,27 @@ H.buildFunctionalCategories=function(){
  * `recovered` units (dropped from FAMS by the app's init) skip the DOM scrape
  * (openDetail can't render them) — they carry raw scalars + capabilities only.
  * ==========================================================================*/
+// the UNIT half of the grid-row inputs. Shared: a unit record belongs to a FAMILY, so a code that is
+// a member of several has a DIFFERENT one in each (FS10734 is dv:34/vr:'FS' in F340 and neither in
+// F2599; 34 of the 74 shared codes diverge). The item carries its primary family's, each dupFamilies
+// entry carries that family's.
+function _unitFacts(u,f){
+  return {
+    // position in the FAMILY's own unit list — `_selUnit` reads that order directly
+    // (`pool.find(u=>u.hc===h)||pool[0]` returns the FIRST match), and a shared code sits at a
+    // different index in each family it belongs to.
+    unitIndex: (f&&f.units)?f.units.indexOf(u):undefined,
+    tier: (u.fam&&/^[PCA]$/.test(u.fam))?u.fam:null,   // dup-synthetic families put a fid in u.fam
+    opening: u.op||null, agnostic: !!u._ag, siblingTiers: u.sib||null,
+    widthCode: u.w!=null?u.w:null, depthCode: u.dv!=null?u.dv:null,
+    variantCode: u.vr!=null?u.vr:null,
+    depthAlterations: (Array.isArray(u.d)&&u.d.length)?u.d.slice():null,   // u.d — the D STATE row
+    // the app matches heights with STRICT === (`x.hc===selH` in wsAtH / dAll), so a unit whose hc
+    // is literally `null` never matches one whose hc is `undefined`. 4 units in v781 (all ANBL)
+    // are null — that is what keeps ANBL's W and D rows off the card.
+    heightCodeNull: u.hc===null?true:undefined,
+  };
+}
 // the FAMILY half of the grid-row inputs. Shared: every item carries its own family's copy, and a
 // dupFamilies entry carries the DUP family's (50 of 79 differ from their primary's).
 function _famFacts(f){
@@ -653,17 +674,7 @@ function buildItem(f,u,recovered){
   // (ppool → hvals / wsAtH / dAll / variantOpts), not from the one unit's detail panel that
   // `parameters.*` is scraped from. These are the pool inputs, read straight off the app.
   try{
-    it.unitFacts={
-      tier: (u.fam&&/^[PCA]$/.test(u.fam))?u.fam:null,   // dup-synthetic families put a fid in u.fam
-      opening: u.op||null, agnostic: !!u._ag, siblingTiers: u.sib||null,
-      widthCode: u.w!=null?u.w:null, depthCode: u.dv!=null?u.dv:null,
-      variantCode: u.vr!=null?u.vr:null,
-      depthAlterations: (Array.isArray(u.d)&&u.d.length)?u.d.slice():null,   // u.d — the D STATE row
-      // the app matches heights with STRICT === (`x.hc===selH` in wsAtH / dAll), so a unit whose hc
-      // is literally `null` never matches one whose hc is `undefined`. 4 units in v781 (all ANBL)
-      // are null — that is what keeps ANBL's W and D rows off the card.
-      heightCodeNull: u.hc===null?true:undefined,
-    };
+    it.unitFacts=_unitFacts(u,f);
     it.familyFacts=_famFacts(f);
   }catch(e){ warn('grid facts failed for '+u.c+': '+(e&&e.message)); }
 
@@ -931,7 +942,9 @@ H.finalize=function(){
     const dups = ow.filter(f=>f.id!==prim);
     if(!dups.length) return;
     it.dupFamilies = dups.map(f=>({
-      familyId: f.id, category: f.cat||null,
+      familyId: f.id,
+      unitFacts: (function(){ const du=(f.units||[]).find(x=>x.c===it.sku); return du?_unitFacts(du,f):undefined; })(),
+      category: f.cat||null,
       subcategory: (typeof subDisp==='function'?subDisp(f):f.sub)||null, section: f.sec||null,
       catalogRank: f.pri!=null?f.pri:null,
       sectionRank: (function(){ const d=(typeof subDisp==='function'?subDisp(f):f.sub);
