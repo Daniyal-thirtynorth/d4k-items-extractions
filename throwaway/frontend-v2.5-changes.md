@@ -72,6 +72,7 @@ only one with a visible consequence for you is the first.
 | 2 | **Section ORDER fixed.** `sectionRank` had been captured with the wrong key (`SECTION_ORDER[f.sub]` instead of `SECTION_ORDER[subDisp(f)]`), so on Tall every section of a merged sub came out in the wrong order. Re-captured, 78 families / 1,130 items. Plus the app's `_subs.size===1` guard: a task leaf spanning several subs falls back to first-seen/`pri` order. | Nothing to do — **reinforces R10**. Render `sections[]` in the order given; never sort them client-side. |
 | 3 | **Card ORDER inside a section fixed.** The `maxh` sort tiebreak was computed over the *filtered* group, not the family's whole member list, so any unit-level filter (`line=80`, `tier=C`) reshuffled sections whose families have no `pri`. Now taken from the unfiltered pool. | Nothing to do — **reinforces R10**. Do not re-sort cards. |
 | 4 | **`familyFacts.rawSub`** added (2.5.3) — the app's raw `f.sub`. `Item.subcategory` is the DISPLAY name and `TALL_MERGE` folds three Tall subs into one, so the raw one is needed for the programme-tier hide. | Client does **not** need it (same as `unitFacts`/`familyFacts` — don't type it). Authoring only — see Step 7. |
+| **5** | **`gridRows` now ships on UNGROUPED lists**, and the **refs map now covers `gridRows` pill targets**. | **Two caveats in this document are retired.** A `sku:[…]` navigation (tier badge, finish chip, depth sibling) keeps full rows instead of falling back to `parameters.*`, and a Ty click can rely on `refs[pill.sku].variantCore`. See R2 and R3's notes; open items 2 and 3 are struck through. |
 
 Not yet on D4K-prd: the 2.5.x data backfills (`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`,
 `dupFamilies`, `faceWidthMm`, `sectionRank`). Point at D4K-dev while building against this document.
@@ -147,8 +148,25 @@ GET items?familyId=F2013__DRWDUP&groupBy=family&limit=3
 **Only an ABSENT `gridRows` may use the legacy `parameters.*` path.** Branch on
 `Array.isArray(card.gridRows)`, never on `card.gridRows?.length`.
 
-(Absent happens for real: any list that is **not** `groupBy=family` — e.g. the `sku:[…]` navigation
-the tier badge and the finish chips use — carries no `gridRows`. See R3's note and Step 4d.)
+> **Updated 2026-07-29 — `gridRows` now ships on UNGROUPED lists too.** The doc previously said a
+> `sku:[…]` navigation carries no rows; that gap is closed. Verified:
+>
+> ```
+> items?sku=CTSP6080&full=true&limit=1
+>   → CTSP6080 (its own sku, NOT re-faced) · gridRows 3
+>     H [73 80* 86] · W [45 50 55 60* 70 80 90 100 120] · D [58* 63 68]
+> ```
+>
+> So the tier-badge / finish / depth-sibling navigations keep full rows, correctly selected, and the
+> legacy branch is effectively unreachable. **Keep the `Array.isArray` guard anyway** — it costs
+> nothing and `[]` still means "no rows" — but do not build the fallback out as a real feature.
+>
+> ⚠️ Still true, and now the *only* reason ungrouped differs: an ungrouped row carries **no
+> `cardAvailable` and no `heightExtensionOk`** (both are attached on the grouped path). R5's `??`
+> fallback and R8's `!== false` test are what cover that — do not tighten either to `=== true`.
+>
+> ⚠️ Also unchanged: `groupBy=family` still RE-FACES. `items?sku=CTSP6080&groupBy=family` returns
+> `TSP6080`, the family face. A sku navigation must stay ungrouped.
 
 ### R3 · Never click a grid pill by `pill.sku` (§2c-11, §2c-8)
 
@@ -169,11 +187,14 @@ retry order still apply, restated in the quick reference below). `pill.sku` is c
 the DETAIL drawer, and on the DEPTH row where it is the state-vs-sibling discriminator (v2.2 §2c-2 —
 a depth pill with `pill.sku === card.sku` is state, no fetch).
 
-> ⚠️ The page **refs map does NOT cover every `gridRows` target.** `collectRefSkus`
-> (`design-book.detail.ts:131-150`) walks `parameters.*` only. Measured over the three list samples:
-> 6 H-row targets missing from `refs` (`TSP4573`, `TSP4586`, `TSP457368ZV`, `TSP458668ZV`,
-> `H45210GAIZ`, `H45224GAIZ`). That no longer matters for greying or selection — but it does mean a Ty
-> click cannot *rely* on `refs[pill.sku].variantCore`; give it a `sku:[…]` fallback (Step 4c).
+> **Updated 2026-07-29 — the refs map now DOES cover `gridRows` targets.** The ref collector walks
+> `gridRows[].pills[].sku` as well as `parameters.*`, so the 6 missing H-row targets this document
+> originally listed are gone. Verified on SNK1: 15 pill targets, 12 in `refs`, and the only 3 absent
+> are `TSP6080` — **the card's own sku** (the D row's self/state pills), which needs no ref entry.
+>
+> A Ty click can therefore rely on `refs[pill.sku].variantCore` in practice. **Keep the `sku:[…]`
+> fallback anyway** as a cheap last resort — it is one line and it covers a card swapped in from a
+> page whose refs you never merged.
 
 ### R4 · A swap query must carry the TOOLBAR, or the rows come back uncollapsed (§2c-11 "Toolbar inputs")
 
@@ -412,7 +433,7 @@ Every candidate also carries `groupBy=family&limit=1&grey=true&refs=true` **and 
 | **height** | `items?familyId=…&heightCode=<value>&widthMm=<card's>` | drop `widthMm` |
 | **width** | `items?familyId=…&widthMm=<value×10>&heightCode=<card's>` | drop `heightCode` (**keep the width**) |
 | **variant** | `items?familyId=…&variantCore=<refs[pill.sku].variantCore>&widthMm&heightCode` | drop `widthMm`, then `heightCode`, then fall back to `items?sku=<pill.sku>` |
-| **depth** | `pill.sku === card.sku` ⇒ **no request** (state pill, v2.2 §2c-2); else `items?sku=<pill.sku>` | — |
+| **depth** | `pill.sku === card.sku` ⇒ **no request** (state pill, v2.2 §2c-2); else `items?sku=<pill.sku>` **+ the toolbar, ungrouped** | — |
 | **line** | not modelled — see "unverified" | — |
 
 Real answers (all verified):
@@ -426,10 +447,17 @@ sku=CTSP6080  &groupBy=family                                                   
 ```
 
 That last one is why a **sku navigation cannot be `groupBy=family`**: it returns the family's face,
-not the sku you asked for. So the tier-badge / finish / depth-sibling navigations stay
-`{ sku: [x], full: true, limit: 1 }` — and the card they return has **no `gridRows`**, so it falls
-back to the legacy `parameters.*` rows until the next family-scoped fetch. Known, accepted, listed
-under "unverified / open" below.
+not the sku you asked for. So the tier-badge / finish / depth-sibling navigations stay ungrouped —
+but as of 2026-07-29 they **do** come back with `gridRows` (R2), so add the toolbar to them:
+
+```
+items?sku=CTSP6080&full=true&limit=1                 → CTSP6080 · H [73 80* 86] · W […] · D [58* 63 68]
+items?sku=CTSP6080&full=true&limit=1&lineState=73    → CTSP6080 · H [73]        ← toolbar honoured
+```
+
+Without the toolbar the swapped-in card's rows come back UNCOLLAPSED and visibly change shape, the
+same failure R4 describes for family-scoped swaps. The one thing an ungrouped row still lacks is
+`cardAvailable` / `heightExtensionOk`.
 
 ## 4. The top "H 73 80 86" bar
 
@@ -691,7 +719,8 @@ const GridRowChips = ({
 
 ### 4c. One click dispatcher — replaces `pickHeight` / `pickWidth` / `pickTy` (`:435-462`)
 
-Keep those three for the legacy fallback branch if you like; the grid path uses one function:
+Keep those three only if you keep the fallback branch; the grid path uses one function.
+(Since `gridRows` now ships on ungrouped lists too, that branch is effectively unreachable — R2.)
 
 ```ts
 // R3 — route by familyId + pill.VALUE. R4 — every candidate carries the toolbar (stateQ).
@@ -722,7 +751,11 @@ const pickGrid = (row: GridRow, p: GridPill) => {
               { ...stateQ, familyId: famId, variantCore: vc },
             ]
           : []),
-        ...(p.sku ? [{ sku: [p.sku], full: true, limit: 1 } as ItemsQuery] : []),
+        // ⚠️ ungrouped, so it is NOT re-faced — but it DOES get gridRows now, and those rows are
+        // built for whatever toolbar the request carries, so the toolbar has to ride along (R4).
+        ...(p.sku
+          ? [{ ...stateQ, groupBy: undefined, sku: [p.sku], full: true, limit: 1 } as ItemsQuery]
+          : []),
       ]);
     }
     case "depth":
@@ -852,7 +885,8 @@ fights the server's face.
 +            </React.Fragment>
 +          ))
 +        ) : (
-+          /* legacy: gridRows ABSENT (a `sku:[…]` navigation result). v2.3 path, unchanged. */
++          /* legacy: gridRows ABSENT. Effectively unreachable now — the server attaches rows to
++             ungrouped lists too (R2) — but harmless to keep as a guard. */
 +          <>
 +            <ChipRow label="H" byLabel opts={collapse(cfg?.height, line).map(…)} onPick={pickHeight} … />
 +            {active.heightExtension && <ChipRow label="217+" … />}
@@ -1008,6 +1042,8 @@ depends on it.
 | 19 | Open `TSP6080` in the authoring dialog, save with no edits, re-fetch it | its W/H pills still carry `showUnderLine` (`H73 → [0,73,86]`, `H80 → [0,80]`). If they came back without it, the form is dropping the field on save (Step 7a) |
 | 20 | Same dialog | `heightCode`, `catalogRank`, `sectionRank`, `familyIndex`, `gridHidden` are all present and editable (Step 7b); `unitFacts` / `familyFacts` / `dupFamilies` are visible but read-only (Step 7c) |
 | 21 | Clear `catalogRank` on a family and save | it becomes `null` (unnumbered → sorts last), **not** `0` and not 999. If the form cannot express "empty", that field is not done |
+| 22 | Click a FRONTS tier badge (`CTSP6080`) with the H bar on 73 | the card keeps full rows (`gridRows` ships on ungrouped lists now) **and** the H row stays `[73]`. A row that springs back to `[73 80 86]` means the sku navigation dropped the toolbar |
+| 23 | Click a Ty pill whose target is off-page | resolves from `refs[pill.sku].variantCore` without the `sku:[…]` last resort firing — the refs map covers `gridRows` targets now |
 
 Ground truth: `d4k-items-extraction/docs/design-book-api-ui-map-v2.md` — **§2c-11** (`gridRows` +
 toolbar inputs), **§2c-12** (membership: `gridHidden`, `dupFamilies`, the family gates, card order),
@@ -1025,20 +1061,15 @@ toolbar inputs), **§2c-12** (membership: `gridHidden`, `dupFamilies`, the famil
    ORDER-CODE modifiers, not navigation. **Render the row; leave the click inert** until the app's
    handler is read out. Do not guess it into `update({line})` — `86` is a 73-*system* line
    (§M9-2) and the mapping is not one-to-one.
-2. **A `sku:[…]` navigation returns a card with NO `gridRows`.** Verified: `items?sku=CTSP6080&
-   groupBy=family` returns the family FACE (`TSP6080`), so a sku navigation cannot be grouped, and an
-   ungrouped list is not given rows. Affected: the FRONTS tier badges, the finish chips, and a depth
-   *sibling* pill — after one of those the card falls back to the legacy `parameters.*` rows. That is
-   today's behaviour too, so it is not a regression, but it is a real gap. Two possible fixes, both
-   unverified: route P/A/C tier picks as `familyId&tier=X&widthMm&heightCode&groupBy=family`
-   (§2c-11's "Fronts chip = tierOk … the face swaps to that unit at the same width/height/variant"
-   suggests it works, but `tier=P1` on SNK1 returned an empty page, so P1/C1 certainly can't be done
-   this way), or ask the backend to attach `gridRows` to ungrouped rows.
-3. **`refs` coverage of `gridRows` targets** is partial by construction (`collectRefSkus` walks
-   `parameters.*` only). Measured 6 missing H-row targets across the three samples; **Ty-row coverage
-   was not measurable** — none of the sampled cards had a variant row with an off-card target. If the
-   Ty fallback (`sku:[…]`) turns out to fire often, the clean fix is server-side: add `gridRows` pill
-   skus to `collectRefSkus`.
+2. ~~A `sku:[…]` navigation returns a card with NO `gridRows`.~~ **RESOLVED server-side 2026-07-29**
+   — the backend now attaches `gridRows` to ungrouped rows. `items?sku=CTSP6080&full=true&limit=1`
+   returns `CTSP6080` itself with all three rows, correctly selected. The FRONTS tier badges, the
+   finish chips and a depth *sibling* pill therefore keep full rows. `groupBy=family` still re-faces,
+   so a sku navigation must still be **ungrouped** — and an ungrouped row still has no
+   `cardAvailable` / `heightExtensionOk` (see R2).
+3. ~~`refs` coverage of `gridRows` targets is partial.~~ **RESOLVED server-side 2026-07-29** — the
+   ref collector walks `gridRows[].pills[].sku` too. Measured on SNK1: 12/15 targets in `refs`, the
+   3 absent being the card's own sku. Keep the `sku:[…]` Ty fallback as a cheap last resort.
 4. **`cardAvailable` on a bare toolbar** is absent, not `true` — confirmed by reading
    `annotateFamilyAvailability`'s early return and by its absence from `list-grouped.json` /
    `by-section.json`. The `??` fallback covers it, but do not write `=== true` anywhere.
