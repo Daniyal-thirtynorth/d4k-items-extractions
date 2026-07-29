@@ -33,9 +33,9 @@
  *   meta.imageUrlTemplate.replace("<CODE>", sku)`.
  *
  * ── VERSIONING ──────────────────────────────────────────────────────────────
- *   `meta.schemaVersion` = "2.5.2"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
- *   2.3 DimPill.showUnderLine on width/height pills; 2.4 Item.heightCode; 2.5 Item.unitFacts + Item.familyFacts
- *   — all additive, old readers ignore).
+ *   `meta.schemaVersion` = "2.5.3"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
+ *   2.3 DimPill.showUnderLine on width/height pills; 2.4 Item.heightCode; 2.5 Item.unitFacts + Item.familyFacts;
+ *   2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies; 2.5.3 FamilyFacts.rawSub — all additive, old readers ignore).
  *   The extractor emits this shape directly
  *   (`docs/export-v781-extractor2.js`); ingest AND the CRUD endpoints write it
  *   through one `normalizeItemDoc`, so hand-authored and extracted items match.
@@ -55,7 +55,7 @@ export interface CatalogExport {
 export interface ExportMeta {
   generated: string;               // ISO datetime
   source: string;                  // e.g. "leicht_units v781 (headless DOM extraction via openDetail)"
-  schemaVersion: string;           // "2.5.2" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode; 2.5 unitFacts + familyFacts; 2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies
+  schemaVersion: string;           // "2.5.3" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode; 2.5 unitFacts + familyFacts; 2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies; 2.5.3 FamilyFacts.rawSub
   imageUrlTemplate: string;        // ".../itemData/<CODE>.jpg" — build every image from this + sku
   counts: { items: number; cabinets: number; accessories: number; categories: number; programmes: number };
   recoveredArtifactSkus?: string[]; // codes the app's init deleted as artifacts but which are still real
@@ -237,6 +237,13 @@ export interface FamilyFacts {
   isSpecial?: boolean;             // /special/i on the label — demoted inside its label group
   variantLabels?: Record<string, string> | null;   // the RENDERED chip text (vmap / Vero / "<n> cm")
   memberTiers?: string | null;     // b._mem — every line the FAMILY appears in ("PAC"); the app's famOkB
+  /* ⭐ 2.5.3 — the RAW `f.sub`. `Item.subcategory` is the DISPLAY name (`subDisp(f)`), and TALL_MERGE
+     folds three Tall subs into one ('Accessory surround' / 'Fillers' / 'Back & Side Panels' →
+     'Panels, Fillers & Surrounds'), so the display name cannot answer the app rules that test the raw
+     sub. Two of them decide MEMBERSHIP: `avanceExempt` (Fillers + Accessory surround are exempt from
+     the v319 programme-tier hide, Back & Side Panels is NOT) and the `sub!=='Modular Units'` arm of
+     that same gate. Reading `subcategory` there hid F1730/F342/F343 under a non-Primo programme. */
+  rawSub?: string | null;
 }
 
 /**

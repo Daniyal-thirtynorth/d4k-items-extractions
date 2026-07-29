@@ -851,3 +851,96 @@ the client's React app will actually use. Today it is hard-coded in `params()`.
 
 Other open items: Wall/Midway not yet re-measured, the tall `Line` row click (§L #7) and the D4K-prd
 backfills (handoff tasks 7 and 8).
+
+---
+
+### §N. SWEEP ROUND 3 — section order, the raw sub, and the v98 sibling swap (2026-07-29, late)
+
+Round 2 (§M) left a `grey=false` residue of **Base MEMBER 1 · Tall MEMBER 3 / SECT 14 / ORDER 6 /
+PILLS 2 · Wall+Midway MEMBER 6**, with FACE / CODE / GREY / ROWSET / STATE / GREY_NOT_HIDE already at
+0 in all three legs. Round 3 took the three real causes behind that residue.
+
+**⚠️ First, two HARNESS artifacts that looked like bugs.** Both cost time; both are re-runs, not fixes.
+
+* **Wall+Midway MEMBER 33 / SECT 33 (report-WallMidway7).** Whole leaves came back EMPTY on our side
+  (`Midway|Open shelf|base` — client 5 families, ours 0). The API returns the right 5. Cause: the
+  backend was rebuilt and RESTARTED while that leg was still sweeping, so the last ~60 states hit a
+  dead server. **Never restart the backend mid-sweep** — abort the sweep, restart, re-run.
+* **`Tall|Panels, Fillers & Surrounds|progP_BOSSA`.** The client dump for that ONE state has no
+  section headers at all, a scrambled card order, and a family (`F224`) that appears in no other
+  state — a partial/mid-render DOM capture. It is the only Tall state still showing MEMBER + SECT
+  diffs; treat it as a bad sample until re-dumped, not as a discrepancy.
+
+**N1. `sectionRank` was captured with the wrong key — all 10 sections of a leaf in the wrong order.**
+`renderGrid` looks up `SECTION_ORDER[subDisp(f)] || SECTION_ORDER[secOrderKey(subDisp(f))]`. The
+stored rank had been captured with `SECTION_ORDER[f.sub]` — the RAW sub. On Tall those differ:
+`TALL_MERGE` maps `Accessory surround` / `Fillers` / `Back & Side Panels` into the single display sub
+`Panels, Fillers & Surrounds`, which has its own curated order built at v433. So the ranks came off
+`SECTION_ORDER['Accessory surround']` instead: Tall End Panels **8** (should be 0), Rear Panels in
+Front Finish **10** (6), Depth Extensions **11** (8), and every v433 classify-derived section (Tall
+Fillers / Blenders / Corner Blenders / Angle Blenders / Wall Blenders, Support Panel with Plinth,
+Carcase Side Extension) fell to **999**. Data-only: 78 families / 1,130 items re-captured from the
+live app and backfilled. The EXTRACTOR's own formula was already correct — the stale values came from
+the earlier `backfill-section-rank.js` capture, and the export had inherited them.
+→ **Tall SECT 14 → 3**, and the 3 survivors are exactly the 3 states that still differ on MEMBERSHIP.
+
+**N2. `bucketSections` applied the rank unconditionally.** The app consults SECTION_ORDER only when
+the visible set has ONE display sub — `_disp = _subs.size===1 ? [..._subs][0] : ''`, and
+`SECTION_ORDER['']` is undefined. A task leaf spanning several subs therefore ranks EVERY section 999
+and falls back to pure first-seen/`pri` order. Ported that guard. (Inert in the sweep, which filters
+by a single sub; it matters for the `leafId` task views.)
+
+**N3. `avanceExempt` was tested against the DISPLAY sub.** The v319 programme-tier hide exempts
+`isAccessory(b) || sub==='Accessory surround' || sub==='Fillers' || /^FRMAT/`, plus a
+`sub!=='Modular Units'` arm — all on the RAW sub. Our escape list matched `Item.subcategory`, which is
+`subDisp(f)`, so on Tall it exempted nothing and we HID Primo-only families the app keeps (`F1730`,
+`F342`, `F343` under LAIKA / ROCCA). Matching the display name instead would over-exempt `Back & Side
+Panels`, which is NOT exempt — so the raw sub now ships as **`familyFacts.rawSub`** (schemaVersion
+2.5.3). Extractor emits it; export patched; D4K-dev backfilled; **D4K-prd still owes it**.
+
+**N4. The v98 SIBLING-FAMILY SWAP is a MEMBERSHIP rule, and it was never ported.** From
+`visibleBlocks`:
+
+```js
+const fl = activeFamFor(b.cat);
+if (fl && u.fam && u.fam !== fl && String(u.sib||'').includes(fl)) {
+  const sc = sibCode(u, fl), loc = sc ? codeLoc(sc) : null;
+  if (loc && loc.fid !== b.id && FAM_BY_ID[loc.fid]) { b = FAM_BY_ID[loc.fid]; u = …; }
+}
+…
+{ const seen=new Set(); … }   // v98: dedupe by b.id, KEEPING THE FIRST
+```
+
+"The card pre-selects the article of the zone's pricebook": under an Avance programme a Contino-faced
+card resolves to its A-twin, which usually lives in a DIFFERENT family — and the dedupe then collapses
+the pair into ONE card. We rendered both. `F115` (`CHP20154`, sib `AC`) → `F209` (`AHP20154`) under
+LAIKA, and symmetrically `F93` ⇄ `F106` in Wall › Corner under LAIKA / ROCCA.
+
+Ported as `applySiblingFamilySwap`, run where the app runs it — after the face pick, before `av`. The
+card keeps the SOURCE's position (the app pushes at the source's index) and takes the TARGET's
+identity, then dedupe by `familyId` keeping first. **No new per-unit data**: `sibCode(u,x) = x==='P' ?
+core(u) : x+core(u)` and `core(u) = u.fam!=='P' && /^[AC]/ ? sku.slice(1) : sku`, so it is derivable
+from `sku` + `unitFacts.tier`. `codeLoc`'s "prefer a family in the current category" is reproduced by
+a sku→family index built off the cached pool (and cleared with it, so `category` joined the pool
+projection). When the target family is not in the result set the swap is SKIPPED rather than
+synthesised — rendering a card for a family the query excluded would be a bigger lie.
+
+Verified against the app: Tall Panels under LAIKA and ROCCA return **28 families each, matching the
+app's 28**, with F1730/F342/F343 present and the F115/F209 swap resolving per programme; Wall › Corner
+returns the app's **6**.
+
+**N5. A STALE IN-PROCESS POOL CACHE can survive a backfill.** All 6 Tall ORDER diffs (`Tall End
+Panels`, `Rear Panels in Front Finish`, `Support Panel with Plinth` — adjacent-pair swaps among
+unnumbered `XAG_*` families that sort on the `(b.maxh - a.maxh)` tiebreak) disappeared on restart with
+no code change: `poolByFamily` had been cached before the `sectionRank` backfill. Anything that writes
+to the collection outside the app's own ingest/CRUD path must be followed by a restart (or an
+`invalidatePool()`), or the next sweep measures stale data.
+
+**Known residue after round 3** (all deliberately left, all documented):
+
+| # | Where | What |
+|---|---|---|
+| 1 | Base MEMBER 1 — `ADD_KSSET_TILTPROTEC__CKDUP` @BOSSA | The dup family's single unit carries `u.fam = "ADD_KSSET_TILTPROTEC__CKDUP"` (the family id, not a tier letter), so the app's `tierHas(b,'P')` is false and v319 HIDES it. Our tier gate reads `capabilities.nativeTier`, which is a real `'P'`, so we keep it. Fixing it means testing `unitFacts.tier` in the tier gate — the gate that already took three iterations to stabilise (`availableTiers` → `nativeTier`) — for one card in one state. Not worth the regression risk now. |
+| 2 | Tall PILLS 2 — `F1780`/`F1782` @LAIKA/ROCCA | The app renders the H row as `154 190 204 217 217` — **two** 217 pills; we emit one. Porting it means deliberately emitting a duplicate pill. Looks like an app bug; confirm with the client before matching it. |
+| 3 | Tall `progP_BOSSA` | Bad client sample (see the artifact note above). Re-dump that one state. |
+| 4 | §G family-level MEMBERSHIP (SNK8-type) | Unchanged from round 1. |

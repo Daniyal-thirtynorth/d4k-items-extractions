@@ -615,6 +615,12 @@ function _famFacts(f){
       return Object.keys(o).length?o:null; })(),
     byProgramme: !!f.byprog, hasOpeningArticles: !!f._hasOp, hasPrimo: !!f._hasP, noLine: !!f.noline,
     memberTiers: f._mem||null,
+    // The RAW `f.sub`. `Item.subcategory` is `subDisp(f)` — the DISPLAY name — and TALL_MERGE
+    // renames three Tall subs into one ('Accessory surround' / 'Fillers' / 'Back & Side Panels'
+    // → 'Panels, Fillers & Surrounds'), so the display name cannot answer the app's rules that
+    // test the raw sub: `avanceExempt` (Fillers / Accessory surround are exempt, Back & Side
+    // Panels is NOT) and the `sub!=='Modular Units'` arm of the v319 programme-tier hide.
+    rawSub: f.sub||null,
     isAccessory: !!(typeof isAccessory==='function'&&isAccessory(f)),
     isProgrammeAgnostic: !!(typeof isProgAgnostic==='function'&&isProgAgnostic(f)),
     depth63: (typeof d63Cfg==='function'&&d63Cfg(f))?{mode:d63Cfg(f).mode,force68:!!d63Cfg(f).force68}:null,

@@ -23,7 +23,7 @@ There is **no build/test here** — it is data files + docs (it IS a git repo no
 and `*.bak.json` are gitignored, the `.gz` is committed). Big JSON files: never `Read` them whole; use
 `python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
 
-## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.5.2** since 2026-07-29). READ THIS FIRST.
+## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.5.3** since 2026-07-29). READ THIS FIRST.
 
 The model was reworked from the fat "everything pre-computed, frozen at the default toolbar" export (v1,
 `docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.4.0** — 2.0.0 plus the
@@ -305,6 +305,46 @@ Current facts:
   D4K-dev backfilled (`backfill-item-fields.js --fields unitFacts,familyFacts,gridHidden,dupFamilies`) plus
   the backend-computed `faceWidthMm`. **D4K-prd still owes `unitFacts`/`familyFacts`/`faceWidthMm`/
   `gridHidden`/`dupFamilies`** — see `docs/parity-session-handoff-2026-07-28.md` §3a for the commands.
+
+- **⭐ SWEEP ROUND 3 — section order + the RAW SUB + the v98 sibling swap (2026-07-29 late,
+  schemaVersion 2.5.3, audit §N).** Round 2's `grey=false` residue was Base MEMBER 1 · Tall MEMBER 3 /
+  SECT 14 / ORDER 6 / PILLS 2 · Wall+Mid MEMBER 6. Four causes, plus two harness traps worth more than
+  the fixes: **⚠️ never restart the backend mid-sweep** (Wall+Mid "MEMBER 33/SECT 33" was ~60 states
+  hitting a dead server — the API was right all along) and **⚠️ a stale in-process `poolByFamily`
+  cache survives an out-of-band backfill** (all 6 Tall ORDER diffs vanished on restart, no code
+  change — any script that writes the collection outside ingest/CRUD needs a restart or
+  `invalidatePool()`). Also one bad client sample: `Tall|…|progP_BOSSA` dumped with no section headers,
+  a scrambled order and a family seen in no other state — re-dump, don't chase.
+  **(1) `sectionRank` was captured with the WRONG KEY.** `renderGrid` reads
+  `SECTION_ORDER[subDisp(f)]`; the stored rank came from `SECTION_ORDER[f.sub]` (RAW). On Tall those
+  differ — `TALL_MERGE` folds `Accessory surround`/`Fillers`/`Back & Side Panels` into
+  `Panels, Fillers & Surrounds`, which has its own v433 order — so ranks came off the wrong array
+  (Tall End Panels 8 not 0, Rear Panels 10 not 6) and every classify-derived section fell to 999. All
+  10 sections of that leaf rendered out of order. Data-only: 78 families / 1,130 items re-captured +
+  backfilled (dev) + export patched. The **extractor's formula was already right** — the stale values
+  came from the earlier `backfill-section-rank.js` capture. → Tall SECT 14 → 3.
+  **(2) `bucketSections` applied the rank unconditionally.** The app consults SECTION_ORDER only when
+  the visible set has ONE display sub (`_disp = _subs.size===1 ? … : ''`); a multi-sub task leaf ranks
+  everything 999 → first-seen/`pri`. Ported.
+  **(3) ⭐ `familyFacts.rawSub` (2.5.3).** `avanceExempt` (and the `sub!=='Modular Units'` arm of the
+  v319 programme-tier hide) test the RAW sub; we matched `Item.subcategory` = `subDisp(f)`, so on Tall
+  the escape list matched NOTHING and we hid Primo-only families the app keeps (F1730/F342/F343 under
+  LAIKA/ROCCA). Matching the display name would over-exempt `Back & Side Panels` (NOT exempt), so the
+  raw sub ships. Extractor emits it; export + D4K-dev done; **D4K-prd owes it**.
+  **(4) ⭐ THE v98 SIBLING-FAMILY SWAP IS A MEMBERSHIP RULE.** `visibleBlocks`: with a zone programme,
+  a card whose face is in another tier but whose `u.sib` contains the active letter resolves to
+  `sibCode(u,fl)` — usually in a DIFFERENT family — and the `b.id` dedupe then collapses the pair into
+  ONE card. We rendered both (F115 ⇄ F209 Tall, F93 ⇄ F106 Wall › Corner). Ported as
+  `applySiblingFamilySwap`, run where the app runs it (after the face pick, before `av`): card keeps
+  the SOURCE's position, takes the TARGET's identity, dedupe by familyId keeping first. **No new
+  per-unit data** — `core(u)` is derivable from `sku` + `unitFacts.tier`; `codeLoc` = a sku→family
+  index off the cached pool (so `category` joined the pool projection, and `invalidatePool` clears it).
+  Verified vs the app: Tall Panels @LAIKA/@ROCCA 28 families each (app 28), Wall › Corner 6 (app 6).
+  **Residue left on purpose:** Base MEMBER 1 (`ADD_KSSET_TILTPROTEC__CKDUP` — its unit's `u.fam` is
+  the FAMILY ID, not a tier letter, so the app's `tierHas` hides it while our `capabilities.nativeTier`
+  is a real `'P'`; fixing means re-touching the thrice-iterated tier gate for one card in one state)
+  and Tall PILLS 2 (the app renders `217` TWICE on F1780/F1782 — looks like an app bug, confirm before
+  matching it).
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 
