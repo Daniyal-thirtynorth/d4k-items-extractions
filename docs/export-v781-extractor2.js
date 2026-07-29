@@ -580,6 +580,25 @@ H.buildFunctionalCategories=function(){
  * `recovered` units (dropped from FAMS by the app's init) skip the DOM scrape
  * (openDetail can't render them) — they carry raw scalars + capabilities only.
  * ==========================================================================*/
+// the FAMILY half of the grid-row inputs. Shared: every item carries its own family's copy, and a
+// dupFamilies entry carries the DUP family's (50 of 79 differ from their primary's).
+function _famFacts(f){
+  const _rkL=l=>String(l||'').toLowerCase().replace(/·\s*[a-z0-9]{1,5}\s*$/,'').replace(/45°\s*(mitre|miter)\s*/g,'').replace(/·\s*island/g,'').replace(/·\s*special[^·]*/g,'').replace(/special height|special usa[^·]*/g,'').replace(/[^a-z]+/g,' ').trim();
+  return {
+    label: f.label||null, labelGroup: _rkL(f.label), isSpecial: /special/i.test(f.label||''),
+    dim: f.dim||'none', variantLabel: f.vlbl||null, numericLabel: f.slbl||null,
+    variantFormat: f.vfmt||null, variantOrder: f.cho||null,
+    variantLabels: (function(){ const o={}; const xig=f.id&&f.id.startsWith('XIG_')&&f.id.endsWith('_B'); const seen=[];
+      f.units.forEach(x=>{ if(x.vr!=null&&!seen.includes(x.vr)) seen.push(x.vr); });
+      seen.forEach(vv=>{ const l=(f.vmap&&f.vmap[vv])||(typeof veroTypeLabel==='function'?veroTypeLabel(vv):null)||(xig?({D:'L3/M3',DU:'M8'})[vv]:null)||(f.vfmt==='cm'?String(vv).replace(/^[A-Za-z]+/,'')+' cm':null); if(l&&l!==vv)o[vv]=l; });
+      return Object.keys(o).length?o:null; })(),
+    byProgramme: !!f.byprog, hasOpeningArticles: !!f._hasOp, hasPrimo: !!f._hasP, noLine: !!f.noline,
+    memberTiers: f._mem||null,
+    isAccessory: !!(typeof isAccessory==='function'&&isAccessory(f)),
+    isProgrammeAgnostic: !!(typeof isProgAgnostic==='function'&&isProgAgnostic(f)),
+    depth63: (typeof d63Cfg==='function'&&d63Cfg(f))?{mode:d63Cfg(f).mode,force68:!!d63Cfg(f).force68}:null,
+  };
+}
 function buildItem(f,u,recovered){
   let pin=null;
   if(!recovered){
@@ -640,22 +659,12 @@ function buildItem(f,u,recovered){
       widthCode: u.w!=null?u.w:null, depthCode: u.dv!=null?u.dv:null,
       variantCode: u.vr!=null?u.vr:null,
       depthAlterations: (Array.isArray(u.d)&&u.d.length)?u.d.slice():null,   // u.d — the D STATE row
+      // the app matches heights with STRICT === (`x.hc===selH` in wsAtH / dAll), so a unit whose hc
+      // is literally `null` never matches one whose hc is `undefined`. 4 units in v781 (all ANBL)
+      // are null — that is what keeps ANBL's W and D rows off the card.
+      heightCodeNull: u.hc===null?true:undefined,
     };
-    const _rkL=l=>String(l||'').toLowerCase().replace(/·\s*[a-z0-9]{1,5}\s*$/,'').replace(/45°\s*(mitre|miter)\s*/g,'').replace(/·\s*island/g,'').replace(/·\s*special[^·]*/g,'').replace(/special height|special usa[^·]*/g,'').replace(/[^a-z]+/g,' ').trim();
-    it.familyFacts={
-      label: f.label||null, labelGroup: _rkL(f.label), isSpecial: /special/i.test(f.label||''),
-      dim: f.dim||'none', variantLabel: f.vlbl||null, numericLabel: f.slbl||null,
-      variantFormat: f.vfmt||null, variantOrder: f.cho||null,
-      variantLabels: (function(){ const o={}; const xig=f.id&&f.id.startsWith('XIG_')&&f.id.endsWith('_B'); const seen=[];
-        f.units.forEach(x=>{ if(x.vr!=null&&!seen.includes(x.vr)) seen.push(x.vr); });
-        seen.forEach(vv=>{ const l=(f.vmap&&f.vmap[vv])||(typeof veroTypeLabel==='function'?veroTypeLabel(vv):null)||(xig?({D:'L3/M3',DU:'M8'})[vv]:null)||(f.vfmt==='cm'?String(vv).replace(/^[A-Za-z]+/,'')+' cm':null); if(l&&l!==vv)o[vv]=l; });
-        return Object.keys(o).length?o:null; })(),
-      byProgramme: !!f.byprog, hasOpeningArticles: !!f._hasOp, hasPrimo: !!f._hasP, noLine: !!f.noline,
-      memberTiers: f._mem||null,
-      isAccessory: !!(typeof isAccessory==='function'&&isAccessory(f)),
-      isProgrammeAgnostic: !!(typeof isProgAgnostic==='function'&&isProgAgnostic(f)),
-      depth63: (typeof d63Cfg==='function'&&d63Cfg(f))?{mode:d63Cfg(f).mode,force68:!!d63Cfg(f).force68}:null,
-    };
+    it.familyFacts=_famFacts(f);
   }catch(e){ warn('grid facts failed for '+u.c+': '+(e&&e.message)); }
 
   // raw structured blocks
@@ -898,6 +907,40 @@ H.finalize=function(){
   });
   const all=uniq.concat(synth);
   all.forEach(it=>{ delete it._err; });
+
+  // gridHidden — the app renders a card only for a family `visibleBlocks()` keeps, and that skips
+  // `b.hid` outright (v127: detail-only families, reached via "Planned together"). So a sku that no
+  // NON-hidden family lists must never become a grid card, while staying fetchable for refs/detail:
+  // the hidden families' members (F74, XHGT_FRIDGE, …), the units recovered above (the app's init
+  // deleted them), and the ItemRef-only stubs synthesized just now (760, 761, SZIZ, US, …).
+  // A code can belong to SEVERAL visible families and the app renders a CARD for each: the
+  // `*__CKDUP` / `*__DRWDUP` / `*__SNKDUP` / `*__TRDUP` / `MRG_*` synthetics that re-list an
+  // accessory under a second task area, plus a few genuinely shared families (FS7334 is in both
+  // F344 and F2599). One doc holds one familyId, so each EXTRA membership ships as a dupFamilies
+  // entry carrying its own cat/sub/sec, catalog order and familyFacts — a dup family sits in a
+  // different subcategory from its origin and its facts usually differ too.
+  const _owners=new Map();
+  FAMS.forEach(f=>{ if(f.hid) return; (f.units||[]).forEach(u=>{
+    if(!_owners.has(u.c)) _owners.set(u.c,[]); _owners.get(u.c).push(f); }); });
+  const _DUPFAM=/__(?:CK|DRW|SNK|TR)DUP$|^MRG_/;
+  all.forEach(it=>{
+    const ow=_owners.get(it.sku);
+    if(!ow){ it.gridHidden=true; return; }
+    const prim = ow.some(f=>f.id===it.familyId) ? it.familyId
+               : ((ow.find(f=>!_DUPFAM.test(f.id))||ow[0]).id);
+    const dups = ow.filter(f=>f.id!==prim);
+    if(!dups.length) return;
+    it.dupFamilies = dups.map(f=>({
+      familyId: f.id, category: f.cat||null,
+      subcategory: (typeof subDisp==='function'?subDisp(f):f.sub)||null, section: f.sec||null,
+      catalogRank: f.pri!=null?f.pri:null,
+      sectionRank: (function(){ const d=(typeof subDisp==='function'?subDisp(f):f.sub);
+        const so=(typeof SECTION_ORDER!=='undefined'&&SECTION_ORDER)?(SECTION_ORDER[d]||(typeof secOrderKey==='function'?SECTION_ORDER[secOrderKey(d)]:null)||[]):[];
+        const i2=so.indexOf(f.sec||''); return i2<0?999:i2; })(),
+      familyIndex: FAMS.indexOf(f),
+      familyFacts: _famFacts(f),
+    }));
+  });
 
   // Tag each family's face unit with the tier contexts it fronts (key by familyId|sku).
   const faces=H.buildFaces(); const faceOf={};

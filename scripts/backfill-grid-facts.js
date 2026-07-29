@@ -77,20 +77,73 @@ function unitFacts(u) {
     depthCode: u.dv != null ? u.dv : null,
     variantCode: u.vr != null ? u.vr : null,
     depthAlterations: Array.isArray(u.d) && u.d.length ? u.d : null,   // u.d — the card's D STATE row
+    // the app matches heights with STRICT === (`x.hc===selH` in wsAtH / dAll), so a unit whose hc is
+    // literally `null` never matches one whose hc is `undefined`. 4 units in v781 (all ANBL) are
+    // null — that is exactly what keeps ANBL's W and D rows off the card.
+    heightCodeNull: u.hcNull ? true : undefined,
   };
 }
 
-let setU = 0, setF = 0, noUnit = 0, noFamily = 0;
+// The app renders a card only for a family in `visibleBlocks()`, which skips `b.hid` outright
+// (v127: detail-only families, shown via "Planned together"). Two item groups must therefore never
+// become a grid card, while staying fetchable by sku for refs/detail:
+//   1. members of a hidden family (F74, XHGT_FRIDGE, …)
+//   2. codes that are in NO app family at all — the 23 `meta.recoveredArtifactSkus` the app's init
+//      deletes, plus the extractor's synthesized ItemRef-only codes (760, 761, SZIZ, US, …).
+const visibleOwners = new Map();   // sku -> the NON-hidden families listing it, in FAMS order
+for (const [fid, f] of Object.entries(facts.families)) {
+  if (f.hid) continue;
+  for (const c of f.codes || []) {
+    if (!visibleOwners.has(c)) visibleOwners.set(c, []);
+    visibleOwners.get(c).push(fid);
+  }
+}
+
+// A code can be a member of SEVERAL visible families, and the app renders a CARD for each of them:
+// the `*__CKDUP` / `*__DRWDUP` / `*__SNKDUP` / `*__TRDUP` / `MRG_*` synthetics that re-list an
+// accessory under a second task area, plus a few genuinely shared families (FS7334 is in both F344
+// and F2599). Our items collection stores ONE doc with ONE familyId, so those extra cards could not
+// exist — 275 of the 284 cards missing from the §L sweep. Each extra membership carries its own
+// cat/sub/sec, catalog order AND familyFacts (50 of 79 differ from the primary's), so the whole
+// card identity travels with the entry.
+const DUP_FAMILY = /__(?:CK|DRW|SNK|TR)DUP$|^MRG_/;
+function dupEntry(fid) {
+  const f = facts.families[fid];
+  return {
+    familyId: fid,
+    category: f.cat || null,
+    subcategory: f.subDisp || f.sub || null,
+    section: f.sec || null,
+    catalogRank: f.pri != null ? f.pri : null,
+    sectionRank: f.secRank != null ? f.secRank : 999,
+    familyIndex: f.i,
+    familyFacts: familyFacts(f),
+  };
+}
+
+let setU = 0, setF = 0, noUnit = 0, noFamily = 0, hidden = 0, dupItems = 0, dupEntries = 0;
 for (const it of data.items || []) {
   const u = facts.units[it.sku];
   if (u) { it.unitFacts = unitFacts(u); setU++; } else noUnit++;
   const fid = it.familyId || (u && u.fid);
   const f = fid && facts.families[fid];
   if (f) { it.familyFacts = familyFacts(f); setF++; } else noFamily++;
+
+  const owners = visibleOwners.get(it.sku);
+  if (!owners) { it.gridHidden = true; hidden++; delete it.dupFamilies; continue; }
+  delete it.gridHidden;
+  // The stored familyId wins when it is one of the owners (it is, for all but 1 item in v781);
+  // otherwise fall back to the first non-synthetic owner, as the extractor does.
+  const primary = owners.includes(it.familyId)
+    ? it.familyId
+    : (owners.find((x) => !DUP_FAMILY.test(x)) || owners[0]);
+  const dups = owners.filter((x) => x !== primary);
+  if (dups.length) { it.dupFamilies = dups.map(dupEntry); dupItems++; dupEntries += dups.length; }
+  else delete it.dupFamilies;
 }
 const prevVersion = data.meta && data.meta.schemaVersion;
-if (data.meta) data.meta.schemaVersion = '2.5.0';
+if (data.meta) data.meta.schemaVersion = '2.5.2';
 
-console.log({ export: EXPORT, items: (data.items || []).length, unitFacts: setU, familyFacts: setF, noUnit, noFamily, prevVersion, newVersion: '2.5.0', apply: APPLY });
+console.log({ export: EXPORT, items: (data.items || []).length, unitFacts: setU, familyFacts: setF, noUnit, noFamily, gridHidden: hidden, dupItems, dupEntries, prevVersion, newVersion: '2.5.2', apply: APPLY });
 if (APPLY) { fs.writeFileSync(EXPORT, JSON.stringify(data)); console.log('written'); }
 else console.log('dry run — pass --apply to write');

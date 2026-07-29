@@ -33,7 +33,7 @@
  *   meta.imageUrlTemplate.replace("<CODE>", sku)`.
  *
  * ── VERSIONING ──────────────────────────────────────────────────────────────
- *   `meta.schemaVersion` = "2.5.0"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
+ *   `meta.schemaVersion` = "2.5.2"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
  *   2.3 DimPill.showUnderLine on width/height pills; 2.4 Item.heightCode; 2.5 Item.unitFacts + Item.familyFacts
  *   — all additive, old readers ignore).
  *   The extractor emits this shape directly
@@ -55,7 +55,7 @@ export interface CatalogExport {
 export interface ExportMeta {
   generated: string;               // ISO datetime
   source: string;                  // e.g. "leicht_units v781 (headless DOM extraction via openDetail)"
-  schemaVersion: string;           // "2.5.0" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode; 2.5 unitFacts + familyFacts
+  schemaVersion: string;           // "2.5.2" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode; 2.5 unitFacts + familyFacts; 2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies
   imageUrlTemplate: string;        // ".../itemData/<CODE>.jpg" — build every image from this + sku
   counts: { items: number; cabinets: number; accessories: number; categories: number; programmes: number };
   recoveredArtifactSkus?: string[]; // codes the app's init deleted as artifacts but which are still real
@@ -128,6 +128,16 @@ export interface Item {
   unitFacts?: UnitFacts;            // per unit — the row VALUES + pool scoping + the Fronts twin rule
   familyFacts?: FamilyFacts;        // per family, denormalized on each member item
 
+  /* ⭐ 2.5.1 — never render this item as a grid CARD. The app's `visibleBlocks()` skips `b.hid`
+     families outright (detail-only, reached through "Planned together"), and some exported codes
+     belong to no app family at all: the units the app's own init deletes as not-in-pricelist
+     (`meta.recoveredArtifactSkus`) and the ItemRef-only stubs the extractor synthesizes (760, 761,
+     SZIZ, US, …). All stay fetchable by sku — they are simply never listed. 57 items. */
+  gridHidden?: boolean;
+
+  /* ⭐ 2.5.2 — EXTRA cards for this code, one per additional family it belongs to. See DupFamily. */
+  dupFamilies?: DupFamily[];
+
   /* configurator pills — thin: label + navigation target only. State is DERIVED. */
   parameters?: Parameters;
   heightExtension?: HeightExtension; // Tall only: the "217+" chip appended to the HEIGHT row.
@@ -198,6 +208,10 @@ export interface UnitFacts {
   widthCode: number | null;        // u.w  — the W ROW value in cm (≠ widthMm/10 on panels)
   depthCode: number | null;        // u.dv — the D ROW value in cm (58/68/…)
   variantCode: string | null;      // u.vr — Ty/variant key; pools are variant-scoped when vlbl is set
+  depthAlterations?: number[] | null;  // u.d — the depths this unit is orderable at (the D STATE row)
+  heightCodeNull?: boolean;        // u.hc is literally `null`, not absent. The app compares heights with
+                                   //   STRICT === in wsAtH/dAll, so a null unit never matches an absent
+                                   //   one — that is why ANBL's card draws no W and no D row. 4 units.
 }
 
 export interface FamilyFacts {
@@ -218,6 +232,31 @@ export interface FamilyFacts {
   depth63: { mode: 'base' | 'sink' | 'cooktop' | 'tall'; force68: boolean } | null;
                                    //   d63Cfg(b). null ⇒ the family is NOT orderable at depth 63, so a
                                    //   D=63 toolbar state must drop it (app `d63Eligible`).
+  label?: string | null;           // b.label — the card title
+  labelGroup?: string;             // the app's `rk(label)` — variants sort WITH their product
+  isSpecial?: boolean;             // /special/i on the label — demoted inside its label group
+  variantLabels?: Record<string, string> | null;   // the RENDERED chip text (vmap / Vero / "<n> cm")
+  memberTiers?: string | null;     // b._mem — every line the FAMILY appears in ("PAC"); the app's famOkB
+}
+
+/**
+ * One EXTRA card for a code that belongs to more than one visible family. The app renders a card per
+ * family membership: the `*__CKDUP` / `*__DRWDUP` / `*__SNKDUP` / `*__TRDUP` / `MRG_*` synthetics that
+ * re-list an accessory under a second task area, plus a few genuinely shared families (FS7334 is in
+ * both F344 and F2599). `Item.familyId` is the PRIMARY card; each entry here is another one, carrying
+ * its own identity because a dup normally sits in a different subcategory entirely (F1970 is
+ * Base/Sinks, F1970__CKDUP is Base/Cooktops & Downdrafts) and its facts usually differ too.
+ * 74 items / 79 entries in v781.
+ */
+export interface DupFamily {
+  familyId: string;
+  category: string | null;
+  subcategory: string | null;
+  section: string | null;
+  catalogRank: number | null;      // the dup family's own `pri` — its position in the catalog order
+  sectionRank: number;             // its section's index in SECTION_ORDER[sub] (999 = no curated order)
+  familyIndex: number;             // its position in FAMS — the app's last sort tiebreak
+  familyFacts: FamilyFacts;        // the DUP family's facts; 50 of 79 differ from the primary's
 }
 
 export interface Capabilities {

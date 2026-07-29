@@ -1063,6 +1063,55 @@ field is settable at creation via CRUD (`UpsertItemDto.capabilities`).
 
 ---
 
+### 2c-12. ⭐ CARD MEMBERSHIP — who gets a card at all (audit §M)
+
+`visibleBlocks()` decides membership before anything else renders. Four rules that are NOT expressible
+as a per-unit filter, all now server-side; the React client needs none of them — it renders what
+`GET items` returns.
+
+| App rule | Our field / behaviour |
+|---|---|
+| `if (b.hid) return;` — 46 detail-only families never render, and 44 exported codes belong to no app family (the units the app's init deletes + ItemRef-only stubs) | **`Item.gridHidden`** (57 items). Dropped from every LIST; still fetchable by sku, so refs and the detail drawer are unchanged. |
+| `state.line!=='ALL' && !lineGrey && !lineCardOk(b)` | family-level `lineFamilyOk`; hides unless `grey=true` |
+| `state.depth!==58 && !lineGrey && !depthFamOk(b)` | family-level `depthFamilyOk`. **Relevance is decided for the FAMILY** — `if (!depthRelevant(b)) return true` — so one depth-less member does not exempt a family that has depths (`F1455`, `PNL_END` at D48/D68). |
+| a code that belongs to several visible families gets a CARD IN EACH | **`Item.dupFamilies[]`** — see below |
+
+**`dupFamilies` — one code, several cards.** 41 synthetic families (`*__CKDUP`, `*__DRWDUP`,
+`*__SNKDUP`, `*__TRDUP`, `MRG_*`) re-list an accessory under a second task area, and a few families
+genuinely share units (`FS7334` is in both `F344` and `F2599`). One doc holds one `familyId`, so each
+EXTRA membership ships as a full card identity:
+
+```jsonc
+"dupFamilies": [{
+  "familyId": "F1970__CKDUP",
+  "category": "Base", "subcategory": "Cooktops & Downdrafts",   // ≠ the item's own Base/Sinks
+  "section": "Accessories & Modifications",
+  "catalogRank": 58, "sectionRank": 5, "familyIndex": 1672,
+  "familyFacts": { /* the DUP family's own facts — 50 of 79 differ from the primary's */ }
+}]
+```
+
+74 items / 79 entries in v781. The grid pipeline expands memberships into their own rows before the
+family group, so face ranks, sectioning and sorting treat a dup family exactly like any other. A
+dup family's member POOL is collected from `familyId` OR `dupFamilies.familyId`.
+
+**Two row-builder details worth keeping** (both cost real diffs):
+
+* `u.hc` is compared with **strict `===`**. A unit whose height code is literally `null`
+  (`unitFacts.heightCodeNull`, 4 units, all ANBL) never matches one where it is absent — which is
+  why ANBL's card has no W and no D row. And the depth row reads `dv || 58`, not `dv ?? 58`: `dv: 0`
+  means 58.
+* `dim === 'none'` families render their variant chips through a SEPARATE branch that emits no `wn`
+  and no `disabled` — the chips stay live even when the whole CARD is greyed.
+
+**Card ORDER inside a section is raw catalog `pri` only.** `sortCards` reproduces
+`visibleBlocks`'s `(available, pri, accessory, label-group, special, maxHeight desc, index)`, but when
+the app buckets into sections it re-sorts by `b.pri` alone first — so a greyed card keeps its catalog
+position instead of sinking (`Cooktop Units @D68`: `BZ2 BSZ2 BZ BSZ BZIZ`, with BZ/BSZ greyed in the
+middle). The availability order survives only as the stable tie-break.
+
+---
+
 ### 2c-11. ⭐⭐ `gridRows` — the CARD's rows come from the FAMILY POOL, not from `parameters.*`
 
 **The rule.** In the app a grid card's **W / H / D / Ty / Line** rows are built from the FAMILY:

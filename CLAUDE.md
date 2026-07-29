@@ -23,7 +23,7 @@ There is **no build/test here** — it is data files + docs (it IS a git repo no
 and `*.bak.json` are gitignored, the `.gz` is committed). Big JSON files: never `Read` them whole; use
 `python3`/`node` or `Read` with offset/limit. Grep/analyze programmatically.
 
-## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.4.0** since 2026-07-28). READ THIS FIRST.
+## ⭐⭐ v2 — MINIMAL + CAPABILITIES model (CURRENT; 2026-07-17, schemaVersion **2.5.2** since 2026-07-29). READ THIS FIRST.
 
 The model was reworked from the fat "everything pre-computed, frozen at the default toolbar" export (v1,
 `docs/export-schema.ts`) to a **minimal + capabilities** model (**schemaVersion 2.4.0** — 2.0.0 plus the
@@ -266,6 +266,38 @@ Current facts:
   on both reported cards, H42→`HGA6042`, H204→`HGSP552047Z`, line-family `TSP6080B`+H73→`TSP6073B` unchanged.
   **D4K-dev + D4K-prd both backfilled** (12,048 docs each; prd is a data-only write — the deployed prd
   code needs no release, the extra field is inert until the `dev` branch ships).
+
+- **⭐⭐ GRID PARITY — `gridRows` + the membership rules (2026-07-28/29, schemaVersion 2.5.0 → 2.5.2,
+  audit §L + §M, map §2c-11/§2c-12).** Client kept reporting the grid diverges from the app, so we built a
+  differential harness (`scripts/parity/*` — drives BOTH UIs over a plan of toolbar states, scrapes each
+  `#grid`, diffs into 9 buckets) and swept Base·Tall·Wall·Midway. 720 combos → 10 root causes (§L), then a
+  second round (§M). **The one big idea: a card's W/H/D/Ty/Line rows come from the FAMILY POOL
+  (`ppool`/`hvals`/`wsAtH`/`dAll`/`variantOpts`), NOT from the stored `parameters.*`, which is ONE unit's
+  DETAIL panel.** So the backend now ships **`gridRows`** on every family card
+  (`design-book.grid-rows.ts`, a line-by-line port of `renderGrid`) and the client RENDERS them —
+  `parameters.*` stays the drawer model. Contract inputs, all dumped FROM the app, never re-derived:
+  **`unitFacts`** (u.fam/op/_ag/sib/w/dv/vr/d + `heightCodeNull`) and **`familyFacts`** (dim, vlbl, slbl,
+  vfmt, cho, byprog, _hasOp, _hasP, noline, _mem, isAccessory, isProgAgnostic, d63Cfg, label/labelGroup/
+  isSpecial/variantLabels). Base diffs: ROWSET 402→8, STATE 305→27, PILLS 76→0, FACE 274→79, GREY 123→31.
+  **Membership rules that are NOT per-unit filters (§M):** `Item.gridHidden` (57 items — the app's `b.hid`
+  families + the 44 codes in no family: recovered artifacts and ItemRef-only stubs; dropped from LISTS,
+  still fetchable by sku) · family-level `depthFamOk` (relevance is decided for the FAMILY —
+  `if(!depthRelevant(b)) return true` — one depth-less member must not exempt it) · `lineCardOk` HIDES,
+  not just greys · **`Item.dupFamilies[]`** (74 items / 79 entries / 40 families) = a code that belongs to
+  several visible families gets a CARD IN EACH (`*__CKDUP`/`*__DRWDUP`/`*__SNKDUP`/`*__TRDUP`/`MRG_*` and
+  a few shared families); each entry carries its own cat/sub/sec + catalog order + `familyFacts` (50 of 79
+  differ), and the grid pipeline expands memberships into rows before the group.
+  **Three render rules that cost real diffs:** `u.hc` compares with STRICT `===`, so a literal `null`
+  never matches an absent one (4 ANBL units → `heightCodeNull`; it is why ANBL draws no W/D row) and the
+  depth row reads `dv || 58` NOT `?? 58` · `dim==='none'` variant chips are a separate branch that emits
+  no `wn`/`disabled`, so they stay LIVE on a greyed card · inside a section the app re-sorts by **raw
+  `pri` alone**, so a greyed card keeps its catalog position (availability is only the tie-break).
+  ⚠️ `catalogRank` is `null` for unnumbered families, NOT 999 — 294 families have a real `pri` above 999.
+  Ops: export patched by `scripts/backfill-grid-facts.js` (facts dumped via
+  `scripts/parity/extract-grid-facts.js` in the app tab), extractor emits all of it → **re-ingest safe**;
+  D4K-dev backfilled (`backfill-item-fields.js --fields unitFacts,familyFacts,gridHidden,dupFamilies`) plus
+  the backend-computed `faceWidthMm`. **D4K-prd still owes `unitFacts`/`familyFacts`/`faceWidthMm`/
+  `gridHidden`/`dupFamilies`** — see `docs/parity-session-handoff-2026-07-28.md` §3a for the commands.
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

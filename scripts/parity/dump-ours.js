@@ -14,10 +14,15 @@
   const RESULTS = {};
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+  // A pill the user cannot see is not a pill. The "217+" heightExtension chip keeps its options in a
+  // `display:none` span until tapped (the app builds them on click, so they are absent from ITS DOM)
+  // — scraping them made every tall card look like it had 3 extra H pills.
+  const visible = b => b.getClientRects().length > 0;
+
   function rowsOf(card) {
     return $$(card, '.row').map(r => ({
       l: ((r.querySelector('.rl') || {}).textContent || '').trim(),
-      p: $$(r, '.cp').map(b => ({
+      p: $$(r, '.cp').filter(visible).map(b => ({
         l: b.textContent.trim(),
         s: b.classList.contains('sel'),
         o: b.classList.contains('off') || b.classList.contains('dead') || b.classList.contains('xed'),

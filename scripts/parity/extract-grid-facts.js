@@ -21,6 +21,19 @@
       const c63 = (typeof d63Cfg === 'function') ? d63Cfg(b) : null;
       families[b.id] = {
         i, cat: b.cat, sub: b.sub, sec: b.sec || null, pri: b.pri != null ? b.pri : null,
+        // the DISPLAY sub (what the sidebar filters on and the export stores) + the family's rank
+        // inside its sub's curated SECTION_ORDER. Both are needed to render a card for a family
+        // that is NOT the item's primary one — a `*__CKDUP` / `MRG_*` duplicate sits in its own
+        // cat/sub/sec with its own order.
+        subDisp: (typeof subDisp === 'function') ? subDisp(b) : b.sub,
+        secRank: (function () {
+          const d = (typeof subDisp === 'function') ? subDisp(b) : b.sub;
+          const so = (typeof SECTION_ORDER !== 'undefined' && SECTION_ORDER)
+            ? (SECTION_ORDER[d] || (typeof secOrderKey === 'function' ? SECTION_ORDER[secOrderKey(d)] : null) || [])
+            : [];
+          const i2 = so.indexOf(b.sec || '');
+          return i2 < 0 ? 999 : i2;
+        })(),
         label: b.label || null, hid: !!b.hid,
         dim: b.dim || null,                       // which numeric row the card renders
         vlbl: b.vlbl || null, slbl: b.slbl || null, vfmt: b.vfmt || null,
@@ -40,6 +53,10 @@
           });
           return Object.keys(out).length ? out : null;
         })(),
+        // the family's member codes, in the app's own order. Needed because `units` below is keyed
+        // by code and a DUP family (`*__CKDUP` / `*__DRWDUP` / `*__SNKDUP` / `*__TRDUP` / `MRG_*`)
+        // re-uses the SAME codes as its origin family — the map can only remember one owner.
+        codes: b.units.map((u) => u.c),
         byprog: !!b.byprog, hasOp: !!b._hasOp, hasP: !!b._hasP, noline: !!b.noline,
         tiers: b._tiers || null, anyP1: !!b._anyP1, anyC1: !!b._anyC1, mem: b._mem || null,
         acc: !!(typeof isAccessory === 'function' && isAccessory(b)),
@@ -51,6 +68,10 @@
           fid: b.id,
           fam: u.fam || null, op: u.op || null, ag: !!u._ag, sib: u.sib || null,
           hc: u.hc != null ? u.hc : null, w: u.w != null ? u.w : null,
+          // the app compares heights with STRICT === (`x.hc===selH` in wsAtH / dAll), so a unit
+          // whose hc is literally `null` never matches one whose hc is `undefined`. 4 units in
+          // v781 (all ANBL) are null — that is what keeps ANBL's W and D rows off the card.
+          hcNull: u.hc === null,
           dv: u.dv != null ? u.dv : null, vr: u.vr != null ? u.vr : null,
           d: u.d || null,
           V: !!u.V, E: !!u.E, J: !!u.J, Yc: u.Yc || null, P1: !!u.P1, C1: !!u.C1,

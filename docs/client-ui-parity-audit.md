@@ -613,3 +613,201 @@ Harness + measurements committed; **no fixes applied yet** — the fix order is 
 `FACE`/`PILLS`/`ROWSET` mass and #1 is a contract-level change: grid rows would come from the family pool,
 computed backend-side, instead of the detail-panel `parameters.*`), then the cheap data-driven ones
 (#4/#5/#6), then #7/#8/#9/#10.
+
+---
+
+### §M. SWEEP ROUND 2 — the residue after the §L fixes (2026-07-29)
+
+Continues `docs/parity-session-handoff-2026-07-28.md`. The §L fix pass was measured (task 1), then
+every remaining task-board item was traced to a rule in v781 and closed. As in §L, nothing here is
+re-derived: each rule was read out of `leicht_units__781_.html` and each input dumped from the
+running app.
+
+#### M0. Task 1 — the re-measure (Base, 192 combos, `report-Base7.json`)
+
+| bucket | baseline | after §L (Base6) | **Base7** | note |
+|---|---|---|---|---|
+| ROWSET | 402 | 7 | **8** | all ANBL (M1) |
+| STATE | 305 | 27 | **27** | all `dim:'none'` (M4) |
+| PILLS | 76 | 8 | **0** | variant chip labels — the late §L fix, now confirmed |
+| FACE | 274 | 134 | **79** | the face-rank reorder, now confirmed |
+| GREY | 123 | 31 | **31** | UI-side (M5) |
+| MEMBER | 133 | 107 | **107** | M2 + M3 |
+| SECT | 110 | 77 | **77** | downstream of MEMBER |
+| ORDER | 7 | 25 | **25** | M6 |
+| CODE | 0 | 0 | **0** | order codes have never diverged |
+
+The two late §L fixes that `report-Base6.json` under-reported are real: PILLS 8 → 0, FACE 134 → 79.
+
+#### M1. `u.hc` is compared with STRICT `===` — `null` ≠ `undefined` (ROWSET, 8)
+
+Every ROWSET diff was **ANBL** (`ANBLBO`): the app draws a Ty row only, we drew `D`, `Ty`, `W`.
+`wsAtH` and `dAll` both filter `x.hc === selH`. In v781 exactly **4 units carry a literal `null` hc**
+(all ANBL: `ANBLBO`, `ANBLBOCI`, `ANBLBOG`, `ANBLBOGL`) while the family's width variants
+(`ANBLBO1/2/3`, `ANBLBOGL1/2/3`) have it **absent**. `undefined === null` is false, so the pool
+collapses to the face alone: `wsAtH = []` → no W row, `dAll = [58]` → no D row. Our port normalised
+both to `null` (the old `hc()` even documented the choice) and drew both rows.
+
+Second bug in the same lines: the app writes `x.dv || 58`, we wrote `?? 58`. `ANBLBO` has `dv: 0`,
+so the app reads 58 and we read 0 — the phantom `D [0, 58]` row.
+
+Fixes — `unitFacts.heightCodeNull` (4 units, schemaVersion **2.5.1**), an `hc()` that keeps the two
+states apart, and `|| 58` at all six sites.
+
+#### M2. Hidden families and codes in no family at all → `Item.gridHidden` (MEMBER)
+
+`visibleBlocks()` starts with `if (b.hid) return;` — 46 families never render (`F74`, `XHGT_FRIDGE`,
+`F1102`, the `__DRWDUP` synthetics …). We had no `hid` flag, so `F74` showed in all 13 Base/Corners
+combos. Separately, **44 exported codes belong to no app family**: the 23
+`meta.recoveredArtifactSkus` the app's own init deletes (`GFV5580Z3M` → our phantom card `GFVB_B`,
+a family id the app does not have) plus the extractor's ItemRef-only stubs (`760`, `761`, `SZIZ`,
+`US`, `HW60GA2` …).
+
+One flag covers both: **`Item.gridHidden`** (57 items) = "no NON-hidden family lists this code".
+Excluded from every LIST in `buildItemFilter`; still fetchable by sku, so refs and the detail drawer
+are untouched.
+
+#### M3. `depthFamOk` is FAMILY-level, and `lineCardOk` HIDES (MEMBER)
+
+Two `blockVisible` gates we had only partly:
+
+* **`depthFamOk(b)`** — we tested `capabilities.depthClasses` per unit and let a member with an
+  EMPTY list exempt its family. The app decides relevance for the FAMILY first:
+  `if (!depthRelevant(b)) return true; return b.units.some(depthOk)`. So `F1455` (back panels
+  `RW73/80/86`, `depthMm` 16) and `PNL_END` (45° end panels, `depthMm` 100…1200) are depth-RELEVANT,
+  match no class, and are hidden at D48/D68 — we kept them.
+* **`lineCardOk(b)`** — present, but only as a greying input. In the app it is also a membership
+  gate (`state.line!=='ALL' && !lineGrey && !lineCardOk(b)` → hide). `F1571` (A-tier cooktops, hc 80)
+  must vanish at line 73; 22/9/25 Base families are hidden at lines 73/80/86.
+
+Both are family-wide, so neither can live in the unit-level `$match`: they are computed in
+`annotateFamilyAvailability` and applied by the new `dropHiddenFamilies()`, which honours
+`grey=true` exactly like the app's "Grey don't hide" checkbox.
+
+Also confirmed while tracing: `b.lines` is set on **0** families in v781 — the `blockVisible` line
+that reads it is dead code. Not ported.
+
+#### M4. `dim === 'none'` variant chips NEVER grey (STATE, 27)
+
+All 27 STATE diffs were `dim:'none'` families (`F1853`, `F14`, `F7300`, `F6`, `F47`, `F1970`, `F26`,
+`XTWSP`), always `client "S,-"` vs `ours "SO,O"`. `dim==='none'` is a SEPARATE early branch in
+`renderGrid` whose chips are emitted with `class="wchip ${sel}"` and nothing else — no `wn`, no
+`disabled`. So `TE80KB` at D48 is a greyed CARD with fully live chips. Our shared variant-row
+builder applied the `ok`/`exists` gates to it.
+
+#### M5. The lite UI ignored the server's `cardAvailable` (GREY, 31)
+
+Every GREY diff was `client=true, ours=false`, always under a programme. The BACKEND was already
+right (`cardAvailable:false` for `FSUL`/`TWSP8058CH`, matching the app's `av`) — the lite UI
+recomputed the flag locally from `availableFromCaps(it.capabilities, …)`, which only sees ONE unit
+and therefore cannot apply `famOkB`/`famOkU` (does the FAMILY/model belong to the picked
+programme's tier?). It now prefers the shipped `cardAvailable` and keeps the local computation as
+the fallback for a bare toolbar.
+
+#### M6. Sections re-sort by raw `pri`, so `av` does NOT demote inside a section (ORDER, 25)
+
+`sortCards` reproduces `visibleBlocks`'s `(av, pri, acc, group, special, maxh, index)` — and that IS
+the order the app uses when no section bucketing applies. But when a single sub is selected the app
+re-sorts before bucketing:
+
+```js
+[...all].sort((a,b)=>((a.b.pri==null?9e9:a.b.pri)-(b.b.pri==null?9e9:b.b.pri))).forEach(...)
+```
+
+Raw family `pri` only — availability is **not** a key, so a greyed card keeps its catalog position.
+Hence `Cooktop Units @D68` = `BZ2(.1) BSZ2(.2) BZ(.3) BSZ(.4) BZIZ(.5)` with BZ/BSZ greyed in the
+middle, where we pushed them to the end. `bucketSections` now applies the same stable re-sort;
+`sortCards`'s order survives as the tie-break, which is what the app's stable sort does with it.
+
+(`catalogRank` is stored as `null` for unnumbered families, not `999` — verified; 294 families have
+a `pri` above 999, so a 999 sentinel would have mis-sorted them.)
+
+#### M7. Dup families — one code, several cards → `Item.dupFamilies` (MEMBER, the 275)
+
+The `MEMBER.cliOnly` mass is families the app renders and we structurally cannot: `F1962__CKDUP`,
+`*__DRWDUP`, `*__SNKDUP`, `F33__TRDUP`, `MRG_*` — 41 synthetic families that re-list an accessory
+under a second task area, plus a few genuinely shared ones (`FS7334` is in both `F344` and `F2599`).
+Our items collection stores ONE doc with ONE `familyId`.
+
+Measured from the app: **74 items carry 79 extra memberships across 40 families**, and a dup family
+normally sits in a DIFFERENT subcategory from its origin (`F1970` = Base/Sinks, `F1970__CKDUP` =
+Base/Cooktops & Downdrafts) with its own catalog order — **50 of the 79 also have different
+`familyFacts`**. So an entry has to carry a whole card identity:
+
+```
+dupFamilies: [{ familyId, category, subcategory, section,
+                catalogRank, sectionRank, familyIndex, familyFacts }]
+```
+
+The grid pipeline expands memberships into rows before the group (`$match` on the indexed main
+branch + the 74 dup docs → build `_memberships` = primary ++ dupFamilies → `$unwind` → `$set` the
+membership's identity → re-apply the real `$match`). Everything downstream — face ranks, grouping,
+`bucketSections`, `sortCards` — then treats a dup family like any other, with no special case.
+`membersByFamily()` collects a family's pool from `familyId` OR `dupFamilies.familyId`, otherwise a
+dup card would render with no rows.
+
+schemaVersion **2.5.2**.
+
+#### M8. Result of round 2 (`report-Base9.json`, `report-Tall2.json`)
+
+| bucket | Base baseline | Base7 | **Base9** | Tall baseline | **Tall2** |
+|---|---|---|---|---|---|
+| ROWSET | 402 | 8 | **0** | 285 | 42 |
+| STATE | 305 | 27 | **0** | — | **0** |
+| PILLS | 76 | 0 | **0** | 220 | 286 → harness artifact, see below |
+| GREY | 123 | 31 | **0** | — | **0** |
+| ORDER | 7 | 25 | **0** | 43 | 7 |
+| MEMBER | 133 | 107 | **57** | 56 | 19 |
+| SECT | 110 | 77 | 65 | — | 59 |
+| FACE | 274 | 79 | 79 | 32 | 5 |
+| CODE | 0 | 0 | **0** | — | **0** |
+
+Base9 predates the `dupFamilies` deploy: its MEMBER 57 is **entirely** `cliOnly` dup families
+(`*__CKDUP` / `*__DRWDUP`, 12 combos each) plus a 5-entry `ourOnly` tail (`F1716_A`, `F1754_A`,
+`XSPL_ARWF`).
+
+**Tall PILLS 286 is a harness artifact, not a product bug.** Every diff is an H row where we report
+three extra pills `230 / 244 / 250`. Those are the `heightExtension` options behind the **"217+"**
+chip: our lite UI builds them into a `display:none` span that expands on click, while the app builds
+its own on click and so has nothing in the DOM. `dump-ours.js` scraped every `.cp` regardless of
+visibility. It now filters on `getClientRects().length > 0`. Re-measure before reading this number.
+
+#### Still open — the FACE residue is one rule: `_selUnit`
+
+79 Base / 5 Tall FACE diffs remain, and they are all the same class: our face is picked by
+denormalized rank fields in the aggregation (`faceForTiers` -> `_faceRank`, `faceHeightClass`,
+`faceVariantCore`, `faceWidthMm` -> `_widthRank`, `depthMm` ASC), the app's by `_selUnit(b)` — a
+per-dim procedure over the family pool with its own precedence:
+
+```
+h = per-card pick -> global Height -> LINE -> 80 -> hs[0]
+w = per-card pick -> the W filter's bucket -> defaultWidthMin(b)/preferWidth -> smallest
+then the (h,w) candidates are narrowed by depth
+```
+
+Two worked cases:
+
+* `F114` @line73 — app `CRWF6073`, ours `RWF6073`. Both are hc 73 / w 60; the app takes the one that
+  comes FIRST in the family's own unit list (Contino), our tier rank prefers P -> A -> C.
+* `THA` @line86 — app `TH6073B`, ours `TH6080B`. The LINE feeds the height choice (86 shares the
+  73-system heights), which our `faceHeightClass` doesn't model; @w90 the app faces `TH9180B` and we
+  keep `TH6080B`.
+
+The fix is the same move that worked for the rows: **port `_selUnit` and pick the face in JS from the
+family pool**, which would also retire `_faceRank` / `_widthRank` / `_famFaceTiers`. That is the
+recommended next task.
+
+**`GREY_NOT_HIDE` 38 → 76 is not a regression, and it hides a blind spot.** The lite UI sends
+`grey=true` unconditionally (`params()`), i.e. it always runs in the app's "Grey don't hide" mode, and
+`diff.js` strips our grey-only extras into this bucket. So the M3 family gates (`depthFamOk`,
+`lineCardOk`) never fire during a sweep: the families they would HIDE come back GREYED instead, which
+moves them out of `MEMBER.ourOnly` and into `GREY_NOT_HIDE` — most of the Base MEMBER 107 → 57 drop
+and all of this bucket's growth. The hide path was verified by hand against the app instead
+(`F1455` / `PNL_END` @D48 and @D68, `F1571` @line73 — absent; `F1571` @D68 and `PNL_END` with no
+depth — present).
+
+**Follow-up for the harness:** make `grey` a sweep parameter so one pass measures the HIDE semantics
+the client's React app will actually use. Today it is hard-coded in `params()`.
+
+Other open items: Wall/Midway not yet re-measured, the tall `Line` row click (§L #7) and the D4K-prd
+backfills (handoff tasks 7 and 8).

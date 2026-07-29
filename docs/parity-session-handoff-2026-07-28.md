@@ -40,16 +40,21 @@ dumpers (§1), and run **TASK 1 below** — the re-measure. Everything else wait
 | — | Fronts chip = `tierOk` twin rule + tier re-face (#2) | ✅ done |
 | — | line collapse via `lineState` (#3, #7 render) | ✅ done |
 | — | app card ORDER (#8) · depth-row label (#9) · variant chip labels | ✅ done |
-| **1** | **re-sweep Base → Tall → Wall+Midway, diff, record numbers** | ⬜ next |
-| **2** | dup-family cards (`*__CKDUP` / `*__DRWDUP` / `MRG_*`) — 275 of 284 missing cards | ⬜ |
-| **3** | `ourOnly` residue: `F74`, `GFVB_B`, `F1571`, `PNL_END`, `ANBL` … | ⬜ |
-| **4** | GREY residue (31 on Base) | ⬜ |
-| **5** | `ANBL`-type: we draw W/D rows the app doesn't | ⬜ |
-| **6** | selected-pill grey nuance (`STATE` tail) | ⬜ |
-| **7** | wire the tall `Line` row click (render already matches) | ⬜ |
-| **8** | D4K-**prd** backfills (data-only, safe before deploy) | ⬜ |
-| **9** | perf pass on the extra member scans | ⬜ |
-| **10** | commit both repos · update CLAUDE.md to 2.5.0 + §L | ⬜ |
+| **1** | re-sweep Base, diff, record numbers → `report-Base7.json` (§M0) | ✅ **done 07-29** |
+| **2** | dup-family cards → **`Item.dupFamilies`** (2.5.2, §M7) | ✅ **done 07-29** |
+| **3** | `ourOnly` residue → **`Item.gridHidden`** (2.5.1) + family-level `depthFamOk` + `lineCardOk` hides (§M2/§M3) | ✅ **done 07-29** |
+| **4** | GREY residue — lite UI now uses the server's `cardAvailable` (§M5) | ✅ **done 07-29** |
+| **5** | `ANBL`-type extra W/D rows — strict `===` on `u.hc` + `dv \|\| 58` (§M1) | ✅ **done 07-29** |
+| **6** | selected-pill grey nuance — `dim==='none'` chips never grey (§M4) | ✅ **done 07-29** |
+| **7** | wire the tall `Line` row click (render already matches) | ⬜ open — do only if the client asks |
+| **8** | D4K-**prd** backfills (data-only, safe before deploy) — now also `gridHidden` + `dupFamilies` | ⬜ open |
+| **9** | perf pass on the extra member scans + the membership `$unwind` | ⬜ open |
+| **10** | commit both repos (docs are written: audit §M, map §2c-12, contract, CLAUDE.md) | ⬜ open |
+| **11** | re-sweep Base + Tall + Wall/Midway with everything deployed | ⏳ running |
+
+**Round 2 (2026-07-29) is written up in `docs/client-ui-parity-audit.md` §M** — six more root causes,
+all closed. Contract is now **2.5.2** (`unitFacts.heightCodeNull`, `Item.gridHidden`,
+`Item.dupFamilies`). Tall and Wall/Midway have still not been re-measured since the §L baseline.
 
 ---
 
@@ -168,8 +173,8 @@ export. Collection `designbookitems`, **18,396 items in all three**. Export
 `variantCore`) are computed FROM the export after ingest and are **wiped by every re-ingest** —
 re-run their scripts each time.
 
-**The only gap right now: D4K-prd is missing `unitFacts`, `familyFacts`, `faceWidthMm`** (0/18,396
-each). Everything else is identical on both clusters. That gap is inert — the deployed prd code never
+**The only gap right now: D4K-prd is missing `unitFacts`, `familyFacts`, `faceWidthMm` and (since
+2026-07-29) `gridHidden` + `dupFamilies`.** Everything else is identical on both clusters. That gap is inert — the deployed prd code never
 reads those fields — but the `dev` branch must NOT be released to prd before it is closed.
 
 ```bash
@@ -178,9 +183,10 @@ cd /Users/apple/Documents/thirtynorth/node-js/D4K-backend
 #   .env currently points at D4K-dev — point it at D4K-prd for these three commands, then flip back.
 #   (`env.dev.bak` in the old scratchpad has the dev value; MONGO_URI is the only line to swap.)
 node scripts/backfill-item-fields.js ../d4k-items-extraction/docs/export-v781-fresh.json \
-     --fields unitFacts,familyFacts                # dry run first — prints how many differ
+     --fields unitFacts,familyFacts,gridHidden,dupFamilies       # dry run — prints how many differ
 node scripts/backfill-item-fields.js ../d4k-items-extraction/docs/export-v781-fresh.json \
-     --fields unitFacts,familyFacts --apply        # expect matched/modified ≈ 18,366
+     --fields unitFacts,familyFacts,gridHidden,dupFamilies --apply
+#   expect: unitFacts/familyFacts ≈ 18,366 · gridHidden 57 · dupFamilies 74   (2026-07-29, schema 2.5.2)
 node scripts/backfill-face-width-mm.js ../d4k-items-extraction/docs/export-v781-fresh.json --apply
 #                                                   # expect ≈ 17,407
 # verify: re-run the counts (scripts/backfill-item-fields.js dry run reports 0 differing when done)
