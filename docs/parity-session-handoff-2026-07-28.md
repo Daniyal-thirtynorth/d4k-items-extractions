@@ -51,6 +51,8 @@ dumpers (§1), and run **TASK 1 below** — the re-measure. Everything else wait
 | **9** | perf pass on the extra member scans + the membership `$unwind` | ⬜ open |
 | **10** | commit both repos (docs are written: audit §M, map §2c-12, contract, CLAUDE.md) | ⬜ open |
 | **11** | re-sweep Base + Tall + Wall/Midway with everything deployed | ⏳ running |
+| **12** | ⭐ **sweep with `grey=false`** — the lite UI hard-coded `grey=true`, so every sweep so far ran in the app's "Grey don't hide" mode and the family gates (`depthFamOk`/`lineCardOk`) never fired. `window.__GREY=false` before `__Q.sweep(...)` now switches it. Expect `GREY_NOT_HIDE` → ~0 and most of `SECT` with it. | ⬜ next |
+| **13** | FACE residue — port the app's `_selUnit` and pick the face in JS (audit §M "Still open") | ⬜ open |
 
 **Round 2 (2026-07-29) is written up in `docs/client-ui-parity-audit.md` §M** — six more root causes,
 all closed. Contract is now **2.5.2** (`unitFacts.heightCodeNull`, `Item.gridHidden`,
