@@ -54,7 +54,21 @@
     return { sections: out.filter(s => s.cards.length || s.sec) };
   }
 
+  // ⚠️ ONE RUN AT A TIME. `run()` mutates the page-global `F` and then scrapes `#grid`, so two
+  // concurrent runs interleave and each records the other's grid. This bit once: a `__Q.sweep(...)`
+  // call hit the 45 s CDP timeout, the tool reported failure, but the page kept the loop alive — a
+  // second sweep started on top of it and the first 45 keys of that leg came back holding a
+  // NEIGHBOURING key's grid (37 fake MEMBER/SECT diffs, indices 0-44, everything after index 44
+  // clean). A CDP timeout does NOT cancel the promise: always drive long sweeps through a
+  // fire-and-forget starter plus a progress poll, never a single awaited call.
+  let BUSY = false;
   async function run(filters, opts) {
+    if (BUSY) throw new Error('dump-ours: a run is already in flight — refusing to interleave');
+    BUSY = true;
+    try { return await run_(filters, opts); } finally { BUSY = false; }
+  }
+
+  async function run_(filters, opts) {
     opts = opts || {};
     Object.keys(F).forEach(k => delete F[k]);
     Object.keys(LABELS).forEach(k => delete LABELS[k]);

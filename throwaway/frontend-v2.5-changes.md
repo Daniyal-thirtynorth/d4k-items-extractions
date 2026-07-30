@@ -198,8 +198,15 @@ GET items?familyId=F2013__DRWDUP&groupBy=family&limit=3
 > nothing and `[]` still means "no rows" — but do not build the fallback out as a real feature.
 >
 > ⚠️ Still true, and now the *only* reason ungrouped differs: an ungrouped row carries **no
-> `cardAvailable` and no `heightExtensionOk`** (both are attached on the grouped path). R5's `??`
-> fallback and R8's `!== false` test are what cover that — do not tighten either to `=== true`.
+> `cardAvailable`** (`annotateFamilyAvailability` runs on the grouped and `by-section` paths only).
+> R5's `??` fallback is what covers that — do not tighten it to `=== true`.
+>
+> **CORRECTION (2026-07-30):** this warning used to name `heightExtensionOk` too. It no longer
+> applies to it — `attachGridRows` runs on the ungrouped list as well, so an ungrouped row carries
+> `gridRows`, `heightExtension` and `heightExtensionOk` exactly as a grid card does (verified:
+> `items?sku=HWS14658` → `gridRows` ✓, `heightExtensionOk: true`, `cardAvailable` absent). Keep R8's
+> `!== false` test anyway — it is correct on both paths and, since §O4c, absence of the payload is
+> itself the answer.
 >
 > ⚠️ Also unchanged: `groupBy=family` still RE-FACES. `items?sku=CTSP6080&groupBy=family` returns
 > `TSP6080`, the family face. A sku navigation must stay ungrouped.
