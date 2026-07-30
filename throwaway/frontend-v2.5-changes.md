@@ -5,22 +5,24 @@
 Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `b8169728`
 or later**.
 
-**⭐ RELEASED TO PRD 2026-07-30** — the data *and* most of the code. The 2.5.x backfills
-(`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`, `dupFamilies`, `faceWidthMm`, a re-captured
-`sectionRank`) are on both clusters, verified field-for-field identical at 18,396 items. So prd is a
-valid target for this document — with **one exception, measured not guessed**:
+**⭐ FULLY RELEASED TO PRD — 2026-07-30.** Code *and* data, on both clusters:
 
-> ⚠️ **`origin/main` (prd) ends at `f61942d8`. The two §Q fixes are still `dev`-only.**
-> Verified against the remote on 2026-07-30: `git log origin/main..origin/dev` = `b8169728` (§Q3,
-> `famOkB`'s `Alteration` escape) · `f59ea0af` (§Q1, the FRMAT gate) · `6a84bba3` (a comment). Until a
-> second `dev` → `staging` → `main` pass ships them, prd shows two greying bugs:
-> * the `Front panel material` card (`F124` / `FRMAT`) greys under **BOSSA** and **LAIKA** — the app
->   renders it live;
-> * **12 `Alteration` cards** grey under any **Avance / Contino** programme — `MPOSKE`, `MPEKE`,
->   `FRAUSR`, `FRAUSRH`, `MPOT`, `MPEZS`, `MPHVERLVE`.
->
-> Everything else in this document is covered by `f61942d8`, which IS on prd. Both missing commits are
-> code-only — no data, no backfill, no contract change.
+* **code** — `origin/main` @ `54c2af2e` (PR #2975 `dev`→`staging`, #2976 `staging`→`main`). Contains
+  every commit in this document, up to and including `b8169728`. `git log origin/main..origin/dev` is
+  empty.
+* **data** — the 2.5.x backfills (`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`,
+  `dupFamilies`, `faceWidthMm`, a re-captured `sectionRank`), verified field-for-field identical on
+  both clusters at 18,396 items.
+
+So **either cluster is a valid target** and there is no SHA caveat left. If prd deploys from `main`
+through CI rather than directly, confirm the rollout finished — these two must both be `true`:
+
+```
+GET /design-book/items?category=Panels%20%26%20surround&subcategory=Surround&groupBy=family&programs=244
+      → F124 · cardAvailable true                    # §Q1, the FRMAT gate
+GET /design-book/items?category=Alteration&subcategory=Accessory&groupBy=family&programs=410
+      → MPOSKE · cardAvailable true                  # §Q3, the Alteration tier escape
+```
 
 ```bash
 # local, against either cluster
@@ -1321,11 +1323,10 @@ other 10 categories, plus the FRONTS/programme/line/width/depth/opening/suspende
 | one `Insert` row (`FP_16FRONT`, 92 units) | 8 diffs. Needs per-unit `u.ins` in the contract — the only known gap in the grid that is not pure backend logic. |
 | a handful of single-family cases | `Alteration › Side Panel Modifications` under BOSSA (grey 12 / member 1 / section 1), `Panels & surround` order 2 + grey-not-hide 1. Diagnosed as neighbourhood, not mechanism; tracked in §P's residue list. |
 
-**Data, not code, is the other half.** The DATA is on both clusters (released 2026-07-30, verified
-identical field-for-field at 18,396 items). The CODE on prd stops at `f61942d8` — the two §Q fixes are
-still `dev`-only, so prd has the two greying bugs listed in the caveat at the top of this document.
-Everything measured above was measured against **D4K-dev**; against prd, expect those two and nothing
-else.
+**Data, not code, is the other half — and both are fully on prd** (released 2026-07-30; code
+`origin/main` @ `54c2af2e`, data verified identical field-for-field at 18,396 items). Everything
+measured above was measured against **D4K-dev**; prd now carries the same code and data, so expect the
+same results from either.
 
 ---
 

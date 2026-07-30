@@ -92,8 +92,8 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | — | extended coverage §P — 1,104 states, six fixes | ✅ 07-30 |
 | — | §Q — FRMAT gate + the `dwm` face | ✅ 07-30 |
 | — | D4K-prd data ledger | ✅ closed 07-30 (see §3) |
-| — | the prd RELEASE | ⚠️ **partial** — merged at `f61942d8`, §Q still on `dev` (see §3) |
-| **0** | **ship §Q to prd** — `origin/main` ends at `f61942d8`; `dev` is 3 commits ahead. One more `dev`→`staging`→`main` pass, then the two curls in §3 | ⬜ **first thing** |
+| — | the prd RELEASE | ✅ **complete** — two passes, `origin/main` @ `54c2af2e` (see §3) |
+| **0** | ~~ship §Q to prd~~ | ✅ **done 07-30** — PR #2975 + #2976, `origin/main` @ `54c2af2e`, `dev` no longer ahead. If prd deploys via CI, run the two curls in §3 to confirm the rollout |
 | **1** | re-sweep **E3 + E2** → confirm §Q1 and §Q3 (above) | ⬜ next |
 | **2** | ~~E2 GREY 12~~ | ✅ **fixed — §Q3.** `famOkB`'s `Alteration` category escape. What is LEFT on E2 is `MEMBER 1 + SECT 1`: `Alteration › Side Panel Modifications` @BOSSA, client `PNL_ACC` vs our `PS_WAUKS_RECESS` (+ the `Sink, Fillers & Panels` header). Looks like a swap/split, not a gate |
 | **3** | **E3 MEMBER 3** — `Pilasters\|line73` (`XAG_Pa_a989a3`), `Side panels W\|progP_BOSSA` (`CURVED_*_M` vs the plain codes), `Wall Cladding\|line73` (`PPM3234`) | ⬜ open — three single-family cases, look like variant-family splits rather than gates |
@@ -129,7 +129,7 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 
 ---
 
-## 3. DATA LEDGER — nothing owed; prd RELEASED but 3 commits behind
+## 3. DATA LEDGER — nothing owed; prd FULLY RELEASED
 
 Contract **2.5.3**, collection `designbookitems`, **18,396 items on both clusters**, verified identical
 on every tracked field (`unitFacts` 18,352 · `familyFacts` 18,366 · `familyFacts.rawSub` 18,366 ·
@@ -143,26 +143,35 @@ on every tracked field (`unitFacts` 18,352 · `familyFacts` 18,366 · `familyFac
   `backfill-face-height-class.js`, `backfill-face-variant-core.js`, `backfill-face-width-mm.js`, and
   whatever writes `variantCore`. Everything else is in the export.
 
-### ⭐ RELEASED TO PRD — 2026-07-30, but THREE COMMITS SHORT
+### ⭐ FULLY RELEASED TO PRD — 2026-07-30
 
-`dev` was merged out to prd (PR #2973 `dev`→`staging`, #2974 `staging`→`main`). Checked against the
-remote afterwards, and the merge landed **before** the session's last three commits:
+Two passes. The first (PR #2973 `dev`→`staging`, #2974 `staging`→`main`) landed at `f61942d8` and left
+the session's last three commits behind; the second closed the gap:
 
 ```
-origin/main   5364d3e3  Merge PR #2974 from staging
-              ff91d896  Merge PR #2973 from dev
-              f61942d8  the six §P rules          ← prd ends here
-
-git log origin/main..origin/dev
-              b8169728  §Q3  famOkB exempts the whole Alteration CATEGORY
-              f59ea0af  §Q1  isFrmatFamily is a qualifier, not a blanket exclusion
-              6a84bba3  a comment
+PR #2975  dev     -> staging     16de7ebb
+PR #2976  staging -> main        54c2af2e   <- origin/main
+git log origin/main..origin/dev            <- empty
+f59ea0af (§Q1) · b8169728 (§Q3)            <- both ancestors of origin/main
 ```
 
-**So prd has all of §O and §P, and none of §Q.** Two greying bugs are live on it:
+Both merges were dry-run in a throwaway worktree first: clean, and the net effect on `main` was exactly
+two files (`design-book.grid-rows.ts`, `design-book.service.ts`). `src/project/room.service.ts` differs
+between the branches but is **main-side only** (dev never touched it since the merge-base), so the merge
+preserved it — worth remembering as the shape of check to run before any prd merge from this repo.
 
-| missing commit | symptom on prd |
-|---|---|
+**Code and data are now level on both clusters.** Nothing owed: every fix from §O2 onward is backend
+logic, so the data ledger never moved. If prd deploys from `main` through CI rather than directly,
+confirm the rollout with these two — both must be `true`:
+
+```bash
+GET /design-book/items?category=Panels%20%26%20surround&subcategory=Surround&groupBy=family&programs=244
+      → F124 · cardAvailable true                    # §Q1 live
+GET /design-book/items?category=Alteration&subcategory=Accessory&groupBy=family&programs=410
+      → MPOSKE · cardAvailable true                  # §Q3 live
+```
+
+---|---|
 | `f59ea0af` (§Q1) | `Front panel material` (`F124` / `FRMAT`) greys under BOSSA and LAIKA — the app renders it live |
 | `b8169728` (§Q3) | 12 `Alteration` cards grey under any Avance / Contino programme (`MPOSKE`, `MPEKE`, `FRAUSR`, `FRAUSRH`, `MPOT`, `MPEZS`, `MPHVERLVE`) |
 

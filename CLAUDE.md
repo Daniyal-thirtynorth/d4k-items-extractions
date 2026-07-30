@@ -537,14 +537,14 @@ Current facts:
   (`Side Panel Modifications`@BOSSA `PNL_ACC` vs `PS_WAUKS_RECESS` — a swap/split, not a gate);
   **E3** MEMBER 3 + GREY_NOT_HIDE 1, three single-family cases that look like variant-family splits
   (`XAG_Pa_a989a3`, `CURVED_*_M`, `PPM3234`).
-  **⭐ RELEASED TO PRD 2026-07-30 — but THREE COMMITS SHORT.** `dev` was merged out (PR #2973
-  dev→staging, #2974 staging→main) and the DATA ledger is closed (both clusters 18,396 items, every
-  tracked field identical), so prd is a valid target for the frontend guide — except that
-  **`origin/main` ends at `f61942d8`**: `git log origin/main..origin/dev` = `b8169728` (§Q3) ·
-  `f59ea0af` (§Q1) · `6a84bba3`. So prd has all of §O/§P and NONE of §Q, which means two greying bugs
-  are live on it: `F124`/`FRMAT` greys under BOSSA/LAIKA, and 12 `Alteration` cards grey under any
-  Avance/Contino programme. **Remedy = one more dev→staging→main pass**; both are code-only (no data,
-  no backfill, no contract change). Confirm with the two curls in
+  **⭐ FULLY RELEASED TO PRD 2026-07-30.** Two passes: PR #2973/#2974 landed at `f61942d8` and left the
+  last three commits behind; PR #2975 (`dev`→`staging`) + #2976 (`staging`→`main`) closed it —
+  `origin/main` @ `54c2af2e`, `git log origin/main..origin/dev` empty, both `f59ea0af` (§Q1) and
+  `b8169728` (§Q3) ancestors of main. Both merges dry-run clean in a throwaway worktree first; net
+  effect on main = 2 files (grid-rows.ts, service.ts); `src/project/room.service.ts` differs but is
+  MAIN-side only (dev never touched it since the merge-base) so the merge preserved it. **Code and data
+  now level on both clusters; nothing owed** — every fix from §O2 on is backend logic, so the ledger
+  never moved. If prd deploys from main via CI, confirm the rollout with the two curls in
   `docs/parity-session-handoff-2026-07-30.md` §3. **Both §Q fixes are hand-verified, not swept** — task 1 tomorrow is re-running the
   E3 and E2 legs to measure them.
 
