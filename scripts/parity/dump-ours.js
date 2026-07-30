@@ -71,7 +71,12 @@
     const kind = document.querySelector('#kind'); if (kind) kind.value = '';
     const fam = document.querySelector('#fFamily'); if (fam) fam.checked = true;
     const prog = document.querySelector('#progSel'); if (prog) prog.value = F.programs || '';
-    page = 1;
+    page = opts.page || 1;
+    // `grey` is not a filter — the UI reads `window.__GREY` inside params() (the app's "Grey don't
+    // hide" checkbox). A sweep normally pins it to false to measure the HIDE semantics, so a
+    // grey=true state has to flip it around this one load and put it back after the scrape.
+    const prevGrey = window.__GREY;
+    if (opts.grey != null) window.__GREY = !!opts.grey;
     await load();
     // load() fires applyHeightPreselect / option-swaps async (per-card fetches). Wait for the
     // UI's own in-flight swap counter to drain, then a short tail for the re-render.
@@ -79,7 +84,9 @@
     await sleep(150);
     while ((window.__inflight || 0) > 0 && Date.now() - t0 < (opts.maxWait || 30000)) await sleep(120);
     await sleep(opts.settle || 300);
-    return dump();
+    const d = dump();
+    if (opts.grey != null) window.__GREY = prevGrey;
+    return d;
   }
 
   async function sweep(list, opts) {
