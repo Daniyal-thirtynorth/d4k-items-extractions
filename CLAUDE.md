@@ -303,8 +303,9 @@ Current facts:
   Ops: export patched by `scripts/backfill-grid-facts.js` (facts dumped via
   `scripts/parity/extract-grid-facts.js` in the app tab), extractor emits all of it → **re-ingest safe**;
   D4K-dev backfilled (`backfill-item-fields.js --fields unitFacts,familyFacts,gridHidden,dupFamilies`) plus
-  the backend-computed `faceWidthMm`. **D4K-prd still owes `unitFacts`/`familyFacts`/`faceWidthMm`/
-  `gridHidden`/`dupFamilies`** (and, since 2026-07-29, a **STALE `sectionRank`** — it carries the old
+  the backend-computed `faceWidthMm`. **(⭐ CLOSED 2026-07-30 — prd backfilled AND released; the para
+  below is history.)** D4K-prd then owed `unitFacts`/`familyFacts`/`faceWidthMm`/
+  `gridHidden`/`dupFamilies` (and, since 2026-07-29, a **STALE `sectionRank`** — it carries the old
   bad capture, so it is wrong rather than merely absent) — commands in
   **`docs/parity-session-handoff-2026-07-29.md` §3** (supersedes the 07-28 §3a).
 
@@ -332,7 +333,7 @@ Current facts:
   v319 programme-tier hide) test the RAW sub; we matched `Item.subcategory` = `subDisp(f)`, so on Tall
   the escape list matched NOTHING and we hid Primo-only families the app keeps (F1730/F342/F343 under
   LAIKA/ROCCA). Matching the display name would over-exempt `Back & Side Panels` (NOT exempt), so the
-  raw sub ships. Extractor emits it; export + D4K-dev done; **D4K-prd owes it**.
+  raw sub ships. Extractor emits it; export + D4K-dev done; D4K-prd backfilled 2026-07-30 (closed).
   **(4) ⭐ THE v98 SIBLING-FAMILY SWAP IS A MEMBERSHIP RULE.** `visibleBlocks`: with a zone programme,
   a card whose face is in another tier but whose `u.sib` contains the active letter resolves to
   `sibCode(u,fl)` — usually in a DIFFERENT family — and the `b.id` dedupe then collapses the pair into
@@ -536,6 +537,14 @@ Current facts:
   (`Side Panel Modifications`@BOSSA `PNL_ACC` vs `PS_WAUKS_RECESS` — a swap/split, not a gate);
   **E3** MEMBER 3 + GREY_NOT_HIDE 1, three single-family cases that look like variant-family splits
   (`XAG_Pa_a989a3`, `CURVED_*_M`, `PPM3234`).
+  **⭐ RELEASED TO PRD 2026-07-30** (end of session): `dev` shipped, so code AND data are level on both
+  clusters (18,396 items, every tracked field identical) and prd is a valid target for the frontend
+  guide and client demos. ⚠️ The release went out the same day as the last two commits — **confirm the
+  deployed SHA carries `f59ea0af` (§Q1) and `b8169728` (§Q3)**; if not, `F124`/`FRMAT` greys under
+  BOSSA/LAIKA and 12 `Alteration` cards grey under Avance/Contino. Two curls in
+  `docs/parity-session-handoff-2026-07-30.md` §3 settle it; both fixes are code-only, so a re-deploy is
+  the whole remedy. **Both §Q fixes are hand-verified, not swept** — task 1 tomorrow is re-running the
+  E3 and E2 legs to measure them.
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

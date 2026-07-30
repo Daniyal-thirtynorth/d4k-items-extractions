@@ -2,17 +2,25 @@
 
 ## Before you start — what to point at
 
-Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `f61942d8`
-or later**, running against the **D4K-dev** database. Neither half is optional:
+Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `b8169728`
+or later**.
 
-* The code is only on `dev` — it has **not** been released to prd.
-* **D4K-prd is missing the data** (`unitFacts`, `familyFacts`, `gridHidden`, `dupFamilies`,
-  `faceWidthMm`) and its `sectionRank` is **stale** — wrong values, not absent. A grid built against
-  prd will look plausible and be subtly wrong.
+**⭐ RELEASED TO PRD 2026-07-30.** Both halves are now live on prd — the code *and* the data
+(`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`, `dupFamilies`, `faceWidthMm`, and a
+re-captured `sectionRank`; both clusters verified field-for-field identical at 18,396 items). So prd is
+a valid target for this document, not just D4K-dev.
+
+> ⚠️ **Confirm the deployed SHA before you trust prd for the last two fixes.** The release went out the
+> same day the final two backend commits landed — `f59ea0af` (§Q1, the FRMAT gate) and `b8169728`
+> (§Q3, `famOkB`'s `Alteration` escape). If the deployed build predates them, those two are still
+> dev-only and you will see: the `Front panel material` card greyed under BOSSA/LAIKA, and 12
+> `Alteration` cards greyed under any Avance/Contino programme. Everything else in this document is
+> covered by `f61942d8`, which is comfortably in the release.
 
 ```bash
+# local, against either cluster
 cd D4K-backend && git checkout dev && git pull && npm run build && node dist/main.js   # :8000
-#   .env → MONGO_URI must be the D4K-dev cluster (it is line 2 by default)
+#   .env → MONGO_URI: line 2 = D4K-dev, the commented line = D4K-prd. Either works now.
 ```
 
 `NEXT_PUBLIC_API_URL=http://localhost:8000/` is already the default in the frontend `.env`.
@@ -110,8 +118,9 @@ only one with a visible consequence for you is the first.
 | 4 | **`familyFacts.rawSub`** added (2.5.3) — the app's raw `f.sub`. `Item.subcategory` is the DISPLAY name and `TALL_MERGE` folds three Tall subs into one, so the raw one is needed for the programme-tier hide. | Client does **not** need it (same as `unitFacts`/`familyFacts` — don't type it). Authoring only — see Step 7. |
 | **5** | **`gridRows` now ships on UNGROUPED lists**, and the **refs map now covers `gridRows` pill targets**. | **Two caveats in this document are retired.** A `sku:[…]` navigation (tier badge, finish chip, depth sibling) keeps full rows instead of falling back to `parameters.*`, and a Ty click can rely on `refs[pill.sku].variantCore`. See R2 and R3's notes; open items 2 and 3 are struck through. |
 
-Not yet on D4K-prd: the 2.5.x data backfills (`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`,
-`dupFamilies`, `faceWidthMm`, `sectionRank`). Point at D4K-dev while building against this document.
+**On D4K-prd since 2026-07-30** — the 2.5.x data backfills (`unitFacts`, `familyFacts` incl. `rawSub`,
+`gridHidden`, `dupFamilies`, `faceWidthMm`, the re-captured `sectionRank`) and the code. Point at either
+cluster; see the SHA caveat at the top of this document.
 
 ---
 
@@ -1307,9 +1316,11 @@ other 10 categories, plus the FRONTS/programme/line/width/depth/opening/suspende
 | one `Insert` row (`FP_16FRONT`, 92 units) | 8 diffs. Needs per-unit `u.ins` in the contract — the only known gap in the grid that is not pure backend logic. |
 | a handful of single-family cases | `Alteration › Side Panel Modifications` under BOSSA (grey 12 / member 1 / section 1), `Panels & surround` order 2 + grey-not-hide 1. Diagnosed as neighbourhood, not mechanism; tracked in §P's residue list. |
 
-**Data, not code, is the other half.** Everything above is true against **D4K-dev**. D4K-prd is missing
-`unitFacts`, `familyFacts` (incl. `rawSub`), `gridHidden`, `dupFamilies`, `faceWidthMm` and carries a
-**stale** `sectionRank`, so a grid built against prd looks plausible and is subtly wrong. Point at dev.
+**Data, not code, is the other half — and both are now on prd** (released 2026-07-30; the two clusters
+are verified identical field-for-field at 18,396 items). Everything measured above was measured against
+**D4K-dev**, and prd carries the same data and code, so either cluster is a valid target. The one thing
+to check is the deployed SHA — see the caveat at the top; a build older than `f59ea0af` / `b8169728`
+still has the two greying bugs those commits fixed.
 
 ---
 

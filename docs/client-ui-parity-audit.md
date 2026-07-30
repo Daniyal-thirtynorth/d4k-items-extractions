@@ -896,7 +896,7 @@ by a single sub; it matters for the `leafId` task views.)
 `subDisp(f)`, so on Tall it exempted nothing and we HID Primo-only families the app keeps (`F1730`,
 `F342`, `F343` under LAIKA / ROCCA). Matching the display name instead would over-exempt `Back & Side
 Panels`, which is NOT exempt — so the raw sub now ships as **`familyFacts.rawSub`** (schemaVersion
-2.5.3). Extractor emits it; export patched; D4K-dev backfilled; **D4K-prd still owes it**.
+2.5.3). Extractor emits it; export patched; D4K-dev backfilled; D4K-prd backfilled 2026-07-30 (closed).
 
 **N4. The v98 SIBLING-FAMILY SWAP is a MEMBERSHIP rule, and it was never ported.** From
 `visibleBlocks`:
