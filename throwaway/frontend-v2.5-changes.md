@@ -743,7 +743,7 @@ don't type them.
 *(`opening` — the app's P1/C1 toolbar toggle — is also a `gridRows` input, but this UI has no such
 control, so it stays out. Same call v2.3 made for handle/front/doorline.)*
 
-> **If you ever add the OPENING toggle (2026-07-30, §P2) — it is NOT a filter.** Send
+> **If you ever add the OPENING toggle (2026-07-30, §P3) — it is NOT a filter.** Send
 > `opening=P1|C1` and the server does three things: pools the family by opening (the card **re-faces**
 > onto the P1/C1 article), greys through the `openOk` gate, and rebuilds the rows. It removes a card
 > only when a `byProgramme` family has nothing at that opening. Two client-side duties:
