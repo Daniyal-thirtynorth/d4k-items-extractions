@@ -5,17 +5,22 @@
 Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `b8169728`
 or later**.
 
-**⭐ RELEASED TO PRD 2026-07-30.** Both halves are now live on prd — the code *and* the data
-(`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`, `dupFamilies`, `faceWidthMm`, and a
-re-captured `sectionRank`; both clusters verified field-for-field identical at 18,396 items). So prd is
-a valid target for this document, not just D4K-dev.
+**⭐ RELEASED TO PRD 2026-07-30** — the data *and* most of the code. The 2.5.x backfills
+(`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`, `dupFamilies`, `faceWidthMm`, a re-captured
+`sectionRank`) are on both clusters, verified field-for-field identical at 18,396 items. So prd is a
+valid target for this document — with **one exception, measured not guessed**:
 
-> ⚠️ **Confirm the deployed SHA before you trust prd for the last two fixes.** The release went out the
-> same day the final two backend commits landed — `f59ea0af` (§Q1, the FRMAT gate) and `b8169728`
-> (§Q3, `famOkB`'s `Alteration` escape). If the deployed build predates them, those two are still
-> dev-only and you will see: the `Front panel material` card greyed under BOSSA/LAIKA, and 12
-> `Alteration` cards greyed under any Avance/Contino programme. Everything else in this document is
-> covered by `f61942d8`, which is comfortably in the release.
+> ⚠️ **`origin/main` (prd) ends at `f61942d8`. The two §Q fixes are still `dev`-only.**
+> Verified against the remote on 2026-07-30: `git log origin/main..origin/dev` = `b8169728` (§Q3,
+> `famOkB`'s `Alteration` escape) · `f59ea0af` (§Q1, the FRMAT gate) · `6a84bba3` (a comment). Until a
+> second `dev` → `staging` → `main` pass ships them, prd shows two greying bugs:
+> * the `Front panel material` card (`F124` / `FRMAT`) greys under **BOSSA** and **LAIKA** — the app
+>   renders it live;
+> * **12 `Alteration` cards** grey under any **Avance / Contino** programme — `MPOSKE`, `MPEKE`,
+>   `FRAUSR`, `FRAUSRH`, `MPOT`, `MPEZS`, `MPHVERLVE`.
+>
+> Everything else in this document is covered by `f61942d8`, which IS on prd. Both missing commits are
+> code-only — no data, no backfill, no contract change.
 
 ```bash
 # local, against either cluster
@@ -1316,11 +1321,11 @@ other 10 categories, plus the FRONTS/programme/line/width/depth/opening/suspende
 | one `Insert` row (`FP_16FRONT`, 92 units) | 8 diffs. Needs per-unit `u.ins` in the contract — the only known gap in the grid that is not pure backend logic. |
 | a handful of single-family cases | `Alteration › Side Panel Modifications` under BOSSA (grey 12 / member 1 / section 1), `Panels & surround` order 2 + grey-not-hide 1. Diagnosed as neighbourhood, not mechanism; tracked in §P's residue list. |
 
-**Data, not code, is the other half — and both are now on prd** (released 2026-07-30; the two clusters
-are verified identical field-for-field at 18,396 items). Everything measured above was measured against
-**D4K-dev**, and prd carries the same data and code, so either cluster is a valid target. The one thing
-to check is the deployed SHA — see the caveat at the top; a build older than `f59ea0af` / `b8169728`
-still has the two greying bugs those commits fixed.
+**Data, not code, is the other half.** The DATA is on both clusters (released 2026-07-30, verified
+identical field-for-field at 18,396 items). The CODE on prd stops at `f61942d8` — the two §Q fixes are
+still `dev`-only, so prd has the two greying bugs listed in the caveat at the top of this document.
+Everything measured above was measured against **D4K-dev**; against prd, expect those two and nothing
+else.
 
 ---
 

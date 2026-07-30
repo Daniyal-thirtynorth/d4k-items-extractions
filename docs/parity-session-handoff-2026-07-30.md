@@ -91,8 +91,9 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | — | round 4 — all four §O residuals + the `heightExtension` follow-ups | ✅ 07-30 |
 | — | extended coverage §P — 1,104 states, six fixes | ✅ 07-30 |
 | — | §Q — FRMAT gate + the `dwm` face | ✅ 07-30 |
-| — | D4K-prd data ledger + **the prd RELEASE** | ✅ closed 07-30 (see §3) |
-| **0** | **confirm the prd release carries `f59ea0af` + `b8169728`** — two curls, §3 | ⬜ **first thing** |
+| — | D4K-prd data ledger | ✅ closed 07-30 (see §3) |
+| — | the prd RELEASE | ⚠️ **partial** — merged at `f61942d8`, §Q still on `dev` (see §3) |
+| **0** | **ship §Q to prd** — `origin/main` ends at `f61942d8`; `dev` is 3 commits ahead. One more `dev`→`staging`→`main` pass, then the two curls in §3 | ⬜ **first thing** |
 | **1** | re-sweep **E3 + E2** → confirm §Q1 and §Q3 (above) | ⬜ next |
 | **2** | ~~E2 GREY 12~~ | ✅ **fixed — §Q3.** `famOkB`'s `Alteration` category escape. What is LEFT on E2 is `MEMBER 1 + SECT 1`: `Alteration › Side Panel Modifications` @BOSSA, client `PNL_ACC` vs our `PS_WAUKS_RECESS` (+ the `Sink, Fillers & Panels` header). Looks like a swap/split, not a gate |
 | **3** | **E3 MEMBER 3** — `Pilasters\|line73` (`XAG_Pa_a989a3`), `Side panels W\|progP_BOSSA` (`CURVED_*_M` vs the plain codes), `Wall Cladding\|line73` (`PPM3234`) | ⬜ open — three single-family cases, look like variant-family splits rather than gates |
@@ -128,7 +129,7 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 
 ---
 
-## 3. DATA LEDGER — nothing owed, and prd is RELEASED
+## 3. DATA LEDGER — nothing owed; prd RELEASED but 3 commits behind
 
 Contract **2.5.3**, collection `designbookitems`, **18,396 items on both clusters**, verified identical
 on every tracked field (`unitFacts` 18,352 · `familyFacts` 18,366 · `familyFacts.rawSub` 18,366 ·
@@ -142,31 +143,41 @@ on every tracked field (`unitFacts` 18,352 · `familyFacts` 18,366 · `familyFac
   `backfill-face-height-class.js`, `backfill-face-variant-core.js`, `backfill-face-width-mm.js`, and
   whatever writes `variantCore`. Everything else is in the export.
 
-### ⭐ DEPLOYED TO PRD — 2026-07-30 (end of session)
+### ⭐ RELEASED TO PRD — 2026-07-30, but THREE COMMITS SHORT
 
-`dev` was released to prd, so **code and data are now level on both clusters** and prd is a valid target
-for the frontend guide and for client demos.
+`dev` was merged out to prd (PR #2973 `dev`→`staging`, #2974 `staging`→`main`). Checked against the
+remote afterwards, and the merge landed **before** the session's last three commits:
 
-⚠️ **First thing tomorrow: confirm the deployed SHA.** The release went out the same day the last two
-backend commits landed. If it predates them, two fixes are still dev-only and both are visible:
+```
+origin/main   5364d3e3  Merge PR #2974 from staging
+              ff91d896  Merge PR #2973 from dev
+              f61942d8  the six §P rules          ← prd ends here
 
-| commit | if missing from the release |
+git log origin/main..origin/dev
+              b8169728  §Q3  famOkB exempts the whole Alteration CATEGORY
+              f59ea0af  §Q1  isFrmatFamily is a qualifier, not a blanket exclusion
+              6a84bba3  a comment
+```
+
+**So prd has all of §O and §P, and none of §Q.** Two greying bugs are live on it:
+
+| missing commit | symptom on prd |
 |---|---|
-| `f59ea0af` (§Q1) | the `Front panel material` card (`F124` / `FRMAT`) greys under BOSSA and LAIKA |
-| `b8169728` (§Q3) | 12 `Alteration` cards grey under any Avance / Contino programme (`MPOSKE`, `MPOT`, `MPEZS`, `MPHVERLVE` …) |
+| `f59ea0af` (§Q1) | `Front panel material` (`F124` / `FRMAT`) greys under BOSSA and LAIKA — the app renders it live |
+| `b8169728` (§Q3) | 12 `Alteration` cards grey under any Avance / Contino programme (`MPOSKE`, `MPEKE`, `FRAUSR`, `FRAUSRH`, `MPOT`, `MPEZS`, `MPHVERLVE`) |
 
-Two curls against prd settle it:
+**Remedy: one more `dev` → `staging` → `main` pass.** Both commits are code-only — no data, no
+backfill, no contract change, nothing to re-ingest. The DATA ledger is closed and unaffected.
+
+Confirm afterwards, against prd:
 
 ```bash
 #  expect BOTH true
 GET /design-book/items?category=Panels%20%26%20surround&subcategory=Surround&groupBy=family&programs=244
-      → F124 · cardAvailable true                                     # §Q1 present
+      → F124 · cardAvailable true                                     # §Q1 landed
 GET /design-book/items?category=Alteration&subcategory=Accessory&groupBy=family&programs=410
-      → MPOSKE · cardAvailable true                                   # §Q3 present
+      → MPOSKE · cardAvailable true                                   # §Q3 landed
 ```
-
-If either is `false`, re-deploy — nothing else is needed, both are code-only with no data or contract
-change.
 
 ---
 
