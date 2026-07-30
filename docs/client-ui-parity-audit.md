@@ -1444,3 +1444,54 @@ anything for `antoso`. No plan state combines `susp` with `tallH*`, so this has 
 
 Un-swept still: `grey=true` (the 15 `grey_on` states need re-running with the patched dumper),
 `page>1`, and the detail drawer.
+
+---
+
+### §Q. TWO MORE FROM THE §P RESIDUE (2026-07-30, late) — the `dwm` face and the FRMAT gate
+
+Both pure backend logic, no data change, no contract change, `schemaVersion` stays **2.5.3**.
+
+**Q1 — `isFrmatFamily` was read as a blanket exclusion; it is a QUALIFIER.** E3's `GREY 2` + the
+`ORDER 2` that followed from it: `Panels & surround|Surround` under BOSSA and under LAIKA, family
+`F124` / `FRMAT`, client live, ours greyed. The app's rule is one line in `progOkFor`:
+
+```js
+if (u.c === 'FRMAT' && !frmatKey(PROG_BY_KEY[pk].n)) return false;
+//  v92 (Shimon): no row in the max-size table = FRMAT does not exist in that programme
+//  (covers KYOTO, VALAIS — missing from the IDM exclusions)
+```
+
+So FRMAT is dead only in programmes whose NAME has no row in `FRMAT_MAX` (book ch.71.18). Our port —
+and the REFERENCE PORT in the contract, which is where it came from — had
+
+```ts
+!(c.excludedPrograms || []).includes(k) && !c.isFrmatFamily && …      // ← kills all 120 programmes
+```
+
+Measured against the app's own table: of 120 programmes, `excludedPrograms` already excludes 111 for
+this unit; **exactly 9 are excluded only by the size table** (SELVA 218, KYOTO 272, VALAIS 283,
+STONE 294, SELVA-A 418, STONE-A 494, SELVA-C 718, VALAIS-C 783, STONE-C 794), and 2 more (BAHIA 250,
+BAHIA-C 750) are in `excludedPrograms` for a different reason while HAVING a size row — so neither the
+flag nor the list can be dropped in favour of the other. Ported as `FRMAT_DEAD_PROGRAMS`, a derived
+constant of those 9 ids (`FORCE_SEC` / `FAM_DWM` class), and the clause is now
+`!(c.isFrmatFamily && FRMAT_DEAD_PROGRAMS.has(k))`.
+
+**The same bug is in the client's copy.** `availableFromCaps` is the port the React app greys pills
+with, and the snippet it was copied from — `export-schema-v2.ts` and `design-book-crud-guide.md` §3 —
+carried the blanket form (the contract's own prose one line above said the right thing:
+"also `&& !(caps.isFrmatFamily && frmatExcluded(prog))`"). Both snippets fixed, with the 9 ids inline.
+
+Verified: `Panels & surround › Surround` @BOSSA → `F69 · F124 · F263`, all three live, which is the
+client's card order byte-for-byte (F124 and F263 share `catalogRank` 7118, so availability was the
+tie-break — that is why one grey caused the ORDER diff). @LAIKA live; @KYOTO correctly DEAD (the size
+table still bites); @ROCCA dead via `excludedPrograms`. **E3 GREY 2 → 0, ORDER 2 → 0.**
+
+**Q2 — the E3 leg re-measured clean.** Full 200-state re-run after P6: **FACE 6 → 0**, every other
+bucket byte-identical to the pre-fix baseline (MEMBER 3 · GREY 2 · SECT 1 · ORDER 2 · GREY_NOT_HIDE 1,
+`out/report-E3d.json`). Q1 then took GREY and ORDER to 0 by hand-verification against the client dump;
+a confirming re-sweep of the leg is the first task in the next session.
+
+**E3 residue after §Q — 3 MEMBER + 1 GREY_NOT_HIDE**, all unexplained and all single-family:
+`Pilasters|line73` (`XAG_Pa_a989a3` ours-only), `Side panels W|progP_BOSSA` (client has `XCRV_WF5R`,
+`XCRV_WFI5R`, `CURVED_IslandCurvedSidePanel`; we have the `_M` variants of two of them — looks like a
+variant-family split, not a gate), `Wall Cladding|line73` (`PPM3234` ours-only).

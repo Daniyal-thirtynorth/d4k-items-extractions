@@ -498,6 +498,35 @@ Current facts:
   per-membership `functionalGroups`** (extractor+export+contract+backfill, deferred by decision).
   Still un-swept: `grey=true`, `page>1`, the detail drawer.
 
+- **⭐ §Q — TWO MORE OFF THE §P RESIDUE (2026-07-30 late; pure backend logic, schemaVersion stays
+  2.5.3).** **(1) `RE_SLIDEIN` FACE 6 (E3, all 6 states) — a HARDCODED per-family default width.**
+  `_selUnit`'s width tail is `mw=defaultWidthMin(b); if(mw) preferWidth(…) else sorted[0]`, and
+  `defaultWidthMin` reads `b.dwm` FIRST. `Panels & surround` matches no category arm → mw 0 → we faced
+  the narrowest member `RE305336`; the app sets `f.dwm=90` at `:7583`, in the SAME IIFE that floats
+  `RE905336` to `units[0]` — the unshift half we already had as `unitFacts.unitIndex`, `dwm` is the
+  other half. `\bdwm\b` occurs 3× in v781 (2 in the function, 1 in that IIFE) and it is init CODE, not
+  `<script id="DATA">`, so it ships as `FAM_DWM={RE_SLIDEIN:90}` like FORCE_SEC/WIDTH_BUCKETS;
+  `famFacts()` stamps `familyId` so it can be keyed, and `familyFacts.defaultWidthMin` (declared since
+  the port, never emitted) still wins if an export ships it. `widthMm=600` still faces `RE605336` — an
+  explicit W outranks the default. E3 re-sweep: **FACE 6 → 0**, every other bucket byte-identical.
+  **(2) `isFrmatFamily` was read as a BLANKET exclusion; it is a QUALIFIER (E3 GREY 2 + ORDER 2).**
+  App: `if(u.c==='FRMAT' && !frmatKey(PROG_BY_KEY[pk].n)) return false` — FRMAT is dead only where the
+  programme NAME has no row in `FRMAT_MAX` (ch.71.18). Ours (and the CONTRACT's reference port, which
+  is where it came from) had `!c.excludedPrograms.includes(k) && !c.isFrmatFamily`, killing all 120.
+  Measured: `excludedPrograms` already covers 111; **exactly 9** are size-table-only (SELVA 218,
+  KYOTO 272, VALAIS 283, STONE 294, SELVA-A 418, STONE-A 494, SELVA-C 718, VALAIS-C 783, STONE-C 794),
+  and 2 (BAHIA 250/750) are excluded for another reason WHILE having a row — so neither the flag nor
+  the list can replace the other. Ported as `FRMAT_DEAD_PROGRAMS`; the clause is now
+  `!(c.isFrmatFamily && FRMAT_DEAD_PROGRAMS.has(k))`. ⚠️ **The client's `availableFromCaps` has the
+  same bug** — the snippets in `export-schema-v2.ts` and crud-guide §3 carried the blanket form (the
+  contract's prose one line above said the right thing); both fixed, frontend guide row 7 tells the
+  client to patch it. Verified: Surround @BOSSA → `F69·F124·F263` all live, the client's exact order
+  (F124/F263 share catalogRank 7118, so the grey was the tie-break → the ORDER diff); @LAIKA live,
+  @KYOTO dead, @ROCCA dead via excludedPrograms. **GREY 2 → 0, ORDER 2 → 0** (hand-verified; the
+  confirming E3 re-sweep is task 1 in `docs/parity-session-handoff-2026-07-30.md`).
+  **E3 residue: MEMBER 3 + GREY_NOT_HIDE 1**, three single-family cases that look like variant-family
+  splits (`XAG_Pa_a989a3`, `CURVED_*_M`, `PPM3234`).
+
 ## UI vocabulary — what each term means on screen (and where it maps)
 
 Read this before the schema. It maps what the user sees in the app to the data model in

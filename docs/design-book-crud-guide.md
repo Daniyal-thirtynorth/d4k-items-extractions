@@ -203,11 +203,15 @@ Same pattern — a toolbar control + one or more fields. Exact logic is in the p
 
 The client runs all 8 gates itself (the backend does only the programme one — §5). Verbatim:
 ```js
+// FRMAT_DEAD = the 9 programme ids that ONLY the FRMAT size table excludes (SELVA 218, KYOTO 272,
+// VALAIS 283, STONE 294, SELVA-A 418, STONE-A 494, SELVA-C 718, VALAIS-C 783, STONE-C 794).
+// ⚠️ `isFrmatFamily` is NOT "excluded everywhere" — FRMAT is LIVE under BOSSA, TOPOS, CERES …
+// `excludedPrograms` already covers the other 111; these 9 are the app's extra `frmatKey` rule.
 function availableFromCaps(c, s /* toolbar state */) {
   if (c.alwaysAvailable) return true;
   const pk = s.progKeys ?? [];
   const progOk  = !pk.length || pk.some(k =>
-    !c.excludedPrograms.includes(k) && !c.isFrmatFamily &&
+    !c.excludedPrograms.includes(k) && !(c.isFrmatFamily && FRMAT_DEAD.has(k)) &&
     !(s.front === 1 && c.hasEFront && c.excludedProgramsE.includes(k)));
   const tierOk  = !s.tier || s.tier === 'ALL' ? true
     : (s.tier === 'P1' || s.tier === 'C1') ? c.opening === s.tier

@@ -1,5 +1,10 @@
 # Grid-parity session handoff — 2026-07-29 (start here tomorrow)
 
+> ### ⭐ SUPERSEDED by `parity-session-handoff-2026-07-30.md` — read that one.
+> 07-30 fixed all four residuals below (audit §O), extended the sweep to all 14 categories and the
+> toolbar flags (§P), and cleared two more (§Q). The data ledger in §3 is CLOSED. Keep this file for
+> the round-2/3 history and the trap list only.
+
 Continues `parity-session-handoff-2026-07-28.md`. That day built the harness, found the 10 root
 causes (audit §L) and shipped `gridRows`. **This day closed round 2 (§M) and round 3 (§N) and got the
 sweep to essentially zero.** Findings live in `docs/client-ui-parity-audit.md` **§M** and **§N**; this

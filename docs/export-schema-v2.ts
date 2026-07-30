@@ -322,13 +322,19 @@ export interface ToolbarState {
  * REFERENCE PORT of the app's `available()` — evaluate a pill's TARGET
  * capabilities against the toolbar. The client calls this for every pill; a pill
  * is DEAD when its `sku` is null (no target), GREY when this returns false, else
- * live. (FRMAT: also `&& !(caps.isFrmatFamily && frmatExcluded(prog))`.)
+ * live.
+ *
+ * ⚠️ FRMAT: `isFrmatFamily` is a QUALIFIER, not a blanket exclusion. `FRMAT_DEAD` is the 9
+ * programme ids that only the app's `FRMAT_MAX` size table excludes — SELVA 218, KYOTO 272,
+ * VALAIS 283, STONE 294, SELVA-A 418, STONE-A 494, SELVA-C 718, VALAIS-C 783, STONE-C 794.
+ * `excludedPrograms` covers the other 111. Reading the flag as "always excluded" greys the card
+ * under BOSSA/TOPOS/CERES, where the app renders it live (audit §Q1).
  *
  *   function availableFromCaps(c: Capabilities, s: ToolbarState): boolean {
  *     if (c.alwaysAvailable) return true;
  *     const pk = s.progKeys ?? [];
  *     const progOk  = !pk.length || pk.some(k =>
- *       !c.excludedPrograms.includes(k) && !c.isFrmatFamily &&
+ *       !c.excludedPrograms.includes(k) && !(c.isFrmatFamily && FRMAT_DEAD.has(k)) &&
  *       !(s.front === 1 && c.hasEFront && c.excludedProgramsE.includes(k)));
  *     const tierOk  = !s.tier || s.tier === 'ALL' ? true
  *       : (s.tier === 'P1' || s.tier === 'C1') ? c.opening === s.tier
