@@ -1137,6 +1137,36 @@ mirror; `HWS14658` (Primo twin) unchanged; `AHG6015411DZ` (Appliance Housing) st
 `P1T3080S` (synthesized) fine. **Whole-catalog check: all 332 Tall family faces, grid card vs drawer
 item, payload sku + flag — 0 mismatches.**
 
+**O4c. `heightExtension` is now formally ADVISORY — the API is its only source (2026-07-30).**
+O4 and O4b each fixed one reader. The field was still a per-unit STORED contract field whose value the
+server no longer trusted, which left two ways for the frozen copy to reach a client:
+
+1. **gate fails, stored copy present** → the response carried the payload with `heightExtensionOk:false`.
+   The grid card checked the flag; the lite UI's drawer (`hextPills`) did not, so it rendered a `217+`
+   row the card next to it hid (`H60190GAIZ` under ROCCA 01 — payload `H45217GAIZ`, `ok:false`).
+2. **family unresolvable** — `attachGridRows` did `if (!units || !f) continue` before stamping, so a
+   `gridHidden` artifact or an item with no `familyFacts` served its stored copy untouched, and
+   `getItem` skipped the same way.
+
+Both are the same mistake as O4/O4b one layer out: a field with two possible sources has a wrong one.
+
+**Fix — one writer, always authoritative.** `applyHeightExtension` now runs on every item on every
+read path, before the family check, and **deletes both fields** when the gate fails instead of leaving
+a stale payload behind. Response invariant: **`heightExtension` present ⟺ the chip renders**;
+`heightExtensionOk` is `true` whenever the payload is there and is retained only so the shipped client
+test (`heightExtensionOk !== false`) keeps working.
+
+**No data change and no schemaVersion bump** — the stored field keeps its `@Prop`, its DTO and its
+export slot, and is simply never read. It is documented as ADVISORY at all four places someone might
+trust it: the contract (`export-schema-v2.ts`), the extractor's own `heightExtensionOf` (whose
+`available(m)` is the toolbar-dependent call that started this), the CRUD guide §4b ("you cannot author
+this one"), and the admin form's note. Deleting it later needs no backfill.
+
+Verified: invariant `present ⟺ ok===true` holds over the grid-family, ungrouped, `@ROCCA` and Base list
+paths — **0 violations**; grid card vs drawer over every Tall face in two toolbars — **332 faces / 82
+with a chip → 0 mismatches**, and **279 / 16 → 0** under ROCCA 01. `H60190GAIZ` at ROCCA 01 now returns
+no `heightExtension` key at all.
+
 **O5. THE DESIGN-TASKS SIDEBAR — `functionalGroups` is per-ITEM where it has to be per-MEMBERSHIP.**
 Found by hand-driving both sidebars (never swept — see the scope caveat above). Base › 💧 Water:
 

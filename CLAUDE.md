@@ -361,8 +361,16 @@ Current facts:
   did not. The stamp is now one shared `applyHeightExtension()` called from BOTH `attachGridRows` and
   `getItem` (drawer toolbar = the programme context alone; pool from the same cached `poolByFamily()`;
   face falls back to the item so synthesized P1/C1 siblings answer). All 332 Tall faces, grid vs
-  drawer: 0 mismatches. Still open: `heightExtension` remains a per-unit contract field although it is
-  derived now — drop it or mark it advisory.
+  drawer: 0 mismatches. **§O4c closed the field itself: `heightExtension` is ADVISORY.**
+  `applyHeightExtension` is its ONLY source — it runs on every item on every read path (before the
+  family check) and **DELETES** both fields when the gate fails, instead of serving the stale stored
+  payload with `ok:false`. Response invariant: **present ⟺ the chip renders**; `heightExtensionOk` is
+  `true` whenever the payload is there (kept only for the shipped `!== false` client test). No data
+  change, no schemaVersion bump — the stored field keeps its `@Prop`/DTO/export slot and is simply
+  never read; marked ADVISORY in the contract, the extractor's `heightExtensionOf`, crud-guide §4b and
+  the admin form. Two leaks it closed: a stale payload + `ok:false` (the lite UI drawer rendered a
+  `217+` row the card hid — `H60190GAIZ` @ROCCA 01), and items whose family can't be resolved
+  (`gridHidden` artifacts, no `familyFacts`), which the old `continue` skipped entirely.
   Re-ran the Tall leg to measure round 3's un-swept `maxh` fix: **ORDER 6 → 0** confirmed over all 272
   states, every other bucket 0 except the two "residue" items — and re-checking those disproved both:
   1. **`Tall|Panels, Fillers & Surrounds|progP_BOSSA` was NOT a bad client sample.** Re-dumped, it

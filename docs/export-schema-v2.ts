@@ -140,7 +140,18 @@ export interface Item {
 
   /* configurator pills — thin: label + navigation target only. State is DERIVED. */
   parameters?: Parameters;
-  heightExtension?: HeightExtension; // Tall only: the "217+" chip appended to the HEIGHT row.
+  /* ⚠️ ADVISORY — SERVER-DERIVED OUTPUT, NOT AUTHORITATIVE INPUT (audit §O4/§O4c).
+     Tall only: the "217+" chip appended to the HEIGHT row. The stored per-unit copy is a FROZEN
+     answer to a FAMILY-level, TOOLBAR-DEPENDENT question: the extractor evaluates the app's
+     `_u217For` gate once, in the pristine default (P) toolbar, so an all-A / all-C family fails it
+     and every one of its units gets nothing (F1780, F1782 — while their Primo twin F1784 has it on
+     all 32). The API therefore RECOMPUTES the field from the family pool for each request's own
+     programme context and DELETES it when the gate fails, on the grid AND on `GET items/:sku`.
+     So: this stored value documents the payload shape and nothing more — never gate on it, and
+     never read it out of the export or a cached document. In a RESPONSE the invariant is
+     `heightExtension` present ⟺ the chip renders (`heightExtensionOk` is then always `true`).
+     Kept in the contract because the response still carries the shape; safe to stop exporting. */
+  heightExtension?: HeightExtension;
 
   /* thin reference lists — sku CODES only; cards hydrated at read via the ref index */
   alterations?: string[];          // alteration-code refs (Standard + Unit-Specific)

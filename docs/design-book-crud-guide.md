@@ -346,6 +346,14 @@ pill — otherwise the sibling pill lights up as "selected" and stops being clic
 
 ## 4b. `heightExtension` — the "217+" chip on the Height row
 
+> **⚠️ YOU CANNOT AUTHOR THIS ONE. It is derived on every read (audit §O4/§O4c).** The admin form still
+> shows the block and the field still exists on the document, but the API recomputes the payload from the
+> family pool for each request and strips whatever is stored — so **editing it changes nothing on screen**.
+> To make the chip appear or disappear, fix the FAMILY: whether it holds a `heightCode 217` unit at all,
+> and whether that unit is orderable in the programme you are looking at. Everything below describes the
+> shape the API returns, not a field to fill in. (Why: the stored copy froze a family-level,
+> toolbar-dependent question per unit, so all-A / all-C families — `F1780`, `F1782` — never got one.)
+
 Tall products (never `Appliance housing`) whose family holds an orderable **217 cm** unit can be built
 past 217. That is **not a separate product**: picking 230 / 244 / 250 orders the **217 cm unit plus an added
 code** (`MPHVERL`). It is the height twin of the 63 cm depth alteration.

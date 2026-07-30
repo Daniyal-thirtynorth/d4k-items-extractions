@@ -538,6 +538,16 @@ Set both or neither.
 
 #### `item.heightExtension` — the "217+" chip
 
+> **⚠️ SERVER-DERIVED, per request (audit §O4/§O4c). Read it off the response, never off the export or
+> a cached document.** The stored per-unit copy is ADVISORY: the extractor freezes the family-level,
+> toolbar-dependent `_u217For` gate in the pristine default (P) toolbar, so all-A / all-C families get
+> nothing (`F1780`, `F1782`). The API recomputes the payload from the family pool for the request's own
+> programme and **deletes** it when the gate fails — on the grid, on `by-section`, on the ungrouped list
+> and on `GET items/:sku` alike. Response invariant: **`heightExtension` present ⟺ the chip renders**,
+> and `heightExtensionOk` is then always `true` (it is retained only for the shipped
+> `heightExtensionOk !== false` client test). So a call with `?programs=` may carry the chip where the
+> bare call does not — that is correct and matches the app.
+
 Tall products (never `Appliance housing`) whose family holds an orderable 217 cm unit can be built past
 217 cm. The app appends a collapsed `217+` chip to the **Height row**; tapping expands it to 230 / 244 /
 250 cm, and picking one opens the **217 cm unit** with `MPHVERL` ordered alongside — the height twin of the

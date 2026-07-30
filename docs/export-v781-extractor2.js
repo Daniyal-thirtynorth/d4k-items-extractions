@@ -429,6 +429,13 @@ function isAlterationSku(sku){ const cf=window.CODE2FAM&&window.CODE2FAM[sku]; i
  * v781: 2,046 units / 83 families. Kept OUT of `parameters.height` because families like the HP20
  * panels also have REAL 230/250 cm sibling units and the labels would collide. */
 const HEXT_MM=[[230,2304],[244,2436.5],[250,2500]];
+/* ⚠️ ADVISORY OUTPUT — the backend does NOT read this (audit §O4/§O4c). `available(m)` below is
+ * TOOLBAR-DEPENDENT and extraction runs in the pristine default (P) toolbar, so an all-A / all-C
+ * family fails the gate and gets `null` on every unit (F1780, F1782). A per-unit frozen answer to a
+ * family-level toolbar-dependent question is exactly what v2's "intrinsic facts, derive the rest"
+ * rule exists to prevent. The API recomputes the payload per request (`heightExtensionFor` in
+ * `design-book.grid-rows.ts`) and strips a stale stored copy, so what ships here is documentation of
+ * the shape only. Kept because it costs nothing; deleting it would need no backfill. */
 function heightExtensionOf(f,u){
   try{
     if(!f||!u||f.cat!=='Tall'||f.sub==='Appliance housing') return null;
