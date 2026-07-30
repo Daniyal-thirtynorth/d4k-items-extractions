@@ -524,8 +524,18 @@ Current facts:
   (F124/F263 share catalogRank 7118, so the grey was the tie-break → the ORDER diff); @LAIKA live,
   @KYOTO dead, @ROCCA dead via excludedPrograms. **GREY 2 → 0, ORDER 2 → 0** (hand-verified; the
   confirming E3 re-sweep is task 1 in `docs/parity-session-handoff-2026-07-30.md`).
-  **E3 residue: MEMBER 3 + GREY_NOT_HIDE 1**, three single-family cases that look like variant-family
-  splits (`XAG_Pa_a989a3`, `CURVED_*_M`, `PPM3234`).
+  **(3) `famOkB` exempts the whole `Alteration` CATEGORY (E2 GREY 12).** App:
+  `famOkB(b,letter) = !letter || b.cat==='Alteration' || b._mem.includes(letter)` — the category escape
+  is unconditional. Our port had only the `_mem` half plus a comment claiming `isAccessory` covered it;
+  it does not — `MPOSKE`/`MPEKE`/`FRAUSR`/`FRAUSRH`/`MPOT`/`MPEZS`/`MPHVERLVE` are `isAccessory:false`,
+  `isProgrammeAgnostic:false`, `memberTiers:'P'`, so all 12 greyed under LAIKA/ROCCA. `famOkU` was never
+  the blocker (every one is `unitFacts.agnostic`). One clause added. Regression-checked: Base›Sinks
+  @LAIKA still greys 8 cards (alteration codes whose CARD is a Base family — the app tests `b.cat`, the
+  family's, which is what we read). **E2 GREY 12 → 0.**
+  **Residue: E2** ROWSET 8 (`FP_16FRONT` `Insert`, needs per-unit `u.ins`) + MEMBER 1/SECT 1
+  (`Side Panel Modifications`@BOSSA `PNL_ACC` vs `PS_WAUKS_RECESS` — a swap/split, not a gate);
+  **E3** MEMBER 3 + GREY_NOT_HIDE 1, three single-family cases that look like variant-family splits
+  (`XAG_Pa_a989a3`, `CURVED_*_M`, `PPM3234`).
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

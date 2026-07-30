@@ -16,12 +16,12 @@ Everything below is **committed and pushed** — backend `dev`, extraction `main
 |---|---|---|---|
 | Base · Tall · Wall+Midway (§O) | 720 | 4 residuals | **0 in all ten buckets** |
 | E1 accessories / alteration / handles | 264 | MEMBER 37 · SECT 19 | **0** (the diffs were a dead backend — see trap 1) |
-| E2 the other 10 categories | 298 | ROWSET 385 · MEMBER 1 · GREY 12 · SECT 1 | ROWSET **8** · MEMBER 1 · GREY 12 · SECT 1 |
+| E2 the other 10 categories | 298 | ROWSET 385 · MEMBER 1 · GREY 12 · SECT 1 | ROWSET **8** · MEMBER 1 · SECT 1 (**GREY 12 → 0**) |
 | E3 Base/Tall/Wall/Mid at skipped states | 200 | MEMBER 3 · FACE 6 · GREY 2 · SECT 1 · ORDER 2 · GNH 1 | MEMBER 3 · SECT 1 · GNH 1 (**FACE, GREY, ORDER → 0**) |
 | F1 the toolbar flags | 90 | MEMBER 66 · SECT 54 | **0 on all 60 flag states** (30 `grey_on*`/`tallH*` un-swept) |
 | T1 the Design-Tasks sidebar | 252 | 144 diffs | unchanged — **deferred by decision** (§O5) |
 
-**Ten fixes shipped today, every one of them pure backend logic.** No data change, no backfill, no
+**Eleven fixes shipped today, every one of them pure backend logic.** No data change, no backfill, no
 re-ingest, no contract change — `schemaVersion` is still **2.5.3** and the export is untouched.
 
 | § | what it was |
@@ -37,6 +37,7 @@ re-ingest, no contract change — `schemaVersion` is still **2.5.3** and the exp
 | P5 | the search box is **GLOBAL** — `q` now returns a reduced filter |
 | P6 | `FAM_DWM` — the app's one-family `defaultWidthMin` override (`RE_SLIDEIN` = 90) |
 | Q1 | `isFrmatFamily` is a QUALIFIER, not a blanket exclusion — 9 programme ids, not 120 |
+| Q3 | `famOkB` exempts the whole **`Alteration` category**, not just accessories — 12 cards ungreyed |
 
 ---
 
@@ -57,11 +58,12 @@ curl -s localhost:8000/design-book/dev-token >/dev/null && echo backend-up
 #  P5  ?q=TSP                                             → 31 families in EVERY category state
 ```
 
-### TASK 1 — re-sweep E3 to confirm §Q1
+### TASK 1 — re-sweep E3 **and E2** to confirm §Q1 + §Q3
 
-Q1's GREY 2 / ORDER 2 were verified against the client dump by hand, not by a sweep. The leg is
-otherwise measured (`out/report-E3d.json`, taken after P6). Expect **MEMBER 3 · SECT 1 · GREY_NOT_HIDE 1**
-and zero everywhere else.
+Q1's GREY 2 / ORDER 2 and Q3's GREY 12 were verified against the client dump by hand, not by a sweep.
+E3 is otherwise measured (`out/report-E3d.json`, taken after P6): expect **MEMBER 3 · SECT 1 ·
+GREY_NOT_HIDE 1** and zero elsewhere. Then run `plan-E2.json` the same way: expect **ROWSET 8 ·
+MEMBER 1 · SECT 1** and zero elsewhere (GREY 12 should be gone).
 
 ```js
 // tab B = our lite UI (http://localhost:8000/design-book/ui)
@@ -91,7 +93,7 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | — | §Q — FRMAT gate + the `dwm` face | ✅ 07-30 |
 | — | D4K-prd data ledger | ✅ closed 07-30 (see §3) |
 | **1** | re-sweep **E3** → confirm §Q1 (above) | ⬜ first thing |
-| **2** | **E2 GREY 12 + MEMBER 1 + SECT 1** — `Alteration › Side Panel Modifications` @BOSSA (`PNL_ACC` vs `PS_WAUKS_RECESS`) and `MPOSKE`/`MPEKE`/`MPOT` @LAIKA/ROCCA | ⬜ open — **best next fix.** Q1 was the same shape (a capability read too broadly) and took 40 min |
+| **2** | ~~E2 GREY 12~~ | ✅ **fixed — §Q3.** `famOkB`'s `Alteration` category escape. What is LEFT on E2 is `MEMBER 1 + SECT 1`: `Alteration › Side Panel Modifications` @BOSSA, client `PNL_ACC` vs our `PS_WAUKS_RECESS` (+ the `Sink, Fillers & Panels` header). Looks like a swap/split, not a gate |
 | **3** | **E3 MEMBER 3** — `Pilasters\|line73` (`XAG_Pa_a989a3`), `Side panels W\|progP_BOSSA` (`CURVED_*_M` vs the plain codes), `Wall Cladding\|line73` (`PPM3234`) | ⬜ open — three single-family cases, look like variant-family splits rather than gates |
 | **4** | the `Insert` row, 8 ROWSET diffs (`FP_16FRONT`, 92 units) | ⬜ open — **needs per-unit `u.ins`**: extractor + export + contract + backfill. The ONLY known grid gap that is not pure logic |
 | **5** | ⭐ **Design-Tasks sidebar — `functionalGroups` per MEMBERSHIP** (§O5, T1's 144 diffs) | ⬜ deferred by decision. Sidebar says 87, grid returns 91 (app 87/87). `leafId` is fine, `groupKey` is not. Extractor + export + contract + backfill, and the taxonomy has NEVER been swept |
@@ -112,6 +114,7 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | `f61942d8` | **the six §P rules** — `dvRowFn`, the single-pill `Finish` row, `opening`, `antoso`, global `q`, `FAM_DWM` |
 | `6a84bba3` | comment: the opening hide is §P3 |
 | `f59ea0af` | **§Q1** — `FRMAT_DEAD_PROGRAMS`: `isFrmatFamily` is a qualifier, not a blanket exclusion |
+| `b8169728` | **§Q3** — `famOkB` exempts the whole `Alteration` category |
 
 ### `d4k-items-extraction` — branch `main`
 

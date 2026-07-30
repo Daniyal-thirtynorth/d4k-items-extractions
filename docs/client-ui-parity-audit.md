@@ -1491,6 +1491,34 @@ bucket byte-identical to the pre-fix baseline (MEMBER 3 · GREY 2 · SECT 1 · O
 `out/report-E3d.json`). Q1 then took GREY and ORDER to 0 by hand-verification against the client dump;
 a confirming re-sweep of the leg is the first task in the next session.
 
+**Q3 — `famOkB` exempts the whole `Alteration` CATEGORY, not just accessories.** E2's `GREY 12`, every
+one of them category `Alteration` under an Avance or Contino programme (LAIKA 410 / ROCCA 701), never
+under BOSSA. The app:
+
+```js
+function famOkB(b, letter) { return !letter || b.cat === 'Alteration' || b._mem.includes(letter); }
+//  av: vertCatOk(b,u) && (isAccessory(b) || (available(u) &&
+//        (isProgAgnostic(b) || (famOkB(b, activeFamFor(b.cat)) && famOkU(u, activeFamFor(b.cat)))) &&
+//        lineCardOk(b)))                                                            // :2834
+```
+
+Our port had the `memberTiers` half and a comment asserting the category was covered by
+`isAccessory` — it is not. `MPOSKE`, `MPEKE`, `FRAUSR`, `FRAUSRH` (Accessory), `MPOT` (Cabinet
+Modifications), `MPEZS` (Drawers & Pull-outs) and `MPHVERLVE` (Glass unit) are all
+`isAccessory:false` / `isProgrammeAgnostic:false` with `memberTiers:'P'`, so the tier gate greyed them
+everywhere outside Primo. `famOkU` was never involved — all of them carry `unitFacts.agnostic`, which
+passes it. One clause: `f.category === 'Alteration' || !mem || mem.includes(fl)`.
+
+Verified: all four subs at both programmes, 12 cards, `cardAvailable` true. Regression: `Base › Sinks`
+@LAIKA still greys 8 cards (`ANRWA`, `ANBLS`, `MPRU`, `ANTSP63US` …) — alteration CODES whose card sits
+in a Base family, so the exemption correctly does not reach them; the app tests `b.cat`, the family's,
+which is what we read. **E2 GREY 12 → 0.**
+
+**E2 residue after §Q3 — ROWSET 8 (`FP_16FRONT`'s `Insert` row, needs per-unit `u.ins`) + MEMBER 1 /
+SECT 1** (`Alteration|Side Panel Modifications|progP_BOSSA`: client shows `PNL_ACC`, we show
+`PS_WAUKS_RECESS`, and the `Sink, Fillers & Panels` header goes with it — a swap/split case, not a
+gate, and untouched by Q3).
+
 **E3 residue after §Q — 3 MEMBER + 1 GREY_NOT_HIDE**, all unexplained and all single-family:
 `Pilasters|line73` (`XAG_Pa_a989a3` ours-only), `Side panels W|progP_BOSSA` (client has `XCRV_WF5R`,
 `XCRV_WFI5R`, `CURVED_IslandCurvedSidePanel`; we have the `_M` variants of two of them — looks like a
