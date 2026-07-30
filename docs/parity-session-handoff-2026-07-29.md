@@ -86,7 +86,7 @@ unmeasured change. Wall+Midway and Base do not need re-running (the fix only mov
 | — | commit + push both repos | ✅ done 07-29 |
 | **1** | re-run the **Tall** leg → confirm ORDER 6 → 0 | ✅ **done 07-30 — ORDER 0, measured** (`report-Tall10.json`; audit §O1) |
 | **2** | re-dump the single `Tall\|Panels…\|progP_BOSSA` client state, clear the MEMBER 1 / SECT 1 | 🔶 **re-dumped 07-30 — NOT a bad sample.** Reproduces exactly; one root cause (the v98 swap reaching a **Wall** family from a Tall view + the app's `_subs.size===1` bucketing gate). Fix is two changes, neither shipped — **audit §O2** |
-| **3** | **D4K-prd backfills** — data-only, safe before deploy. Now also `sectionRank` + `familyFacts.rawSub` | ⬜ open — see §3 |
+| **3** | **D4K-prd backfills** — data-only, safe before deploy. Now also `sectionRank` + `familyFacts.rawSub` | ✅ **done 07-30** — 18,366 modified; dev and prd now identical on every tracked field; `faceWidthMm` needed 0. See §3 |
 | **4** | Base MEMBER 1 — the `u.fam`-is-a-family-id dup (§5) | ✅ **fixed 07-30** — §5's patch was a NO-OP (`unitFacts.tier` is `null` there, never a family id). Real fix: `$unwind` now swaps `unitFacts` onto the membership, and the programme tier branch adds `$or[unitFacts.tier==t, unitFacts.agnostic]` (audit §O3). Base @BOSSA 25 types, dup gone |
 | **5** | Tall PILLS 2 — **not** a duplicate `217`; the `217+` chip never rendered on `F1780`/`F1782` (audit §O4) | ✅ **fixed 07-30 by DERIVING it** — `heightExtensionFor()` off the pool, `attachGridRows` stamps payload + flag per request, Appliance-housing exclusion moved to `familyFacts.rawSub` (the display name has two spellings). No backfill / re-ingest / contract change. PILLS 2 → 0 |
 | **9** | ⭐ **DESIGN-TASKS SIDEBAR — `functionalGroups` must be per-MEMBERSHIP** (audit §O5). Base › Water: our sidebar says 87, our GRID returns **91**; the app 87/87. 8 extra + 4 missing. `leafId` is fine, `groupKey` is not | ⬜ **open, deferred by decision 07-30** — same class as §O3 but **extractor + export + contract + backfill**, not pure backend. Needs its own plan + sweep leg (the task taxonomy has NEVER been swept) |
@@ -125,6 +125,19 @@ map, CLAUDE.md, the three client guides and `throwaway/frontend-v2.5-changes.md`
 ---
 
 ## 3. DATA LEDGER — what each store owes
+
+> ### ✅ CLOSED 2026-07-30 — prd is level with dev
+> `backfill-item-fields.js … --fields unitFacts,familyFacts,gridHidden,dupFamilies,sectionRank --apply`
+> against **D4K-prd**: 18,396 scanned, 18,366 differ, **matched 18,366 / modified 18,366**. The stale
+> `sectionRank` is overwritten. `backfill-face-width-mm.js` reported **0 updates needed** — prd already
+> had `faceWidthMm`, so that row below was wrong. `.env` restored to D4K-dev afterwards.
+>
+> Verified identical on both clusters: `total 18396 · unitFacts 18352 · familyFacts 18366 ·
+> familyFacts.rawSub 18366 · gridHidden 57 · dupFamilies 74 · sectionRank 18366 · faceWidthMm 17407 ·
+> faceHeightClass 7605 · variantCore 18396`.
+>
+> Data-only — the deployed prd code ignores these fields until `dev` ships. The "❌ owed" column below
+> is kept for the history of what was missing, not as a current TODO.
 
 Contract **2.5.3**. Collection `designbookitems`, 18,396 items everywhere.
 
