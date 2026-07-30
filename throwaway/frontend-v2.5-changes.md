@@ -1284,6 +1284,34 @@ toolbar inputs), **§2c-12** (membership: `gridHidden`, `dupFamilies`, the famil
 
 ---
 
+## ⭐ Parity status — where the server IS the app, and where it is not yet
+
+Read this before you file a bug against the API. The grid is verified by a differential harness that
+drives BOTH UIs over a plan of toolbar states, scrapes each grid and diffs it into ten buckets
+(membership, face, order code, grey, section list, card order, row set, pill labels, pill state,
+grey-not-hide). Numbers below are from `docs/client-ui-parity-audit.md` §O/§P.
+
+**Verified 0 diffs in all ten buckets** — Base · Tall · Wall · Midway over 720 toolbar states, plus the
+other 10 categories, plus the FRONTS/programme/line/width/depth/opening/suspended/search states
+(1,104 more). If our grid disagrees with the app in any of those, it is a regression and worth a bug.
+
+**NOT yet at parity — do not treat these as your bug:**
+
+| surface | status |
+|---|---|
+| **the Design-Tasks sidebar** (`leafId` / `groupKey` / `zone`) | ⚠️ **252 states, 144 diffs** (membership 68 · face 14 · sections 31 · state 24 · order 2 · grey-not-hide 5). The cause is known and is a DATA gap, not logic: `functionalGroups` is stored per ITEM, but a leaf claims a **family membership**, so a `dupFamilies` code is claimed by the wrong leaf. It needs an extractor + export + contract + backfill change and was deferred by decision. **The examples in this document that pass `leafId` are structurally right — the RESULT SET is not yet app-identical.** Build the sidebar, expect diffs there, don't chase them. |
+| `grey=true` ("Grey don't hide") | un-swept. The parameter works and is used by the drawer/`R6` path, but no state in any plan measures it, so the hide-vs-grey boundary is unverified. |
+| `page > 1` | un-swept. Pagination is a plain `$skip`/`$limit` after the app-order sort, so it should be safe; nobody has measured it. |
+| the detail **drawer** | un-swept as a whole. `parameters.*` is the drawer model and is v1-era scraped data — right for the drawer, wrong for a card (see the R3 warning). |
+| one `Insert` row (`FP_16FRONT`, 92 units) | 8 diffs. Needs per-unit `u.ins` in the contract — the only known gap in the grid that is not pure backend logic. |
+| a handful of single-family cases | `Alteration › Side Panel Modifications` under BOSSA (grey 12 / member 1 / section 1), `Panels & surround` order 2 + grey-not-hide 1. Diagnosed as neighbourhood, not mechanism; tracked in §P's residue list. |
+
+**Data, not code, is the other half.** Everything above is true against **D4K-dev**. D4K-prd is missing
+`unitFacts`, `familyFacts` (incl. `rawSub`), `gridHidden`, `dupFamilies`, `faceWidthMm` and carries a
+**stale** `sectionRank`, so a grid built against prd looks plausible and is subtly wrong. Point at dev.
+
+---
+
 ## Unverified / needs checking — do not invent behaviour here
 
 1. **The `Line` row's CLICK is not modelled.** The row itself is built and shipped (verified:
