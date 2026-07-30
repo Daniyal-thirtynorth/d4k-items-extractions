@@ -120,7 +120,7 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | `f935e3c` | the extended sweep plans (E1/E2/E3/F1/T1) |
 | `bed6da3` | audit §P + map + CRUD guide + `make-plan.js` + `dump-ours.js` + CLAUDE.md |
 | `33e34ec` · `e7124a3` | frontend guide: §P3 ref, then the **parity-status** section |
-| `<this commit>` | audit §Q, the contract + CRUD reference-port fix, the frontend guide's row 7, this handoff |
+| `d7ef321` | audit §Q, the contract + CRUD reference-port fix, the frontend guide's row 7, this handoff |
 
 ---
 
