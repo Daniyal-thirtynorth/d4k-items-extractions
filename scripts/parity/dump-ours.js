@@ -103,6 +103,12 @@
     return d;
   }
 
+  // ⚠️ `run()` RETURNS a dump, it does not record one. Only `sweep()` writes into RESULTS, and
+  // `post()` sends RESULTS. So the fire-and-forget starter the comment above prescribes must keep
+  // its OWN map and POST that — a hand-rolled `for (…) await __Q.run(…)` loop followed by
+  // `__Q.post(name)` writes `{"data":{}}` and the diff then reports every key as "missing on ours"
+  // after the full leg has already run. (Cost one 15-minute E3 leg on 2026-07-30.)
+  //   window.__MY={}; …  __MY[st.key] = await __Q.run(st.filters, st.opts||{});  … POST {data:__MY}
   async function sweep(list, opts) {
     for (const item of list) RESULTS[item.key] = await run(item.filters, opts);
     return Object.keys(RESULTS).length;

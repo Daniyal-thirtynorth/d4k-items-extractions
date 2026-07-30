@@ -433,6 +433,71 @@ Current facts:
      ⚠️ Harness left as-is: prefer the RAW pill label, fall back to `NUM()` only when both sides are
      purely numeric (changing it re-baselines every stored report).
 
+- **⭐ EXTENDED COVERAGE — the other 10 categories, the flags, the task view (2026-07-30, audit §P;
+  again NO contract change, schemaVersion stays 2.5.3 — pure backend logic).** §O's zero covered 4 of
+  14 categories, so the plans were extended: **1,104 states in five legs** (E1 accessories/alteration/
+  handles 264 · E2 the remaining 10 cats 298 · E3 Base/Tall/Wall/Mid at skipped states 200 · F1 the
+  toolbar flags 90 · T1 the Design-Tasks sidebar 252). ⚠️ **E1's 56 diffs were a dead backend again**
+  (restarted mid-leg — the §N trap); `E1re` on the same plan/data/code = CLEAN. E2's **ROWSET 385** was
+  TWO missing rows, both now ported: **(1) the app has two depth rows after the `dim` branch** —
+  `dvRowFn(b,u)` (`:5040`/`:2696`, v537) *then* `dRow` (`:5041`), and only `dRow` existed. It fires on
+  `dim==='width'` when the face has NO `u.d` (which is why it hid for 4 rounds: the two are mutually
+  exclusive, so the families that expose it drew no D row at all), lists the distinct `u.dv` at the
+  card's own `u.w` variant-scoped, ≥2, **every pill live and a real sibling** (`pickCardDv`→`blockDv`→
+  `selectedUnit` re-faces). 237 diffs; verified `CBSET90581 → [58* 68]`, `CBU29058B → [36 48 58* 68]`.
+  **(2) a `Finish` variant row renders with ONE pill** (`:3912` `b.vfin && variantOpts(b).length===1` →
+  one chip, `sel`+`disabled`, because the row exists for the colour SWATCH). 140 diffs, 20 Handles
+  families. `vfin` is a raw flag we deliberately still DON'T store: it is 1:1 with
+  `variantLabel==='Finish'` (53 label-holders, 45 flagged, the only unflagged one `PNL_CLAD` has >1
+  variant so it can't reach the branch) and label+single-variant = exactly the 20 in the diff. Re-swept
+  the 21 Handles states → **0 in all ten buckets**. Lite UI needed no logic change (its depth handler
+  already discriminates on `pill.sku !== it.sku`, `dead` pills already render unclickable) — only the
+  swatch on a Finish row + `swatchUrl`'s one special file name (**`405` → `F+405_VS.jpg`**); admin got
+  help text on `variantLabel`. **Residue (open):** E2 `Insert` row 8 (`FP_16FRONT` — needs per-unit
+  `u.ins`, the one non-logic item) · E2 GREY 12/MEMBER 1/SECT 1 (Alteration @BOSSA/LAIKA/ROCCA) · E3
+  ORDER 2 + GREY_NOT_HIDE 1 (E3 **FACE 6 FIXED, §P6: a HARDCODED per-family default width.**
+  `_selUnit`'s width tail ends `mw=defaultWidthMin(b); if(mw) preferWidth(…) else sorted[0]` and
+  `defaultWidthMin` reads `b.dwm` FIRST. `Panels & surround` matches no category arm → mw 0 → we faced
+  the narrowest member `RE305336`; the app sets `f.dwm=90` at `:7583`, in the SAME IIFE that floats
+  `RE905336` to `units[0]` — the unshift half we already had as `unitFacts.unitIndex` (why our face was
+  53 cm at all), `dwm` is the other half → `preferWidth([30,60,90,120],90)` → `RE905336`. `\bdwm\b`
+  occurs 3× in v781: 2 in the function, 1 in that IIFE, and it is init CODE not `<script id="DATA">`, so
+  it ships as the `FAM_DWM={RE_SLIDEIN:90}` constant like FORCE_SEC/WIDTH_BUCKETS/ANTOSO_ALLOWC — NO
+  data/backfill/contract change; `famFacts()` stamps `familyId` so it can be keyed, and the long-declared
+  `familyFacts.defaultWidthMin` (loose Record, never emitted) still wins if an export ever ships it.
+  `widthMm=600` still faces `RE605336` — an explicit W outranks the default. E3 re-sweep: FACE 6 → 0) · **F1 120 = our toolbar has filters the app hasn't**
+  (**ALL THREE FLAGS NOW FIXED — F1 is 0/10 on every one of its 60 flag states.** **`q` FIXED, §P5: the
+  SEARCH BOX IS GLOBAL** — `blockVisible` **returns** on `state.q`, so category/sub/leaf/W/H/D/FRONTS/
+  line/ANTOSO are all skipped and a search in Base›Sinks can return a Tall card (app: same 31 families
+  for `q=TSP` in all 12 sub states; ours AND-ed the category → 0). `buildItemFilter` now returns a
+  REDUCED filter when `q` is set: the match + only what sits ABOVE the app's return — the v319 programme
+  tier gate (hoisted to a local; the FRONTS-chip gate is below the line, dropped) and the byprog/ppool
+  hide (post-group, unchanged) — plus the API-only active/kind/sku. Match = **sku OR
+  `familyFacts.label`**, NOT unit `name` (a superset the app never searches), and `toe kick`/`toe-kick`
+  → `plinth`. 24 q states → 0/10, SECT/ORDER included (the §O2 multi-sub gate already emits no headers).
+  Backend not UI, deliberately: this is what the endpoint's `q` MEANS, so the React client gets it free ·
+  **`suspended` FIXED, §P4: "no app counterpart" was WRONG. SUSPENDED **IS**
+  ANTOSO (`setSusp(on){state.susp=!!on; state.antoso=!!on}` `:5059`; `toggleAntoso` calls it), and
+  `state.susp` alone is display-only — the plan drove `susp` without `antoso`, so the client dumped a
+  base grid and measured nothing (Base›Accessories&Surround: 20 cards → 5 with antoso). Three
+  behaviours: the `antosoOk` GATE (already ported, just had no param), the Base/Tall-only HIDE
+  (`blockVisible`'s clause + `ANTOSO_ALLOWC`/`ALLOWS` allow-list, Wall/Midway never hidden →
+  `antosoFamOk`), and the v671 RE-FACE onto the approved variant (`faceUnit`, before the Fronts twin
+  swap). ⚠️ TWO forms of the envelope: `capabilities.antosoApproved` is `antosoU(u,cat,'')` — EMPTY sub,
+  so a sink's depth ceiling is 58 — while the hide/re-face pass the REAL sub (62 for sinks); stored flag
+  = gate, live `antosoU` = the other two. New `antoso` bool param (the lite UI's Suspended switch sends
+  it; `suspended` stays an API-only engineering-flag filter, no control sends it). 12 susp states →
+  0/10 buckets** · **`opening` FIXED, §P3: it was `$and
+  availableTiers`, which hid 17/17 Base›Accessories&Surround families at P1. `state.open` is a TOOLBAR
+  input — `openOk` greys, `ppool` re-faces, `assemble` prefixes the CODE — and the only hide it owns is
+  `blockVisible`'s `if(b.byprog && !ppool(b).length)`, ported as `openFamilyOk` OUTSIDE the grey
+  early-return. Provable no-op without an opening (all 241 byProgramme families have an `opening:null`
+  unit), so no re-sweep; 7-state control clean. ⚠️ `capabilities.openP1` is the WIDER `openOk` form
+  (`!!u.P1 || sku.startsWith('P1')`) so it is true on the P1 ARTICLE too — the code prefix must guard on
+  `unitFacts.opening` or you get `P1P1GFV6080SM`. All 24 open states → 0/10 buckets**) · **T1 144 = §O5's
+  per-membership `functionalGroups`** (extractor+export+contract+backfill, deferred by decision).
+  Still un-swept: `grey=true`, `page>1`, the detail drawer.
+
 ## UI vocabulary — what each term means on screen (and where it maps)
 
 Read this before the schema. It maps what the user sees in the app to the data model in

@@ -2,7 +2,7 @@
 
 ## Before you start — what to point at
 
-Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `9dc6a834`
+Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `f61942d8`
 or later**, running against the **D4K-dev** database. Neither half is optional:
 
 * The code is only on `dev` — it has **not** been released to prd.
@@ -112,6 +112,30 @@ only one with a visible consequence for you is the first.
 
 Not yet on D4K-prd: the 2.5.x data backfills (`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`,
 `dupFamilies`, `faceWidthMm`, `sectionRank`). Point at D4K-dev while building against this document.
+
+---
+
+## ⭐ API changes since round 3 (2026-07-30, sweep rounds 4 + extended coverage — audit §O4 / §P)
+
+Backend `dev` `f61942d8`. **No contract change — `schemaVersion` stays 2.5.3**, nothing to re-ingest,
+no new field to type. The sweep was extended from 4 categories to all 14 plus the query surface the
+plans never touched (1,104 states); six server-side mechanisms came out of it. Three change what you
+see on screen, three only change what you must not do.
+
+| # | Change | What it means for the frontend |
+|---|---|---|
+| **1** | **A second DEPTH row exists** (`dvRowFn`, app v537): on a `dim:'width'` family whose face has no depth alterations, the card draws a **`kind:"depth"` row where every pill is a real sibling sku and none is the card's own**. | **Render it, and do not assume a depth row is a state row.** The discriminator is unchanged (`pill.sku !== card.sku` ⇒ fetch), so R3's handler already covers it — but a client that hard-codes "depth = local state, never a request" breaks here. See the R3 note and checklist 16a/16b. |
+| **2** | **A `Finish` variant row can have exactly ONE pill**, shipped `selected` **and** `dead`. The row exists for the colour **swatch**, not for a choice. | **Do not drop single-pill rows, and do not drop `dead` pills.** 20 Handles families render a bare card otherwise. Draw the swatch from `pill.value` (`Finish/F+<code>.jpg`, with `405` → `F+405_VS.jpg`) — Step 4h. Checklist 16c. |
+| **3** | **`opening` is no longer a membership filter.** It was `$and availableTiers`, which hid 17 of 17 Base › Accessories & Surround families at P1. It is a toolbar INPUT: it greys pills, re-faces cards and prefixes the displayed order code. | If you add the FRONTS **P1/C1** toggle, keep sending `opening=P1`, but **expect the same families back** — only faces, greying and codes move. A card count that drops when the toggle goes on is a bug, not a filter. |
+| **4** | **New `antoso` boolean param** — the toolbar's **Suspended** toggle. `state.susp` and `state.antoso` are the same switch in the app; `suspended` (the engineering flag) is a different, API-only filter and is NOT it. | If you build the toe-kick / Suspended control, send **`antoso=true`**, never `suspended=true`. It hides Base/Tall families outside the ANTOSO envelope and re-faces the rest onto their approved variant, so **the card count legitimately drops** (Base › Accessories & Surround: 20 → 5). |
+| **5** | **The search box is GLOBAL, and the server now enforces it.** `blockVisible` returns on `state.q`, so category, sub-category, Design-Tasks leaf, W/H/D, FRONTS, line and ANTOSO are all skipped. | **Send `q` and stop sending everything else** — or send it anyway, the server ignores it. Results can be in a **different category** from the sidebar selection, there are usually **no section headers** (R10a), and you must **not** re-filter the response client-side. `toe kick` → `plinth` is handled server-side. |
+| **6** | **The face's default width is per-CATEGORY, with a one-family override** (`FAM_DWM`, app `f.dwm`). Panels & surround › Open Shelf Units opens at `RE905336` (W90), not at its 30 cm member. | Nothing to do — **reinforces R10**. A face is not the narrowest member, not the W you filtered by, and not necessarily a Primo article. Checklist 15a. |
+
+Also on `dev` since round 3, and worth knowing because it removes a stale field you may have typed:
+**`heightExtension` is now ADVISORY** (§O4c). The API derives it per request on every read path and
+**deletes** it when the `217+` chip does not render, so the invariant is *present ⟺ the chip renders*.
+`heightExtensionOk` is `true` whenever the payload is there — keep the `!== false` test you shipped,
+but never read the stored field's absence as "this family has no extension".
 
 ---
 
@@ -238,6 +262,52 @@ a depth pill with `pill.sku === card.sku` is state, no fetch).
 > A Ty click can therefore rely on `refs[pill.sku].variantCore` in practice. **Keep the `sku:[…]`
 > fallback anyway** as a cheap last resort — it is one line and it covers a card swapped in from a
 > page whose refs you never merged.
+
+> **New 2026-07-30 (§P) — a `kind:"depth"` row can be ALL-SIBLING, with no self pill at all.**
+> The backend was missing the app's *second* post-branch depth row, `dvRowFn` (v781 `:5040` / `:2696`,
+> app v537). A **width**-dimensioned family whose units carry real per-depth skus (Combo drawer sets,
+> inner pullouts, L-Box / Q-Box, mats, shelves) draws a D row of the depths that exist **at the card's
+> own width** — variant-scoped, every pill **LIVE** (`off:false`, never `dead`), and every pill a
+> **real sibling sku**: clicking it re-faces the card (`pickCardDv` → `blockDv` → `selectedUnit`).
+> It only fires when the face has no depth alterations, so it never coexists with the self/state
+> depth row v2.2 described — a card has one shape or the other, never both.
+>
+> ```
+> ADD_CBSET_COMBODRAWE1 · CBSET90581 → D [ 58* CBSET90581 · 68 CBSET90681 ]
+> CBU_DOUBLE            · CBU29058B  → D [ 36 · 48 · 58* · 68 ]   (all four are real skus)
+> ```
+>
+> **Nothing to change in the click handler.** The §3 dispatch already routes a depth pill on
+> `pill.sku === card.sku` ⇒ no request, else `items?sku=<pill.sku>` ungrouped + toolbar — which is
+> exactly right for these. What changes is what you may **assume**: do not expect a depth row to
+> contain the card's own sku, and do not read meaning into `off` on these families (it is always
+> false). This closed 237 ROWSET diffs across `Accessories & interior`.
+
+> **New 2026-07-30 (§P) — a `Finish` variant row can be a SINGLE pill, and it is `selected` + `dead`.**
+> Same round, second mechanism. A `kind:"variant"` row normally needs two or more options to render;
+> the app makes one exception (`:3912`, `b.vfin && variantOpts(b).length===1`): a handle family with
+> **one** finish still draws its row, one pill, selected and **disabled** — because the point of the
+> row is the colour **swatch**, not the choice. 20 families, all under `Handles` (Bow Handles,
+> Griprails, Bar Handles), e.g. `HDL_MBH_405 · ZGR405405 → Finish [ 405* ]`.
+>
+> ```json
+> { "label": "Finish", "kind": "variant",
+>   "pills": [ { "label": "405", "value": "405", "sku": "ZGR405405",
+>                "selected": true, "off": false, "dead": true } ] }
+> ```
+>
+> Two client rules:
+> 1. **Render every row the server sends** — never suppress a row because it has one pill, and never
+>    suppress a pill because it is `dead`. `dead` means unclickable, not invisible (R3's dispatch
+>    already skips the handler when `dead || selected`, so nothing else changes).
+> 2. **A `Finish` row means swatches.** On any `kind:"variant"` row whose `label` is `Finish`, draw a
+>    colour square in front of each pill from the finish host, keyed on `pill.value`:
+>    `https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+<value>.jpg` — **with one special
+>    case, `405` → `F+405_VS.jpg`** (stainless steel). `onerror` → hide the image, keep the code text.
+>    The pill text stays the bare finish code; the app puts the human name in the tooltip
+>    (`405 · Stainless steel`).
+>
+> This closed 140 ROWSET diffs, all in `Handles`.
 
 ### R4 · A swap query must carry the TOOLBAR, or the rows come back uncollapsed (§2c-11 "Toolbar inputs")
 
@@ -451,6 +521,9 @@ Three things the client must not re-do:
   surprise people, both correct: a card's face width can differ from the W filter (the app faces a
   W90 filter with a 50 cm cabinet when the tier pool says so — §2c-9), and the face is often a
   Contino/`C…` or Avance/`A…` article. **Do not re-pick or re-sort cards.**
+  With **no** W filter the face is not the narrowest member either — the default width is
+  per-category, and one family overrides it (`Panels & surround › Open Shelf Units` opens at
+  `RE905336`, W90, never `RE305336`; added 2026-07-30, §P6).
 * **ORDER inside a section.** The app re-sorts by raw catalog `pri` alone before bucketing, so a
   **greyed card keeps its catalog position instead of sinking**: `Cooktop Units @D68` =
   `BZ2 BSZ2 BZ BSZ BZIZ` with BZ/BSZ greyed *in the middle* (§M6). Availability survives only as the
@@ -522,7 +595,7 @@ Every candidate also carries `groupBy=family&limit=1&grey=true&refs=true` **and 
 | **height** | `items?familyId=…&heightCode=<value>&widthMm=<card's>` | drop `widthMm` |
 | **width** | `items?familyId=…&widthMm=<value×10>&heightCode=<card's>` | drop `heightCode` (**keep the width**) |
 | **variant** | `items?familyId=…&variantCore=<refs[pill.sku].variantCore>&widthMm&heightCode` | drop `widthMm`, then `heightCode`, then fall back to `items?sku=<pill.sku>` |
-| **depth** | `pill.sku === card.sku` ⇒ **no request** (state pill, v2.2 §2c-2); else `items?sku=<pill.sku>` **+ the toolbar, ungrouped** | — |
+| **depth** | `pill.sku === card.sku` ⇒ **no request** (state pill, v2.2 §2c-2); else `items?sku=<pill.sku>` **+ the toolbar, ungrouped** — this is also the whole handler for the all-sibling D row (R3 note, §P) | — |
 | **line** | not modelled — see "unverified" | — |
 
 Real answers (all verified):
@@ -546,7 +619,7 @@ items?sku=CTSP6080&full=true&limit=1&lineState=73    → CTSP6080 · H [73]     
 
 Without the toolbar the swapped-in card's rows come back UNCOLLAPSED and visibly change shape, the
 same failure R4 describes for family-scoped swaps. The one thing an ungrouped row still lacks is
-`cardAvailable` / `heightExtensionOk`.
+**`cardAvailable`** — `heightExtensionOk` IS there (R2's 2026-07-30 correction).
 
 ## 4. The top "H 73 80 86" bar
 
@@ -669,6 +742,40 @@ don't type them.
 
 *(`opening` — the app's P1/C1 toolbar toggle — is also a `gridRows` input, but this UI has no such
 control, so it stays out. Same call v2.3 made for handle/front/doorline.)*
+
+> **If you ever add the OPENING toggle (2026-07-30, §P2) — it is NOT a filter.** Send
+> `opening=P1|C1` and the server does three things: pools the family by opening (the card **re-faces**
+> onto the P1/C1 article), greys through the `openOk` gate, and rebuilds the rows. It removes a card
+> only when a `byProgramme` family has nothing at that opening. Two client-side duties:
+> 1. **Prefix the displayed order code** — the app's `assemble()` does `c = "P1" + c`. Guard it on
+>    **`unitFacts.opening`**: a unit that already IS the opening article takes no prefix, and
+>    `capabilities.openP1` will not tell you that (it is the wider `openOk` form,
+>    `!!u.P1 || sku.startsWith("P1")`, so it is true on the article itself → `P1P1GFV6080SM`).
+>    Prefix only when `!item.unitFacts?.opening && item.capabilities?.openP1` (resp. `openC1`).
+>    Order matters: a `doorLine === "Y"` code REPLACES the whole code and never takes the prefix.
+> 2. **Carry it on every swap query**, like the rest of the toolbar (R4) — otherwise the swapped-in
+>    card comes back faced and coded for no-opening.
+
+> **If you add the TOE-KICK "Suspended" toggle (2026-07-30, §P4) — send `antoso=true`, not
+> `suspended=true`.** In the app they are one control (`setSusp` sets `state.antoso`), and ANTOSO is
+> what does the work: it greys unapproved cards, **re-faces** a Base/Tall card onto its approved
+> variant, and hides Base/Tall families with nothing inside the book envelope (Wall/Midway are never
+> hidden by it). All server-side — nothing to compute on the client, and no code-prefix duty this
+> time. Carry it on swap queries like the rest of the toolbar (R4). `suspended` is a different,
+> API-only filter on the `engineering` flag; wiring the toggle to it returns the wrong cards.
+
+> **The SEARCH box is GLOBAL (2026-07-30, §P5) — and the server now enforces that.** Sending `q`
+> makes every other grid filter irrelevant: category, sub-category, section, `leafId`/`groupKey`/`zone`,
+> W/H/D, `tier`, `lineState`, `antoso`. That is the app (`blockVisible` **returns** on `state.q`), so a
+> search typed while Base › Sinks is selected legitimately returns Tall cards. You do **not** have to
+> strip those params — keep sending them and the backend ignores them while `q` is set, so clearing the
+> box restores the scoped grid with no extra bookkeeping. Three consequences for the UI:
+> 1. **Do not assert a card's `category`/`subcategory` matches the sidebar selection** (same rule as
+>    R9b/§O2). Keep the sidebar highlighted if you like, but render whatever comes back.
+> 2. **Expect no section headers.** A cross-category result set is multi-sub, and the app emits no
+>    headers and no `pri` re-sort there — a flat, headerless `by-section` response is correct.
+> 3. It matches **sku or the family label**, not the unit's `name`, and rewrites `toe kick`/`toe-kick`
+>    to `plinth`. Don't add client-side filtering on top; you would only re-scope what the app doesn't.
 
 ## Step 2 — `api/params.ts`
 
@@ -986,6 +1093,38 @@ fights the server's face.
 +        )}
 ```
 
+### 4h. The swatch on a `Finish` row (§P)
+
+`GridRowChips` needs no change for the single-pill Finish row — `if (!row.pills.length) return null`
+already passes it, and `dead` only turns off the click. What is missing is the **colour square**, which
+is the entire reason the app draws that row. Put it in `GridRowChips` (it applies to multi-finish rows
+too — 33 more families):
+
+```tsx
+// app `finUrl()`: the file name is the finish code, digits only, and 405 is the one suffixed file.
+const FINISH_HOST = "https://leicht-store.s3.us-west-1.amazonaws.com/Finish/F+";
+const finishSwatch = (row: GridRow, p: GridPill): string | null => {
+  if (row.kind !== "variant" || !/finish/i.test(row.label)) return null;
+  const c = String(p.value ?? "").replace(/\D/g, "");
+  return c ? `${FINISH_HOST}${c === "405" ? "405_VS" : c}.jpg` : null;
+};
+```
+
+Render it inside the chip, before the label, and hide it on error (some finish codes have no image):
+
+```tsx
+{swatch && (
+  <img src={swatch} alt="" aria-hidden loading="lazy"
+       className="mr-1 inline-block h-3 w-3 shrink-0 rounded-sm align-[-1px] ring-1 ring-black/10"
+       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+)}
+```
+
+The chip text stays the bare code (`405`); the human name belongs in the `title`
+(`405 · Stainless steel`) — the app keeps that name map client-side and it is not in the API.
+Guard on `p.value`, not `p.label`: a `variantLabels` entry can rewrite the label to a material name
+while the value stays the finish code.
+
 **The FRONTS tier badges (`:780-800`) are NOT part of `gridRows`** — they come from
 `cfg.programme` + `availableTiers`, and their per-pill greying still runs through `gateOpt`
 (`:394-406`) and the refs map. Leave that block alone; it is the one surviving consumer of v2.3 R5's
@@ -1118,14 +1257,18 @@ depends on it.
 | 9 | Pick BOSSA (244) + D68, Base/Sinks | `TSP6080` renders **greyed** — from `cardAvailable:false`, not from a local computation (R5) |
 | 10 | Any alteration/accessory card under a programme that excludes it | **not** greyed (`isAccessory`, folded into `cardAvailable`) |
 | 11 | Tall → Closet, card `H60197GAIZ` | a `Line` row (`86 · J`, `E`) renders above H; H `[197* 210 224]`; the `217+` chip present |
-| 12 | Same card under a programme with no available 217 unit | the `217+` chip **disappears** (`heightExtensionOk:false`) while the H row is unchanged (R8) |
+| 12 | Same card under a programme with no available 217 unit | the `217+` chip **disappears** — since §O4c the whole `heightExtension` payload is absent, not served with `ok:false` — while the H row is unchanged (R8) |
 | 13 | Base → Cooktops & Downdrafts → Accessories & Modifications | `ANTSPSAUS` appears there **and** under Base → Sinks; both render; no React key warning (R9) |
 | 14 | Cooktop Units @ D68 | greyed `BZ`/`BSZ` sit **in the middle** of `BZ2 BSZ2 BZ BSZ BZIZ`, not pushed to the end (R10/§M6) |
 | 14a | Tall → Panels, Fillers & Surrounds, no programme → then LAIKA (410) → then ROCCA (701) | 29 cards → **28** → **28**. Under LAIKA `F115` is gone and `F209` is present; under ROCCA the reverse. A count drop here is CORRECT (R9b), not a lost card |
 | 14b | Wall → Corner under LAIKA vs ROCCA | 6 cards either way; `F93` under LAIKA, `F106` under ROCCA — never both (R9b) |
 | 14c | Tall → Panels, Fillers & Surrounds, line 80 | sections read `Tall End Panels · Tall Fillers · Tall Blenders · Tall Corner Blenders · Tall Angle Blenders · Wall Blenders · Rear Panels in Front Finish · Carcase Side Extension · Tall Visible Carcase Side · Support Panel with Plinth` — in that order, from the server (§N2). Do not sort them |
 | 15 | A W=90 filter on a family whose face is 50 cm | the card is correct — do not "fix" the face (R10/§2c-9) |
+| 15a | Panels & surround → Open Shelf Units, **no** W filter | the one card faces **`RE905336`** with `W:[30 60 90* 120]` and `Height:[53 cm* 27 cm 40 cm]`. `RE305336` here means you are re-picking the face client-side (R10/§P6) |
 | 16 | Click D `63` on `TSP6080` | **no network request**; the displayed order code changes via `parameters.depth[].code`; the image does not change (v2.2 §2c-2 / Step 4d) |
+| 16a | Accessories & interior → Combo, card `CBSET90581` | a **D** row renders `[58* 68]` — every pill live, both real skus. Its click DOES fetch (`items?sku=CBSET90681`, ungrouped + toolbar). Missing D row here = the `dvRowFn` port isn't deployed (§P) |
+| 16b | Same page, `CBU_DOUBLE` / `CBU29058B` | D `[36 48 58* 68]` — four sibling skus, none greyed |
+| 16c | Handles → Bow Handles, card `ZGR405405` | a **Finish** row renders with ONE pill, `405`, selected + unclickable, with a colour swatch (`F+405_VS.jpg`). A bare card here = you are hiding single-pill rows or `dead` pills (§P) |
 | 17 | Open the detail drawer, click a W pill | still navigates by `pill.sku` (drawer exempt) |
 | 18 | Screenshot diff vs the app | compare **card face sku + row shape**, ignore the toolbar chip highlight (stale-highlight trap, R6) |
 | 19 | Open `TSP6080` in the authoring dialog, save with no edits, re-fetch it | its W/H pills still carry `showUnderLine` (`H73 → [0,73,86]`, `H80 → [0,80]`). If they came back without it, the form is dropping the field on save (Step 7a) |
@@ -1155,7 +1298,7 @@ toolbar inputs), **§2c-12** (membership: `gridHidden`, `dupFamilies`, the famil
    returns `CTSP6080` itself with all three rows, correctly selected. The FRONTS tier badges, the
    finish chips and a depth *sibling* pill therefore keep full rows. `groupBy=family` still re-faces,
    so a sku navigation must still be **ungrouped** — and an ungrouped row still has no
-   `cardAvailable` / `heightExtensionOk` (see R2).
+   `cardAvailable` (it DOES have `heightExtensionOk`; see R2's 2026-07-30 correction).
 3. ~~`refs` coverage of `gridRows` targets is partial.~~ **RESOLVED server-side 2026-07-29** — the
    ref collector walks `gridRows[].pills[].sku` too. Measured on SNK1: 12/15 targets in `refs`, the
    3 absent being the card's own sku. Keep the `sku:[…]` Ty fallback as a cheap last resort.

@@ -130,7 +130,7 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | API parameter | Dir | UI parameter (element) | UI location | Sample call |
 |---|---|---|---|---|
 | `page`, `limit` | IN | Grid pager | Grid footer | `…/items?page=2&limit=50` |
-| `q` | IN | "Search by Code" box (partial match on sku / name) | Landing / top search | `…/items?q=TK6080` |
+| `q` | IN | **"Search by Code" box — GLOBAL (§P5).** Matches a **sku** or the **family label** (`familyFacts.label`), and when it is present every other grid filter is IGNORED: category, sub-category, section, the Design-Tasks leaf, W/H/D, the FRONTS chip, line, ANTOSO. That is the app: `blockVisible` **returns** on `state.q` before all of them, so a search made inside Base › Sinks can return a Tall card. The two rules above that return still apply — the v319 programme tier gate and the `byprog`/empty-`ppool` hide — as do the API-only `active`/`kind`/`sku` narrowings. `toe kick` / `toe-kick` is rewritten to `plinth` (USA↔UK), like the app. ⚠️ It does NOT search the unit's own `name`; the app never did, and matching it returned families the app hides | Landing / top search | `…/items?q=TK6080` |
 | `sku[]` | IN | **Exact SKU** filter (repeat or comma-separate; upper-cased; `$in`) | precise lookup / deep link / My-List batch | `…/items?sku=TK6080BZ2,TK7080BZ2` |
 | `category` / `subcategory` / `section` | IN | Type-taxonomy sidebar picks | Left sidebar | `…/items?category=Base&subcategory=Sinks` |
 | `familyId` | IN | Sibling-code group (client groups cards by family) | (internal) | `…/items?familyId=F333` |
@@ -140,7 +140,7 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `programs[]` | IN | **PROGRAMME picker multi-select** (ids/names; union of tiers). **Also drives the PROGRAMME half of pill greying** server-side (§2c) | "Programme for … units" modal — highlighted chips | `…/items?programs=AVENIDA&programs=BONDI-A` |
 | `priceProgram` | IN | **PROGRAMME dropdown** — the programme to **PRICE** cards in (`pts`). NOT a grid filter | Top toolbar — Programme SELECT DROPDOWN | `…/items?priceProgram=BOSSA` |
 | `tier` | IN | **FRONTS pill** (P·P1·A·C·C1) | Top toolbar — "FRONTS" pill group | `…/items?tier=P1` |
-| `opening` | IN | **OPENING toggle** (P1 \| C1). AND-composes with `tier`/`family` | Top toolbar — "OPENING" pill | `…/items?opening=P1` |
+| `opening` | IN | **OPENING toggle** (P1 \| C1) — a **toolbar input, NOT a card filter** (§P2). It re-faces the card (`ppool` pools by opening), greys via the `openOk` gate, and prefixes the displayed order code (`P1`/`C1`); it removes a card only when a `byProgramme` family has NOTHING at that opening (the app's `blockVisible` line 1). It used to match `availableTiers`, which hid 17 of 17 families on Base › Accessories & Surround at P1 | Top toolbar — "OPENING" pill | `…/items?opening=P1` |
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row | `…/items?widthMm=600` |
 | `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`). ⚠️ **Do NOT use as the grid's toolbar-H filter** — the app's "H All 73 80 86" bar is its LINE selector: pre-select + row collapse, never a hard filter (§2c-7). Valid as a precise API filter, but for a family SWAP prefer **`heightCode`** — `heightClass` is null outside carcase-line families (§2c-10) | Grid filter bar — H row | `…/items?familyId=SNK5&heightClass=73` |
 | `heightCode` | IN | **CARD H pill** — the app's per-unit H-row key `u.hc` (73/80/86 on carcase-line families, the unit's **cm height** everywhere else: 29, 42, 204…). The ONE key that resolves an H pick on any family; **exact, not null-inclusive** (§2c-10) | (internal — grid H pill navigation) | `…/items?familyId=F674&heightCode=42&widthMm=600&groupBy=family` |
@@ -148,7 +148,8 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68). Ports the app's `depthOk`: matches when the class is in the unit's **`capabilities.depthClasses`** (however the catalog expresses depth — see §2c-2), or the unit has no carcass depth at all (empty/absent → rides every class). **58 and 63 are pass-through** (the app short-circuits them). Carcass = class×10−20. | Grid filter bar — D row | `…/items?depthClass=68` |
 | `depthMm` / `heightMm` | IN | Exact carcass depth / height (mm) — precise, **not** the grid class rows | (precise filter) | `…/items?depthMm=560` |
 | `line` / `tallHeight` | IN | **TALL** two-row height selector (carcase LINE 73/80/86 + dynamic HEIGHT cm). TALL only. Options from `GET tall-heights` (§6b) | Tall toolbar — top + second pill rows | `…/items?zone=Tall&line=80&tallHeight=204` |
-| `suspended` | IN | **TOE-KICK "Suspended" toggle** — the `engineering` `suspended` flag (ok=true) | Top toolbar — TOE-KICK · Suspended | `…/items?suspended=true` |
+| `antoso` | IN | **TOE-KICK "Suspended" toggle** — in the app this IS ANTOSO mode (`setSusp(on)` sets `state.antoso`; `toggleAntoso` calls the same function), so it is a **toolbar input, not a card filter** (§P4): it greys through the `antosoOk` gate (`capabilities.antosoApproved`) and **re-faces** a Base/Tall card onto its approved variant. Its ONE hide is `blockVisible`'s clause — a **Base/Tall** family with no unit inside the book envelope (and Appliance housing), minus the app's allow-list (`FS8034`/`CTW58058K45`/`ATW58058K45S`, or a section/label containing "Stainless Steel Sinks"/"Visible Carcase Sides"). **Wall/Midway are never hidden by it.** | Top toolbar — TOE-KICK · Suspended | `…/items?antoso=true` |
+| `suspended` | IN | The `engineering` `suspended` flag (ok=true) as a precise filter. ⚠️ **NOT the toolbar toggle** — that is `antoso` above. No UI control sends this; it is an API-only convenience | (API only) | `…/items?suspended=true` |
 | `active` | IN | Active-only flag | Admin | `…/items?active=true` |
 | `groupBy=family` | IN | **Grid card grouping** — one card per family ("N types"); pages by family | Grid — the card grid itself | `…/items?leafId=b_cool%230&groupBy=family` |
 | `full` | IN | Include the detail-only blobs (§3) that `LIST_OMIT` strips | (dev / when the card needs a detail field) | `…/items?q=T6073VE&full=true` |
@@ -157,13 +158,15 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 
 > **`availableTiers` precedence** (one filter, most-specific wins): `tier` (FRONTS pill) → `programs[]`
 > (picker) → `family` (tab). The tier gate narrows ONLY design-zone cabinet families (Base/Tall/Wall);
-> Alteration / Accessories / Handles / Lighting / … always ride through (null-inclusive). `opening`
-> (P1/C1) is an INDEPENDENT `$and` toggle. Dimension filters are null-inclusive (a dimensionless
-> accessory/part is never hidden by a W/H/D pill). All compose freely.
+> Alteration / Accessories / Handles / Lighting / … always ride through (null-inclusive). Dimension
+> filters are null-inclusive (a dimensionless accessory/part is never hidden by a W/H/D pill). All
+> compose freely. ⚠️ **`opening` is NOT in this precedence chain** — it never touches
+> `availableTiers`; see its row above and §P2.
 >
-> **The tier/depth/opening/suspended grid FILTERS (which cards return) are separate from the pill-GATE
-> model of §2c (which pills inside a card grey).** The grid filters are computed server-side in
-> `buildItemFilter`; the pill gates are computed client-side from each pill target's `capabilities`.
+> **The tier/depth grid FILTERS (which cards return) are separate from the pill-GATE model of §2c
+> (which pills inside a card grey).** The grid filters are computed server-side in `buildItemFilter`;
+> the pill gates are computed client-side from each pill target's `capabilities`. `opening` belongs to
+> neither list: it is a toolbar input the server feeds to the face pick / greying / row build.
 >
 > **Card = family, not unit** (unchanged from v1). Default (no `groupBy`) returns one row per UNIT (sku);
 > the grid shows one card per FAMILY. Use `groupBy=family` so pagination lines up with the card grid.
@@ -855,6 +858,15 @@ Two facts about the app's W pill (`unitsInWidth` + `_selUnit`), now ported into 
    `XSPL_ARWF` @W90 faces `ARWF9066` (['A']) because its default face `ARWF6066` is `['P','A']` —
    the pool is **the flagged `faceForTiers` unit's own `availableTiers`**, not a hardcoded 'P'
    (C-only / A-only families keep their width preference).
+3. **With no W pill the face opens at the family's DEFAULT width, which is per-CATEGORY and can be
+   overridden per family** (`defaultWidthMin` -> `preferWidth`; audit §P6). Base/Tall/Midway/Appliance
+   housing prefer 60, `Accessories & interior`/`Interior+` 90 (and 90 has its own precedence order
+   `[90,80,60,100,120]`), `Drawers & Pull-outs` 80, everything else 0 = **the narrowest unit**. The app
+   also carries a one-family override in its init CODE (`f.dwm=90` on `RE_SLIDEIN`, which is why
+   `Panels & surround › Open Shelf Units` faces `RE905336` and not its W30 member); ported as the
+   `FAM_DWM` constant, with `familyFacts.defaultWidthMin` winning over it if an export ever ships the
+   field. Client rule: same as (2) — never assert a card's face width equals the W you sent, and
+   never assert it is the smallest member either.
 
 Backend implementation (`familyGroupStages`): `widthMm` is LIFTED out of `$match` into ranks —
 `_famFaceTiers` ($setWindowFields per family = the `faceForTiers`-flagged unit's tiers, computed
@@ -940,11 +952,19 @@ is no grid-filter param for handle / front / doorline — they are pure toolbar 
 | **handleOk** | handle-free selector → `handle` (std/V) | — (client only) | `handleFree` |
 | **frontOk** | single-front / Full-E → `front` (0/1) | — (client only) | `onePieceFront` |
 | **openOk** | OPENING toggle → `open` (''/P1/C1) | `opening` (grid) | `openP1` · `openC1` · `singleHandle` (passes when true) |
-| **antosoOk** | ANTOSO suspended-install → `antoso` | `suspended`* (grid, via `engineering`) | `antosoApproved` |
+| **antosoOk** | ANTOSO suspended-install → `antoso` | `antoso` (grid) | `antosoApproved` |
 | **doorOk** | door-line → `doorline` (''/J/Y) | — (client only) | `doorLineJ` · `doorLineY` |
 
-`alwaysAvailable` (`u._c`) short-circuits ALL gates to live. *The grid `suspended` filter is the
-`engineering` `suspended` flag, a related-but-separate signal from the `capabilities.antosoApproved` pill gate.
+`alwaysAvailable` (`u._c`) short-circuits ALL gates to live. The toolbar's Suspended toggle sends
+**`antoso`** and gates on `capabilities.antosoApproved` — the same flag as this pill gate. The separate
+`engineering` `suspended` flag still exists as the API-only `suspended` filter; it is a related but
+different signal, and no control sends it (§P4).
+
+> ⚠️ **Two forms of the same envelope.** `capabilities.antosoApproved` is the app's `antosoU(u, cat, '')`
+> — frozen with an EMPTY sub, which is how `available()`'s gate calls it, so a sink's depth allowance is
+> 58 cm there. The family hide and the re-face pass the REAL sub, where a sink gets 62 cm. Both are the
+> app's own behaviour; the backend keeps the stored flag for the gate and recomputes the sub-aware form
+> for the other two (`antosoU`/`antosoFamOk` in `design-book.grid-rows.ts`).
 
 #### Per-gate GREY condition (render reference)
 

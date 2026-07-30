@@ -1217,3 +1217,230 @@ formatting, but it silently merges any two labels differing only in punctuation.
 first case found. Prefer the raw label and fall back to `NUM()` only when both sides are purely
 numeric — left alone for now because changing it re-baselines every stored report, and the one concrete
 case it hid is now fixed in the data path.
+
+---
+
+### §P. EXTENDED COVERAGE — the 10 un-swept categories, the flags, the task view (2026-07-30)
+
+§O closed the sweep on 4 of 14 categories. This leg extends it to the rest and to the query surface the
+plans never touched. **1,104 states in five legs**, `grey=false`, client grid = ground truth:
+
+| leg | what it covers | states | first result | after the §P fixes |
+|---|---|---|---|---|
+| **E1** | Accessories & interior · Alteration · Handles (part) | 264 | MEMBER 37 · SECT 19 | **CLEAN** (`E1re` — the diffs were a dead backend, see below) |
+| **E2** | the remaining 10 categories, 8 toolbar states each | 298 | ROWSET 385 · MEMBER 1 · GREY 12 · SECT 1 | ROWSET **8** · MEMBER 1 · GREY 12 · SECT 1 |
+| **E3** | Base/Tall/Wall/Midway at states the O-plans skipped | 200 | MEMBER 3 · FACE 6 · GREY 2 · SECT 1 · ORDER 2 · GREY_NOT_HIDE 1 | unchanged (open items) |
+| **F1** | the toolbar FLAGS — `opening`, `suspended`, `q` | 90 | MEMBER 66 · SECT 54 | **0 · 0** — all 60 flag states (24 `opening` P3 · 12 `susp` P4 · 24 `q` P5) diff **0 in all ten buckets**. The 30 `grey_on*` / `tallH*` states are un-swept, not clean |
+| **T1** | the Design-Tasks sidebar (`leafId`/`groupKey`/`zone`) | 252 | MEMBER 68 · FACE 14 · SECT 31 · ORDER 2 · STATE 24 · GREY_NOT_HIDE 5 | unchanged (deferred, §O5) |
+
+⚠️ **E1's 56 diffs were not real.** Same trap as §N: the backend had been restarted mid-leg. `E1re` on
+the same plan, same data, same code → 0 in all ten buckets. **Re-run before diagnosing.**
+
+⚠️ **Third harness trap, found in P6: `__Q.run()` does not RECORD.** It returns a dump; only
+`__Q.sweep()` writes into `RESULTS`, and `__Q.post()` sends `RESULTS`. The fire-and-forget starter the
+BUSY comment prescribes (needed because a CDP timeout does not cancel the page promise) therefore has to
+keep its **own** map and POST that — a hand-rolled `for (…) await __Q.run(…)` loop plus `__Q.post(name)`
+uploads `{"data":{}}`, and `diff.js` then reports *"missing on ours: 200"* with every bucket 0, i.e. a
+clean-looking report over nothing, after the whole leg has already run. Now called out in `dump-ours.js`
+next to `sweep`.
+
+**Both ROWSET mechanisms were ONE missing row each, and both are pure backend logic** — no data change,
+no backfill, no re-ingest, `schemaVersion` stays **2.5.3**.
+
+**P1 — the app has TWO depth rows after the `dim` branch; we had ported one.** 237 of the 385
+(`[D,Runner,W]` 134 · `[D,Ty,W]` 72 · `[D,W]` 31, all `Accessories & interior`). The card template calls
+`dvRowFn(b,u)` (`:5040`, defined `:2696`, app v537) and *then* `dRow` (`:5041`); only `dRow` existed in
+`design-book.grid-rows.ts`. `dvRowFn` fires on `b.dim==='width'` when the face has **no `u.d`** — which
+is exactly why the gap survived four sweep rounds: the two rows are mutually exclusive, so every family
+that could expose it renders no depth row at all. It lists the distinct `u.dv` at the card's own `u.w`
+(variant-scoped when `b.vlbl`), needs ≥2, and every pill is **live and a real sibling** — `pickCardDv`
+sets `blockDv[b.id]` and `selectedUnit` (`:2683`) re-faces the card. Ported verbatim before the `dRow`
+block. Verified against the client dump on `Accessories & interior/Combo`:
+`ADD_CBSET_COMBODRAWE1 · CBSET90581 → [58* 68]`, `CBU_DOUBLE · CBU29058B → [36 48 58* 68]`,
+`CBU_SINGLE → [48 58* 68]`, `ADD_CBRM_COMBONONSL → [36 48 58* 68]`. ROWSET 385 → 148, every other
+bucket unmoved (FACE/PILLS/STATE/ORDER all 0).
+
+**P2 — a `Finish` row renders with ONE pill.** The other 140 (`Handles`: Bow 112 · Griprails 21 · Bar 7 =
+20 families × 7 states), client `[Finish]` vs ours `[]`. `typeRow` has a branch before the ordinary one
+(`:3912`): `if(b.vfin && variantOpts(b).length===1)` → the row still draws, one chip, `sel` +
+`disabled`, because the row exists for the colour **swatch** (`finUrl(vr)`), not for the choice. Our port
+started at `opts.length > 1`.
+**`vfin` is a raw family flag we do not store — and deliberately still don't.** It is 1:1 with
+`variantLabel === 'Finish'`: 53 families in the export carry that label, 45 are flagged in the app's
+`DATA` (all `cat:'Handles'`), the one unflagged label-holder (`PNL_CLAD`, Standard/Bossa) has >1 variant
+and so can never reach the branch, and post-init `hmerge` only ever ADDS the flag. Measured over the
+whole export: families with `variantLabel:'Finish'` **and** a single `variantCode` = exactly **20**, and
+exactly the 20 in the diff. So the branch gates on the label; a comment names the assumption and the
+re-check. Verified: `HDL_MBH_405 → Finish [405*]`, `HDL_Bar_handle_670`, `HDL_MBH_520` all correct,
+`PNL_CLAD` unchanged (still `H [190* 230 270]` + `Finish [Standard* Bossa]`). Re-sweeping the 21 Handles
+states: **0 diffs in all ten buckets**.
+
+**P3 — `opening` was a card FILTER; in the app it is a toolbar INPUT.** F1's 18 MEMBER + 18 SECT diffs,
+every `open_P1` / `open_C1` state. `buildItemFilter` pushed `{ availableTiers: query.opening }`, so
+Base › Accessories & Surround at P1 returned **0 of the app's 17 families** and Base › Appliance housing
+12 of 23. `state.open` appears in exactly three places in the app, none of them a membership test:
+`openOk(u)` — one of the eight `available(u)` gates, so it **greys** and re-sorts; `ppool(b)` — the P1/C1
+pool, so it **re-faces**; and `assemble(u)` — `if(open==='P1' && u.P1) c='P1'+c`, so it **prefixes the
+displayed order code**. All three were already ported (`design-book.grid-rows.ts:131/150/170`,
+`gridToolbar`'s `open: query.opening`) — the hard filter was pure surplus. Deleted.
+
+There IS one hide, and it is not the tier: `blockVisible`'s first line,
+`if (b.byprog) { if (!ppool(b).length) return false; }` — a programme-driven family with nothing at this
+opening/programme. Ported as `openFamilyOk` (`annotateFamilyAvailability`) + one clause in
+`dropHiddenFamilies`, deliberately **outside** the `query.grey` early return because in the app this
+test sits above every `state.lineGrey` check. Provably a no-op without an opening: all 241
+`byProgramme` families have at least one `opening:null` unit, so the `hasOpeningArticles` branch is
+non-empty at `op:''`, and the other branch's `openOkOnly` returns `true` when the toolbar has no
+opening — which is why removing the filter needed no re-sweep of the 720 clean states. A 7-state
+control on no-opening keys confirmed it: 0 in all ten buckets.
+
+The lite UI then had to add the code prefix, and the first attempt was wrong in an instructive way:
+`P1P1GFV6080SM`. **`capabilities.openP1` is not `u.P1`** — it is the whole `openOk` form
+(`!!u.P1 || u.c.startsWith('P1')`), so it is *also* true on the P1 article itself, which is exactly the
+unit `ppool` faces when the toggle is on. The guard is `unitFacts.opening`: a unit that IS an opening
+variant never takes a prefix. Result over all 24 open states: **0 in all ten buckets** (was MEMBER 18 ·
+SECT 18, and CODE 43 mid-fix).
+
+**P4 — "`suspended` has no app counterpart" was wrong: SUSPENDED *IS* ANTOSO.** F1's 12 `susp` states
+(9 MEMBER + 9 SECT diffs). The app has one function for both:
+
+```js
+window.setSusp = function (on) { state.susp = !!on; state.antoso = !!on; … }   // :5059
+window.toggleAntoso = function () { setSusp(!state.susp); };                   // :8145
+```
+
+`state.susp` on its own is **display only** (the plinth read-out, "Suspended · 15 cm off the floor").
+Everything that matters hangs off `state.antoso`. **The harness plan was measuring nothing:** it drove
+`{susp: true}` and never set `antoso`, so the client dumped a plain base grid, which made our
+`engineering.suspended` filter look like an invented control with no ground truth. It is an invented
+control — but the app's real one exists, and we had not ported it. Driving `{susp:true, antoso:true}` on
+Base › Accessories & Surround takes the app from **20 cards to 5**.
+
+Three behaviours, none of them a tier/flag match:
+* **the gate** — `antosoOk(u)` is one of the eight `available(u)` gates → greys. Already ported
+  (`capabilities.antosoApproved`), and it was already correct; it just had no query param to switch it on.
+* **the hide** — `blockVisible`'s ANTOSO clause, and it is **Base/Tall only**: a family passes on the
+  allow-list (`ANTOSO_ALLOWC` = 3 codes, `ANTOSO_ALLOWS` = "Stainless Steel Sinks" / "Visible Carcase
+  Sides" matched against `sec + label`), else Appliance housing is dropped outright and everything else
+  must have one unit inside the envelope. Wall/Midway are never hidden. Ported as `antosoFamOk`.
+* **the re-face** — v671/v672: a Base/Tall card SHOWS its approved variant rather than rendering dead.
+  Ported into `faceUnit`, before the Fronts twin swap, in `visibleBlocks` order.
+
+⚠️ **The envelope has two forms and the app uses both.** `capabilities.antosoApproved` is
+`antosoU(u, cat, '')` — the gate's call, with an EMPTY sub, so a sink's depth ceiling is 58 cm. The hide
+and the re-face pass the REAL sub, where `/sink/i` raises it to 62 cm. So the stored flag stays the gate
+and `antosoU` was ported live for the other two. Reproduced, not unified.
+
+Shipped as a new **`antoso`** boolean query param (`suspended` survives as an API-only engineering-flag
+filter, documented as not-the-toolbar-toggle); the lite UI's Suspended switch now sends it, and the
+Gates checkbox ORs into the same client-side gate. Inert without it — every new code path is behind
+`tb.antoso`. **All 12 susp states: 0 in all ten buckets**, first run; 7-state no-flag control clean.
+
+**P5 — the search box is GLOBAL.** F1's last 24 states (24 MEMBER + 13 SECT). `blockVisible`:
+
+```js
+if (state.q) { const q = state.q.toLowerCase().replace(/toe[\s-]?kick/g, 'plinth');
+               return (b.label||'').toLowerCase().includes(q)
+                   || b.units.some(u => u.c.toLowerCase().includes(q)); }
+```
+
+It **returns**. Every test below it — category, sub-category, the Design-Tasks leaf, W/H/D, the FRONTS
+chip, line, ANTOSO — is skipped, so a search typed inside Base › Sinks can return a Tall card. The app's
+`q=TSP` set is the same 31 families in all 12 sub-category states; ours AND-ed `q` with the category and
+returned **0** in every one of them.
+
+Fixed in `buildItemFilter`: when `q` is present it returns a REDUCED filter — the match plus only what
+sits above the app's return, i.e. the v319 programme tier gate (hoisted into a local so it can be
+re-applied; the FRONTS-chip gate is *below* the line and is dropped) and the `byprog`/empty-`ppool` hide,
+which is post-group (`openFamilyOk`) and needed no change. The API-only `active` / `kind` / `sku`
+narrowings are kept — they have no counterpart in the app's grid model and are nobody's search scope.
+Two details taken from the app: `toe kick` / `toe-kick` -> `plinth` (USA/UK), and the match is **sku or
+`familyFacts.label`**, NOT the unit's own `name`. `name` is a superset the app never searches; matching
+it surfaces families the app hides. The face still comes from the pool, so a family matched through one
+member fronts its normal unit.
+
+Put it in the backend rather than the lite UI on purpose: unlike the H-bar (2c-7, a genuine display
+pre-select), this is not a client-side interpretation of a filter — it is what the endpoint's `q` MEANS.
+Fixing it once serves the React client too. **All 24 q states: 0 in all ten buckets**, SECT and ORDER
+included — `bucketSections`'s multi-sub gate (O2) already handles a result set that spans categories,
+with no headers and no `pri` re-sort, which is exactly what the app renders.
+
+Lite UI: `renderGridRows` already routed both row kinds correctly (the depth handler discriminates on
+`pill.sku !== it.sku`; a `dead` pill is rendered unclickable), so the only edits were cosmetic parity —
+draw the swatch on a `Finish` variant row from `pill.value`, teach `swatchUrl` the app's one special file
+name (**`405` → `F+405_VS.jpg`**), and stop titling a `dead`+`selected` chip "Not available". Admin UI:
+help text on `variantLabel` (the "Finish" exception) — no new control, nothing new to author.
+
+**P6 — one family's default width is hardcoded, and it lives in the app's CODE.** E3's FACE 6: all six
+states of `Panels & surround › Open Shelf Units` (`base`, `line73`, `progP_BOSSA`, `progA_LAIKA`,
+`progC_ROCCA`, `tierC` — state-INdependent, which is the tell). App faces `RE905336` (W90), we faced
+`RE305336` (W30).
+
+`_selUnit`'s `dim==='width'` tail:
+
+```js
+const mw=(b.dim!=='depth')?defaultWidthMin(b):0;
+if(mw){ const pw=preferWidth(sorted.map(x=>x.w),mw); … }        // prefer a "real" size
+else   u = sorted.find(x=>available(x)) || sorted[0];            // else the narrowest unit
+```
+
+and `defaultWidthMin(b)` consults a per-family override FIRST: `if(b.dwm!=null) return b.dwm`.
+`Panels & surround` matches none of the category arms (`Base`/`Tall`/`Midway`/`Appliance housing` → 60,
+`Accessories & interior`/`Interior+` → 90, `Drawers & Pull-outs` → 80), so without the override `mw` is 0
+and the face is the narrowest member — W30. The override is set once, at `:7583`:
+
+```js
+// default RE905336 -> float to units[0]
+(function(){ var f=F('RE_SLIDEIN'); if(!f) return; f.dwm=90;
+  var i=(f.units||[]).findIndex(function(u){return u.c==='RE905336';});
+  if(i>0){ var u=f.units.splice(i,1)[0]; f.units.unshift(u); } })();
+```
+
+Two halves and both matter. The **unshift** makes `variantOpts(b)[0]` the `"53 cm"` height, so the face is
+a 53 cm unit — we already had that, because the export captures the family's own unit order as
+`unitFacts.unitIndex` (it is why we faced `RE305336` and not `RE302736`). **`dwm=90`** is the other half:
+it sends `preferWidth([30,60,90,120], 90)` down its `[90,80,60,100,120]` branch → W90 → `RE905336`.
+
+`\bdwm\b` occurs exactly three times in v781 — twice inside `defaultWidthMin`, once in that IIFE. So it is
+a **one-family constant assigned in the app's init CODE, not in `<script id="DATA">`**: the same class as
+`FORCE_SEC`, `SECTION_ORDER`, `WIDTH_BUCKETS`, `ANTOSO_ALLOWC`, `HEXT_MM`, every one of which we port as
+code. Ported the same way — `FAM_DWM = { RE_SLIDEIN: 90 }` in `design-book.grid-rows.ts`, read by
+`defaultWidthMin()` after the (long-declared, never-populated) `familyFacts.defaultWidthMin` override and
+before the category arms. `famFacts()` now stamps `familyId` onto the facts object so the constant can be
+keyed; that is the only new input and nothing else reads it.
+
+**No data change, no backfill, no contract change, and deliberately so.** `familyFacts` is a loose
+`Record<string, any>`, so if a future export ever emits `dwm` as `defaultWidthMin` it wins over the
+constant with no code change — the override path was already there, it just had nothing to read.
+
+Verified: W-All → `RE905336` in all six states, and `widthMm=600` still faces `RE605336` (an explicit W
+filter outranks the default — that state never diffed). Full E3 re-sweep: **FACE 6 → 0**.
+
+**Residue after §P — 8 + 12 + 1 + 1 on E2, plus the E3/F1/T1 legs.** Ranked, with the mechanism where it
+is known:
+
+1. **`Insert` row, 8 diffs** (`FP_16FRONT` only — `ZIGSUV90`/`ZIGSUV60`). The app's `b.insAx` row from
+   `insList(b)`/`selIns(b)`. Needs per-unit `u.ins` in the contract (extractor + export + backfill), so
+   it is the one item in this leg that is NOT pure logic. One family, 92 units.
+2. **GREY 12 + MEMBER 1 + SECT 1 on E2** — `Alteration|Side Panel Modifications|progP_BOSSA`
+   (`PNL_ACC` vs `PS_WAUKS_RECESS`, and the section header) and `Alteration|Accessory` cards we grey and
+   the app doesn't (`MPOSKE`, `MPEKE`, `MPOT` under LAIKA/ROCCA). Same neighbourhood as §N(3)'s
+   `avanceExempt`; not yet reduced to a mechanism.
+3. ~~**E3's FACE 6**~~ (`RE_SLIDEIN`) — **fixed, P6 above.** What is left on that leg is **ORDER 2**
+   (a consequence of the GREY diffs — availability is the tie-break) and **GREY_NOT_HIDE 1**.
+4. ~~**F1**~~ — **all three flags fixed** (P3 `opening` −36 · P4 ANTOSO −18 · P5 `q` −37). Every one
+   turned out to be a PORT, not the product decision they looked like: each control exists in the app,
+   and in all three cases we had modelled it as a membership filter when it is a toolbar input — or,
+   for `q`, a filter that REPLACES the others. What is left in this leg is the un-swept part of the
+   plan: the 15 `grey_on*` states (need the patched dumper) and the `tallH*` states.
+5. **T1, 144 diffs — the Design-Tasks sidebar**, i.e. §O5's per-membership `functionalGroups` gap. Still
+   an extractor + export + contract + backfill change. Deferred by decision, not by ignorance.
+
+Also un-swept, and now a known gap: **`GET tall-heights` ignores `antoso`.** The app's `availHeights()`
+polls `blockVisible(b)`, which includes the ANTOSO clause, so with Suspended on the tall LINE/HEIGHT
+options should narrow; ours computes them from `buildItemFilter`, which (correctly) no longer holds
+anything for `antoso`. No plan state combines `susp` with `tallH*`, so this has no measurement behind it
+— don't fix it blind, add the combined state first.
+
+Un-swept still: `grey=true` (the 15 `grey_on` states need re-running with the patched dumper),
+`page>1`, and the detail drawer.

@@ -133,7 +133,7 @@ A pill is **DEAD** when its `sku` is null (no target), **GREY** when `available(
 | `onePieceFront` | bool | it's not one-piece **and** you turned Full-E on (`false` greys under Full-E). |
 | `openP1` / `openC1` | bool | it doesn't support that opening — unless `singleHandle` (below). |
 | `singleHandle` | bool | never (for opening): `true` = the opening gate **always passes** (a single front always accepts P1/C1). |
-| `antosoApproved` | bool | it's not approved for suspended install **and** you turned Suspended on. |
+| `antosoApproved` | bool | it's not approved for suspended install **and** you turned Suspended on. ⚠️ You are not editing the whole Suspended story: the flag is the GREY gate, but the toggle also **hides** off-envelope Base/Tall families and **re-faces** a card onto an approved sibling, both recomputed server-side from the unit's own W/H/D (audit §P4). Setting this `true` on a unit outside the envelope greys nothing but does not make its family reappear. |
 | `doorLineJ` / `doorLineY` | bool | you filtered to that door line and the unit isn't in it. |
 
 In the lite UI's capabilities box: **green dot = true, red dot = false**, and a live `LIVE / GREY` line shows
@@ -477,9 +477,9 @@ gridRows: [
 | Field | App | What it decides |
 |---|---|---|
 | `widthCode` | `u.w` | the number this unit contributes to the **W row**, in cm. ⚠️ *not* `widthMm/10` on panels |
-| `depthCode` | `u.dv` | its value on the **D row**, in cm. `0` means 58 (the app reads `dv \|\| 58`) |
+| `depthCode` | `u.dv` | its value on the **D row**, in cm. `0` means 58 (the app reads `dv \|\| 58`). ⚠️ On a `dim:'width'` family this field **creates** a D row of its own (app `dvRowFn`, v537): two or more units sharing a `widthCode` but differing in `depthCode` ⇒ one **live** pill each, every pill a **real sibling** the card re-faces onto. One such unit alone draws no row |
 | `variantCode` | `u.vr` | its **Ty** key; pools are variant-scoped whenever `familyFacts.variantLabel` is set |
-| `depthAlterations` | `u.d` | the depth classes this *same* cabinet can be built at → the D **state** row (§4a model A) |
+| `depthAlterations` | `u.d` | the depth classes this *same* cabinet can be built at → the D **state** row (§4a model A). ⚠️ Setting it **suppresses** the sibling D row `depthCode` would build above — the app's two D rows are mutually exclusive and this one wins |
 | `tier` / `opening` / `agnostic` / `siblingTiers` | `u.fam` / `u.op` / `u._ag` / `u.sib` | pool scoping + the FRONTS twin rule. `agnostic:true` = belongs to every line, never filtered out |
 | `heightCodeNull` | — | set it **only** when `u.hc` is literally `null` rather than absent. The app compares heights with strict `===`, so a null unit never matches an absent one — which is why ANBL's card draws no W and no D row. 4 units in v781; if you are unsure, leave it out |
 
@@ -493,7 +493,7 @@ their own copy, §below).
 | Field | App | What it decides |
 |---|---|---|
 | `dim` | `b.dim` | **which numeric row exists**: `height` (H+W+D), `hd` (H+D), `width`, `depth`, `none`. A `depth` family labels its row **D** even though the values come from `widthCode`. `none` = variant chips only, and those chips **never grey** |
-| `variantLabel` | `b.vlbl` | the Ty/Mode/Config row's on-screen label — and the switch that makes pools variant-scoped |
+| `variantLabel` | `b.vlbl` | the Ty/Mode/Config row's on-screen label — and the switch that makes pools variant-scoped. The row needs **two** variants to render, with ONE exception: the literal `"Finish"` draws its row even for a single variant (one pill, selected, unclickable — the app's `b.vfin` handle case; the pill is there for the colour swatch, `Finish/F+<code>.jpg`, and `405` → `F+405_VS.jpg`). See audit §P |
 | `variantLabels` / `variantOrder` / `variantFormat` | `_vrLbl` / `b.cho` / `b.vfmt` | the chip TEXT, the curated chip order, and "labels are lengths in cm" |
 | `numericLabel` | `b.slbl` | overrides the numeric row's label ("Depth", "Length") |
 | `byProgramme` | `b.byprog` | pool is scoped by the ZONE programme instead of by the unit's own line |
@@ -503,6 +503,7 @@ their own copy, §below).
 | `isProgrammeAgnostic` | `isProgAgnostic(b)` | cat/sub sits outside the programme system |
 | `depth63` | `d63Cfg(b)` | `null` ⟹ the family **cannot** be ordered at 63, so a D=63 toolbar drops it |
 | `label` / `labelGroup` / `isSpecial` | `b.label` / `rk(label)` | card title + the sort that keeps a variant next to its product |
+| `defaultWidthMin` | `b.dwm` | **which width the card OPENS at** when no W pill is set (a `dim:'width'` family). Leave it `null` — the value is then derived from the family's cat/sub (Base/Tall/Midway/Appliance housing 60 · `Accessories & interior`/`Interior+` 90 · `Drawers & Pull-outs` 80 · **anything else 0 = the narrowest member**). Set it only to reproduce an app-side override; v781 has exactly one (`RE_SLIDEIN` = 90), which ships as a backend constant, so nothing in the export carries this field today. Audit §P6 |
 
 ### `gridHidden` — never render this code as a card
 

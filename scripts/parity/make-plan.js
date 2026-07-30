@@ -71,7 +71,12 @@ const FLAG_STATES = [
   ['grey_on_line73', { lineGrey: true, line: '73' }, { heightClass: '73', line: '73' }, { grey: true }],
   ['open_P1', { open: 'P1' }, { opening: 'P1' }],
   ['open_C1', { open: 'C1' }, { opening: 'C1' }],
-  ['susp', { susp: true }, { suspended: true }],
+  // ⚠️ SUSPENDED **IS** ANTOSO. The app's toggle is one function — `setSusp(on){ state.susp=!!on;
+  // state.antoso=!!on; }` (v781 `:5059`, and `toggleAntoso` just calls it) — and `state.susp` alone
+  // is DISPLAY ONLY (the plinth text). Driving `susp` without `antoso` dumped a plain base grid,
+  // which made our `suspended` engineering filter look like an invented control. It isn't: the app's
+  // counterpart is `state.antoso` (membership + the `antosoOk` gate + a re-face). See audit §P4.
+  ['susp', { susp: true, antoso: true }, { antoso: true }],
   ['tallH204', { height: 204 }, { tallHeight: 204 }],
   ['tallH217_line80', { height: 217, line: '80' }, { tallHeight: 217, heightClass: '80', line: '80' }],
   ['q_TSP', { q: 'TSP' }, { q: 'TSP' }],
