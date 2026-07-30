@@ -11,7 +11,15 @@ Everything below is **committed and pushed** — backend `dev`, extraction `main
 
 ## 0. WHERE WE LANDED — the numbers
 
-Final sweep, **720 toolbar states**, `grey=false` (the app's DEFAULT mode — see the trap in §4):
+> ### ⭐ SUPERSEDED 2026-07-30 — all four residuals are FIXED and the sweep is ZERO
+> Every bucket, all three legs, 720 states, `grey=false`: **0**. Reports
+> `out/report-{Base,Tall,WallMidway}-O3.json`. The four items below were all traced to a mechanism and
+> fixed — see **audit §O1–§O4** — and three of the four diagnoses in this file turned out to be wrong,
+> so read the ⚠️ notes in each row rather than the original text. Scope caveat: the plans cover 4 of 14
+> categories and never touch `leafId`/`groupKey`/`zone` (the Design-Tasks sidebar), `q`, `grey=true`,
+> `page>1` or the detail drawer.
+
+Final sweep of 07-29, **720 toolbar states**, `grey=false` (the app's DEFAULT mode — see the trap in §4):
 
 | bucket | Base (192) | Tall (272) | Wall+Midway (256) |
 |---|---|---|---|
@@ -36,9 +44,9 @@ For scale, the §L baseline on Base alone was ROWSET 402 · STATE 305 · FACE 27
 | # | where | what | why not fixed |
 |---|---|---|---|
 | 1 | Base MEMBER 1 | `ADD_KSSET_TILTPROTEC__CKDUP` shows for us under BOSSA, not in the app | That dup family's single unit carries `u.fam = "ADD_KSSET_TILTPROTEC__CKDUP"` — the FAMILY ID, not a tier letter — so the app's `tierHas(b,'P')` is false and the v319 gate hides it. Our gate reads `capabilities.nativeTier`, a real `'P'`. The fix is to test `unitFacts.tier` in the tier gate, which is the gate that already took three iterations to stabilise (`availableTiers` → `nativeTier`, which itself fixed 6 Appliance-housing families). One card in one state — not worth the regression risk at the end of a session. **See §5 for the exact change if you want it.** |
-| 2 | Tall MEMBER 1 + SECT 1 | `Tall\|Panels, Fillers & Surrounds\|progP_BOSSA` | **Bad client sample, not a discrepancy.** That one dump has NO section headers at all, a scrambled card order, and a family (`F224`) that appears in no other state — a partial/mid-render DOM capture. Re-dump just that state to clear it. |
-| 3 | Tall PILLS 2 | `F1780`/`F1782` @LAIKA/ROCCA — the app's H row reads `154 190 204 217 217`, **two** 217 pills; we emit one | Matching it means deliberately emitting a duplicate pill. Looks like an app bug. **Ask the client before porting it.** |
-| 4 | Tall ORDER 6 | the `maxh` sort tiebreak | **FIXED after the sweep** (`9dc6a834`) and verified by hand on all six cases — but not re-measured by a sweep. First thing tomorrow: re-run the Tall leg and confirm 6 → 0. |
+| 2 | Tall MEMBER 1 + SECT 1 | `Tall\|Panels, Fillers & Surrounds\|progP_BOSSA` | ⚠️ **DISPROVED 07-30 — audit §O2.** Re-dumped and it reproduces byte-for-byte: 31 cards, zero headers, flat order. `F224` is real — it is `cat:'Wall'`, reached from a Tall view by the v98 swap off F102's all-C units, and its unmerged `subDisp:'Fillers'` makes `_subs.size===2`, which makes the app skip bucketing entirely. |
+| 3 | Tall PILLS 2 | `F1780`/`F1782` @LAIKA/ROCCA | ⚠️ **DISPROVED 07-30 — audit §O4.** The fifth pill is **`217+`** (the `heightExtension` chip), not a second `217`; `diff.js`'s `NUM()` strips the `+`. Nothing for the client to decide. Real defect is ours: those two families are the ONLY two in the catalog with a `hc 217` Tall unit and no `heightExtension` at all, so we render no chip. |
+| 4 | Tall ORDER 6 | the `maxh` sort tiebreak | ✅ **CONFIRMED 07-30 by a full 272-state Tall sweep — ORDER 0** (`out/report-Tall10.json`, audit §O1). |
 
 Plus the two carried over from earlier: the tall `Line` row CLICK (renders, not wired — do only if the
 client asks) and the §G family-level membership gap (SNK8-type, deferred since round 1).
@@ -76,11 +84,12 @@ unmeasured change. Wall+Midway and Base do not need re-running (the fix only mov
 | — | full `grey=false` sweep, all three legs | ✅ done 07-29 |
 | — | docs: audit §M+§N · map §2c-12 · contract 2.5.3 · CLAUDE.md · frontend guide | ✅ done 07-29 |
 | — | commit + push both repos | ✅ done 07-29 |
-| **1** | re-run the **Tall** leg → confirm ORDER 6 → 0 | ⬜ **next** |
-| **2** | re-dump the single `Tall\|Panels…\|progP_BOSSA` client state, clear the MEMBER 1 / SECT 1 | ⬜ open |
+| **1** | re-run the **Tall** leg → confirm ORDER 6 → 0 | ✅ **done 07-30 — ORDER 0, measured** (`report-Tall10.json`; audit §O1) |
+| **2** | re-dump the single `Tall\|Panels…\|progP_BOSSA` client state, clear the MEMBER 1 / SECT 1 | 🔶 **re-dumped 07-30 — NOT a bad sample.** Reproduces exactly; one root cause (the v98 swap reaching a **Wall** family from a Tall view + the app's `_subs.size===1` bucketing gate). Fix is two changes, neither shipped — **audit §O2** |
 | **3** | **D4K-prd backfills** — data-only, safe before deploy. Now also `sectionRank` + `familyFacts.rawSub` | ⬜ open — see §3 |
-| **4** | Base MEMBER 1 — the `u.fam`-is-a-family-id dup (§5) | ⬜ open, low value |
-| **5** | Tall PILLS 2 — duplicate `217`; **ask the client first** | ⬜ blocked on client |
+| **4** | Base MEMBER 1 — the `u.fam`-is-a-family-id dup (§5) | ✅ **fixed 07-30** — §5's patch was a NO-OP (`unitFacts.tier` is `null` there, never a family id). Real fix: `$unwind` now swaps `unitFacts` onto the membership, and the programme tier branch adds `$or[unitFacts.tier==t, unitFacts.agnostic]` (audit §O3). Base @BOSSA 25 types, dup gone |
+| **5** | Tall PILLS 2 — **not** a duplicate `217`; the `217+` chip never rendered on `F1780`/`F1782` (audit §O4) | ✅ **fixed 07-30 by DERIVING it** — `heightExtensionFor()` off the pool, `attachGridRows` stamps payload + flag per request, Appliance-housing exclusion moved to `familyFacts.rawSub` (the display name has two spellings). No backfill / re-ingest / contract change. PILLS 2 → 0 |
+| **9** | ⭐ **DESIGN-TASKS SIDEBAR — `functionalGroups` must be per-MEMBERSHIP** (audit §O5). Base › Water: our sidebar says 87, our GRID returns **91**; the app 87/87. 8 extra + 4 missing. `leafId` is fine, `groupKey` is not | ⬜ **open, deferred by decision 07-30** — same class as §O3 but **extractor + export + contract + backfill**, not pure backend. Needs its own plan + sweep leg (the task taxonomy has NEVER been swept) |
 | **6** | tall `Line` row click | ⬜ open — only if the client asks |
 | **7** | perf pass — member scans + the membership `$unwind` + the pool cache | ⬜ open |
 | **8** | frontend work — `throwaway/frontend-v2.5-changes.md` is current, incl. the authoring-dialog gaps | ⬜ handed off |
@@ -174,6 +183,13 @@ and whatever writes `variantCore`. Everything else is in the export.
 ---
 
 ## 5. The Base MEMBER 1 fix, if you want it
+
+> ⚠️ **The patch below is a NO-OP — see audit §O3 (2026-07-30).** `unitFacts.tier` is `null` for this
+> dup, not the family id (extractor + facts backfill both guard with `/^[PCA]$/`), and the proposed
+> clause explicitly passes `tier ∈ [null,'']`. The app-faithful gate is `tierHas` itself —
+> `tier === letter || agnostic` (this dup: `tier:null`, `agnostic:false`) — and the `$unwind` warning
+> at the bottom is confirmed: `familyGroupStages` does NOT swap `unitFacts` to the dup's record.
+> Keep reading for the diagnosis, not the diff.
 
 `ADD_KSSET_TILTPROTEC__CKDUP` under BOSSA. Root cause confirmed in the app:
 

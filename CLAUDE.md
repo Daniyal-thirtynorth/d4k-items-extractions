@@ -346,7 +346,80 @@ Current facts:
   the FAMILY ID, not a tier letter, so the app's `tierHas` hides it while our `capabilities.nativeTier`
   is a real `'P'`; fixing means re-touching the thrice-iterated tier gate for one card in one state)
   and Tall PILLS 2 (the app renders `217` TWICE on F1780/F1782 — looks like an app bug, confirm before
-  matching it).
+  matching it). **⚠️ ALL THREE of those residue diagnoses were WRONG — see round 4.**
+
+- **⭐⭐ SWEEP ROUND 4 — ALL FOUR RESIDUALS FIXED, SWEEP IS ZERO (2026-07-30, audit §O; NO contract
+  change, schemaVersion stays 2.5.3 — pure backend logic, nothing to backfill). 720 states ×
+  10 buckets × 3 legs = 0 diffs** (`out/report-{Base,Tall,WallMidway}-O3.json`). ⚠️ Scope: the plans
+  cover **4 of 14 categories** and never exercise `leafId`/`groupKey`/`zone` (the Design-Tasks sidebar —
+  the app's PRIMARY nav, and the only path through `bucketSections`'s new `isTaskView` branch), `q`,
+  **`grey=true`**, `opening`, `tallHeight`, `suspended`, `page>1`, or the detail drawer. **Three of
+  round 3's four residual diagnoses were WRONG** — each had been written off as "an app quirk / a bad
+  sample / not worth the risk" without being reduced to a mechanism, and each was ours. Still open
+  after this: the DETAIL endpoint serves the frozen `heightExtension`, so F1780/F1782 drawers lack the
+  `217+` row the grid now shows (grid/drawer now disagree), and `heightExtension` remains a per-unit
+  contract field although it is derived now — drop it or mark it advisory.
+  Re-ran the Tall leg to measure round 3's un-swept `maxh` fix: **ORDER 6 → 0** confirmed over all 272
+  states, every other bucket 0 except the two "residue" items — and re-checking those disproved both:
+  1. **`Tall|Panels, Fillers & Surrounds|progP_BOSSA` was NOT a bad client sample.** Re-dumped, it
+     reproduces byte-for-byte: 31 cards, ZERO section headers, flat order. MEMBER 1 + SECT 1 were ONE
+     bug. `F102` (Tall › Fillers, three C-tier units `COP2027/40/53`, sib `'PC'`) resolves under BOSSA
+     to `OP2027` — which lives in **`F224`, `cat:'Wall'`**. So **the v98 swap target can be outside the
+     query's result set and in ANOTHER CATEGORY**; the app reads `FAM_BY_ID[loc.fid]` off the whole
+     catalog. We skipped the swap when the target wasn't in the result set (a deliberate call), so F102
+     survived. Fixed: `fetchSwapTargets` builds the missing target cards with ONE extra unfiltered
+     `familyId`-only aggregation (the app takes the whole family), `repickFaces` them, then swap. Two
+     details that cost a wrong answer first: the swapped card's face is **the sibling code itself**
+     (`b2.units.find(x=>x.c===sc) || selectedUnit(b2)` → `OP2027`, not F224's own face `OP2080`), and
+     only the ORIGINAL cards are swap SOURCES (a fetched target is never re-swapped, never enters the
+     result on its own). Second half of the same bug: `bucketSections` treated multi-sub as "rank every
+     section 999 and bucket anyway", but the app's gate is
+     `(_subs.size===1 || state.cat==='__TASK__') && all.some(x=>x.b.sec)` and when it FAILS there is no
+     bucketing at all — **no headers and no `pri` re-sort**. F224's unmerged `subDisp` is `'Fillers'`
+     (TALL_MERGE is Tall-only), so one Wall card makes the set multi-sub. Ported, with
+     `isTaskView(query)` = `leafId ?? groupKey ?? zone` for the `__TASK__` arm. That state now diffs
+     **0 in every bucket**. Client rules in map §2b (a headerless `by-section` response is faithful;
+     never assert `card.category` equals the filter you sent) + frontend guide R9b/R10a.
+  2. **The Base MEMBER 1 patch sketched in the 07-29 handoff §5 is a NO-OP.** `unitFacts.tier` is never
+     a family id — extractor and facts backfill both guard with `/^[PCA]$/`
+     (`export-v781-extractor2.js:593`, `scripts/backfill-grid-facts.js:83`), as does
+     `capabilities.nativeTier` (`:125`). `KSSET`: primary → `tier:"P"`, dup → **`tier:null`,
+     `agnostic:false`** — and the proposed clause explicitly passes `tier ∈ [null,'']`. The real gate is
+     `tierHas` itself (`tier === letter || agnostic`; tier-less accessories carry `agnostic:true` and
+     still pass). The handoff's `$unwind` warning IS confirmed: `familyGroupStages`'s `$set` swaps
+     familyId/category/subcategory/section/catalogRank/sectionRank/familyIndex/familyFacts but **not
+     `unitFacts`**, and the primary membership object didn't carry it either. **FIXED** (no data change):
+     the membership object gains `unitFacts: '$unitFacts'`, the `$set` gains
+     `unitFacts: {$ifNull:['$_memberships.unitFacts','$unitFacts']}` (mirrors `poolByFamily`; only 34 of
+     74 shared codes diverge; `LIST_OMIT` doesn't drop it), and the programme tier branch becomes
+     `$and[capabilities.nativeTier==t, $or[unitFacts.tier==t, unitFacts.agnostic]]` — a no-op for every
+     ordinary unit (same `u.fam`, same guard) and decisive only on a dup whose own record diverges,
+     since `capabilities` is ALWAYS the primary family's. Verified Base Cooktops @BOSSA → 25 types
+     (client 25), dup absent, primary intact.
+  3. **The "duplicate `217`" was a HARNESS ARTIFACT over a 2-family data gap.** The app's 5th H pill on
+     F1780/F1782 is **`217+`** — the `heightExtension` chip — not a second `217`; `diff.js` compares
+     labels through `NUM()` (strip non-digits, `:24`/`:105`), which merged them. Nothing for the client
+     to decide. **Ours is the defect:** `attachGridRows` only sets `heightExtensionOk` inside
+     `if (c.heightExtension)`, and NO unit of F1780/F1782 carries the field, while their Primo twin
+     F1784 has it on all 32. Not tier-scoped (331 A + 338 C units elsewhere have it) — these are the
+     ONLY 2 families in 18,396 items that are Tall, hold a `heightCode 217` unit, aren't Appliance
+     Housing, and have no `heightExtension`. **Root cause: the field is the wrong SHAPE.** The extractor
+     never taps the chip — it reproduces the app's gate and hardcodes the options
+     (`HEXT_MM=[[230,2304],[244,2436.5],[250,2500]]`, `extractor2.js:431`), and that gate's
+     `available(m)` is TOOLBAR-DEPENDENT while extraction runs in the pristine default (P) toolbar — so
+     an all-A/all-C family fails it and gets `null` on every unit. A per-unit frozen field for a
+     family-level toolbar-dependent question is what v2's "intrinsic facts, derive the rest" rule exists
+     to prevent. **FIXED by deriving** (no backfill / re-ingest / contract change): new
+     `heightExtensionFor()` in `design-book.grid-rows.ts` returns the payload from the pool
+     (`heightExtensionOk` delegates), and `attachGridRows` stamps both `heightExtension` +
+     `heightExtensionOk` per request (it runs after `LIST_OMIT`, so list rows carry it). ⚠️ The
+     Appliance-housing exclusion had to move to **`familyFacts.rawSub`** — `Item.subcategory` is
+     `subDisp(f)` and spells it BOTH ways (**382 `Appliance housing` + 566 `Appliance Housing`**), so
+     the old display-name test missed two thirds; `rawSub` is uniformly `Appliance housing` (946). Same
+     rule as §N(3); `rawSub` joined `GridFamilyFacts`. Verified F1780→`AHWSP21756` @LAIKA only,
+     F1782→`CHWSP21756` @ROCCA only, F1784 unchanged, Appliance Housing 0/50 → **PILLS 2 → 0**.
+     ⚠️ Harness left as-is: prefer the RAW pill label, fall back to `NUM()` only when both sides are
+     purely numeric (changing it re-baselines every stored report).
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

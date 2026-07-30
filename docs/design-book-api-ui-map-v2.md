@@ -283,6 +283,38 @@ an older export). D4K-dev **and D4K-prd** both hold them (18,366 items each). `S
 deferred as a per-item rank, not a stored map; catalog `pri` order matches it for all pri-fallback subs
 verified so far.
 
+#### ⚠️ A response can legitimately come back with NO section headers at all (2026-07-30, audit §O2)
+
+The app only buckets when the visible set has **one display subcategory** (or the Design-Tasks sidebar
+is driving the grid — every task leaf sections by `sec`, v617):
+
+```js
+if ((_subs.size === 1 || state.cat === '__TASK__') && all.some(x => x.b.sec)) { …bucket… }
+// else: show = all   → no headers, and no `pri` re-sort either
+```
+
+When it fails the endpoint returns a single `{ section: "", count: N, cards: [...] }` — every card in
+one headerless run, in the card sort's own order. Real case: **Tall › Panels, Fillers & Surrounds under
+BOSSA** — 31 cards, zero headers, because one card in the set is a **Wall** family (see the swap note
+below) whose display sub is `Fillers`, so the set spans two subs.
+
+Client rule, unchanged and now load-bearing: **render `sections[]` as given.** Do not synthesize a
+header from `card.section` when `section` is `""`, and do not re-bucket — a headerless response is a
+faithful render, not missing data.
+
+#### ⚠️ A card's `category` can differ from the `category` you filtered on (audit §O2)
+
+The v98 sibling swap ("the card pre-selects the article of the zone's pricebook") can move a card to a
+family **outside the query's own filter, including in another category**. Tall › Panels under BOSSA:
+`F102` is Tall › Fillers with three C-tier units (`COP2027/40/53`), its P-sibling code `OP2027` lives in
+`F224` which is `category: "Wall"`, and the app renders F224 there — in F102's grid position, with
+`OP2027` as the face (the swap faces the card with **the sibling code itself**, not the target family's
+own default face). The pair is then deduped by `familyId`, so the two never both appear.
+
+Client rules: don't assert `card.category === <the filter you sent>`, don't assert
+`card.subcategory === <the subcategory you sent>`, and don't drop or re-group such a card — it is
+where the app puts it.
+
 ---
 
 ## 2c. ⭐ Pill state — the CAPABILITIES gate model (replaces v1 §2c–§2e)

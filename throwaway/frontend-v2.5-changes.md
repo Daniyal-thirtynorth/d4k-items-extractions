@@ -399,7 +399,10 @@ a different family, and the pair collapses. Measured: Tall › Panels, Fillers &
 `F115` (`CHP20154`) becomes `F209` (`AHP20154`) under Avance and vice-versa. Wall › Corner: `F93` ⇄
 `F106`, 6 cards either way.
 
-**Nothing to implement — this is a warning about expectations.** But three things follow:
+So a Contino-faced card under an Avance programme becomes its Avance twin, that twin usually lives in
+a different family, and the pair collapses.
+
+**Nothing to implement — this is a warning about expectations.** But four things follow:
 
 * **The card count legitimately changes when the programme changes**, beyond greying. Do not treat a
   drop as a lost-data bug.
@@ -408,6 +411,16 @@ a different family, and the pair collapses. Measured: Tall › Panels, Fillers &
   Key on it for React identity (R9 still stands) but re-resolve it after a programme change.
 * **Do not re-add any client-side "prefer the programme's article" logic.** The server already did it,
   and doing it twice would swap a card that was already swapped.
+* ⭐ **The swapped-in family can be OUTSIDE the filter you sent — including in another category**
+  (added 2026-07-30, audit §O2, shipped in the same pass). Tall › Panels under BOSSA: `F102` (Tall ›
+  Fillers, three C-tier units) resolves to `OP2027`, which lives in **`F224`, `category:"Wall"`**, and
+  the app renders F224 in F102's grid slot. So `card.category` / `card.subcategory` can differ from
+  the values you filtered on. **Do not assert them, and do not drop or re-group such a card.**
+  Two knock-on effects, both already correct in the response:
+  * the swapped card's face is **the sibling code itself** (`OP2027`), not the target family's own
+    default face (`OP2080`);
+  * one foreign-sub card can make the whole set multi-sub, and the app then emits **no section headers
+    at all** — see R10a.
 
 ### R10 · The FACE, the card ORDER and the section ORDER are all server-final (§2c-12, §M2, §M6)
 
@@ -426,6 +439,25 @@ Three things the client must not re-do:
   ItemRef-only stubs (`760`, `761`, `SZIZ`, `US`, …). They are dropped from every LIST but stay
   fetchable by sku. Nothing to implement — it just explains why `GET items/:sku` can 200 on a code
   that never appears in any grid (and why refs and the drawer are unaffected).
+
+### R10a · A `by-section` response with NO headers is a valid render (§O2)
+
+Added 2026-07-30. The app buckets into section headers only when the visible set has **one display
+subcategory** — or when the Design-Tasks sidebar is driving the grid, where every leaf sections by
+`sec` (v617):
+
+```js
+if ((_subs.size === 1 || state.cat === '__TASK__') && all.some(x => x.b.sec)) { …bucket… }
+// else: show = all   → no headers, and no `pri` re-sort either
+```
+
+When it fails you get one entry back: `{ section: "", count: N, cards: [...] }`, every card in a single
+headerless run, in the card sort's order. Tall › Panels under BOSSA is exactly this — 31 cards, no
+headers, because the R9b swap pulls in a Wall family whose display sub is `Fillers`.
+
+**Implement nothing, but do not "fix" it:** don't synthesize a header from `card.section` when
+`section` is `""`, and don't re-bucket the response. `card.section` still names the card's true section;
+only the grouping header is absent.
 
 ---
 
