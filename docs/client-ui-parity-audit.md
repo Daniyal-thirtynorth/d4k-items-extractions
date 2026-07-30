@@ -1118,6 +1118,25 @@ absent under ROCCA (701); `F1782` the exact mirror (`CHWSP21756`); `F1784` uncha
 Tall › Appliance Housing 0 of 50 families get a chip. The harness now reads
 `F1780 H = [154, 190, 204, 217, 217+]`, matching the client byte-for-byte — **PILLS 2 → 0**.
 
+**O4b. The DRAWER was left on the frozen field — grid and drawer disagreed (fixed 2026-07-30).**
+O4 derived the chip in `attachGridRows` only, so `GET items/:sku` still served whatever the extractor
+had frozen on the document. On exactly the two families O4 was about, the grid grew a `217+` row and
+the drawer did not (`GET items/AHWSP15456?programs=410` → `heightExtension: null`). Same class of bug
+as O4 itself, one endpoint later.
+
+Fix: the stamp is one shared method, `DesignBookService.applyHeightExtension(c, units, face, f, tb)`,
+called from `attachGridRows` **and** from `getItem`. The drawer has no W/H/D/line state of its own, so
+its toolbar is `gridToolbar({ programs }, resolveProgramTiers(programs))` — the programme context and
+every other field at its 'ALL'/default. Pool comes from the same cached `poolByFamily()` (dup
+memberships included), face is the pool member for the requested sku, falling back to the item itself
+so a synthesized `P1`/`C1` sibling still answers. No data change; contract stays **2.5.3**.
+
+Verified: `AHWSP15456?programs=410` → `AHWSP21756` / `ok:true`, no programme → `null` (matching the
+grid, whose `unitAvailable` fails an all-A family in a P context); `CHWSP15456?programs=701` the
+mirror; `HWS14658` (Primo twin) unchanged; `AHG6015411DZ` (Appliance Housing) still no chip;
+`P1T3080S` (synthesized) fine. **Whole-catalog check: all 332 Tall family faces, grid card vs drawer
+item, payload sku + flag — 0 mismatches.**
+
 **O5. THE DESIGN-TASKS SIDEBAR — `functionalGroups` is per-ITEM where it has to be per-MEMBERSHIP.**
 Found by hand-driving both sidebars (never swept — see the scope caveat above). Base › 💧 Water:
 

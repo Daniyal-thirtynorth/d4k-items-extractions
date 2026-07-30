@@ -354,6 +354,14 @@ The field ships whenever the card has a `heightExtension` at all (it is computed
 card has no extension to show. Everything else about the chip (v2.2 §2 — the pick is state on
 the 217 unit, navigation off it, and `orderCodeLines` emits `[sku, addCode]`) is unchanged.
 
+> **⚠️ `heightExtension` itself is DERIVED per request now — read it off the response, never off a
+> stored/cached item.** The extractor freezes the field in the pristine default toolbar, which misses
+> every all-A / all-C family (`F1780`, `F1782`); the server recomputes both the payload and the flag
+> from the family pool for the request's own programme context (audit §O4). **`GET items/:sku` does
+> the same** since §O4b, so the drawer and the grid card agree — verified 0 mismatches over all 332
+> Tall family faces. A drawer opened with `?programs=` may show the chip where the bare call does not;
+> that is correct and matches the app.
+
 ### R9 · `dupFamilies` — the same sku can be TWO cards (§2c-12, §M7)
 
 41 synthetic families (`*__CKDUP`, `*__DRWDUP`, `*__SNKDUP`, `*__TRDUP`, `MRG_*`) re-list an

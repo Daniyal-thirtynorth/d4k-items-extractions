@@ -355,10 +355,14 @@ Current facts:
   the app's PRIMARY nav, and the only path through `bucketSections`'s new `isTaskView` branch), `q`,
   **`grey=true`**, `opening`, `tallHeight`, `suspended`, `page>1`, or the detail drawer. **Three of
   round 3's four residual diagnoses were WRONG** — each had been written off as "an app quirk / a bad
-  sample / not worth the risk" without being reduced to a mechanism, and each was ours. Still open
-  after this: the DETAIL endpoint serves the frozen `heightExtension`, so F1780/F1782 drawers lack the
-  `217+` row the grid now shows (grid/drawer now disagree), and `heightExtension` remains a per-unit
-  contract field although it is derived now — drop it or mark it advisory.
+  sample / not worth the risk" without being reduced to a mechanism, and each was ours. **Follow-up
+  (same day, §O4b): the DETAIL endpoint was still serving the frozen `heightExtension`** — O4 derived
+  it in `attachGridRows` only, so on those same two families the grid grew a `217+` row and the drawer
+  did not. The stamp is now one shared `applyHeightExtension()` called from BOTH `attachGridRows` and
+  `getItem` (drawer toolbar = the programme context alone; pool from the same cached `poolByFamily()`;
+  face falls back to the item so synthesized P1/C1 siblings answer). All 332 Tall faces, grid vs
+  drawer: 0 mismatches. Still open: `heightExtension` remains a per-unit contract field although it is
+  derived now — drop it or mark it advisory.
   Re-ran the Tall leg to measure round 3's un-swept `maxh` fix: **ORDER 6 → 0** confirmed over all 272
   states, every other bucket 0 except the two "residue" items — and re-checking those disproved both:
   1. **`Tall|Panels, Fillers & Surrounds|progP_BOSSA` was NOT a bad client sample.** Re-dumped, it
