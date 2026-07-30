@@ -6,7 +6,8 @@ residuals. **This day fixed all four (round 4, audit §O), extended the sweep fr
 
 Findings: `docs/client-ui-parity-audit.md` **§O**, **§P**, **§Q**. This file is the operational state.
 
-Everything below is **committed and pushed** — backend `dev`, extraction `main`. Nothing dangling.
+Everything below is **committed and pushed** — backend `dev`, extraction `main` — and **released to
+prd** (`origin/main` @ `54c2af2e`, §3). Nothing dangling, nothing owed.
 
 ---
 
@@ -39,6 +40,9 @@ re-ingest, no contract change — `schemaVersion` is still **2.5.3** and the exp
 | Q1 | `isFrmatFamily` is a QUALIFIER, not a blanket exclusion — 9 programme ids, not 120 |
 | Q3 | `famOkB` exempts the whole **`Alteration` category**, not just accessories — 12 cards ungreyed |
 
+*(§Q2 is not a fix — it is the full 200-state E3 re-measure that confirmed P6: FACE 6 → 0, every other
+bucket byte-identical to the pre-fix baseline. `out/report-E3d.json`.)*
+
 ---
 
 ## 1. START HERE — first 20 minutes
@@ -49,7 +53,8 @@ cd /Users/apple/Documents/thirtynorth/node-js/d4k-items-extraction/data-from-cli
 cd /Users/apple/Documents/thirtynorth/node-js/d4k-items-extraction && node scripts/parity/sink.js scripts/parity/out
 cd /Users/apple/Documents/thirtynorth/node-js/D4K-backend && npm run build && node dist/main.js
 
-# B. sanity — today's fixes, all hand-verified at log-off
+# B. sanity — today's fixes, all hand-verified at log-off.
+#    Runs against localhost; the same five hold against PRD now (§3), so they double as a rollout check.
 curl -s localhost:8000/design-book/dev-token >/dev/null && echo backend-up
 #  P6  Panels & surround › Open Shelf Units, no W filter  → RE_SLIDEIN faces RE905336 (not RE305336)
 #  Q1  Panels & surround › Surround @programs=244         → F69 · F124 · F263, all three LIVE, in that order
@@ -117,6 +122,8 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | `6a84bba3` | comment: the opening hide is §P3 |
 | `f59ea0af` | **§Q1** — `FRMAT_DEAD_PROGRAMS`: `isFrmatFamily` is a qualifier, not a blanket exclusion |
 | `b8169728` | **§Q3** — `famOkB` exempts the whole `Alteration` category |
+| `16de7ebb` | release: PR #2975 `dev` → `staging` |
+| `54c2af2e` | release: PR #2976 `staging` → `main` — **prd HEAD** |
 
 ### `d4k-items-extraction` — branch `main`
 
@@ -126,6 +133,9 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | `bed6da3` | audit §P + map + CRUD guide + `make-plan.js` + `dump-ours.js` + CLAUDE.md |
 | `33e34ec` · `e7124a3` | frontend guide: §P3 ref, then the **parity-status** section |
 | `d7ef321` | audit §Q, the contract + CRUD reference-port fix, the frontend guide's row 7, this handoff |
+| `c880dfe` | pin the handoff's own sha |
+| `61d034e` · `0bafa02` | retarget the handover docs onto prd, then record that the first release pass came up 3 commits short |
+| `ba5b7b9` | §Q is on prd — the second pass, and the SHA caveat removed again |
 
 ---
 
