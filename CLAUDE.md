@@ -602,8 +602,10 @@ Current facts:
   `move()`), so the backfill reads `<script id="DATA">` directly — **no parity run, no browser**.
   Extractor emits it (`_unitFacts`), facts dumper + `backfill-grid-facts.js` carry it → re-extract and
   re-ingest safe. Export + `.gz` patched (meta 2.5.4); **D4K-dev backfilled** (92 docs, via
-  `backfill-item-fields.js --fields unitFacts`). **⚠️ D4K-prd owes the same 92-doc write** (data-only,
-  inert until `dev` ships).
+  `backfill-item-fields.js --fields unitFacts`). **D4K-prd backfilled too** (2026-07-31, same 92 docs,
+  re-run reports 0 differ; data-only, inert until `dev` ships — the deployed prd code never reads it).
+  ⚠️ Use `MONGO_URI_OVERRIDE=<uri> node scripts/backfill-item-fields.js …` for a prd write — `.env`
+  stays on D4K-dev, so nothing is left pointing at prod afterwards.
   **⭐ THE ROW IS CARD STATE — two new query params, and only the browser found that.** The row got
   its own **`kind:"insert"`** (NOT `variant`: both pills share one `variantCore`, so that route
   returns the card you are on), plus **`insert`** (= the app's `blockIns`) and **`variantCode`**
