@@ -545,8 +545,57 @@ Current facts:
   MAIN-side only (dev never touched it since the merge-base) so the merge preserved it. **Code and data
   now level on both clusters; nothing owed** — every fix from §O2 on is backend logic, so the ledger
   never moved. If prd deploys from main via CI, confirm the rollout with the two curls in
-  `docs/parity-session-handoff-2026-07-30.md` §3. **Both §Q fixes are hand-verified, not swept** — task 1 tomorrow is re-running the
-  E3 and E2 legs to measure them.
+  `docs/parity-session-handoff-2026-07-30.md` §3. ~~Both §Q fixes are hand-verified, not swept~~ —
+  **✅ both measured 2026-07-31, see §R.**
+
+- **⭐⭐ §R — TASK 1 MEASURED; E2 IS NINE BUCKETS AT ZERO (2026-07-31, audit §R; pure backend logic,
+  schemaVersion stays 2.5.3, nothing to backfill).** Re-ran both legs. **§Q1 confirmed** (E3
+  `GREY 2→0`, `ORDER 2→0`, 200 states) and **§Q3 confirmed** (E2 `GREY 12→0`, 298 states). Two MORE
+  causes surfaced in the same pass, both fixed (backend `dev` @ **`470c8003`**, rebased onto an
+  unrelated `src/project/contract.*` push):
+  **(1) `lineCardOk` read the STORED height where the app DERIVES it.** The app says so itself (v93):
+  *"Many tall units carry no hc (height lives in the code/H mm) — derive the code from H mm"*, ±8 mm
+  over `TALLC`. A family whose tall height exists only as `heightMm` yielded no system heights, fell
+  through to the permissive `return true`, and was never hidden at a line it has nothing at —
+  `PPM3234` (190, 80-system) and `XAG_Pa_a989a3` (146) survived at line 73 while their own 73-system
+  siblings correctly stayed. **`tallHC` was already ported in `design-book.grid-rows.ts` and simply
+  wasn't called** — the second time this session a helper existed and the call site read the raw
+  field (cf. §O4-2). Pilasters 7→6, Wall Cladding 2→1. **E3 MEMBER 3 → 1.**
+  **(2) a dup membership wore the PRIMARY's `category`.** `poolByFamily` already gives each dup its
+  own `unitFacts` (§O4-2); `category` is the same bug and is load-bearing, because `locateFamily`
+  (our `codeLoc`) breaks ties by *"the family in the CURRENT category"* — with both memberships
+  reporting the same one, that degraded to **Map insertion order**. `WFAUKS` @BOSSA is tier `A`,
+  sib `'PA'`, and its sku doesn't start with A/C, so the v98 sibling code is **itself**: the app
+  resolves to its own family `PNL_ACC` and does NOT swap; we resolved to the dup `PS_WAUKS_RECESS`,
+  swapped, dragged in a foreign sub, and lost the section header (§O2). **E2 MEMBER 1 + SECT 1 → 0.**
+  **⚠️ §R4 — the LAST E3 diff is an APP BUG; do not match it.** `Side panels W|progP_BOSSA`: the init
+  code runs `splitFam('CURVED_*')` then **splices `XCRV_WF5R`/`WF15R`/`WFI5R`/`WFI15R` out of `FAMS`**
+  — but `CODE_INDEX` (byte 16,499,634) and `FAM_BY_ID` (16,604,814) are both built BEFORE the splice
+  (16,675,665), so `codeLoc` still resolves `WF5R36` to a family `FAMS` no longer has and the app
+  renders it. The codes rendered are identical on both sides and the two agree in every other state.
+  Our export is post-init and correctly has no `XCRV_*` at all, so matching it would mean re-adding
+  deleted families. Left alone, like §O4-3's duplicate `217`.
+  **Where both legs stand: E2 = 9 buckets at ZERO** (298 states; only `ROWSET 8`, all `FP_16FRONT`,
+  the one genuine DATA gap needing per-unit `u.ins`). **E3 = one state, and it is §R4.**
+  **⚠️ NEW un-swept gap recorded, deliberately NOT patched:** `lineCardOk` is missing the app's
+  **v376 Avance line-80 lock** (`if(state.progMap && (activeFamFor('Base')==='A'||activeFamFor('Tall')
+  ==='A') && state.line==='80' && activeFamFor(b.cat)!=='A') return true;`) and **no plan state
+  anywhere combines line 80 with a programme** — exactly one `line=80` state exists and it carries no
+  programme. Add the state and MEASURE before porting.
+
+- **⭐ FRONTEND v2.5 IMPLEMENTED (2026-07-31).** `D4K-frontend` branch **`feat/design-book-v2.5`**
+  (3 commits @ `638de925`, cut from `origin/dev` `25b19af9`, pushed, PR not yet opened) implements 7
+  of the 8 steps in `throwaway/frontend-v2.5-changes.md`: `gridRows` rendered verbatim, one click
+  dispatcher by `familyId`+`pill.value`, the toolbar carried on every swap, `lineState`, `antoso`
+  (not `suspended`), `cardAvailable`, and the authoring dialog's missing fields. **Verified in a
+  browser: 22 states / ~760 cards / 0 diffs**, plus `antoso`, the global `q`, the drawer, and a live
+  dialog round-trip (10/10). Three fixes beyond the guide: the FRMAT blanket-exclusion bug in the
+  client's `availableFromCaps`, a finish-swatch URL that 403'd for every code (`F+<digits>.jpg`, and
+  `405` → `F+405_VS.jpg`), and a pill that is `selected` AND `off` rendering fully lit. **Status +
+  the 4 deliberately-deferred items: `docs/frontend-v2.5-pending-2026-07-30.md`** — none of them is an
+  integration gap. ⚠️ `npm install` in that repo needs `--legacy-peer-deps` (React 16/17-vs-18 peer
+  conflict). ⚠️ `GET /design-book/stats` still reports `schemaVersion "2.2.0"` against a 2.5.3
+  contract — the backfills never touched the catalog meta doc; check prd too.
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 
