@@ -13,6 +13,142 @@ are not in a PR. The **data** is on both clusters. See §3.
 
 ---
 
+## ⭐ COLD START — read this first if you have no context
+
+**The project.** `d4k-items-extraction` is a data + schema workspace for the LEICHT "Design Book"
+catalog. The goal of this whole line of work: make our **backend + React client render the product
+grid byte-identically to the client's own app** (`leicht_units__781_.html`, 17.8 MB, ships its whole
+catalog and renderer inline). We measure that with a differential harness — drive both UIs over a
+plan of toolbar states, scrape each grid, diff into 10 buckets. `CLAUDE.md` in this repo is the
+standing brief and is auto-loaded; this file is the operational state on top of it.
+
+### The model, in six lines
+
+* An **item** = one orderable code (sku). A **family** = the sibling set behind one grid CARD; the
+  card shows one member (the **face**) plus pill rows that navigate to the others.
+* ⭐ **A card's rows come from the FAMILY POOL, not from the item.** The backend ships them
+  pre-built as **`gridRows`** (a line-by-line port of the app's `renderGrid`) and the client renders
+  them verbatim. `parameters.*` is the DETAIL-drawer model — one unit's own pill list — and using it
+  for the grid was the root of the long parity gap.
+* **`capabilities`** (17 fields) is the pill/card GREY rule surface — 8 gates, evaluated by
+  `availableFromCaps(caps, toolbar)`, ported identically in the contract, the backend and the client.
+* **`unitFacts` / `familyFacts`** are the pool inputs, dumped FROM the app (never re-derived).
+* Anything the app keeps as **per-card state** (`blockIns`, `blockVr`, `blockSel`) has no server
+  memory, so it must travel in the query — that is exactly what §S is about.
+* The app is the spec. Where it has a bug we **match nothing** and write it down (see the two below).
+
+### The three repos
+
+| repo | path | branch | role |
+|---|---|---|---|
+| extraction | `/Users/apple/Documents/thirtynorth/node-js/d4k-items-extraction` | `main` | contract, export, docs, the parity harness |
+| backend | `/Users/apple/Documents/thirtynorth/node-js/D4K-backend` | `dev` | NestJS `design-book` module + the lite/admin dev UIs |
+| client | `/Users/apple/Documents/thirtynorth/react-apps/D4K-frontend` | `feat/design-book-v2.5` | the real React app |
+
+### Servers, URLs, auth
+
+```bash
+# the CLIENT APP (ground truth) — the extension cannot open file://, so serve it
+cd <extraction>/data-from-client && python3 -m http.server 8777
+#   → http://localhost:8777/leicht_units__781_.html      openDetail('<famId>','<sku>') opens a panel
+
+# the SINK (both in-page dumpers POST here; the extension redacts big tool returns)
+cd <extraction> && node scripts/parity/sink.js scripts/parity/out
+#   POST :8799/save?name=<file>   ·   GET :8799/js?f=<file in scripts/parity/>
+
+# the BACKEND — run from the repo ROOT (it sendFile()s public/ via process.cwd())
+cd <backend> && npm run build && node dist/main.js          # :8000, Swagger /api
+#   lite UI    http://localhost:8000/design-book/ui         ← what the harness scrapes
+#   admin UI   http://localhost:8000/design-book/admin      ← form-based CRUD, /admin#SKU deep-links
+#   token      GET /design-book/dev-token → 1 h masteradmin JWT (both UIs self-auth; ENVIRONMENT
+#              must be local|dev, and those two routes 403 in stg/prd by design)
+```
+
+⚠️ **`.env` `MONGO_URI` points at D4K-dev.** Leave it there. For a prd write use
+`MONGO_URI_OVERRIDE=<uri> node scripts/...` so nothing is left aimed at production (§3).
+
+⚠️ **Check the port before trusting any local result** — `lsof -ti :8000 -sTCP:LISTEN`. A stale
+server holds the port, your new one dies with `EADDRINUSE` in the scrollback, and you measure old
+code. This happened twice on 07-31 (see trap 8).
+
+⚠️ **Some list queries are slow.** An unfiltered `category`+`subcategory` page with `gridRows` can
+take minutes. Scope by `familyId` when you are checking one card.
+
+### Running the React client
+
+```bash
+cd /Users/apple/Documents/thirtynorth/react-apps/D4K-frontend
+npm install --legacy-peer-deps      # ⚠️ required — react-toast-notifications peer-wants React 16/17
+npm run dev                         # :3000  (⚠️ if it says "Port 3000 is in use" it silently moves
+                                    #         to :3001 and you are testing a DIFFERENT server)
+```
+
+`.env` already points `NEXT_PUBLIC_API_URL` at `http://localhost:8000/`. **Logging in is not
+possible unattended** — the form wants a password plus a secret code. Skip it: the app reads
+`localStorage.token`, and `middleware.ts` gates routes on a `loggedIn` cookie, so paste this in the
+tab's console (or run it from the browser tool) and reload `/design-book`:
+
+```js
+const r = await fetch('http://localhost:8000/design-book/dev-token').then(r => r.json());
+localStorage.setItem('token', r.token);      // the app's own auth key
+document.cookie = 'loggedIn=1; path=/';      // middleware.ts route gate
+```
+
+### The harness, end to end
+
+Two Chrome tabs: **A** = the served client app (:8777), **B** = our lite UI (:8000). Inject the
+matching dumper into each, drive the plan, POST both dumps to the sink, diff.
+
+```js
+// ── tab A · CLIENT (ground truth). Only needed when the PLAN changes — the app never does,
+//    so the existing out/client-*.json stay valid and you normally re-dump OUR side only.
+(0,eval)(await fetch('http://localhost:8799/js?f=dump-client.js').then(r=>r.text()));
+const plan = await fetch('http://localhost:8799/js?f=plan-E2.json').then(r=>r.json());
+window.__MY = {}; window.__PROG = {done:0,total:plan.length};
+(async () => { for (const st of plan) { window.__MY[st.key] = await __P.run(st.state);
+    window.__PROG.done++; }
+  await fetch('http://localhost:8799/save?name=client-E2', {method:'POST',
+    headers:{'Content-Type':'application/json'}, body:JSON.stringify({side:'client',data:window.__MY})});
+})();
+
+// ── tab B · OURS (the lite UI). Same plan, `filters` instead of `state`.
+(0,eval)(await fetch('http://localhost:8799/js?f=dump-ours.js').then(r=>r.text()));
+const plan = await fetch('http://localhost:8799/js?f=plan-E2.json').then(r=>r.json());
+window.__MY = {}; window.__PROG = {done:0,total:plan.length};
+(async () => { for (const st of plan) {
+    window.__MY[st.key] = await __Q.run(st.filters, {grey:false});   // ⭐ pin grey — trap 5
+    window.__PROG.done++; }
+  await fetch('http://localhost:8799/save?name=ours-E2', {method:'POST',
+    headers:{'Content-Type':'application/json'}, body:JSON.stringify({side:'ours',data:window.__MY})});
+})();
+// poll:  JSON.stringify(window.__PROG)     ⚠️ never `await` a whole leg in one call — trap 7
+```
+
+```bash
+node scripts/parity/diff.js scripts/parity/out/client-E2.json \
+     scripts/parity/out/ours-E2.json  scripts/parity/out/report-E2.json
+# buckets: GREY_NOT_HIDE · MEMBER · FACE · CODE · GREY · SECT · ORDER · ROWSET · PILLS · STATE
+node scripts/parity/check-faces.js report-E2 plan-E2      # replay FACE diffs against the API, no browser
+node scripts/parity/make-plan.js <Category> [...]         # regenerate a plan
+```
+
+A leg is ~15 min (200 states) to ~25 min (Tall / Wall+Midway).
+
+### Key files
+
+| file | what |
+|---|---|
+| `docs/export-schema-v2.ts` | ⭐ **the contract** (2.5.4) + the `availableFromCaps` reference port |
+| `docs/export-sample-v2.json` | the 15-item worked sample |
+| `docs/export-v781-fresh.json` (+ `.gz`) | the full export, 18,396 items — raw is gitignored, the `.gz` is committed |
+| `docs/design-book-api-ui-map-v2.md` | ⭐ API ↔ UI, per-endpoint params, `gridRows` (§2c-11) |
+| `docs/design-book-crud-guide.md` | authoring guide — what each field does to a card |
+| `docs/client-ui-parity-audit.md` | ⭐ every round's findings, §L → §S |
+| `docs/export-v781-extractor2.js` | the in-page extractor that produces the export |
+| `scripts/backfill-*.js` | export/DB patchers; `D4K-backend/scripts/backfill-item-fields.js` pushes export → cluster |
+
+---
+
 ## 0. WHERE WE LANDED
 
 | leg | states | at session start | now |
@@ -220,10 +356,30 @@ ZIGSUV90 [90 · Drawer · L3/M3]
 
 ---
 
-## 5. ⚠️ TRAPS — the 07-30 seven still apply; four more
+## 5. ⚠️ ELEVEN TRAPS — every one of them cost real time
 
-The seven in `parity-session-handoff-2026-07-30.md` §4 are unchanged and still the highest-value list.
-Added today:
+1–7 carry over from `parity-session-handoff-2026-07-30.md` §4 and are inlined here so this file
+stands alone; 8–11 are new today.
+
+1. **Never restart the backend mid-sweep.** Cost two whole legs: "MEMBER 33 / SECT 33" and
+   "MEMBER 37 / SECT 19" were both ~60 states hitting a dead server. The API was right the whole
+   time. Abort, restart, re-run.
+2. **A stale in-process pool cache survives an out-of-band backfill.** `poolByFamily()` is cached for
+   the process lifetime; only `invalidatePool()` (ingest / item CRUD) clears it. Six ORDER diffs once
+   vanished on restart with no code change. Any script that writes the collection ⇒ restart first.
+3. **Reproduce a sweep diff with the plan's EXACT filters.** `lineState=80` passes where `line=80`
+   fails — `lineState` applies no per-unit `$match`. That hid one bug for three sweeps.
+4. **"It's a bad client sample" is usually wrong.** Three of round 3's four residual diagnoses were
+   wrong for exactly this reason: written off without a mechanism. Re-dump and reproduce first.
+5. **`grey=true` and `grey=false` are different products.** The app's default is **`grey=false`** and
+   that is the mode that matters. Pin it: `__Q.run(filters, {grey:false})`.
+6. **`__Q.run()` returns a dump; it does not record one.** Only `__Q.sweep()` writes `RESULTS`, and
+   `post()` sends `RESULTS`. A hand-rolled loop + `__Q.post()` uploads `{"data":{}}`, and the diff
+   then reports *"missing on ours: 200"* with all ten buckets 0 — a clean-looking report over
+   nothing, after the leg has already run. Keep your own map (the snippets above do).
+7. **A CDP timeout does NOT cancel the page promise.** Drive long sweeps fire-and-forget and poll
+   `window.__PROG`; never `await` a whole leg in one `javascript_tool` call. Two concurrent sweeps
+   interleave and each records the other's grid.
 
 8. **A stale dev server serves pre-fix code, and says nothing.** Hit TWICE: a `node dist/main.js` from
    10:36 held :8000 (my new one died with `EADDRINUSE`, which scrolled past), and a `next dev` held
@@ -243,14 +399,19 @@ Added today:
 
 ---
 
-## 6. The harness, current form
+## 6. The harness — notes beyond the recipe
 
-Unchanged from 07-30 §5 — `make-plan.js`, `dump-client.js` / `dump-ours.js`, `diff.js` (10 buckets),
-`check-faces.js`, `sink.js`, and the plans `plan-{Base,Tall,WallMidway,E1,E2,E3,F1,T1}.json`. Client
-dumps in `out/client-*.json` stay valid: **the app never changes, so only our side needs re-dumping.**
+The commands are in **COLD START › The harness, end to end**. Files: `make-plan.js`,
+`dump-client.js` / `dump-ours.js`, `diff.js` (10 buckets, `--keep-grey` disables the grey-only
+normalization), `check-faces.js`, `sink.js`, and the plans
+`plan-{Base,Tall,WallMidway,E1,E2,E3,F1,T1}.json` (192 / 272 / 256 · 264 / 298 / 200 / 90 / 252).
+Client dumps in `out/client-*.json` stay valid: **the app never changes, so only our side needs
+re-dumping.**
 
-⚠️ `diff.js` still compares pill labels through `NUM()` (digits only), so `217` and the `217+` chip
-look identical. Prefer the raw label when a PILLS diff looks like a duplicate.
+⚠️ `diff.js` compares pill labels through `NUM()` (digits only), so `217` and the `217+`
+`heightExtension` chip look identical. That merged a real 2-diff into "a duplicate 217" for a whole
+round (§O4). Prefer the raw label when a PILLS diff looks like a duplicate. Left as-is on purpose:
+changing it re-baselines every stored report.
 
 **§S needed no sweep, and the reasoning is worth reusing:** the change is a strict no-op outside the
 92 units that carry `insert` (`insList().length` gates the row; `selIns()` returns null everywhere
@@ -265,7 +426,20 @@ A leg is ~15 min (200 states) to ~25 min (Tall / Wall+Midway).
 
 ## 7. Read these first
 
-* **`docs/client-ui-parity-audit.md` §R · §S** — today. §L–§Q are rounds 1–4 plus the extended sweep.
+* **`docs/client-ui-parity-audit.md`** — every finding, in order. The file is long; this is the map,
+  so you can jump straight to the section a task names:
+
+  | § | what it covers |
+  |---|---|
+  | A–K | the pre-`gridRows` era: the first discrepancy tables, depth/`showUnderLine`/face selection, the global-height and W-filter findings, section order, `heightCode` |
+  | **L** | ⭐ **`gridRows`** — a card's rows come from the FAMILY POOL, not `parameters.*`. The single biggest idea here |
+  | **M** | the membership rules that are not per-unit filters: `gridHidden`, `depthFamOk`, `lineCardOk` hides, `dupFamilies` |
+  | **N** | round 3 — section order, the RAW sub, the v98 sibling-family swap. **Also the two harness traps** (dead backend, stale pool cache) |
+  | **O** | round 4 — all four residuals; the sweep hits ZERO on Base/Tall/Wall/Midway. §O4 is `heightExtension` becoming derived + ADVISORY; §O5 is the deferred sidebar task |
+  | **P** | extended coverage — the other 10 categories and the toolbar flags. `dvRowFn`, the single-pill `Finish` row, `opening`, ANTOSO, global `q`, `FAM_DWM` |
+  | **Q** | the FRMAT qualifier and the `Alteration`-category escape |
+  | **R** | 07-31 — the E2/E3 re-measure, `lineCardOk`'s derived height, dup `category`, and the `XCRV` **app bug** |
+  | **S** | ⭐ 07-31 — **the `Insert` row**, and why it is card state. Read with map §2c-11 |
 * `docs/design-book-api-ui-map-v2.md` **§2c-11** — the `gridRows` contract, now including the `Insert`
   row and both card-state params; §2's query-param table and the pill-navigation table carry them too.
 * **`throwaway/frontend-v2.5-changes.md`** — the client's implementation guide, current.
