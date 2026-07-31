@@ -114,10 +114,10 @@ Current facts:
   the whole `capabilities` object settable at creation; `UpsertItemDto`). Re-ingest = **extractor wins** (no
   merge layer). `.env` currently points at **D4K-dev** (was prod — flip back when done). Migration cleanup:
   `D4K-backend/scripts/strip-legacy-designbook-fields.js`.
-- **Docs (all v2, refreshed to 2.5.2 on 2026-07-29):** `docs/export-schema-v2.ts` (contract) ·
-  `docs/export-sample-v2.json` (**14**-item worked sample — `MGT601468` = `doorLineYCode` +
-  `heightExtension`; **every item now carries `unitFacts`/`familyFacts`; `L24CD` = `gridHidden`;
-  `ANTSPSAUS` = `dupFamilies`**) ·
+- **Docs (all v2, refreshed to 2.5.4 on 2026-07-31):** `docs/export-schema-v2.ts` (contract) ·
+  `docs/export-sample-v2.json` (**15**-item worked sample — `MGT601468` = `doorLineYCode` +
+  `heightExtension`; **every item now carries `unitFacts`/`familyFacts` incl. `rawSub` (was missed at
+  2.5.3); `L24CD` = `gridHidden`; `ANTSPSAUS` = `dupFamilies`; `ZIGSUV90` = `unitFacts.insert`**) ·
   `docs/design-book-api-ui-map-v2.md` (API↔UI, §2c the 8-gate model + per-gate GREY table +
   `availableFromCaps` + render spec; **§2c-4 DEPTH PILL — selection + when to call `/items/:sku`**;
   **§2c-1 SELECTED — navigation rows vs DEPTH state rows**;

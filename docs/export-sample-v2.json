@@ -3,10 +3,10 @@
     "_ui": "Illustrative sample of the v2 (MINIMAL + CAPABILITIES) contract. The items below between them exercise EVERY object in export-schema-v2.ts. Some refs (alterations/accessories/companions sku codes, pill targets) point at items outside this small slice; in a real export every referenced sku exists in items[]. Any key starting with `_ui` is plain-English DOCUMENTATION ONLY — the backend MUST strip every `_ui` key on ingest; `_ui` is NOT part of the schema. counts here describe THIS sample, not the full catalog.",
     "generated": "2026-07-17T08:56:11.786Z",
     "source": "leicht_units v781 (headless DOM extraction via openDetail) — SAMPLE",
-    "schemaVersion": "2.5.2",
+    "schemaVersion": "2.5.4",
     "imageUrlTemplate": "https://dash4data.s3.us-west-1.amazonaws.com/itemData/<CODE>.jpg",
     "counts": {
-      "items": 14,
+      "items": 15,
       "cabinets": 10,
       "accessories": 1,
       "categories": 3,
@@ -481,7 +481,8 @@
         "depth63": {
           "mode": "cooktop",
           "force68": false
-        }
+        },
+        "rawSub": "Cooktops & Downdrafts"
       },
       "description": {
         "title": "Hob unit",
@@ -792,7 +793,8 @@
         "memberTiers": "P",
         "isAccessory": false,
         "isProgrammeAgnostic": false,
-        "depth63": null
+        "depth63": null,
+        "rawSub": "Open & Lights"
       },
       "description": {
         "title": "Vero-glass floor unit",
@@ -1128,7 +1130,8 @@
         "depth63": {
           "mode": "base",
           "force68": false
-        }
+        },
+        "rawSub": "Doors"
       },
       "description": {
         "title": "Floor unit",
@@ -1495,7 +1498,8 @@
         "depth63": {
           "mode": "sink",
           "force68": true
-        }
+        },
+        "rawSub": "Sinks"
       },
       "description": {
         "title": "Sink waste bin unit for hot",
@@ -1779,7 +1783,8 @@
         "depth63": {
           "mode": "tall",
           "force68": false
-        }
+        },
+        "rawSub": "Appliance housing"
       },
       "description": {
         "title": "Appliance door for large capacity appliance",
@@ -1996,7 +2001,8 @@
         "memberTiers": "C",
         "isAccessory": false,
         "isProgrammeAgnostic": false,
-        "depth63": null
+        "depth63": null,
+        "rawSub": "Appliance housing"
       },
       "description": {
         "title": "Front for built-under appliance with drawer- and pullout partitioning with original recessed handle on the front",
@@ -2245,7 +2251,8 @@
         "depth63": {
           "mode": "sink",
           "force68": true
-        }
+        },
+        "rawSub": "Sinks"
       },
       "description": {
         "title": "Sink unit",
@@ -2498,7 +2505,8 @@
         "depth63": {
           "mode": "base",
           "force68": false
-        }
+        },
+        "rawSub": "Special Height"
       },
       "description": {
         "title": "Pullout unit",
@@ -2839,7 +2847,8 @@
         "memberTiers": "PA",
         "isAccessory": false,
         "isProgrammeAgnostic": true,
-        "depth63": null
+        "depth63": null,
+        "rawSub": "Surround"
       },
       "description": {
         "title": "Front panel material",
@@ -3021,7 +3030,8 @@
         "memberTiers": "P",
         "isAccessory": true,
         "isProgrammeAgnostic": false,
-        "depth63": null
+        "depth63": null,
+        "rawSub": "Cabinet Modifications"
       },
       "description": {
         "title": "Cupboard depth alteration",
@@ -3117,7 +3127,8 @@
         "memberTiers": "PAC",
         "isAccessory": true,
         "isProgrammeAgnostic": true,
-        "depth63": null
+        "depth63": null,
+        "rawSub": "Plinth Accessories"
       },
       "description": {
         "title": "Plinth cover profile can be clipped onto 1.6 cm thick material",
@@ -3234,7 +3245,8 @@
         "memberTiers": "PAC",
         "isAccessory": false,
         "isProgrammeAgnostic": true,
-        "depth63": null
+        "depth63": null,
+        "rawSub": "Modular Units"
       },
       "description": {
         "title": "Module Appliance niche with door",
@@ -3712,7 +3724,8 @@
         "memberTiers": "P",
         "isAccessory": false,
         "isProgrammeAgnostic": false,
-        "depth63": null
+        "depth63": null,
+        "rawSub": "Sinks"
       },
       "dupFamilies": [
         {
@@ -3747,6 +3760,232 @@
           }
         }
       ]
+    },
+    {
+      "_ui": {
+        "note": "⭐ 2.5.4 — the INSERT axis. unitFacts.insert (app u.ins) gives this familys cards an extra Insert row after Ty, and re-pools the card: the face and the W row narrow to the picked insert, so W 20 reads ZIGSUV20 here and ZIGSUV20U on the M8 twin (ZIGSUV90U). There is NO separate axis flag - the apps insAx is derived from a member carrying insert.",
+        "clientRule": "The row ships as kind:\"insert\" and is CARD STATE: send insert=<pill.value> on EVERY swap of this card (and variantCode=<Ty pill value>, because the denormalized variantCore encodes the insert too). Never route it by variantCore - both pills are the same variant, Drawer."
+      },
+      "sku": "ZIGSUV90",
+      "kind": "cabinet",
+      "familyId": "FP_16FRONT",
+      "name": "1.6 cm front panel",
+      "category": "Accessories & interior",
+      "subcategory": "Inner drawers & pullouts",
+      "section": "1.6 cm Front Panel",
+      "active": true,
+      "widthMm": 900,
+      "availableTiers": [
+        "P"
+      ],
+      "capabilities": {
+        "alwaysAvailable": true,
+        "nativeTier": null,
+        "opening": null,
+        "twinTiers": [],
+        "excludedPrograms": [],
+        "excludedProgramsE": [],
+        "isFrmatFamily": false,
+        "hasEFront": false,
+        "depthClasses": [],
+        "handleFree": false,
+        "onePieceFront": false,
+        "openP1": false,
+        "openC1": false,
+        "singleHandle": true,
+        "antosoApproved": false,
+        "doorLineJ": false,
+        "doorLineY": false
+      },
+      "unitFacts": {
+        "unitIndex": 22,
+        "tier": null,
+        "opening": null,
+        "agnostic": false,
+        "siblingTiers": null,
+        "widthCode": 90,
+        "depthCode": null,
+        "variantCode": "Drawer",
+        "depthAlterations": null,
+        "insert": "L3/M3"
+      },
+      "familyFacts": {
+        "label": "1.6 cm front panel",
+        "labelGroup": "cm front panel",
+        "isSpecial": false,
+        "dim": "width",
+        "variantLabel": "Type",
+        "numericLabel": null,
+        "variantFormat": null,
+        "variantOrder": {
+          "Drawer": 1,
+          "Drawer + hinge": 2,
+          "Drawer + both": 3,
+          "Pullout": 4,
+          "Pullout + hinge": 5,
+          "Pullout + both": 6
+        },
+        "variantLabels": null,
+        "byProgramme": false,
+        "hasOpeningArticles": false,
+        "hasPrimo": false,
+        "noLine": false,
+        "memberTiers": "PAC",
+        "isAccessory": false,
+        "isProgrammeAgnostic": true,
+        "depth63": null,
+        "rawSub": "Inner drawers & pullouts"
+      },
+      "description": {
+        "title": "1.6 cm front panel for inner drawers L3/M3 in all surround accessory colours",
+        "bullets": [
+          "Package unit: 1 item"
+        ]
+      },
+      "restrictions": [
+        "IGS/IGZ 1.6 cm front",
+        "Pullout-/drawer system L3/M3"
+      ],
+      "finishes": [
+        {
+          "finishCode": "1",
+          "price": 4400
+        },
+        {
+          "finishCode": "2",
+          "price": 4400
+        },
+        {
+          "finishCode": "3",
+          "price": 5600
+        },
+        {
+          "finishCode": "4",
+          "price": 5800
+        },
+        {
+          "finishCode": "5",
+          "price": 6700
+        },
+        {
+          "finishCode": "6",
+          "price": 7500
+        },
+        {
+          "finishCode": "8",
+          "price": 11400
+        }
+      ],
+      "priceUnit": "HLP",
+      "volumeM3": 0,
+      "parameters": {
+        "width": [
+          {
+            "label": "20",
+            "sku": "ZIGSUV20"
+          },
+          {
+            "label": "27",
+            "sku": "ZIGSUV27"
+          },
+          {
+            "label": "30",
+            "sku": "ZIGSUV30"
+          },
+          {
+            "label": "40",
+            "sku": "ZIGSUV40"
+          },
+          {
+            "label": "45",
+            "sku": "ZIGSUV45"
+          },
+          {
+            "label": "50",
+            "sku": "ZIGSUV50"
+          },
+          {
+            "label": "55",
+            "sku": "ZIGSUV55"
+          },
+          {
+            "label": "60",
+            "sku": "ZIGSUV60"
+          },
+          {
+            "label": "70",
+            "sku": "ZIGSUV70"
+          },
+          {
+            "label": "75",
+            "sku": "ZIGSUV75"
+          },
+          {
+            "label": "80",
+            "sku": "ZIGSUV80"
+          },
+          {
+            "label": "90",
+            "sku": "ZIGSUV90"
+          },
+          {
+            "label": "100",
+            "sku": "ZIGSUV100"
+          },
+          {
+            "label": "120",
+            "sku": "ZIGSUV120"
+          }
+        ],
+        "programme": [
+          {
+            "tier": "P",
+            "sku": "ZIGSUV90"
+          }
+        ],
+        "options": [
+          {
+            "group": "Insert",
+            "label": "L3/M3",
+            "sku": "ZIGSUV90"
+          },
+          {
+            "group": "Insert",
+            "label": "M8",
+            "sku": "ZIGSUV90U"
+          },
+          {
+            "group": "Ty",
+            "label": "Drawer",
+            "sku": "ZIGSUV90"
+          },
+          {
+            "group": "Ty",
+            "label": "Drawer + hinge",
+            "sku": "ZIGSEUV45"
+          },
+          {
+            "group": "Ty",
+            "label": "Drawer + both",
+            "sku": "ZIGSDUV90"
+          },
+          {
+            "group": "Ty",
+            "label": "Pullout",
+            "sku": "ZIGZUV90"
+          },
+          {
+            "group": "Ty",
+            "label": "Pullout + hinge",
+            "sku": "ZIGZEUV45"
+          },
+          {
+            "group": "Ty",
+            "label": "Pullout + both",
+            "sku": "ZIGZDUV90"
+          }
+        ]
+      }
     }
   ]
 }
