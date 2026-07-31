@@ -603,14 +603,26 @@ Current facts:
   Extractor emits it (`_unitFacts`), facts dumper + `backfill-grid-facts.js` carry it → re-extract and
   re-ingest safe. Export + `.gz` patched (meta 2.5.4); **D4K-dev backfilled** (92 docs, via
   `backfill-item-fields.js --fields unitFacts`). **⚠️ D4K-prd owes the same 92-doc write** (data-only,
-  inert until `dev` ships). **⚠️ CLIENT ROUTING:** the row is `kind:"variant"` and the React client
-  swapped variant rows by `variantCore`, which **cannot discriminate** (both siblings are `Drawer`) —
-  fixed with the general rule *if the target's `variantCore` equals the card's, it is not the variant
-  axis, swap by sku*. The lite UI already did the right thing. **Verification is not a sweep** — the
-  change is a strict no-op outside the 92 units (`insList().length` gates the row, `selIns()` returns
-  null elsewhere so `insPool` is identity), so only this family can move; the app has exactly TWO row
-  signatures for it over all 8 states (7 × face `ZIGSUV90`, 1 × `ZIGSUV60` at `w60`) and the API
-  reproduces both byte-for-byte, `cardAvailable` unchanged.
+  inert until `dev` ships).
+  **⭐ THE ROW IS CARD STATE — two new query params, and only the browser found that.** The row got
+  its own **`kind:"insert"`** (NOT `variant`: both pills share one `variantCore`, so that route
+  returns the card you are on), plus **`insert`** (= the app's `blockIns`) and **`variantCode`**
+  (= `blockVr`, the Ty pick as `u.vr`). Why each: (1) deriving `selIns` from the FACE works only for
+  a fetch by sku — a family-scoped swap has no face until `_selUnit` has run, so
+  `variantCore=ZIGSUVU&groupBy=family` came back `ZIGSUV90`; (2) the app keeps `blockIns` across
+  `pickWidth`/`pickType`, so both params ride on EVERY swap of an insert-family card or the next pick
+  resets it; (3) `variantCore` encodes the insert too (`ZIGZUV` = L3/M3 pullout, `ZIGZUVU` = M8), so
+  pairing it with `insert` matches nothing and a Ty pick did nothing. Client scopes both to cards
+  that HAVE an insert row → every other card's query is byte-identical (checked on the wire).
+  **Verification:** the grid change is a strict no-op outside the 92 units (`insList().length` gates
+  the row, `selIns()` is null elsewhere so `insPool` is identity), the app has exactly TWO row
+  signatures for this family over all 8 states (7 × face `ZIGSUV90`, 1 × `ZIGSUV60` at `w60`) and the
+  API reproduces both byte-for-byte with `cardAvailable` unchanged; the INTERACTION was then driven
+  in the real React client — `ZIGSUV90 → M8 → W20 → Pullout → L3/M3 → M8 → W60 → Drawer` walks
+  `ZIGSUV90U · ZIGSUV20U · ZIGZUV20U · ZIGZUV20 · ZIGZUV20U · ZIGZUV60U · ZIGSUV60U`, all 8 the app's
+  answer. ⚠️ Traps hit: a stale `next dev` on :3000 served pre-fix code (the §N restart trap AGAIN),
+  and FIVE buttons on that page read "M8" — four are `Ty` pills on other cards, so scope a pill
+  lookup to its ROW (`span[title="Insert"]`), never to its label.
 
 - **⭐ FRONTEND v2.5 IMPLEMENTED (2026-07-31).** `D4K-frontend` branch **`feat/design-book-v2.5`**
   (3 commits @ `638de925`, cut from `origin/dev` `25b19af9`; **PR #2328 MERGED to `dev` 2026-07-31**,

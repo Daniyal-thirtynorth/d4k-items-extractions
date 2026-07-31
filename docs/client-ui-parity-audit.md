@@ -1673,11 +1673,24 @@ a click is an ordinary sku swap.
   init touch is `move()`, which changes cat/sub/sec), so the backfill reads it straight from
   `<script id="DATA">` — **no parity run, no browser**. Extractor emits it from now on
   (`_unitFacts`), so a re-extract is safe; the facts dumper and `backfill-grid-facts.js` carry it too.
-* **⚠️ Client routing.** The row is `kind: "variant"`, and the React client swapped variant rows by
-  `variantCore` — which **cannot discriminate here** (`ZIGSUV90` and `ZIGSUV90U` are both `Drawer`),
-  so the M8 pill would have re-fetched the card it was on. Fixed with the general rule: *if the
-  target's `variantCore` equals the card's, the row is not the variant axis — swap by sku.* The lite
-  UI already did the right thing (`kind==='variant'` → `swapCard(pl.sku)`).
+* **⚠️ CARD STATE is the whole difficulty, and it took the browser to find it.** The row started as
+  `kind:"variant"` on the theory that a client swaps it by `pill.sku`. Driving the real React client
+  disproved that twice:
+  1. The client routes a variant row by the denormalized `variantCore`, and here that **does**
+     differ (`ZIGSUV` vs `ZIGSUVU`) — so it looked routable. But the swap query
+     `familyId + variantCore=ZIGSUVU + groupBy=family` came back **`ZIGSUV90`**: a family-scoped
+     query has no FACE until `_selUnit` has run, so `selIns` had nothing to read and fell back to
+     the row's first insert. Deriving `selIns` from the face only works for a fetch BY SKU.
+  2. Routing the Insert pill by sku alone would still lose it on the NEXT pick — the app keeps
+     `blockIns` across `pickWidth`/`pickType`, so `M8 → W20` must give `ZIGSUV20U`.
+  So the row got its own **`kind:"insert"`** and the state became two query params, the stateless
+  twins of the app's own card state: **`insert`** (`blockIns`) and **`variantCode`** (`blockVr`).
+  The second is needed because `variantCore` encodes the insert too (`ZIGZUV` = L3/M3 pullout,
+  `ZIGZUVU` = M8) — pairing it with `insert` matches nothing, so a Ty pick on an M8 card did
+  nothing. Both are scoped client-side to cards that HAVE an insert row, so every other card's
+  query is byte-identical (confirmed on the wire: a Base Ty swap still sends
+  `familyId=F344&variantCore=FSUEL&widthMm=16&heightCode=80`, no new params). Lite UI routes the
+  row by sku — enough for a dev tool, and it is what the parity harness scrapes.
 
 ### Verification
 
@@ -1691,6 +1704,20 @@ the app has exactly **two** row signatures for this family over all 8 states (7 
 app   base | W:…,90*,… || Ty:Drawer*,… || Insert:L3/M3*,M8
 ours  base | W:…,90*,… || Ty:Drawer*,… || Insert:L3/M3*,M8      (also w60, d68, tierC, all 3 programmes)
 ```
+
+The INTERACTION was then driven in the real React client, which is the only way the two state bugs
+above surface. Eight picks, composing all three axes in both directions, every step the app's answer:
+
+```
+ZIGSUV90 [90+Drawer+L3/M3]
+  M8   → ZIGSUV90U    W20  → ZIGSUV20U    Pullout → ZIGZUV20U   L3/M3 → ZIGZUV20
+  M8   → ZIGZUV20U    W60  → ZIGZUV60U    Drawer  → ZIGSUV60U   L3/M3 → ZIGSUV60
+```
+
+⚠️ Two harness traps, both mine, both worth remembering: a stale `next dev` was squatting :3000 (so
+the first run served pre-fix code — the §N restart trap, third time this session), and **five buttons
+on that page read "M8"** — four are `Ty` pills on other cards. Scope a pill lookup to its ROW
+(`span[title="Insert"]`), never to its label.
 
 **E2 is now ten buckets at zero.** The remaining known items are §R4 (the `XCRV` app bug, E3, do not
 match) and the un-swept v376 Avance line-80 clause above.

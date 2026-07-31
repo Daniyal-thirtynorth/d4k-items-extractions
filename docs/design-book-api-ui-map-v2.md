@@ -1203,29 +1203,44 @@ gridRows: [
   there. The DRAWER keeps `parameters.*` — that IS the app's detail model (§2c-4, §2c-10).
 * Row order is the app's: `Line → H → W → D → Ty → Insert` (+ the `217+` chip on H, §2c-3).
 
-**⭐ The `Insert` row (2.5.4) — a variant-kind row you must click by SKU.** A family whose units carry
+**⭐ The `Insert` row (2.5.4) — `kind:"insert"`, and it is CARD STATE.** A family whose units carry
 `unitFacts.insert` (the app's `u.ins`) draws one more row after `Ty`, from its distinct values with
 `L3/M3` floated first:
 
 ```jsonc
-{ label: "Insert", kind: "variant", pills: [
+{ label: "Insert", kind: "insert", pills: [
     { label: "L3/M3", value: "L3/M3", sku: "ZIGSUV90",  selected: true,  off: false },
     { label: "M8",    value: "M8",    sku: "ZIGSUV90U", selected: false, off: false } ] }
 ```
 
-Every pill is LIVE — the app's chips carry neither `wn` nor `disabled`, only `sel`. It is a SECOND
-axis over the same variant (`ZIGSUV90` and `ZIGSUV90U` are both `Drawer`), so:
+Every pill is LIVE — the app's chips carry neither `wn` nor `disabled`, only `sel`. Picking one
+re-pools the WHOLE card: the **W row retargets** to that insert's siblings (`20 → ZIGSUV20U …`) and
+the face follows, because the app's `insPool` narrows both `_selUnit` and the W row's source. The
+server does all of that; what it cannot do is remember which insert you picked.
 
-* **⚠️ Swap by `pill.sku`, never by `variantCore`** — the two pills share one `variantCore`, so a
-  `familyId + variantCore` query re-fetches the card you are already on. This is the one variant-kind
-  row where the refs-map route is wrong; the general client rule is *if the target's `variantCore`
-  equals the card's, the row is not the variant axis — use the sku*.
-* Picking it re-pools the whole card: the **W row retargets** to that insert's siblings
-  (`20 → ZIGSUV20U …`) and the face follows, because the app's `insPool` narrows both `_selUnit` and
-  the W row's source. The server does that for you — the swapped-in card comes back with the new W row.
+**Two new query params — the stateless twins of the app's `blockIns` / `blockVr`:**
+
+| param | app | send it |
+|---|---|---|
+| `insert=<pill.value>` | `blockIns[b.id]` | on **every** swap of an insert-family card, not just the Insert pill |
+| `variantCode=<Ty pill.value>` | `blockVr[b.id]` | on every swap of an insert-family card — see the trap below |
+
+* **⚠️ Do NOT route this row like a variant row.** Both pills share one `variantCore` (`ZIGSUV90` and
+  `ZIGSUV90U` are each `Drawer`), so a `familyId + variantCore` query returns the card you are on.
+* **⚠️ And on these cards do not route the Ty row by `variantCore` either.** That stem encodes the
+  insert as well — `ZIGZUV` is the L3/M3 pullout, `ZIGZUVU` the M8 one — so pairing it with `insert`
+  matches nothing and the Ty pick silently does nothing. Send `variantCode` (the app's own `u.vr`,
+  which IS the Ty pill's `value`).
+* **⚠️ Carry BOTH on width and height picks too.** A family-scoped swap has no face until the server
+  has picked one, so a missing param falls back to the family default: pick `M8`, then `W20`, and
+  without `insert` you land on `ZIGSUV20` (L3/M3); pick `M8` on a Pullout without `variantCode` and
+  you get a Drawer. Verified composing in both directions —
+  `ZIGSUV90 → M8 → W20 → Pullout → L3/M3 → M8 → W60 → Drawer` walks
+  `ZIGSUV90U · ZIGSUV20U · ZIGZUV20U · ZIGZUV20 · ZIGZUV20U · ZIGZUV60U · ZIGSUV60U`.
+* Both params are inert on every other card, so scope them to cards that HAVE an insert row (read the
+  card's current values off `gridRows` — the selected pill of the `insert` / `variant` row).
 * The app gates the row on the raw family flag `b.insAx`, which is NOT exported: it is 1:1 with "a
   member carries `ins`" (v781: one family both ways — `FP_16FRONT`, 92 units), so the axis is DERIVED.
-  There is no per-card state to keep — the FACE answers `selIns`.
 
 **Toolbar inputs.** Rows are computed for the request's toolbar, so a card fetched for a swap must
 carry the same state or its rows come back uncollapsed:

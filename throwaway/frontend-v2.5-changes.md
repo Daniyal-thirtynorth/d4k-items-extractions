@@ -612,27 +612,52 @@ Every candidate also carries `groupBy=family&limit=1&grey=true&refs=true` **and 
 | **height** | `items?familyId=…&heightCode=<value>&widthMm=<card's>` | drop `widthMm` |
 | **width** | `items?familyId=…&widthMm=<value×10>&heightCode=<card's>` | drop `heightCode` (**keep the width**) |
 | **variant** | `items?familyId=…&variantCore=<refs[pill.sku].variantCore>&widthMm&heightCode` | drop `widthMm`, then `heightCode`, then fall back to `items?sku=<pill.sku>` |
-| **variant, `Insert` row** (2.5.4, §S) | ⚠️ `items?sku=<pill.sku>` **only** — see below | — |
+| **insert** (2.5.4, §S) | `items?familyId=…&insert=<pill.value>&widthMm=<card's>` | drop `widthMm` |
 | **depth** | `pill.sku === card.sku` ⇒ **no request** (state pill, v2.2 §2c-2); else `items?sku=<pill.sku>` **+ the toolbar, ungrouped** — this is also the whole handler for the all-sibling D row (R3 note, §P) | — |
 | **line** | not modelled — see "unverified" | — |
 
-**⭐ The `Insert` row is the exception to "never `pill.sku`" (2.5.4 / audit §S).** A family whose units
-carry `unitFacts.insert` draws an extra `kind:"variant"` row labelled **`Insert`** after `Ty`
-(`L3/M3` · `M8`, every pill live). It is a SECOND axis over the SAME variant — `ZIGSUV90` and
-`ZIGSUV90U` are both `Drawer` — so `variantCore` cannot discriminate and the family-scoped query
-re-fetches the card you are on. Route it by sku. The general rule, and the one implemented:
+**⭐ The `Insert` row (2.5.4 / audit §S) — a new `kind`, and it is CARD STATE.** A family whose units
+carry `unitFacts.insert` draws an extra row labelled **`Insert`** after `Ty` (`L3/M3` · `M8`, every
+pill live), with `kind: "insert"`. Two new query params carry the state the server cannot keep — the
+stateless twins of the app's `blockIns` / `blockVr`:
 
 ```ts
-// unit-card.tsx, case "variant"
-const vc = pageRefs.get()[p.sku ?? ""]?.variantCore;
-const vcDiscriminates = vc != null && vc !== active.variantCore;   // ← the guard
-return setSwap([ ...(vcDiscriminates ? [ …familyId+variantCore candidates… ] : []),
-                 ...(p.sku ? [{ ...stateQ, groupBy: undefined, sku: [p.sku], full: true }] : []) ]);
+// the card's own value on a server-computed row = its card state
+const rowPick = (kind: GridRow["kind"]) =>
+  (active.gridRows || []).find(r => r.kind === kind)
+    ?.pills.find(p => p.selected)?.value?.toString() ?? undefined;
+
+const stateQ: ItemsQuery = {
+  …,
+  insert: rowPick("insert"),
+  // only on insert-family cards: elsewhere the server's faceVariantCore rank already
+  // preserves the variant, and pinning it would change measured behaviour
+  variantCode: rowPick("insert") ? rowPick("variant") : undefined,
+};
+
+case "insert":                                   // `insert` AFTER the spread — stateQ holds the OLD pick
+  return setSwap([
+    { ...stateQ, familyId: famId, insert: String(p.value), widthMm: active.widthMm },
+    { ...stateQ, familyId: famId, insert: String(p.value) },
+  ]);
 ```
 
-Nothing else changes: the swapped-in card comes back with its **W row already retargeted** to that
-insert's siblings (`20 → ZIGSUV20U …`) and `Insert: M8*`, because the server applies the app's
-`insPool` to the face pick and the W row. Only one family in v781 (`FP_16FRONT`, 92 units).
+Three traps, all of them things that silently do nothing rather than error:
+
+1. **Do not route it as a variant.** Both pills share one `variantCore` (`ZIGSUV90` and `ZIGSUV90U`
+   are each `Drawer`), so `familyId + variantCore` returns the card you are on.
+2. **On these cards, do not route the Ty row by `variantCore` either** — that stem encodes the
+   insert too (`ZIGZUV` = L3/M3 pullout, `ZIGZUVU` = M8), so pairing it with `insert` matches
+   nothing. Send `variantCode` (the Ty pill's own `value`) instead, and clear `variantCode` from
+   the `variantCore` candidates or the two contradict.
+3. **Both params ride on W and H picks too**, or the next pick resets the card: `M8` then `W20`
+   without `insert` lands on `ZIGSUV20` (L3/M3).
+
+Verified in the browser, eight picks composing all three axes in both directions:
+`ZIGSUV90 → M8 → W20 → Pullout → L3/M3 → M8 → W60 → Drawer` walks
+`ZIGSUV90U · ZIGSUV20U · ZIGZUV20U · ZIGZUV20 · ZIGZUV20U · ZIGZUV60U · ZIGSUV60U`. Non-insert cards
+are untouched — a Base Ty swap still sends `familyId=F344&variantCore=FSUEL&widthMm=16&heightCode=80`.
+One family in v781 (`FP_16FRONT`, 92 units).
 
 Real answers (all verified):
 
