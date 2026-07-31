@@ -584,6 +584,12 @@ Current facts:
   anywhere combines line 80 with a programme** — exactly one `line=80` state exists and it carries no
   programme. Add the state and MEASURE before porting.
 
+- **⭐⭐ CURRENT HANDOFF: `docs/parity-session-handoff-2026-07-31.md`** — supersedes the 07-28/29/30
+  files (kept as history). It carries the live task board, the data ledger for BOTH clusters, the
+  four sanity curls, and eleven traps. **Top of that board: the backend `dev` → prd release (3
+  commits, code-only — the 2.5.4 data is already on prd) and the frontend follow-up PR (2 commits,
+  which must NOT merge before the backend ships).**
+
 - **⭐ §S — THE `Insert` ROW; E2 IS TEN BUCKETS AT ZERO (2026-07-31, audit §S, map §2c-11,
   schemaVersion **2.5.4** — the FIRST contract change since 2.5.3, additive).** The last non-app-bug
   diff in either leg: E2 `ROWSET 8`, all `FP_16FRONT`, client `[Insert, Ty, W]` vs our `[Ty, W]`.
