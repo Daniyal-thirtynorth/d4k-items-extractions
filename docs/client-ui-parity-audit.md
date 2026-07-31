@@ -1523,3 +1523,101 @@ gate, and untouched by Q3).
 `Pilasters|line73` (`XAG_Pa_a989a3` ours-only), `Side panels W|progP_BOSSA` (client has `XCRV_WF5R`,
 `XCRV_WFI5R`, `CURVED_IslandCurvedSidePanel`; we have the `_M` variants of two of them — looks like a
 variant-family split, not a gate), `Wall Cladding|line73` (`PPM3234` ours-only).
+
+---
+
+## §R — TASK 1 MEASURED, AND TWO MORE OFF THE RESIDUE (2026-07-31)
+
+Pure backend logic again — **no data change, no backfill, no contract change; schemaVersion stays
+2.5.3.** Backend `dev` @ `470c8003` (rebased onto `c0f45d44`, an unrelated `src/project/contract.*`
+change someone else pushed mid-session).
+
+### R1 — §Q1 confirmed by sweep (task 1, the E3 half)
+
+§Q1 and §Q3 shipped hand-verified. The E3 leg now measures them, 200/200 states, 0 missing keys:
+
+| bucket | `report-E3d` (pre-§Q) | `report-E3e` (post-§Q) |
+|---|---|---|
+| GREY | 2 | **0** |
+| ORDER | 2 | **0** |
+| MEMBER · SECT · GREY_NOT_HIDE | 3 · 1 · 1 | 3 · 1 · 1 |
+
+Everything else was 0 before and stayed 0. **§Q1 is measured, not just argued.**
+
+### R2 — ⭐ `lineCardOk` read the STORED height where the app DERIVES it
+
+The app's own comment (v93) says what we missed: *"Many tall units carry no hc (height lives in the
+code/H mm) — derive the code from H mm"*.
+
+```js
+const th=[...new Set(b.units.map(tallHC).filter(h=>h!=null))];   // ← tallHC, not u.hc
+if(th.length) return th.some(h=>sys.has(h));
+return true;                                                     // non-line family (accessories etc.)
+```
+```js
+function tallHC(u){ if(u.hc!=null&&(TALL_H80.has(u.hc)||TALL_H73.has(u.hc))) return u.hc;
+  if(u.H==null) return null; for(const c of TALLC){ if(Math.abs(u.H-c*10)<=8) return c; } return null; }
+const TALLC=[146,153,190,197,204,210,217,224];
+```
+
+Ours filtered the raw `hc` to the two system sets. A family whose tall height exists **only** as
+`heightMm` therefore yielded an empty `tall`, fell through to the permissive `return true`, and was
+never hidden at a line it has nothing at. **`tallHC` was already ported in `design-book.grid-rows.ts`
+and simply was not called** — a one-line fix, the second time this session a helper existed and the
+call site read the raw field instead (cf. §O4-2, §R3).
+
+Measured against the client, exactly: `Pilasters` 7 → **6** (`XAG_Pa_a989a3`, tallHC `[146]`,
+80-system only) · `Wall Cladding` 2 → **1** (`PPM3234`, `[190]`). Their own siblings — `_B` `[153…]`,
+`_C` `[217,224]` — are 73-system and correctly stay. **E3 MEMBER 3 → 1.**
+
+### R3 — ⭐ a dup membership was wearing the PRIMARY's category, and `codeLoc` picks by category
+
+`poolByFamily` already gives each dup membership its own `unitFacts` (§O4-2). `category` is the same
+bug and is load-bearing: `familyBySku` indexes the pool by sku, and `locateFamily` — our port of the
+app's `codeLoc` — breaks a tie with *"the family in the CURRENT category"*. With both memberships of a
+shared code reporting the primary's category, that tie-break degraded to **Map insertion order**.
+
+`WFAUKS` @BOSSA: `unitFacts.tier 'A'`, `siblingTiers 'PA'`, and the sku does not start with `A`/`C`,
+so `core(u) === sku` and the v98 **sibling code is `WFAUKS` itself**. The app resolves it to `PNL_ACC`
+— the card's own family — so `target === card.familyId` and it does **not** swap. We resolved it to
+the dup `PS_WAUKS_RECESS` (`Panels & surround`), swapped, and thereby dragged a foreign sub into the
+set, made it multi-sub, and lost the section header (§O2). One field, two buckets:
+**E2 MEMBER 1 + SECT 1**, both verified fixed (`WFAUKS` back under `PNL_ACC`, header restored).
+
+### R4 — ⚠️ the last E3 diff is an APP BUG. Do not match it.
+
+`Side panels W|progP_BOSSA` is the whole of E3's remaining residue (MEMBER 1 + SECT 1 +
+GREY_NOT_HIDE 1). The client shows `XCRV_WF5R`, `XCRV_WFI5R`, `CURVED_IslandCurvedSidePanel`; we show
+the `CURVED_*_M` families. **The codes rendered are identical on both sides** — only the family
+attribution differs — and the two sides agree in *every other state* (base · d68 · line73 · LAIKA ·
+ROCCA · tierC). It looked like §N's bad-sample trap; it is not, and it is not ours either:
+
+```js
+splitFam('CURVED_CurvedSidePanel',       'Curved Side Panel',        1);
+splitFam('CURVED_IslandCurvedSidePanel', 'Island Curved Side Panel', 3);
+['XCRV_WF5R','XCRV_WF15R','XCRV_WFI5R','XCRV_WFI15R'].forEach(function(id){
+  var i=FAMS.findIndex(f=>f.id===id); if(i>=0) FAMS.splice(i,1); });   // ← REMOVED from FAMS
+});
+```
+
+The app splits those families and then **deletes** the `XCRV_*` originals — but `CODE_INDEX` (byte
+16,499,634) and `FAM_BY_ID` (16,604,814) are both built **before** the splice (16,675,665), so both
+keep entries for the deleted families. Under a programme the v98 swap calls
+`codeLoc('WF5R36') → XCRV_WF5R → FAM_BY_ID[...]` and renders a card for a family `FAMS` no longer
+contains. Our export is taken post-init and correctly has no `XCRV_*` family at all
+(`GET items?familyId=XCRV_WF5R` → 0 units), so matching this would mean **re-adding families the app
+itself removed**. Left as-is deliberately, like §O4-3's duplicate `217`.
+
+**E3 residue: 1 state / 3 buckets, all of it R4.** Everything else on E3 is 0.
+
+### Open
+
+* **E2** — measurement of §Q3 + R3 was still running at write-up; expect `GREY 12 → 0` and
+  `MEMBER 1 / SECT 1 → 0`, leaving `ROWSET 8` (`FP_16FRONT`'s `Insert` row, the one genuine data gap).
+* ⚠️ **`lineCardOk` is missing the app's v376 clause** and it is **completely un-swept** — no plan
+  state anywhere combines line 80 with a programme (checked: exactly one `line=80` state, no
+  programme). The app has
+  `if(state.progMap && (activeFamFor('Base')==='A'||activeFamFor('Tall')==='A') && state.line==='80'
+  && activeFamFor(b.cat)!=='A') return true;` — an Avance line-80 lock that exempts non-Avance zones.
+  Ours would hide cards the app keeps. **Add a `line80 + progA_*` state to a plan and measure before
+  porting it** — do not add unmeasured logic.
