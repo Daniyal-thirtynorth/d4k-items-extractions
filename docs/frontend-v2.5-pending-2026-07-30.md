@@ -119,6 +119,14 @@ Two fixes beyond the step list, both from the guide's "API changes since round 3
 
 ## 2 · PENDING — ranked
 
+> **None of these is an integration gap.** Every v2.5 backend change has a working, verified frontend
+> consumer (§0 and the second pass). What is left is a rendering *choice* (7d), a click the backend
+> does not model either (the `Line` row), dead code, and params with no UI control to drive them —
+> which the guide scoped out. In particular **FRONTS `P1`/`C1` is `tier`, not `opening`**, and it is
+> wired and verified: clicking P1 sends `tier=P1`, returns 28 cards, all `P1…` articles, 0 diffs.
+> `opening` is a *different* toolbar input the app has and this UI does not, and it is provably inert
+> without a control (§P3 — every `byProgramme` family has an `opening:null` unit).
+
 | # | Item | Why it's open |
 |---|---|---|
 | **1** | ✅ **DONE.** 22 states / ~760 cards / 0 diffs plus the second pass above; Check rows 3, 4, 5, 7, 8, 13, 16a, 16c, 17 and 19–21 all confirmed. One defect found and fixed (`638de925`). Left open only where a backend gap already explains it (§3). |
