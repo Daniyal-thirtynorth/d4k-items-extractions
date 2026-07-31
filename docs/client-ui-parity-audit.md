@@ -1612,8 +1612,12 @@ itself removed**. Left as-is deliberately, like §O4-3's duplicate `217`.
 
 ### Open
 
-* **E2** — measurement of §Q3 + R3 was still running at write-up; expect `GREY 12 → 0` and
-  `MEMBER 1 / SECT 1 → 0`, leaving `ROWSET 8` (`FP_16FRONT`'s `Insert` row, the one genuine data gap).
+* **E2 — DONE, and it is nine buckets at zero** (`report-E2g.json`, 298/298 states, 0 missing).
+  **§Q3 confirmed: `GREY 12 → 0`. R3 confirmed: `MEMBER 1 → 0`, `SECT 1 → 0`.** The only residue is
+  `ROWSET 8` — every one of them `FP_16FRONT` (`ZIGSUV90`/`ZIGSUV60`, client `[Insert, Ty, W]` vs our
+  `[Ty, W]`) across all 8 toolbar states. That is the one genuine DATA gap: it needs per-unit `u.ins`
+  in the contract (extractor + export + backfill), and it is the only known grid gap in either leg
+  that is not pure backend logic.
 * ⚠️ **`lineCardOk` is missing the app's v376 clause** and it is **completely un-swept** — no plan
   state anywhere combines line 80 with a programme (checked: exactly one `line=80` state, no
   programme). The app has

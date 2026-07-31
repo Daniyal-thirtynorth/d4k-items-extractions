@@ -45,6 +45,13 @@ bucket byte-identical to the pre-fix baseline. `out/report-E3d.json`.)*
 
 ---
 
+> **⭐ Updated 2026-07-31 (§R).** Task 1 is DONE — both legs measured, and two more causes fixed
+> along the way. **E2 = 9 buckets at ZERO** (298 states; only `ROWSET 8`, the `FP_16FRONT` `Insert`
+> data gap, remains). **E3 = one state left**, and it is an APP BUG (§R4), so E3 is effectively
+> closed too. Backend `dev` @ `470c8003`. Next real work is task 4 (`u.ins`) or task 5 (the sidebar).
+> ⚠️ New finding worth a plan state before anything else: `lineCardOk` is missing the app's **v376
+> Avance line-80 lock**, and NO plan anywhere combines line 80 with a programme — it is un-swept.
+
 ## 1. START HERE — first 20 minutes
 
 ```bash
@@ -99,10 +106,10 @@ node scripts/parity/diff.js scripts/parity/out/client-E3.json \
 | — | D4K-prd data ledger | ✅ closed 07-30 (see §3) |
 | — | the prd RELEASE | ✅ **complete** — two passes, `origin/main` @ `54c2af2e` (see §3) |
 | **0** | ~~ship §Q to prd~~ | ✅ **done 07-30** — PR #2975 + #2976, `origin/main` @ `54c2af2e`, `dev` no longer ahead. If prd deploys via CI, run the two curls in §3 to confirm the rollout |
-| **1** | re-sweep **E3 + E2** → confirm §Q1 and §Q3 (above) | ⬜ next |
-| **2** | ~~E2 GREY 12~~ | ✅ **fixed — §Q3.** `famOkB`'s `Alteration` category escape. What is LEFT on E2 is `MEMBER 1 + SECT 1`: `Alteration › Side Panel Modifications` @BOSSA, client `PNL_ACC` vs our `PS_WAUKS_RECESS` (+ the `Sink, Fillers & Panels` header). Looks like a swap/split, not a gate |
-| **3** | **E3 MEMBER 3** — `Pilasters\|line73` (`XAG_Pa_a989a3`), `Side panels W\|progP_BOSSA` (`CURVED_*_M` vs the plain codes), `Wall Cladding\|line73` (`PPM3234`) | ⬜ open — three single-family cases, look like variant-family splits rather than gates |
-| **4** | the `Insert` row, 8 ROWSET diffs (`FP_16FRONT`, 92 units) | ⬜ open — **needs per-unit `u.ins`**: extractor + export + contract + backfill. The ONLY known grid gap that is not pure logic |
+| **1** | ~~re-sweep E3 + E2 → confirm §Q1 and §Q3~~ | ✅ **done 07-31 (§R).** Both legs measured. §Q1: E3 `GREY 2→0`, `ORDER 2→0` over 200 states. §Q3: E2 `GREY 12→0` over 298. Two MORE causes found and fixed in the same pass (`lineCardOk` must DERIVE the tall height; dup memberships need their own `category`) — see §R2/§R3. **E2 is now 9 buckets at ZERO**; E3's whole residue is one state and is an APP BUG (§R4) |
+| **2** | ~~E2 `MEMBER 1 + SECT 1`~~ | ✅ **fixed — §R3.** `poolByFamily` gave every dup membership the PRIMARY's `category`, so `locateFamily`'s "prefer the current category" tie-break degraded to Map order and the v98 swap resolved `WFAUKS` to `PS_WAUKS_RECESS` instead of its own `PNL_ACC` — which also cost the section header (§O2). One field, both buckets |
+| **3** | ~~E3 MEMBER 3~~ | ✅ **2 of 3 fixed — §R2** (`lineCardOk` now calls `tallHC`, which derives the height from `heightMm`: `XAG_Pa_a989a3` and `PPM3234` are 80-system-only and now hide at line 73). **The third is an APP BUG — do not match it (§R4):** the app splices `XCRV_*` out of `FAMS` *after* `CODE_INDEX`/`FAM_BY_ID` are built, so `codeLoc` still resolves to families it deleted. Our data correctly has none |
+| **4** | the `Insert` row, 8 ROWSET diffs (`FP_16FRONT`, 92 units) | ⬜ **open — and now the ONLY thing left on E2/E3 that is not an app bug.** Needs per-unit `u.ins`: extractor + export + contract + backfill |
 | **5** | ⭐ **Design-Tasks sidebar — `functionalGroups` per MEMBERSHIP** (§O5, T1's 144 diffs) | ⬜ deferred by decision. Sidebar says 87, grid returns 91 (app 87/87). `leafId` is fine, `groupKey` is not. Extractor + export + contract + backfill, and the taxonomy has NEVER been swept |
 | **6** | un-swept surfaces: `grey=true` (15 states), `page>1`, the detail drawer, `tallH*`+`antoso` together | ⬜ open — `GET tall-heights` ignores `antoso`; **add the combined state before fixing it**, there is no measurement behind that one |
 | **7** | tall `Line` row click | ⬜ open — only if the client asks |
