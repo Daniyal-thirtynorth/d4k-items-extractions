@@ -576,15 +576,45 @@ Current facts:
   Our export is post-init and correctly has no `XCRV_*` at all, so matching it would mean re-adding
   deleted families. Left alone, like §O4-3's duplicate `217`.
   **Where both legs stand: E2 = 9 buckets at ZERO** (298 states; only `ROWSET 8`, all `FP_16FRONT`,
-  the one genuine DATA gap needing per-unit `u.ins`). **E3 = one state, and it is §R4.**
+  the one genuine DATA gap needing per-unit `u.ins` — **✅ CLOSED, see §S below**). **E3 = one state,
+  and it is §R4.**
   **⚠️ NEW un-swept gap recorded, deliberately NOT patched:** `lineCardOk` is missing the app's
   **v376 Avance line-80 lock** (`if(state.progMap && (activeFamFor('Base')==='A'||activeFamFor('Tall')
   ==='A') && state.line==='80' && activeFamFor(b.cat)!=='A') return true;`) and **no plan state
   anywhere combines line 80 with a programme** — exactly one `line=80` state exists and it carries no
   programme. Add the state and MEASURE before porting.
 
+- **⭐ §S — THE `Insert` ROW; E2 IS TEN BUCKETS AT ZERO (2026-07-31, audit §S, map §2c-11,
+  schemaVersion **2.5.4** — the FIRST contract change since 2.5.3, additive).** The last non-app-bug
+  diff in either leg: E2 `ROWSET 8`, all `FP_16FRONT`, client `[Insert, Ty, W]` vs our `[Ty, W]`.
+  The app has **three** `u.ins` call sites, not one: `_selUnit` `:2673` (`pool=insPool(b,pool)` — the
+  FACE is picked inside the chosen insert), `renderGrid` `:5006` (`_src` — so the **W row retargets**,
+  `20 → ZIGSUV20U` under M8) and `:5042` (the row itself, LAST, after `Ty`). Chips carry neither `wn`
+  nor `disabled` — every pill LIVE, only the picked one `sel` — and unlike the depth STATE row each
+  lands on a **real stored sibling** (`ZIGSUV20` ↔ `ZIGSUV20U`), so a click is an ordinary sku swap.
+  **Only `u.ins` ships (`UnitFacts.insert`); `insAx` is DERIVED** — in v781 the flag is 1:1 with "a
+  member carries `ins`" (one family both ways: `FP_16FRONT`, 92 units, `L3/M3` vs `M8`), and
+  `scripts/backfill-insert-axis.js` **asserts** that and exits non-zero if a future catalog breaks it
+  (the moment to store `FamilyFacts.insertAxis`). Same call as `vfin` (§P). **Stateless `selIns`: the
+  FACE answers it** — `_selUnit` pools by it, so the face's own `ins` IS the picked one; verified
+  round-trip `GET items?sku=ZIGSUV90U` → `Insert: L3/M3, M8*` + a W row on the `…U` skus.
+  **Data:** `u.ins` is a RAW per-unit field init never rewrites (`FP_16FRONT`'s only touch is
+  `move()`), so the backfill reads `<script id="DATA">` directly — **no parity run, no browser**.
+  Extractor emits it (`_unitFacts`), facts dumper + `backfill-grid-facts.js` carry it → re-extract and
+  re-ingest safe. Export + `.gz` patched (meta 2.5.4); **D4K-dev backfilled** (92 docs, via
+  `backfill-item-fields.js --fields unitFacts`). **⚠️ D4K-prd owes the same 92-doc write** (data-only,
+  inert until `dev` ships). **⚠️ CLIENT ROUTING:** the row is `kind:"variant"` and the React client
+  swapped variant rows by `variantCore`, which **cannot discriminate** (both siblings are `Drawer`) —
+  fixed with the general rule *if the target's `variantCore` equals the card's, it is not the variant
+  axis, swap by sku*. The lite UI already did the right thing. **Verification is not a sweep** — the
+  change is a strict no-op outside the 92 units (`insList().length` gates the row, `selIns()` returns
+  null elsewhere so `insPool` is identity), so only this family can move; the app has exactly TWO row
+  signatures for it over all 8 states (7 × face `ZIGSUV90`, 1 × `ZIGSUV60` at `w60`) and the API
+  reproduces both byte-for-byte, `cardAvailable` unchanged.
+
 - **⭐ FRONTEND v2.5 IMPLEMENTED (2026-07-31).** `D4K-frontend` branch **`feat/design-book-v2.5`**
-  (3 commits @ `638de925`, cut from `origin/dev` `25b19af9`, pushed, PR not yet opened) implements 7
+  (3 commits @ `638de925`, cut from `origin/dev` `25b19af9`; **PR #2328 MERGED to `dev` 2026-07-31**,
+  merge commit `34610156`) implements 7
   of the 8 steps in `throwaway/frontend-v2.5-changes.md`: `gridRows` rendered verbatim, one click
   dispatcher by `familyId`+`pill.value`, the toolbar carried on every swap, `lineState`, `antoso`
   (not `suspended`), `cardAvailable`, and the authoring dialog's missing fields. **Verified in a

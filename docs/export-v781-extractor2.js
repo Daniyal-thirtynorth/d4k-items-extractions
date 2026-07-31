@@ -606,6 +606,10 @@ function _unitFacts(u,f){
     // is literally `null` never matches one whose hc is `undefined`. 4 units in v781 (all ANBL)
     // are null — that is what keeps ANBL's W and D rows off the card.
     heightCodeNull: u.hc===null?true:undefined,
+    // u.ins — the "Insert" row key. Its PRESENCE is the app's family flag `b.insAx` (1:1 in v781:
+    // one family, FP_16FRONT, 92 units, 'L3/M3' vs 'M8'), so readers derive the axis rather than
+    // store it. Omitted on the other 18,304 units.
+    insert: u.ins!=null?u.ins:undefined,
   };
 }
 // the FAMILY half of the grid-row inputs. Shared: every item carries its own family's copy, and a

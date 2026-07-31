@@ -1201,7 +1201,31 @@ gridRows: [
   `dead` — `disabled` (no unit behind it). `sku` — the unit the pill lands on (null ⇒ resolve by value).
 * **Render `gridRows` verbatim on grid cards.** Do not re-derive, do not fall back to `parameters.*`
   there. The DRAWER keeps `parameters.*` — that IS the app's detail model (§2c-4, §2c-10).
-* Row order is the app's: `Line → H → W → D → Ty` (+ the `217+` chip on H, §2c-3).
+* Row order is the app's: `Line → H → W → D → Ty → Insert` (+ the `217+` chip on H, §2c-3).
+
+**⭐ The `Insert` row (2.5.4) — a variant-kind row you must click by SKU.** A family whose units carry
+`unitFacts.insert` (the app's `u.ins`) draws one more row after `Ty`, from its distinct values with
+`L3/M3` floated first:
+
+```jsonc
+{ label: "Insert", kind: "variant", pills: [
+    { label: "L3/M3", value: "L3/M3", sku: "ZIGSUV90",  selected: true,  off: false },
+    { label: "M8",    value: "M8",    sku: "ZIGSUV90U", selected: false, off: false } ] }
+```
+
+Every pill is LIVE — the app's chips carry neither `wn` nor `disabled`, only `sel`. It is a SECOND
+axis over the same variant (`ZIGSUV90` and `ZIGSUV90U` are both `Drawer`), so:
+
+* **⚠️ Swap by `pill.sku`, never by `variantCore`** — the two pills share one `variantCore`, so a
+  `familyId + variantCore` query re-fetches the card you are already on. This is the one variant-kind
+  row where the refs-map route is wrong; the general client rule is *if the target's `variantCore`
+  equals the card's, the row is not the variant axis — use the sku*.
+* Picking it re-pools the whole card: the **W row retargets** to that insert's siblings
+  (`20 → ZIGSUV20U …`) and the face follows, because the app's `insPool` narrows both `_selUnit` and
+  the W row's source. The server does that for you — the swapped-in card comes back with the new W row.
+* The app gates the row on the raw family flag `b.insAx`, which is NOT exported: it is 1:1 with "a
+  member carries `ins`" (v781: one family both ways — `FP_16FRONT`, 92 units), so the axis is DERIVED.
+  There is no per-card state to keep — the FACE answers `selIns`.
 
 **Toolbar inputs.** Rows are computed for the request's toolbar, so a card fetched for a swap must
 carry the same state or its rows come back uncollapsed:
@@ -1220,7 +1244,7 @@ carry the same state or its rows come back uncollapsed:
 | `familyFacts.depth63` | null ⇒ the family cannot be ordered at 63; the app drops it from a D=63 grid |
 | `familyFacts.dim` | which numeric row exists; `'depth'` families label it **D** even though the pills live in `parameters.width` |
 | `depthFamilyOk` | false ⇒ no unit at the toolbar depth — the app HIDES the card, grey-mode dims it |
-| `unitFacts.*` | pool inputs (tier / opening / agnostic / siblingTiers / widthCode / depthCode / variantCode / depthAlterations) — needed only if a client rebuilds rows itself |
+| `unitFacts.*` | pool inputs (tier / opening / agnostic / siblingTiers / widthCode / depthCode / variantCode / depthAlterations / **insert**) — needed only if a client rebuilds rows itself |
 
 **Fronts chip = `tierOk`, not `availableTiers`.** `?tier=C` keeps a family when SOME unit passes the
 app's twin rule (`capabilities.nativeTier` / `twinTiers`), and the face swaps to that unit at the same

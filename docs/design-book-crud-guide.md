@@ -486,6 +486,7 @@ gridRows: [
 | `depthAlterations` | `u.d` | the depth classes this *same* cabinet can be built at → the D **state** row (§4a model A). ⚠️ Setting it **suppresses** the sibling D row `depthCode` would build above — the app's two D rows are mutually exclusive and this one wins |
 | `tier` / `opening` / `agnostic` / `siblingTiers` | `u.fam` / `u.op` / `u._ag` / `u.sib` | pool scoping + the FRONTS twin rule. `agnostic:true` = belongs to every line, never filtered out |
 | `heightCodeNull` | — | set it **only** when `u.hc` is literally `null` rather than absent. The app compares heights with strict `===`, so a null unit never matches an absent one — which is why ANBL's card draws no W and no D row. 4 units in v781; if you are unsure, leave it out |
+| `insert` (2.5.4) | `u.ins` | its value on the **Insert** row — the last row, after `Ty`. ⚠️ Setting it on ONE member gives the whole family the row (there is no separate axis flag: the app's `insAx` is derived from "a member has it"), and it **re-pools the card** — the face and the W row narrow to the picked insert, so every unit that should stay reachable needs a twin at the same width with the other value. Live-only pills, no greying. One family in v781: `FP_16FRONT`, `L3/M3` vs `M8` (`ZIGSUV20` ↔ `ZIGSUV20U`) |
 
 The **H row** value is not in here — it is the top-level `heightCode` (§4e).
 

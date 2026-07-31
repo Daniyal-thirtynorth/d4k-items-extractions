@@ -612,8 +612,27 @@ Every candidate also carries `groupBy=family&limit=1&grey=true&refs=true` **and 
 | **height** | `items?familyId=…&heightCode=<value>&widthMm=<card's>` | drop `widthMm` |
 | **width** | `items?familyId=…&widthMm=<value×10>&heightCode=<card's>` | drop `heightCode` (**keep the width**) |
 | **variant** | `items?familyId=…&variantCore=<refs[pill.sku].variantCore>&widthMm&heightCode` | drop `widthMm`, then `heightCode`, then fall back to `items?sku=<pill.sku>` |
+| **variant, `Insert` row** (2.5.4, §S) | ⚠️ `items?sku=<pill.sku>` **only** — see below | — |
 | **depth** | `pill.sku === card.sku` ⇒ **no request** (state pill, v2.2 §2c-2); else `items?sku=<pill.sku>` **+ the toolbar, ungrouped** — this is also the whole handler for the all-sibling D row (R3 note, §P) | — |
 | **line** | not modelled — see "unverified" | — |
+
+**⭐ The `Insert` row is the exception to "never `pill.sku`" (2.5.4 / audit §S).** A family whose units
+carry `unitFacts.insert` draws an extra `kind:"variant"` row labelled **`Insert`** after `Ty`
+(`L3/M3` · `M8`, every pill live). It is a SECOND axis over the SAME variant — `ZIGSUV90` and
+`ZIGSUV90U` are both `Drawer` — so `variantCore` cannot discriminate and the family-scoped query
+re-fetches the card you are on. Route it by sku. The general rule, and the one implemented:
+
+```ts
+// unit-card.tsx, case "variant"
+const vc = pageRefs.get()[p.sku ?? ""]?.variantCore;
+const vcDiscriminates = vc != null && vc !== active.variantCore;   // ← the guard
+return setSwap([ ...(vcDiscriminates ? [ …familyId+variantCore candidates… ] : []),
+                 ...(p.sku ? [{ ...stateQ, groupBy: undefined, sku: [p.sku], full: true }] : []) ]);
+```
+
+Nothing else changes: the swapped-in card comes back with its **W row already retargeted** to that
+insert's siblings (`20 → ZIGSUV20U …`) and `Insert: M8*`, because the server applies the app's
+`insPool` to the face pick and the W row. Only one family in v781 (`FP_16FRONT`, 92 units).
 
 Real answers (all verified):
 

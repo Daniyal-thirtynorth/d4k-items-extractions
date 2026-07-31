@@ -92,6 +92,9 @@ function unitFacts(u, key) {
     // literally `null` never matches one whose hc is `undefined`. 4 units in v781 (all ANBL) are
     // null — that is exactly what keeps ANBL's W and D rows off the card.
     heightCodeNull: u.hcNull ? true : undefined,
+    // u.ins — the "Insert" row key; its presence is the app's family flag `b.insAx` (1:1 in v781).
+    // Absent from dumps taken before 2026-07-31 — `backfill-insert-axis.js` is the patch for those.
+    insert: u.ins != null ? u.ins : undefined,
   };
 }
 

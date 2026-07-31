@@ -1617,7 +1617,7 @@ itself removed**. Left as-is deliberately, like §O4-3's duplicate `217`.
   `ROWSET 8` — every one of them `FP_16FRONT` (`ZIGSUV90`/`ZIGSUV60`, client `[Insert, Ty, W]` vs our
   `[Ty, W]`) across all 8 toolbar states. That is the one genuine DATA gap: it needs per-unit `u.ins`
   in the contract (extractor + export + backfill), and it is the only known grid gap in either leg
-  that is not pure backend logic.
+  that is not pure backend logic. — **✅ CLOSED same day, see §S** (schemaVersion 2.5.4).
 * ⚠️ **`lineCardOk` is missing the app's v376 clause** and it is **completely un-swept** — no plan
   state anywhere combines line 80 with a programme (checked: exactly one `line=80` state, no
   programme). The app has
@@ -1625,3 +1625,72 @@ itself removed**. Left as-is deliberately, like §O4-3's duplicate `217`.
   && activeFamFor(b.cat)!=='A') return true;` — an Avance line-80 lock that exempts non-Avance zones.
   Ours would hide cards the app keeps. **Add a `line80 + progA_*` state to a plan and measure before
   porting it** — do not add unmeasured logic.
+
+---
+
+## §S — THE `Insert` ROW (2026-07-31, schemaVersion **2.5.4**, the first contract change since 2.5.3)
+
+The last non-app-bug diff in either leg: **E2 `ROWSET 8`**, every one of them `FP_16FRONT`
+(`Accessories & interior › Inner drawers & pullouts`), client `[Insert, Ty, W]` vs our `[Ty, W]`,
+across all 8 toolbar states the family appears in.
+
+### The rule
+
+Three app functions, all on the raw family flag `b.insAx` and the raw unit field `u.ins`:
+
+```js
+function insList(b){ const s=[]; b.units.forEach(u=>{ if(u.ins!=null&&!s.includes(u.ins)) s.push(u.ins); });
+                     return s.sort((a,c)=>(a==='L3/M3'?0:1)-(c==='L3/M3'?0:1)); }   // stable — rest keeps family order
+function selIns(b){ if(!b.insAx) return null; const o=insList(b); const cur=blockIns[b.id];
+                    return (cur!=null&&o.includes(cur))?cur:o[0]; }
+function insPool(b,arr){ return b.insAx?arr.filter(u=>u.ins===selIns(b)):arr; }
+```
+
+and **three** call sites, not one — which is why this is more than a missing row:
+
+| site | app | effect |
+|---|---|---|
+| `_selUnit` `:2673` | `pool=insPool(b,pool)` | the FACE is picked inside the chosen insert |
+| `renderGrid` `:5006` | `_src = insPool(b, …)` | the **W row retargets** — `20 → ZIGSUV20U` under M8 |
+| `renderGrid` `:5042` | `${typeRow}${b.insAx?…}` | the row itself, **after** `Ty`, LAST |
+
+The chips carry neither `wn` nor `disabled` — every pill is LIVE, only the picked one is `sel`. Unlike
+the depth STATE row (§2c-2) each pill lands on a **real stored sibling** (`ZIGSUV20` ↔ `ZIGSUV20U`), so
+a click is an ordinary sku swap.
+
+### What shipped
+
+* **Contract — `UnitFacts.insert` (2.5.4), additive.** Only `u.ins` ships. `insAx` is **derived**: in
+  v781 the flag is 1:1 with "a member unit carries `ins`" (one family both ways — `FP_16FRONT`, 92
+  units, `L3/M3` vs `M8`). `scripts/backfill-insert-axis.js` **asserts** that equivalence and exits
+  non-zero if a future catalog breaks it, which is the moment to store `FamilyFacts.insertAxis`.
+  Same call as `vfin` on the single-Finish row (§P).
+* **No per-card state.** The app keeps `blockIns[b.id]`; we are stateless, so **the FACE answers
+  `selIns`** — `_selUnit` pools by it, so the face's own `ins` IS the picked one, and a pill click
+  re-fetches that sibling sku. Verified round-trip: `GET items?sku=ZIGSUV90U` comes back with
+  `Insert: L3/M3, M8*` and a W row on the `…U` skus.
+* **Data path.** `u.ins` is a RAW per-unit field the init pass never rewrites (`FP_16FRONT`'s only
+  init touch is `move()`, which changes cat/sub/sec), so the backfill reads it straight from
+  `<script id="DATA">` — **no parity run, no browser**. Extractor emits it from now on
+  (`_unitFacts`), so a re-extract is safe; the facts dumper and `backfill-grid-facts.js` carry it too.
+* **⚠️ Client routing.** The row is `kind: "variant"`, and the React client swapped variant rows by
+  `variantCore` — which **cannot discriminate here** (`ZIGSUV90` and `ZIGSUV90U` are both `Drawer`),
+  so the M8 pill would have re-fetched the card it was on. Fixed with the general rule: *if the
+  target's `variantCore` equals the card's, the row is not the variant axis — swap by sku.* The lite
+  UI already did the right thing (`kind==='variant'` → `swapCard(pl.sku)`).
+
+### Verification
+
+Not a browser sweep — the change is a **strict no-op** outside the 92 units that carry `insert`
+(`insList().length` gates the row, `selIns()` returns null everywhere else so `insPool` returns its
+argument), so only `FP_16FRONT`'s cards can move. Those were checked against the stored client dump:
+the app has exactly **two** row signatures for this family over all 8 states (7 × face `ZIGSUV90`,
+1 × face `ZIGSUV60` at `w60`), and the API reproduces both byte-for-byte, `cardAvailable` unchanged:
+
+```
+app   base | W:…,90*,… || Ty:Drawer*,… || Insert:L3/M3*,M8
+ours  base | W:…,90*,… || Ty:Drawer*,… || Insert:L3/M3*,M8      (also w60, d68, tierC, all 3 programmes)
+```
+
+**E2 is now ten buckets at zero.** The remaining known items are §R4 (the `XCRV` app bug, E3, do not
+match) and the un-swept v376 Avance line-80 clause above.

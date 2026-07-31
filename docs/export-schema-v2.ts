@@ -33,9 +33,10 @@
  *   meta.imageUrlTemplate.replace("<CODE>", sku)`.
  *
  * ── VERSIONING ──────────────────────────────────────────────────────────────
- *   `meta.schemaVersion` = "2.5.3"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
+ *   `meta.schemaVersion` = "2.5.4"  (2.1 added DimPill.code; 2.2 Item.doorLineYCode + Item.heightExtension;
  *   2.3 DimPill.showUnderLine on width/height pills; 2.4 Item.heightCode; 2.5 Item.unitFacts + Item.familyFacts;
- *   2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies; 2.5.3 FamilyFacts.rawSub — all additive, old readers ignore).
+ *   2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies; 2.5.3 FamilyFacts.rawSub; 2.5.4 UnitFacts.insert
+ *   — all additive, old readers ignore).
  *   The extractor emits this shape directly
  *   (`docs/export-v781-extractor2.js`); ingest AND the CRUD endpoints write it
  *   through one `normalizeItemDoc`, so hand-authored and extracted items match.
@@ -55,7 +56,7 @@ export interface CatalogExport {
 export interface ExportMeta {
   generated: string;               // ISO datetime
   source: string;                  // e.g. "leicht_units v781 (headless DOM extraction via openDetail)"
-  schemaVersion: string;           // "2.5.3" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode; 2.5 unitFacts + familyFacts; 2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies; 2.5.3 FamilyFacts.rawSub
+  schemaVersion: string;           // "2.5.4" — 2.1 DimPill.code; 2.2 doorLineYCode + heightExtension; 2.3 DimPill.showUnderLine; 2.4 Item.heightCode; 2.5 unitFacts + familyFacts; 2.5.1 Item.gridHidden; 2.5.2 Item.dupFamilies; 2.5.3 FamilyFacts.rawSub; 2.5.4 UnitFacts.insert
   imageUrlTemplate: string;        // ".../itemData/<CODE>.jpg" — build every image from this + sku
   counts: { items: number; cabinets: number; accessories: number; categories: number; programmes: number };
   recoveredArtifactSkus?: string[]; // codes the app's init deleted as artifacts but which are still real
@@ -223,6 +224,15 @@ export interface UnitFacts {
   heightCodeNull?: boolean;        // u.hc is literally `null`, not absent. The app compares heights with
                                    //   STRICT === in wsAtH/dAll, so a null unit never matches an absent
                                    //   one — that is why ANBL's card draws no W and no D row. 4 units.
+  insert?: string | null;          // ⭐ 2.5.4 — u.ins, the "Insert" row key ('L3/M3' | 'M8'). A card whose
+                                   //   family has it draws an INSERT row after the Ty row (every pill live,
+                                   //   only the picked one selected) and pools by it — `insPool` narrows both
+                                   //   the face pick and the W row. The app gates that row on the raw family
+                                   //   flag `b.insAx`, which is NOT exported: in v781 the flag is 1:1 with
+                                   //   "a member carries `ins`" (one family both ways — FP_16FRONT, 92 units),
+                                   //   so readers DERIVE the axis. Re-check on a new catalog build. Unlike the
+                                   //   depth STATE row, each pill lands on a real stored sibling
+                                   //   (`ZIGSUV20` ↔ `ZIGSUV20U`), so a click is a normal sku swap.
 }
 
 export interface FamilyFacts {

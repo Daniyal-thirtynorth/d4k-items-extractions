@@ -77,6 +77,8 @@
           // v781 (all ANBL) are null — that is what keeps ANBL's W and D rows off the card.
           hcNull: u.hc === null,
           dv: u.dv != null ? u.dv : null, vr: u.vr != null ? u.vr : null,
+          // u.ins — the "Insert" row key; its presence is the family flag `b.insAx` (1:1 in v781).
+          ins: u.ins != null ? u.ins : null,
           d: u.d || null,
           V: !!u.V, E: !!u.E, J: !!u.J, Yc: u.Yc || null, P1: !!u.P1, C1: !!u.C1,
         };
