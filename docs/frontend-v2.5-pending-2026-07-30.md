@@ -3,13 +3,29 @@
 Companion to **`throwaway/frontend-v2.5-changes.md`** (the implementation guide). That document is
 the spec; this one is the state of the code against it.
 
-**Branch:** `feat/design-book-v2.5` — pushed to `origin`, two commits **`8383e370`** (the v2.5 work)
-and **`a4bfadeb`** (a pre-commit-hook fix), cut from `origin/dev` **`25b19af9`** (unchanged since the
+**Branch:** `feat/design-book-v2.5`, pushed. Cut from `origin/dev` **`25b19af9`** (unchanged since the
 guide was written, so every line ref in the guide still lands).
-PR link: <https://github.com/thirtynorth/D4K-frontend/pull/new/feat/design-book-v2.5>
 
-**Backend:** needs `D4K-backend` ≥ `b8169728`. Already on **prd** (`origin/main` @ `54c2af2e`) and on
-`dev`, with the 2.5.x data on both clusters — so either target works, no SHA caveat.
+| commit | what |
+|---|---|
+| `8383e370` | the v2.5 work |
+| `a4bfadeb` | a pre-commit-hook fix |
+| `638de925` | a `selected` pill can also be greyed |
+| `54456308` · `05706e6b` | ⭐ **2026-07-31** — the `Insert` row (contract 2.5.4, audit §S) |
+
+**PR #2328 (the first three commits) MERGED to `dev`** 2026-07-31, merge commit `34610156`. The two
+Insert commits landed after that merge and are **not** in a PR yet — open a follow-up when wanted.
+
+**Backend:** the first three commits need `D4K-backend` ≥ `b8169728` (on prd and dev). ⚠️ **The Insert
+work needs `dev` ≥ `66c0a3e3`** — it uses two query params (`insert`, `variantCode`) that prd does not
+serve yet, so against prd that row renders but does not swap. Data is on both clusters
+(`unitFacts.insert`, 92 docs).
+
+> ⚠️ The browser verification below covers the first three commits. The Insert row was verified
+> separately (audit §S): eight picks composing all three axes both ways —
+> `ZIGSUV90 → M8 → W20 → Pullout → L3/M3 → M8 → W60 → Drawer` walking
+> `ZIGSUV90U · ZIGSUV20U · ZIGZUV20U · ZIGZUV20 · ZIGZUV20U · ZIGZUV60U · ZIGSUV60U`, every step the
+> app's answer, with a non-insert card's swap query confirmed byte-identical on the wire.
 
 ## ⭐ VERIFIED IN A BROWSER — 22 states, ~760 cards, 0 diffs
 

@@ -294,6 +294,11 @@ av = vertCatOk(b,u) && (isAccessory(b)
 | The combined verdict | **`cardAvailable`** on every grid card | ⭐ the client USES this; the local 8-gate port is only the fallback when it's absent (bare toolbar = everything available) |
 
 Per-BUTTON state on a grid card is shipped too, so a client greys nothing itself:
-`gridRows[].pills[]` carry `selected`, `off` (greyed, still clickable) and `dead` (disabled). Details:
+`gridRows[].pills[]` carry `selected`, `off` (greyed, still clickable) and `dead` (disabled).
+
+⚠️ One row is exempt by design: the **`Insert`** row (`kind:"insert"`, 2.5.4) — the app's chips carry
+neither `wn` nor `disabled`, so **every insert pill is always live**, only the picked one is
+`selected`. Do not add a gate there; there is nothing to grey. Same for the `dim:'none'` variant
+chips, which stay live even on a card the app greys wholesale (audit §L). Details:
 `design-book-api-ui-map-v2.md` §2c-11 / §2c-12; the measurements behind them: `client-ui-parity-audit.md` §M.
 — see `availableFromCaps()` in `export-schema-v2.ts` / `design-book-api-ui-map-v2.md` §2c.
