@@ -3,17 +3,53 @@
 Companion to **`throwaway/frontend-v2.5-changes.md`** (the implementation guide). That document is
 the spec; this one is the state of the code against it.
 
-**Branch:** `feat/design-book-v2.5` — pushed to `origin`, one commit **`8383e370`**, cut from
-`origin/dev` **`25b19af9`** (unchanged since the guide was written, so every line ref in the guide
-still lands). PR link: <https://github.com/thirtynorth/D4K-frontend/pull/new/feat/design-book-v2.5>
+**Branch:** `feat/design-book-v2.5` — pushed to `origin`, two commits **`8383e370`** (the v2.5 work)
+and **`a4bfadeb`** (a pre-commit-hook fix), cut from `origin/dev` **`25b19af9`** (unchanged since the
+guide was written, so every line ref in the guide still lands).
+PR link: <https://github.com/thirtynorth/D4K-frontend/pull/new/feat/design-book-v2.5>
 
 **Backend:** needs `D4K-backend` ≥ `b8169728`. Already on **prd** (`origin/main` @ `54c2af2e`) and on
 `dev`, with the 2.5.x data on both clusters — so either target works, no SHA caveat.
 
-**⚠️ NOT VERIFIED IN A BROWSER.** Everything below passed `tsc`, lint (no new findings) and a
-10-assertion runtime check of the query builder + the FRMAT gate, and the `gridRows` shape was
-confirmed against the live API on `:8000`. Nobody has loaded the grid and looked at it. **The
-guide's 23-row Check table is the pending work item #1** — run it before this branch merges.
+## ⭐ VERIFIED IN A BROWSER — 22 states, ~760 cards, 0 diffs
+
+Ran `next dev` against the local backend, injected a `/design-book/dev-token` into `localStorage`
+(the app reads `localStorage.token`, so no login is needed), and diffed **what the client renders**
+against **what the server sent** for the app's own list request — card for card, row for row, pill
+for pill, including `selected` / `off` / `dead` and the whole-card grey.
+
+| State | Cards | Diffs |
+|---|---|---|
+| Base › Water › Dishwasher Fronts | 19 | 0 |
+| …same at **line 73** | 14 | 0 |
+| …same at line 73 + **grey don't hide** | 19 (5 greyed) | 0 |
+| Sink Cabinets · Trash Pullouts · Sinks & Faucets · Sink Accessories · Cooking · Storage | 162 | 0 |
+| Tall · Wall · Midway · Handles · Alteration | 264 | 0 |
+| Lighting · Service · Accessories & interior · Countertops · Panels & surround | 278 | 0 |
+| `ZGR405405` · `ANK45` · `CBSET90581` (targeted) | 4 | 0 |
+
+Check-table rows confirmed individually:
+
+* **#3** `ANK45` renders **bare** — 0 rows. The `Array.isArray` vs `.length` branch is right.
+* **#13/R9** **two** `ANK45` cards render side by side (the dup family), no React key collision.
+* **#4/#5** a W pill click fires **one** request, by `familyId` + `widthMm=600` — **never** by
+  `pill.sku` — carrying `grey=true`, `refs=true` and `depthClass`. Card re-faced correctly.
+* **#7** a line pick fires **exactly one** `by-section` request and **zero** per-card swaps; it sends
+  `lineState=73` and **no** `heightClass`; faces move (`GFV6080SM` → `GFV6073SM`) and the H row
+  collapses to `[73*]` — all server-side.
+* **#8** the count drops 19 → 14 at line 73, and "grey don't hide" brings back exactly those 5, greyed.
+* **#16a** `CBSET90581` draws `D [58* 68]`, every pill live; clicking `68` re-faces to `CBSET90681`.
+* **#16c** `ZGR405405` draws a `Finish` row with ONE pill, selected + unclickable, **and its swatch
+  loads** (`F+405_VS.jpg`, `naturalWidth > 0`) — the URL fix confirmed end-to-end.
+
+Two apparent diff classes were **scraper artifacts, not defects**, and are worth knowing if anyone
+re-runs this: a pill that is `off` *and* `dead` renders through the disabled branch (correct — a dead
+pill is already greyed), and a `Radius` pill's label legitimately carries a leading space
+(`" = 5 cm cm"`), which a `.trim()` in the scraper removed.
+
+**Still unverified:** a programme pick (same `cardAvailable` path as the 5 greys above, so covered by
+inference, not by observation), the detail drawer, `page > 1`, and the Design-Tasks sidebar's result
+set (a known backend data gap — §3).
 
 ---
 
@@ -59,13 +95,13 @@ Two fixes beyond the step list, both from the guide's "API changes since round 3
 
 | # | Item | Why it's open |
 |---|---|---|
-| **1** | **Run the guide's Check table (23 rows) in a browser.** | Nothing has been visually confirmed. Rows to weight highest: **3** (`F2013__DRWDUP` → `ANK45` renders BARE — a W row means the `[]`-vs-absent branch is wrong), **16a/16b** (the all-sibling `dvRowFn` depth row), **16c** (`ZGR405405` — one `Finish` pill, selected + unclickable, **with** its swatch), **7/8** (one request per line pick, count may drop), **19/21** (dialog round-trips `showUnderLine`; a cleared `catalogRank` becomes `null`, not `0`). |
+| **1** | ✅ **DONE — the grid half.** 22 states / ~760 cards / 0 diffs (table above), with rows 3, 4, 5, 7, 8, 13, 16a and 16c confirmed individually. **What is left of it: the DIALOG rows, 19–21** — open `TSP6080` in the authoring dialog, save with no edits, re-fetch, and confirm its W/H pills still carry `showUnderLine` (`H73 → [0,73,86]`); then clear `catalogRank` and confirm it comes back **`null`**, not `0` and not 999. Those paths are written and typed but were never exercised against the API. |
 | **2** | **Step 7d — `showUnderLine` in the detail drawer.** | Guide marks it optional: ship only if the drawer's W/H rows visibly diverge from the app. The helper already exists (`data/caps.ts` → `showsUnderLine`, `lineNum`). Deliberately skipped. |
 | **3** | **The tall `Line` row click is inert.** | By instruction, not omission. The row renders; the click does nothing. Its pills carry `sku: null` and mix a carcase SYSTEM (73/80/86/66) with front-line suffixes (J/Y/E), which are order-code modifiers, not navigation — and `86` is a *73-system* line. Not modelled server-side either (audit §M open items). **Do not guess it into `update({line})`.** |
 | **4** | **The legacy `parameters.*` fallback branch is now unreachable.** | Kept as a guard because `Array.isArray` is free. It still holds `pickHeight` / `pickWidth` / `pickTy` / `collapse` / `mark`. Delete the branch and those five once #1 passes, or leave it — it costs nothing but it is dead weight a future reader will trust. |
 | **5** | **`buildTallHeightsQuery` still sends `suspended`, not `antoso`.** | Left alone on purpose: `GET tall-heights` **ignores** `antoso` server-side (it is task 6 in the backend handoff, un-swept). Flipping it here would change nothing and would diverge from the endpoint's contract. Revisit when the backend teaches that endpoint about ANTOSO. |
-| **6** | **The pre-commit hook cannot pass on these files.** | `.githooks/pre-commit` lints with `--no-eslintrc --config .githooks/eslint.precommit.cjs`, which registers only `@typescript-eslint/no-unused-vars` — so every pre-existing `eslint-disable-next-line <other-rule>` comment errors with "Definition for rule … was not found". `index.tsx` fails the same way **untouched**. Its actual rule reports **0** hits on the staged set, so this commit used `--no-verify`. Fix the hook config (add the plugins, or `--no-inline-config`) rather than stripping the disable comments. |
-| **7** | **3 pre-existing `tsc` errors, unrelated.** | `isomorphic-dompurify`, `remark-gfm`, `remark-breaks` not installed — a `package-lock.json` drift that predates this work (the local modification was stashed on `feat/design-book`, stash message `wip lockfile before v2.5 branch`). **0** errors in any design-book file. `npm ci` before judging a build failure. |
+| **6** | ✅ **FIXED — `a4bfadeb`.** | `.githooks/pre-commit` lints with `--no-eslintrc --config .githooks/eslint.precommit.cjs`, which registers only `@typescript-eslint/no-unused-vars` — so every pre-existing `eslint-disable-next-line <other-rule>` comment errored with "Definition for rule … was not found", and the hook rejected a commit over something it was never asked to check (`index.tsx` failed the same way **untouched**; `8383e370` needed `--no-verify`). Now `noInlineConfig: true`, which also makes it stricter: the escape hatch for a deliberately-unused binding is the `_` prefix, not a disable comment. `a4bfadeb` itself committed with the hook **enabled**. |
+| **7** | ✅ **RESOLVED — `tsc` is now clean repo-wide.** | `isomorphic-dompurify`, `remark-gfm`, `remark-breaks` were declared in `package.json` but absent from `node_modules`. ⚠️ **Plain `npm install` fails** — `react-toast-notifications@2.5.1` peer-wants React 16/17 against the repo's React 18 (ERESOLVE). Use **`npm install --legacy-peer-deps`**. That is also what the stray `package-lock.json` modification is; it is deliberately **not** committed on this branch. |
 | **8** | **Toolbar controls that still don't exist**, so four capability gates stay inert. | `handle` / `front` / `open` (P1/C1) / `doorline`. If the **OPENING** toggle is ever added, the guide has the two client duties: send `opening=P1|C1` (**not** a filter — expect the same families, moved faces), and prefix the displayed order code guarded on **`unitFacts.opening`**, never on `capabilities.openP1` (that flag is the wider `openOk` form and is true on the P1 article itself → `P1P1GFV6080SM`). |
 
 ---
@@ -100,6 +136,34 @@ src/views/design-book/index.tsx                       ~7  (comment only)
 ```
 
 `components/detail-panel.tsx` — deliberately untouched.
+
+## 4b · How to re-run the browser verification
+
+```bash
+cd D4K-backend && node dist/main.js            # :8000 — from the repo root
+cd D4K-frontend && npx next dev                # :3000
+```
+
+Open `http://localhost:3000/design-book`, then in the console:
+
+```js
+// the app reads localStorage.token — no login needed
+const r = await (await fetch('http://localhost:8000/design-book/dev-token')).json();
+localStorage.setItem('token', r.data?.token ?? r.token);   // 1 h; re-mint on 401
+location.reload();
+```
+
+⚠️ **Two traps, both cost time here.** (1) The backend **died mid-session** and the grid sat on
+"Loading catalog…" forever — React Query is configured `retry: false`, so one failed fetch is
+permanent until reload. If the grid is empty, `curl localhost:8000/design-book/stats` **before**
+believing anything (this is the same dead-server trap as audit §N). (2) Minting the token from the
+page is blocked by CORS — mint it with `curl` and paste the string in.
+
+The differ itself was ad-hoc console JS: patch `XMLHttpRequest.prototype.open` to record the app's
+`items/by-section` URL, re-fetch that exact URL, then walk `[data-card]` and compare each card's
+rendered rows to the response's `gridRows`. Worth re-writing into `scripts/parity/` if the client
+keeps reporting grid differences — it is the frontend twin of the backend harness and it found the
+two `off`+`dead` and whitespace artifacts immediately.
 
 ## 5 · Read first
 
