@@ -47,9 +47,35 @@ re-runs this: a pill that is `off` *and* `dead` renders through the disabled bra
 pill is already greyed), and a `Radius` pill's label legitimately carries a leading space
 (`" = 5 cm cm"`), which a `.trim()` in the scraper removed.
 
-**Still unverified:** a programme pick (same `cardAvailable` path as the 5 greys above, so covered by
-inference, not by observation), the detail drawer, `page > 1`, and the Design-Tasks sidebar's result
-set (a known backend data gap — §3).
+### Second pass — the three backend changes that had an untested consumer
+
+`antoso`, the global `q`, and the authoring dialog were each written against the spec but never
+exercised. All three now are, and the first found a real bug.
+
+* **`antoso` (§P4)** — the Suspended toggle sends **`antoso=true`** and **not** `suspended`. ✅
+  ⭐ **It also caught a defect.** Under ANTOSO every W pill on an out-of-envelope card comes back
+  `selected:true, off:true`, and 6 of them rendered **fully lit**: `off` and `selected` sat in the
+  same `clsx` ternary, so the `selected` arm won and swallowed the dimming. They are independent in
+  the app — a pill can be the card's current value *and* not orderable. Fixed in **`638de925`**;
+  that state went to 0 diffs and a re-sweep of Tall · Wall · Handles · Countertops · Panels ·
+  Alteration (346 cards) was unchanged.
+* **The global `q` (§P5)** — with **Base** selected, `q=TSP` returns cards from **Base, Alteration
+  and Sink**, and the client renders all 24 without dropping one. Cross-category results survive; no
+  client-side re-filtering. ✅
+* **The detail drawer** — opens on `TSP6073`, renders breadcrumb / L/R badge / dims / toe-kick
+  height / description / restrictions / modifications. Untouched by v2.5 and still whole. ✅
+* **The authoring dialog, Checks #19–21** — verified end-to-end against the live API by creating a
+  throwaway item, round-tripping it through the dialog's own transforms and hard-deleting it
+  (`scratchpad/dialog-e2e.js`, 10/10). `showUnderLine` survives a no-edit save as `number[]`; a blank
+  cell **omits the key** rather than storing `[]`; mixed `,`/space separators parse; and a cleared
+  `catalogRank` comes back **`null`** — not `0`, not the stale `7118`, and the sibling scalars
+  survive. D4K-dev left at exactly 18,396 items / 0 inactive. ✅
+  ⚠️ `DELETE /design-book/items/:sku` is a **soft** delete (`active:false`); pass `?hard=true` to
+  actually remove. Worth knowing before anyone "cleans up" a test item and leaves it in the catalog.
+
+**Still unverified:** a programme pick (same `cardAvailable` path as the 5 greys above — covered by
+inference, not observation), `page > 1`, and the Design-Tasks sidebar's result set (a known backend
+data gap — §3).
 
 ---
 
@@ -95,7 +121,7 @@ Two fixes beyond the step list, both from the guide's "API changes since round 3
 
 | # | Item | Why it's open |
 |---|---|---|
-| **1** | ✅ **DONE — the grid half.** 22 states / ~760 cards / 0 diffs (table above), with rows 3, 4, 5, 7, 8, 13, 16a and 16c confirmed individually. **What is left of it: the DIALOG rows, 19–21** — open `TSP6080` in the authoring dialog, save with no edits, re-fetch, and confirm its W/H pills still carry `showUnderLine` (`H73 → [0,73,86]`); then clear `catalogRank` and confirm it comes back **`null`**, not `0` and not 999. Those paths are written and typed but were never exercised against the API. |
+| **1** | ✅ **DONE.** 22 states / ~760 cards / 0 diffs plus the second pass above; Check rows 3, 4, 5, 7, 8, 13, 16a, 16c, 17 and 19–21 all confirmed. One defect found and fixed (`638de925`). Left open only where a backend gap already explains it (§3). |
 | **2** | **Step 7d — `showUnderLine` in the detail drawer.** | Guide marks it optional: ship only if the drawer's W/H rows visibly diverge from the app. The helper already exists (`data/caps.ts` → `showsUnderLine`, `lineNum`). Deliberately skipped. |
 | **3** | **The tall `Line` row click is inert.** | By instruction, not omission. The row renders; the click does nothing. Its pills carry `sku: null` and mix a carcase SYSTEM (73/80/86/66) with front-line suffixes (J/Y/E), which are order-code modifiers, not navigation — and `86` is a *73-system* line. Not modelled server-side either (audit §M open items). **Do not guess it into `update({line})`.** |
 | **4** | **The legacy `parameters.*` fallback branch is now unreachable.** | Kept as a guard because `Array.isArray` is free. It still holds `pickHeight` / `pickWidth` / `pickTy` / `collapse` / `mark`. Delete the branch and those five once #1 passes, or leave it — it costs nothing but it is dead weight a future reader will trust. |
@@ -164,6 +190,14 @@ The differ itself was ad-hoc console JS: patch `XMLHttpRequest.prototype.open` t
 rendered rows to the response's `gridRows`. Worth re-writing into `scripts/parity/` if the client
 keeps reporting grid differences — it is the frontend twin of the backend harness and it found the
 two `off`+`dead` and whitespace artifacts immediately.
+
+## 4c · One thing for the BACKEND session
+
+`GET /design-book/stats` reports **`schemaVersion: "2.2.0"`** on D4K-dev, against a contract that has
+been **2.5.3** since 2026-07-29. The 2.3–2.5 fields were added by backfill scripts writing straight
+into the items collection, which never touch the catalog meta doc, so the number has been stale for
+four rounds. Nothing reads it for behaviour — but it is the field a client would check to confirm
+which contract a cluster is serving, and it currently says the wrong one. Check prd too.
 
 ## 5 · Read first
 
