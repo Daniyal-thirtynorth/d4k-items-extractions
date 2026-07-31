@@ -13,6 +13,28 @@ are not in a PR. The **data** is on both clusters. See §3.
 
 ---
 
+## HOW TO USE THIS FILE (new session)
+
+Open the session **with `/Users/apple/Documents/thirtynorth/node-js/d4k-items-extraction` as the
+working directory** — `CLAUDE.md` there is the standing brief and loads automatically; this file is
+the state on top of it. Then:
+
+> Read `docs/parity-session-handoff-2026-07-31.md`. Start with task 1 on the board.
+
+That is enough — everything needed is either in this file or reachable from its Key-files table. Four
+things it cannot do for you:
+
+* **Sweeps and browser checks need the Chrome extension connected** and the three servers of COLD
+  START running. Everything else (API checks, backfills, git) is shell-only.
+* **`GET /design-book/dev-token` only exists when `ENVIRONMENT` is `local` or `dev`** — by design, it
+  403s in stg/prd, so a deployed backend needs a real token instead.
+* **The prd release (task 1) is a `gh` PR merge.** Expect to run the merge command yourself if the
+  agent's is blocked — `! gh pr merge <n> --merge --repo thirtynorth/D4K-backend` runs it in-session.
+* **Nothing here is time-sensitive.** No sweep is mid-flight, no branch is half-merged, no cluster is
+  half-written. Picking it up in a week costs nothing.
+
+---
+
 ## ⭐ COLD START — read this first if you have no context
 
 **The project.** `d4k-items-extraction` is a data + schema workspace for the LEICHT "Design Book"
@@ -382,8 +404,9 @@ stands alone; 8–11 are new today.
    interleave and each records the other's grid.
 
 8. **A stale dev server serves pre-fix code, and says nothing.** Hit TWICE: a `node dist/main.js` from
-   10:36 held :8000 (my new one died with `EADDRINUSE`, which scrolled past), and a `next dev` held
-   :3000 so mine silently moved to :3001. The first verification of the whole Insert row was run
+   10:36 held :8000 (the newly started one died with `EADDRINUSE`, which scrolled past), and a
+   `next dev` held :3000 so the new one silently moved to :3001. The first verification of the
+   whole Insert row was run
    against pre-fix code. **`lsof -ti :PORT -sTCP:LISTEN` before trusting any local result.** This is
    the same family as trap 1 and is now the most expensive recurring mistake in this project.
 9. **Scope a DOM pill lookup to its ROW, never to its label.** Five buttons on that page read `M8` —
