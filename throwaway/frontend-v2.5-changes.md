@@ -3,13 +3,13 @@
 ## Before you start — what to point at
 
 Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `b8169728`
-or later**.
+or later** — and the **R11–R15** rules below need `59a7e09f` or later.
 
-**⭐ FULLY RELEASED TO PRD — 2026-07-30.** Code *and* data, on both clusters:
+**⭐ FULLY RELEASED TO PRD — 2026-07-30, and again 2026-08-05.** Code *and* data, on both clusters:
 
-* **code** — `origin/main` @ `54c2af2e` (PR #2975 `dev`→`staging`, #2976 `staging`→`main`). Contains
-  every commit in this document, up to and including `b8169728`. `git log origin/main..origin/dev` is
-  empty.
+* **code** — `origin/main` @ **`7ca4bc44`** (PR #2982 from `staging`; the 07-30 release was
+  `54c2af2e`). Contains every commit in this document, up to and including §T's `59a7e09f`.
+  `git log origin/main..origin/dev` is empty.
 * **data** — the 2.5.x backfills (`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`,
   `dupFamilies`, `faceWidthMm`, a re-captured `sectionRank`), verified field-for-field identical on
   both clusters at 18,396 items.
@@ -153,6 +153,32 @@ Also on `dev` since round 3, and worth knowing because it removes a stale field 
 **deletes** it when the `217+` chip does not render, so the invariant is *present ⟺ the chip renders*.
 `heightExtensionOk` is `true` whenever the payload is there — keep the `!== false` test you shipped,
 but never read the stored field's absence as "this family has no extension".
+
+---
+
+## ⭐ API changes since the extended sweep (2026-07-31, audit §T — map §2c-13)
+
+Backend `dev` `66e47346` · `c82543fb` · `59a7e09f`, **all now on `origin/main` @ `7ca4bc44`**. **No
+contract change — `schemaVersion` stays 2.5.4**, nothing to re-ingest, one new query param. Every one
+of these survived four zero-diff sweeps because the sweeps compare **rendered grids**: the rows were
+right and the **clicks** were wrong. All three are implemented in `feat/design-book-v2.5`
+(`47577826` merged, **`8016d2c7` still open**) — this table is the spec if you are re-deriving it.
+
+| # | Change | What it means for the frontend |
+|---|---|---|
+| **R11** | ⭐ **A swap query must carry its own PINS.** The face is re-picked in JS from the whole family pool, and the re-face used to see only the `GridToolbar` — which carries `widthMm`/`depth`/`insert`/`variantCode` but **not `heightCode`, `variantCore` or `sku`** — so the family DEFAULT came straight back. | **Nothing to change if you followed R3** (`familyId` + the pin + the toolbar). But if you saw H pills and Ty pills "do nothing" against an older backend, this was why — not your dispatcher. Server-side fix (`pinFacePool`); the relax chain is unchanged. `q` is deliberately not a pin. |
+| **R12** | ⭐⭐ **The `Line` row is CARD STATE — send it back as `cardLine`.** `73`/`80` = the carcase system; `86` = 73 + the `J` door line (toggles back to 73); `66` = 80 + `Y` (which REPLACES the whole order code); `E` = single-piece front, **order code only**. | **Send `cardLine=73\|80\|86\|66` on EVERY swap of that card**, not just a Line click, or a later W/H pick resets it — read it back off the row the server just marked. A request `lineState`/`line` wins over it. ⚠️ Only the `86`/`66` chips clear `E`, so `73 → E → 80` KEEPS the E. Apply `assemble()`'s Y-replaces / +E / +J against the **face's own** capabilities. |
+| **R13** | ⭐ **On a `force68` family (Base › Sinks) the `63` depth chip NAVIGATES** — 63 cm on a sink IS the 68 carcase with a door, so the app's `pickDepth63` moves the face to the d68 twin. Everywhere else `63` is still local state (R3 / map §2c-4 shape 4). | **Send `depthClass=63` on the pick AND on every later swap while the row still reads 63**, or the swapped-in card comes back with `68` selected and your 63 chip goes dark. `TSP6080B` + 63 → `TSP608068B` (63 still lit), then +H73 → `TSP607368B`, still 63. |
+| **R14** | ⭐ **`d63NoClick`** — a family whose label matches `/appliance door/i` ships its `63` pill as `sku:null`, `off:true`, **`dead:true`**. The chip exists in the app too; it simply has no handler. | **Render it, never route it.** Same rule as the single-pill `Finish` row (#2 above): do not drop `dead` pills. 7 families / 68 units (`F1230`, `F1230_E`, `F1231__GF0..GF3`, `XGFRWINE`). |
+| **R15** | ⭐ **The D row's SELF pills must render your LOCAL pick.** The server's `pill.selected` is baked from the **toolbar** depth, so on a mixed row a local pick has to override it. | On `TSP6080` both `58` and `63` target the card itself and carry no re-cut `code` — before this, those two pills changed **nothing on screen**. Let the local pick own the self pills, leave sibling pills on the server's answer, and read the click guard off the same overridden value so the previously-selected pill is clickable again. |
+
+One call proves R12 + R14 together (run against dev 2026-08-05):
+
+```
+GET /design-book/items?familyId=F1230&cardLine=86&groupBy=family&limit=1
+  → face GF61210 · Line ['73','80','86*','E'] · H ['210*','224'] · W ['46','61*','76','91']
+  → D ['58*', '63 dead']          ← the dead 63 is R14
+```
 
 ---
 
@@ -1364,11 +1390,11 @@ other 10 categories, plus the FRONTS/programme/line/width/depth/opening/suspende
 | `grey=true` ("Grey don't hide") | un-swept. The parameter works and is used by the drawer/`R6` path, but no state in any plan measures it, so the hide-vs-grey boundary is unverified. |
 | `page > 1` | un-swept. Pagination is a plain `$skip`/`$limit` after the app-order sort, so it should be safe; nobody has measured it. |
 | the detail **drawer** | un-swept as a whole. `parameters.*` is the drawer model and is v1-era scraped data — right for the drawer, wrong for a card (see the R3 warning). |
-| one `Insert` row (`FP_16FRONT`, 92 units) | 8 diffs. Needs per-unit `u.ins` in the contract — the only known gap in the grid that is not pure backend logic. |
+| one `Insert` row (`FP_16FRONT`, 92 units) | ✅ **CLOSED** — `unitFacts.insert` shipped in 2.5.4 (§S). Both clusters backfilled. |
 | a handful of single-family cases | `Alteration › Side Panel Modifications` under BOSSA (grey 12 / member 1 / section 1), `Panels & surround` order 2 + grey-not-hide 1. Diagnosed as neighbourhood, not mechanism; tracked in §P's residue list. |
 
-**Data, not code, is the other half — and both are fully on prd** (released 2026-07-30; code
-`origin/main` @ `54c2af2e`, data verified identical field-for-field at 18,396 items). Everything
+**Data, not code, is the other half — and both are fully on prd** (code `origin/main` @ `7ca4bc44`
+as of 2026-08-05; data verified identical field-for-field at 18,396 items). Everything
 measured above was measured against **D4K-dev**; prd now carries the same code and data, so expect the
 same results from either.
 

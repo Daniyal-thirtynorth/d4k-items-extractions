@@ -506,8 +506,8 @@ their own copy, §below).
 | `memberTiers` | `b._mem` | every line the FAMILY appears in ("PAC") — the `famOkB` half of the card grey |
 | **`isAccessory`** | `isAccessory(b)` | ⭐ the CARD never greys. No programme, depth or height gate applies to it |
 | `isProgrammeAgnostic` | `isProgAgnostic(b)` | cat/sub sits outside the programme system |
-| `depth63` | `d63Cfg(b)` | `null` ⟹ the family **cannot** be ordered at 63, so a D=63 toolbar drops it |
-| `label` / `labelGroup` / `isSpecial` | `b.label` / `rk(label)` | card title + the sort that keeps a variant next to its product |
+| `depth63` | `d63Cfg(b)` | `null` ⟹ the family **cannot** be ordered at 63, so a D=63 toolbar drops it. ⭐ Non-null does NOT mean the chip is live: on a **`force68`** family (Base › Sinks) it NAVIGATES to the d68 twin, and on an appliance-door family it ships **dead** — see `label` below and map §2c-13 |
+| **`label`** / `labelGroup` / `isSpecial` | `b.label` / `rk(label)` | card title + the sort that keeps a variant next to its product. ⚠️ **`label` is also LOAD-BEARING**: a label matching `/appliance door/i` makes the family's `63` depth chip render dead (`d63NoClick` — greyed, no handler, no target; 7 families / 68 units). Renaming such a family silently brings a dead chip back to life |
 | `defaultWidthMin` | `b.dwm` | **which width the card OPENS at** when no W pill is set (a `dim:'width'` family). Leave it `null` — the value is then derived from the family's cat/sub (Base/Tall/Midway/Appliance housing 60 · `Accessories & interior`/`Interior+` 90 · `Drawers & Pull-outs` 80 · **anything else 0 = the narrowest member**). Set it only to reproduce an app-side override; v781 has exactly one (`RE_SLIDEIN` = 90), which ships as a backend constant, so nothing in the export carries this field today. Audit §P6 |
 
 ### `gridHidden` — never render this code as a card

@@ -586,9 +586,12 @@ Current facts:
 
 - **⭐⭐ CURRENT HANDOFF: `docs/parity-session-handoff-2026-07-31.md`** — supersedes the 07-28/29/30
   files (kept as history). It carries the live task board, the data ledger for BOTH clusters, the
-  four sanity curls, and eleven traps. **Top of that board: the backend `dev` → prd release (3
-  commits, code-only — the 2.5.4 data is already on prd) and the frontend follow-up PR (2 commits,
-  which must NOT merge before the backend ships).**
+  four sanity curls, and eleven traps. **Board as of 2026-08-05: its top three items are CLOSED** —
+  the backend release (`origin/main..dev` empty @ `7ca4bc44`), the frontend follow-up PRs (#2329 +
+  #2330 merged), and the stale `schemaVersion` (both clusters `2.5.4`). **Top of the board now: open
+  the last frontend PR** (`8016d2c7`, the Line row + force68 63 — its backend half is already
+  released), then task 4 (`functionalGroups` per membership) and task 5 (the un-swept v376 Avance
+  line-80 lock).
 
 - **⭐ §S — THE `Insert` ROW; E2 IS TEN BUCKETS AT ZERO (2026-07-31, audit §S, map §2c-11,
   schemaVersion **2.5.4** — the FIRST contract change since 2.5.3, additive).** The last non-app-bug
@@ -632,6 +635,77 @@ Current facts:
   and FIVE buttons on that page read "M8" — four are `Ty` pills on other cards, so scope a pill
   lookup to its ROW (`span[title="Insert"]`), never to its label.
 
+- **⭐⭐ §T — THE PILL CLICKS (2026-07-31 late, audit §T, map §2c-13, client guide R11–R15; three
+  backend commits, NO contract change, schemaVersion stays 2.5.4, nothing to backfill).** The
+  sweeps compare RENDERED GRIDS, so every one of these survived four zero-diff rounds: the rows were
+  right and the CLICKS were wrong. Found by a client report ("depth pill clicks do nothing, on both
+  the lite UI and the React client") and then by comparing pill taps one by one against the app.
+  1. **`repickFaces` was discarding every unit-level PIN a swap query carries** (`66e47346`) — the
+     worst of the three. The face is re-picked in JS from the WHOLE family pool against the
+     `GridToolbar` alone, and that object carries `widthMm`/`depth`/`insert`/`variantCode` but **not
+     `heightCode`, `variantCore` or `sku`** — so the pipeline matched the right sibling and the
+     re-face put the family default straight back. **Every grid H pill and every Ty pill was inert.**
+     It regressed the map's OWN §2c-10 examples (`familyId=SNK2&heightCode=73&widthMm=600` answered
+     `TSP6080B` not `TSP6073B`; `familyId=F674&heightCode=42` answered `HGA6029BK` not `HGA6042`) and
+     §S's round-trip (`sku=ZIGSUV90U&groupBy=family` → `ZIGSUV90`, so the wrong Insert pill read
+     selected). Dates from **§L**, which introduced the re-face; §K had verified all of them working
+     BEFORE it. `pinFacePool` now narrows the FACE pool only (the row builder still needs the whole
+     family, §L) and falls back to it when nothing matches, so the client's relax chain is unchanged.
+     `q` is deliberately NOT a pin (§P5). ⚠️ `widthMm` only ever escaped because `gridToolbar()`
+     happens to carry it, and insert/variantCode because §S had added them for this exact reason.
+  2. **The `63` chip is `pickDepth63`, not `pickCardDepth`** (`c82543fb`) — five of six taps matched
+     on Base › Water › Sink Cabinets, `D 63` did not (app `TSP6073 → TSP607368`, we stayed put and the
+     click looked dead). The chip is its OWN control (`:4926`/`:5000`), and `d63Cfg` returns
+     `{mode:'sink',force68:true}` for Base › Sinks → `pickDepth63` sets `blockSel[id].d=68`, re-facing
+     onto the d68 twin. **So 63 is NAVIGATION on a force68 family and STATE everywhere else.** Both of
+     our depth-row builders targeted `face` unconditionally; the one that actually fires for these
+     cards is the `hd`/`dAll`/`show63` branch, NOT the `dRow` alteration branch
+     (`unitFacts.depthAlterations` is null on `TSP6073`), so both were fixed — the app applies the
+     rule at both of its call sites too. Twin resolved the app's way (`:2812`). `familyFacts.depth63`
+     was already stored and correct. Whole-grid signature for that state unchanged (18 cards, 5
+     sections, len 1335) — only the pill's TARGET moved, not its label or selected state.
+  3. **`d63NoClick`, the `Line` row, and the local depth pick** (`59a7e09f`). `d63NoClick`: a family
+     whose label matches `/appliance door/i` renders its 63 chip as `.d63off` — greyed, no handler, no
+     target — while `d63Cfg` still returns a config, so the chip EXISTS and is simply dead
+     (`sku:null`/`off:true`/`dead:true`; 7 families / 68 units — `F1230`, `F1230_E`, `F1231__GF0..GF3`,
+     `XGFRWINE`). The **`Line` row was rendered but inert**: it is CARD state, not navigation —
+     `pickSys` writes `blockSel[id].sys` (73/80) + `cardMod[id].dl` (86→`J`, 66→`Y`) and `pickFE`
+     toggles `cardMod[id].fe` (`E`) — so a new **`cardLine`** param (73|80|86|66) carries the app's
+     effLine per card, `cardSys`/`effLine`/`cardDoorLine` derive the halves, `lineHFilter` collapses
+     the H row, and `selected` follows the app's own rule (a TOOLBAR line 86 still marks `73`, a
+     per-card J marks `86 · J`); a request `lineState`/`line` wins, as in the app. ⚠️ Only the 86/66
+     chips clear `E` (`pickSys` writes `fe:0` in those two arms alone), so `73 → E → 80` keeps it.
+     Third: **the D STATE row never re-rendered the local pick** in EITHER UI — both render the
+     server's `pill.selected`, baked from the toolbar depth, so `pickCardDepth`/`setDepthPick` moved a
+     value nothing drew (on `TSP6080` both `58` and `63` target self AND carry no re-cut `code`, so
+     those two pills changed nothing at all on screen). The local pick now owns the SELF pills,
+     sibling pills keep the server's answer, and the click guard reads the same overridden value so
+     the previously-selected pill becomes clickable again. **No stored field, no backfill, no contract
+     change** — `cardLine` is card state and `d63NoClick` reads `familyFacts.label` (which the admin
+     form now documents). Verified on `F1230`: `73 → 86 → E → 80` walks `GF61204 → GF61210 →
+     GF61210 → GF61210E → GF61204E`, H row `[204,217] ↔ [210,224]`, identical both sides.
+  Lite UI got all three (it also applies `assemble()`'s Y-replaces/+E/+J to the displayed code, drops
+  its stand-in door-line row when the server ships a real one, and sends `depthClass=63` on a force68
+  swap so 63 stays lit). ⚠️ A third lite-UI bug in `66e47346`: it routed a `gridRows` Ty pill by
+  `pill.sku`, which never preserves the card's H/W (`TSPA8073TZW`'s TZ pill points at `TSPA908068TZ`)
+  — the legacy `parameters.options` path already resolved this through the target's `variantCore`, so
+  that resolver is now a shared **`variantSwap()`** used by both row paths and they cannot drift again
+  (cards with an Insert row keep the plain sku swap — the stem encodes the insert, §2c-11).
+  **⭐ RELEASED: `git log origin/main..dev` is EMPTY, `origin/main` @ `7ca4bc44` (PR #2982 from
+  staging).** Handoff task 1 is closed; both clusters are level on code AND data.
+
+- **⭐ `schemaVersion` on the catalog META doc (2026-08-05).** `GET /design-book/stats` had reported
+  `2.2.0` since the 2026-07-17 ingest. The meta doc is written ONLY by ingest (`meta: catalog.meta`),
+  so every contract bump that ships as a FIELD BACKFILL rather than a re-ingest leaves it behind.
+  Nothing gates on it — two reads, both reporting (`design-book.service.ts:281` stats, `:3263` meta) —
+  so it was cosmetic. **Fixed on BOTH clusters → `2.5.4`** (data-only, no release). Repeatable:
+  `[MONGO_URI_OVERRIDE=<uri>] node scripts/backfill-meta-schema-version.js <x.y.z> [--apply]` in
+  D4K-backend — dry-run by default, idempotent, one field. **Re-run it after every contract bump.**
+  The stored `meta` block was otherwise byte-identical to the export's. ⚠️ The prd URI is line 3 of
+  `D4K-backend/.env`, **commented out** — use `MONGO_URI_OVERRIDE` so `.env` is never left aimed at
+  prod. ⚠️ macOS `sed` is BSD: `\s` does not match, use `[[:space:]]` (a `\s` pattern silently passed
+  the whole `# MONGO_URI = "…"` line through as a URI).
+
 - **⭐ FRONTEND v2.5 IMPLEMENTED (2026-07-31).** `D4K-frontend` branch **`feat/design-book-v2.5`**
   (3 commits @ `638de925`, cut from `origin/dev` `25b19af9`; **PR #2328 MERGED to `dev` 2026-07-31**,
   merge commit `34610156`) implements 7
@@ -644,8 +718,52 @@ Current facts:
   `405` → `F+405_VS.jpg`), and a pill that is `selected` AND `off` rendering fully lit. **Status +
   the 4 deliberately-deferred items: `docs/frontend-v2.5-pending-2026-07-30.md`** — none of them is an
   integration gap. ⚠️ `npm install` in that repo needs `--legacy-peer-deps` (React 16/17-vs-18 peer
-  conflict). ⚠️ `GET /design-book/stats` still reports `schemaVersion "2.2.0"` against a 2.5.3
-  contract — the backfills never touched the catalog meta doc; check prd too.
+  conflict). ⚠️ **The repo is at `/Users/apple/Documents/thirtynorth/react-apps/D4K-frontend`, NOT
+  under `node-js/`.**
+  **⭐ THREE PRs are now merged to `dev`** (checked 2026-08-05): **#2328** (`34610156`) the v2.5 client ·
+  **#2329** (`9eadd240`) the §S Insert row — `kind:"insert"` + the `insert`/`variantCode` card-state
+  params · **#2330** (`1f303630`) `47577826` "render the local depth pick on the grid D row" (§T3).
+  Handoff task 2 is closed. **⬜ ONE COMMIT STILL UNMERGED** on `feat/design-book-v2.5`: **`8016d2c7`**
+  "wire the Line row and keep 63 lit on force68 cards" — the client half of backend `59a7e09f`, i.e.
+  guide steps **R12** (the dispatcher had a literal `case "line": return;`; now sends `cardLine`, and
+  `orderCodeLines` applies `assemble()`'s Y-replaces/+E/+J against the FACE's own capabilities) and
+  **R13** (a force68 63 pick sends `depthClass=63` and every later swap keeps sending it while the row
+  still reads 63). Its backend half IS released, so this PR is unblocked — open it.
+
+- **⭐ THE BOOKS — the greying gates audited against the CLIENT'S OWN CATALOGS (2026-08-04).** The
+  client supplied `data-from-client/items-pdfs/{primo,contino-avance}-2026.pdf` (1,033 + 1,010 pages,
+  the LEICHT "Price- and Type list 2026", edition 1/2026) and said **the v781 app was built FROM
+  them** — so they are UPSTREAM of the app, not a third opinion, and where they disagree with us the
+  book is the authority. Harness + findings: **`scripts/book-audit/`** (README has the method and the
+  traps). Results: **`excludedPrograms` 1,408/1,411** · **`excludedProgramsE` 668/683 tall fronts and
+  609/609 on the ≥190.6 cm rule** · **`isFrmatFamily` an EXACT match — the book independently
+  reproduces §Q2** (31 programmes FRMAT-dead, 0 uncovered; all 9 hardcoded `FRMAT_DEAD_PROGRAMS` have
+  no size row AND aren't in `excludedPrograms`, and BAHIA/BAHIA-C are excluded while HAVING a row —
+  both halves of that note confirmed, neither list can replace the other) · `doorLineY` 11/11 follow
+  the legend's `8`→`Y` rule · `depthClasses` + `openP1` verified by RENDERING pages (`T2073GVZ` shows
+  both the `36/48` and `68` icons = our `[36,48,58,68]`; `T3073SZF` has the `P1` badge, `T3073ZBR`
+  doesn't). **`scripts/fix-book-exclusions.js`** applied the 17 fixable ones (export + `.gz` + **D4K-dev
+  AND D4K-prd**, both verified `0 differ` on re-run — handoff §3; prd's dry run found exactly the same
+  17, so its `capabilities` was otherwise already byte-identical to the export, and the write needed no
+  release since it is inert until a Q programme or a Full-E state is chosen):
+  `HAA30217ZR` += the 4 Q programmes (primo p569, a **NEW** 2026 type) and
+  16 `GF76…`/`GF91…` += `VALAIS-C` on the single-front rule. **schemaVersion stays 2.5.4** — data
+  correction, not a contract change.
+  **⚠️ THREE THINGS TO KNOW.** (1) **This DELIBERATELY DIVERGES FROM v781** — the app renders these
+  live. Provably invisible to the harness today (every plan under `scripts/parity/` uses only
+  programmes 244/701/410 and never sets `front`, so neither a Q programme nor `excludedProgramsE`,
+  which only bites at `s.front===1`, is exercised); if a plan ever adds a Q programme, VALAIS-C or a
+  Full-E state, expect GREY diffs HERE and **treat ours as the correct side**. (2) **RE-RUN
+  `fix-book-exclusions.js` AFTER EVERY EXTRACTION** — the extractor reads the app, and the app is the
+  side that is wrong. It is idempotent and aborts if the finding set changes shape. (3) The P1 /
+  suspended / depth markers are **vector drawings** — no glyphs, no image XObjects — so those gates
+  can only be checked by rendering; and `antosoApproved` can't be read off its icon at all (it varies
+  WITHIN one icon block by width, `T2073GVZ` false vs `T3073GVZ` true — the app's `antosoU(u,cat,sub)`
+  size rule). **Left unfixed on purpose:** `TP2060`/`ANPB` (`isAccessory`) and `FRAUSR` (Alteration)
+  are restricted by the book but the app's own `famOkB` escapes mean they are never greyed by
+  programme — ours matches the app; 15 `RWF…` rear panels + 42 Wall/Ventilation items carry
+  `hasEFront` but aren't the "tall unit fronts" the legend describes; and **215 items at width 55 cm
+  are in our data but in NEITHER book**. Those four need the client, not a patch.
 
 ## UI vocabulary — what each term means on screen (and where it maps)
 

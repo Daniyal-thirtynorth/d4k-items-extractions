@@ -216,20 +216,18 @@ curl -s localhost:8000/design-book/dev-token >/dev/null && echo backend-up
 #        → 6 families, NO XAG_Pa_a989a3 (the 80-system parent now hides at line 73; its _B/_C/_D stay)
 ```
 
-### TASK 1 — release the backend to prd
+### TASK 1 — ✅ RELEASED (verified 2026-08-05)
 
-The only thing standing between prd and this session. Three commits, **all code-only** — the data is
-already on prd (§3). Same two-PR shape as 07-30:
+`git log origin/main..dev` is **EMPTY**; `origin/main` @ **`7ca4bc44`** (PR #2982 from staging). The
+release carried more than the three commits this task was written for — §T's `66e47346` · `c82543fb` ·
+`59a7e09f` landed on `dev` after it and shipped in the same train.
 
-```
-dev -> staging -> main       21a8ef87 · 66c0a3e3 · d1d87ccc
-```
+⚠️ Keep the method for next time: dry-run both merges (`dev → staging`, `staging → main`) in a
+throwaway worktree first and confirm the net effect on `main` is exactly the design-book files. On
+07-30 `src/project/room.service.ts` differed between branches but was main-side only; check that
+shape again rather than assuming.
 
-⚠️ Dry-run both merges in a throwaway worktree first and confirm the net effect on `main` is exactly
-the design-book files. On 07-30 `src/project/room.service.ts` differed between branches but was
-main-side only; check that shape again rather than assuming.
-
-Confirm afterwards, against prd — all three must hold:
+Sanity curls against prd — all three must hold (add a `cardLine` check now that §T has shipped):
 
 ```bash
 GET /design-book/items?familyId=FP_16FRONT&groupBy=family&limit=1
@@ -238,15 +236,31 @@ GET /design-book/items?familyId=FP_16FRONT&insert=M8&widthMm=900&groupBy=family&
       → ZIGSUV90U   (without `insert` it returns ZIGSUV90)    # §S card state
 GET /design-book/items?category=Panels%20%26%20surround&subcategory=Pilasters&heightClass=73&line=73&groupBy=family
       → 6 families, no XAG_Pa_a989a3                           # §R2
+GET /design-book/items?familyId=SNK2&heightCode=73&widthMm=600&groupBy=family&limit=1
+      → TSP6073B   (TSP6080B means pinFacePool is missing)     # §T1
+GET /design-book/items?familyId=F1230&cardLine=86&groupBy=family&limit=1
+      → GF61210, H row [210,224], Line row marks 86            # §T3
+      →   Line ['73','80','86*','E'] · H ['210*','224'] · W ['46','61*','76','91']
+      →   D ['58*','63 dead']   ← the same response proves d63NoClick
 ```
 
-### TASK 2 — open the frontend follow-up PR
+Both were run against D4K-dev on 2026-08-05 and returned exactly the above.
 
-`feat/design-book-v2.5` has **two commits not in `dev`** (`54456308`, `05706e6b` — the Insert wiring).
-PR #2328 merged the first three on 07-31 (merge commit `34610156`); these landed after it.
+### TASK 2 — ✅ DONE, and TASK 2b — the one PR still open
 
-⚠️ **Do not merge the client before the backend release above.** The wiring sends `insert` and
-`variantCode`, which prd does not serve yet — against prd the row renders but does not swap.
+**Done (2026-08-05).** PR **#2328** (`34610156`) the v2.5 client · **#2329** (`9eadd240`) the Insert
+wiring (`54456308` + `05706e6b`) · **#2330** (`1f303630`) `47577826` the local depth pick — all on
+`origin/dev`.
+
+**⬜ Still open: `8016d2c7`** on `feat/design-book-v2.5` — "wire the Line row and keep 63 lit on
+force68 cards", guide steps **R12** (the click dispatcher had a literal `case "line": return;`; it now
+sends `cardLine` on every swap of that card, and `orderCodeLines` applies `assemble()`'s
+Y-replaces / +E / +J against the FACE's own capabilities) and **R13** (a force68 63 pick sends
+`depthClass=63`, and every later swap keeps sending it while the row still reads 63). See map §2c-13.
+
+The old ⚠️ is discharged: its backend half (`59a7e09f`) is released, so prd serves `cardLine` and this
+PR is unblocked. **The general rule still stands** — a client PR that sends a new query param must not
+merge before the backend that reads it, or the row renders but does not swap.
 
 ### Task board
 
@@ -256,9 +270,11 @@ PR #2328 merged the first three on 07-31 (merge commit `34610156`); these landed
 | — | §R — E2/E3 re-measure + two more fixes | ✅ 07-31 |
 | — | §S — the `Insert` row, all surfaces | ✅ 07-31 |
 | — | D4K-prd **data** ledger | ✅ level — `unitFacts.insert` written 07-31 (§3) |
-| **1** | ⭐ **release backend `dev` → prd** (3 commits) | ⬜ **open — the top item.** See TASK 1 |
-| **2** | ⭐ open the frontend follow-up PR (2 commits) | ⬜ open — **after** task 1 |
-| **3** | `GET /design-book/stats` reports `schemaVersion "2.2.0"` | ⬜ open — **both clusters**; the meta doc is from the 2026-07-17 ingest and no backfill has ever touched it. One-field write to `designbookmetas`, or re-ingest. Cosmetic today, misleading forever |
+| — | **§T — the pill CLICKS** (3 backend commits, map §2c-13) | ✅ 07-31 — `pinFacePool`, `pickDepth63`/force68, `d63NoClick` + `cardLine` + the local depth pick. No contract change |
+| **1** | ⭐ ~~release backend `dev` → prd~~ | ✅ **closed 2026-08-05** — `git log origin/main..dev` EMPTY, `origin/main` @ `7ca4bc44` (PR #2982 from staging). Shipped §T as well as the original 3 |
+| **2** | ⭐ ~~open the frontend follow-up PR~~ | ✅ **closed 2026-08-05** — PR **#2329** (`9eadd240`, the Insert wiring) and **#2330** (`1f303630`, `47577826` the local depth pick) are both on `dev` |
+| **2b** | ⭐ **open the LAST frontend PR — `8016d2c7`** | ⬜ **open — the top item.** The one commit still on `feat/design-book-v2.5`: "wire the Line row and keep 63 lit on force68 cards" (guide R12 + R13, the client half of backend `59a7e09f`). Its backend half is RELEASED, so it is unblocked |
+| **3** | `GET /design-book/stats` reported `schemaVersion "2.2.0"` | ✅ **closed 2026-08-05 — BOTH clusters at `2.5.4`.** `D4K-backend/scripts/backfill-meta-schema-version.js <x.y.z> [--apply]` (dry-run default, idempotent, one field). The meta doc is written ONLY by ingest, so every contract bump that ships as a field backfill leaves it behind — **re-run this after every bump.** Nothing gates on it (two reads, both reporting) so it was cosmetic; data-only, no release |
 | **4** | ⭐ **Design-Tasks sidebar — `functionalGroups` per MEMBERSHIP** (§O5, T1's 144 diffs) | ⬜ deferred by decision. Sidebar says 87, grid returns 91 (app 87/87). Extractor + export + contract + backfill; the taxonomy has NEVER been swept |
 | **5** | ⚠️ `lineCardOk` is missing the app's **v376 Avance line-80 lock** | ⬜ open and **UN-SWEPT** — no plan state anywhere combines line 80 with a programme. **Add the state and MEASURE before porting** |
 | **6** | un-swept surfaces: `grey=true` (15 states), `page>1`, the detail drawer, `tallH*`+`antoso` together | ⬜ open — `GET tall-heights` ignores `antoso`; add the combined state before fixing it |
@@ -275,7 +291,7 @@ codes from families it deleted, because `CODE_INDEX` is built before the splice)
 
 ## 2. What shipped today (all committed + pushed)
 
-### `D4K-backend` — branch `dev` @ **`d1d87ccc`** ⚠️ 3 ahead of `origin/main` (`54c2af2e`)
+### `D4K-backend` — ✅ all of this is on `origin/main` @ **`7ca4bc44`** (`origin/main..dev` empty, 08-05)
 
 | commit | what |
 |---|---|
@@ -283,14 +299,22 @@ codes from families it deleted, because `CODE_INDEX` is built before the splice)
 | `21a8ef87` | **§S** — port the app's `Insert` row (`insList` / `selIns` / `insPool`, three call sites) |
 | `66c0a3e3` | **§S** — the row is CARD STATE: `insert` + `variantCode` query params, `kind:"insert"`, lite-UI handler |
 | `d1d87ccc` | **§S** — admin: expose `unitFacts.insert` as a field |
+| `66e47346` | **§T1** — `pinFacePool`: `repickFaces` was discarding a swap's own pins, so every grid H and Ty pill was inert; + the D state row renders the local pick; + shared `variantSwap()` |
+| `c82543fb` | **§T2** — the `63` chip is `pickDepth63`, not `pickCardDepth`; `force68` (sinks) moves the FACE to the d68 twin |
+| `59a7e09f` | **§T3** — `d63NoClick` (dead 63 chip), the `Line` row as card state (`cardLine`), lite-UI wiring |
 
-### `D4K-frontend` — branch `feat/design-book-v2.5` @ **`05706e6b`** ⚠️ 2 ahead of `dev`
+⚠️ Unrelated project commits rode the same branch (`79dbb8c3` cors + categories status, `5004d9a5`
+new file type, `6df0ad62` room-scan files, and three merges) — they are not design-book work.
+
+### `D4K-frontend` (`/Users/apple/Documents/thirtynorth/react-apps/D4K-frontend`) — ⚠️ 1 still unmerged
 
 | commit | what |
 |---|---|
 | `8383e370` · `a4bfadeb` · `638de925` | the v2.5 client — **merged** via PR #2328 (`34610156`) |
 | `54456308` | first attempt at the Insert route (superseded by the next commit, kept for the reasoning) |
-| `05706e6b` | **§S** — `kind:"insert"` + `insert`/`variantCode` carried in `stateQ` |
+| `05706e6b` | **§S** — `kind:"insert"` + `insert`/`variantCode` carried in `stateQ` — **merged** via PR #2329 (`9eadd240`) |
+| `47577826` | **§T3** — render the local depth pick on the grid D row — **merged** via PR #2330 (`1f303630`) |
+| `8016d2c7` | **§T3 · R12+R13** — wire the `Line` row (`cardLine`) and keep 63 lit on force68 cards — ⬜ **NOT merged, task 2b** |
 
 ### `d4k-items-extraction` — branch `main` @ **`61e70f7`**
 
@@ -313,9 +337,23 @@ Contract **2.5.4**, collection `designbookitems`. Verified today by direct read 
 |---|---|---|
 | items | 18,396 | 18,396 |
 | `unitFacts.insert` | 92 | 92 |
+| book-exclusion fix (17 docs, 2026-08-04) | ✅ applied | ✅ applied |
 | inactive | 0 | 0 |
-| `designbookmetas.meta.schemaVersion` | `2.2.0` ⚠️ | `2.2.0` ⚠️ |
+| `designbookmetas.meta.schemaVersion` | `2.5.4` ✅ (2026-08-05) | `2.5.4` ✅ (2026-08-05) |
 | `*_bak_20260727` collections | none | 4 ⚠️ |
+
+**The book-exclusion fix is done on BOTH** (2026-08-04) — 17 docs, `capabilities` only, from
+`scripts/fix-book-exclusions.js` in the extraction repo (see CLAUDE.md). Data-only and inert
+until a Q programme or a Full-E state is selected, so it needed no release:
+
+```bash
+MONGO_URI_OVERRIDE="<prd uri>" node scripts/backfill-item-fields.js \
+  ../d4k-items-extraction/docs/export-v781-fresh.json --fields capabilities   # dry run first
+#   → 18,396 scanned, 17 differ · matched 17, modified 17 · re-run reports 0 differ
+```
+
+Worth noting from that run: the dry run found **exactly the same 17** on prd as on dev, so prd's
+`capabilities` was otherwise already byte-identical to the export across all 18,396 items.
 
 **The 2.5.4 write is done on both.** It was data-only and is **inert until the backend ships** — the
 deployed prd code never reads `unitFacts.insert`.
@@ -419,6 +457,19 @@ stands alone; 8–11 are new today.
 11. **`DELETE /design-book/items/:sku` is a SOFT delete.** A CRUD round-trip left `ZZ_INSERT_RT_TEST`
     as `active:false` in D4K-dev and `stats` read `18397 / 1 inactive` until it was hard-deleted.
     Use `?hard=true` for throwaway test items, and check `inactiveItems` after any CRUD test.
+12. **⭐ THE SWEEP CANNOT SEE A BROKEN CLICK.** It compares **rendered grids**, so a card whose rows
+    are byte-perfect passes even when every pill on it is inert. All three §T bugs — the discarded
+    face pins (every H and Ty pill dead), the `63` chip that never moved the face, the `Line` row with
+    no handler — survived **four zero-diff rounds** and came from a client report instead.
+    **Zero diffs means the ROWS are right; it says nothing about what a tap does.** Tap the pills,
+    on both UIs, against the app. §T2 was found by comparing six taps on one card (5/6 matched).
+13. **A regression can hide inside a documented example.** §T1 broke the map's OWN §2c-10 examples
+    (`familyId=SNK2&heightCode=73&widthMm=600` → `TSP6080B` not `TSP6073B`) back at §L, and nothing
+    noticed for four rounds because no sweep and no test replays them. The §3 sanity curls now include
+    two of them — **run the curls after any change to face selection**, not just after a release.
+14. **macOS `sed` is BSD — `\s` silently does not match.** `sed -E 's/^#\s*MONGO_URI...'` left the
+    line untouched and passed the whole `# MONGO_URI = "…"` string through as a connection URI. Use
+    `[[:space:]]`.
 
 ---
 
@@ -463,8 +514,11 @@ A leg is ~15 min (200 states) to ~25 min (Tall / Wall+Midway).
   | **Q** | the FRMAT qualifier and the `Alteration`-category escape |
   | **R** | 07-31 — the E2/E3 re-measure, `lineCardOk`'s derived height, dup `category`, and the `XCRV` **app bug** |
   | **S** | ⭐ 07-31 — **the `Insert` row**, and why it is card state. Read with map §2c-11 |
+  | **T** | ⭐⭐ 07-31 — **the pill CLICKS.** The sweep compares rendered grids, so it cannot see an inert pill: discarded face pins, the `force68` `63` chip, `d63NoClick`, the `Line` row as card state. Read with map §2c-13 |
 * `docs/design-book-api-ui-map-v2.md` **§2c-11** — the `gridRows` contract, now including the `Insert`
   row and both card-state params; §2's query-param table and the pill-navigation table carry them too.
+  **§2c-13** — the three CARD-STATE rows (`cardLine`, the `63` chip, `d63NoClick`) and why the D row's
+  self pills must render the client's local pick.
 * **`throwaway/frontend-v2.5-changes.md`** — the client's implementation guide, current.
 * **`docs/frontend-v2.5-pending-2026-07-30.md`** — client status: four commits, what PR #2328 covered,
   and the ⚠️ that the Insert commits need backend `dev` ≥ `66c0a3e3`.

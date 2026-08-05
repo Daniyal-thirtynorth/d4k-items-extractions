@@ -1721,3 +1721,116 @@ on that page read "M8"** — four are `Ty` pills on other cards. Scope a pill lo
 
 **E2 is now ten buckets at zero.** The remaining known items are §R4 (the `XCRV` app bug, E3, do not
 match) and the un-swept v376 Avance line-80 clause above.
+
+---
+
+## §T — THE PILL CLICKS (2026-07-31 late; no contract change, schemaVersion stays 2.5.4)
+
+**The finding that reframes every previous section: the sweep cannot see a broken click.** It
+compares RENDERED GRIDS. A card whose rows are byte-perfect passes even when every pill on it is
+inert — so all three bugs below survived rounds 1–4, §P, §Q and §R at zero diffs, and arrived as a
+client report ("depth pill clicks do nothing, on both the lite UI and the React client") instead.
+Backend `dev` `66e47346` · `c82543fb` · `59a7e09f`, all now on `origin/main` @ `7ca4bc44`. Client
+half: `47577826` (merged, PR #2330) + `8016d2c7` (open). Client-facing writeup: **map §2c-13**;
+client guide rules **R11–R15**.
+
+### T1 — `repickFaces` discarded every unit-level PIN a swap carries (`66e47346`)
+
+The face is re-picked in JS from the WHOLE family pool (§L) against the `GridToolbar` **alone**. That
+object carries `widthMm`, `depth`, `insert` and `variantCode` — but **not `heightCode`, `variantCore`
+or `sku`**. So the Mongo pipeline matched the right sibling and the re-face immediately put the family
+default back. **Every grid H pill and every Ty pill was inert.**
+
+Two things make this the most instructive bug of the project:
+
+* It **regressed this repo's own documented examples** and nothing noticed for four rounds, because no
+  sweep and no test replays them. `familyId=SNK2&heightCode=73&widthMm=600` answered `TSP6080B`
+  instead of `TSP6073B`; `familyId=F674&heightCode=42` answered `HGA6029BK` instead of `HGA6042` —
+  both are verbatim map §2c-10 examples, both verified working in §K, both broken by §L.
+* It also broke §S's round-trip (`sku=ZIGSUV90U&groupBy=family` → `ZIGSUV90`), so the Insert row
+  reported the **wrong pill selected** — a data-looking symptom with a face-selection cause.
+
+`widthMm` escaped only because `gridToolbar()` happens to carry it, and `insert`/`variantCode` only
+because §S had added them for this exact reason a few hours earlier. Fix: `pinFacePool` narrows the
+FACE pool only — the row builder still needs the whole family — and falls back to the full pool when
+nothing matches, so the client's relax chain (§2c-10) is unchanged. **`q` is deliberately NOT a pin**:
+the app's search matches a FAMILY and faces its card normally (§P5).
+
+### T2 — the `63` chip is `pickDepth63`, not `pickCardDepth`; `force68` moves the FACE (`c82543fb`)
+
+Found by comparing pill CLICKS one at a time, on the same state, between the app and both our UIs
+(Base › Water › Sink Cabinets, line 73). **Five of six taps already matched; `D 63` did not** — the
+app answers `TSP6073 → TSP607368`, we stayed on `TSP6073` and the click looked dead.
+
+The 63 chip is not part of the depth STATE row at all. The app renders it as its own control,
+`pickDepth63(b.id, d63Cfg(b).force68)` (v781 `:4926` and `:5000`), and `pickDepth63` sets
+`blockSel[id].d = 68` whenever `force68` — which **re-faces the card onto the d68 twin**. `d63Cfg`
+returns `{mode:'sink', force68:true}` for Base › Sinks, because 63 cm on a sink IS the 68 carcase with
+a door. So the chip is **navigation there and state everywhere else**.
+
+Both of our depth-row builders targeted `face` for 63 unconditionally. ⚠️ The one that actually fires
+for these cards is the **`hd` branch** (`dAll`/`show63`), not the `dRow` alteration branch —
+`unitFacts.depthAlterations` is null on `TSP6073` — so both were fixed, since the app applies the same
+rule at both of its call sites. The d68 twin is resolved the app's own way (`:2812`): the d68 unit
+whose code stem matches, else same width/heightCode/variant; `show63`'s `has68` has already proved the
+twin exists at this width and height, and it falls back to `face`.
+
+`familyFacts.depth63` was already stored and correct — no data or contract change. Verified, same
+state, same six taps: `W45 → TSP4573 · W90 → TSP9073 · D68 → TSP607368 · D63 → TSP607368 ·
+Ty TZ → TSPA9073TZ · Ty ZBS → TSP6073ZBS` — app / lite UI / React client **6/6 identical** (was 5/6).
+Non-force68 families (`T6073Z2W`, `TK6080BZ2`) unchanged, 63 still self. The whole-grid signature for
+that state is unchanged and still byte-identical to the app (18 cards, 5 sections, len 1335): **only
+the pill's target moved, not its label or its selected state** — which is exactly why the sweep was
+blind to it.
+
+### T3 — `d63NoClick`, the `Line` row, and the local depth pick (`59a7e09f`)
+
+Three more, each reduced to its line in v781:
+
+1. **`d63NoClick`.** A family whose label matches `/appliance door/i` renders its 63 chip as
+   `.d63off`: greyed, no handler, no target (630 mm is what the door gives you; there is no separate
+   63 code). `d63Cfg` still returns a config for these, so the chip EXISTS — it is simply dead.
+   7 families / 68 units (`F1230`, `F1230_E`, `F1231__GF0..GF3`, `XGFRWINE`). Emitted as
+   `sku:null` / `off:true` / `dead:true` from both 63-emitting sites.
+2. **The `Line` row was rendered but inert.** It is CARD state, not navigation: `pickSys` writes
+   `blockSel[id].sys` (73/80) plus `cardMod[id].dl` (86 → `J`, 66 → `Y`), and `pickFE` toggles
+   `cardMod[id].fe` (`E`). New **`cardLine`** query param carries the app's effLine (73|80|86|66) per
+   card; `cardSys`/`effLine`/`cardDoorLine` derive the two halves, `lineHFilter` collapses the H row
+   with them, and the row's `selected` now follows the app's own rule — so a **toolbar** line 86 still
+   marks `73` while a **per-card** `J` marks `86 · J`. As in the app, a `lineState`/`line` on the
+   request wins over it. ⚠️ Only the 86/66 chips clear `E` (`pickSys` writes `fe:0` in those two arms
+   alone), which is why `73 → E → 80` keeps the E.
+3. **The D STATE row never re-rendered the pick.** A depth row is MIXED (map §2c-2): a pill on another
+   sku navigates, a pill on the card's own sku is per-card STATE (`cardMod[id].md`, applied locally
+   with no fetch). Both UIs render the server's `pill.selected`, which is baked from the **toolbar**
+   depth, and neither fed the local pick back into it — so `pickCardDepth`/`setDepthPick` moved a
+   value nothing rendered. On `TSP6080` both `58` and `63` target the card itself AND carry no re-cut
+   `code`, so those two pills changed nothing at all on screen. Both UIs now let the local pick own
+   the SELF pills; sibling pills keep the server's answer, and the click guard reads the same
+   overridden value so the previously-selected pill becomes clickable again.
+
+**No stored field, no backfill, no contract change** — `cardLine` is card state, and `d63NoClick`
+reads `familyFacts.label` (which the admin form now documents; crud-guide §4f flags the field as
+load-bearing). Verified against v781 on `F1230`: `73 → 86 → E → 80` gives
+`GF61204 → GF61210 → GF61210 → GF61210E → GF61204E`, H row `[204,217] ↔ [210,224]`, identical both
+sides. One call shows the Line row and the dead 63 together (D4K-dev, 2026-08-05):
+
+```
+GET /design-book/items?familyId=F1230&cardLine=86&groupBy=family&limit=1
+  → face GF61210 · Line ['73','80','86*','E'] · H ['210*','224'] · W ['46','61*','76','91']
+  → D ['58*', '63 dead']
+```
+
+⚠️ A third lite-UI fault in `66e47346`: it routed a `gridRows` **Ty** pill by `pill.sku`, which never
+preserves the card's H/W (on `TSPA8073TZW` the TZ pill points at `TSPA908068TZ` — wrong height AND
+width). The legacy `parameters.options` row already resolved this correctly through the target's
+`variantCore`; that resolver is now a shared **`variantSwap()`** used by both row paths so they cannot
+drift again. Cards that also have an Insert row keep the plain sku swap — the `variantCore` stem
+encodes the insert there (§S / map §2c-11).
+
+### What §T changes about how to verify
+
+**Zero diffs means the ROWS are right. It says nothing about what a tap does.** Add a click pass to
+the routine: pick one card per row type, tap every pill, compare the resulting code against the app.
+And run the §3 sanity curls — which now include two of the §2c-10 examples — after any change to face
+selection, not only at release time.

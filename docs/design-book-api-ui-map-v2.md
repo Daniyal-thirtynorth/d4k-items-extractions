@@ -1206,6 +1206,9 @@ gridRows: [
 * **Render `gridRows` verbatim on grid cards.** Do not re-derive, do not fall back to `parameters.*`
   there. The DRAWER keeps `parameters.*` — that IS the app's detail model (§2c-4, §2c-10).
 * Row order is the app's: `Line → H → W → D → Ty → Insert` (+ the `217+` chip on H, §2c-3).
+* ⭐ **`Line` and the `D` row's `63` chip are CARD STATE, not navigation — see §2c-13** for the
+  `cardLine` param, the `force68` sinks exception (63 DOES navigate there), the dead `d63NoClick`
+  chip, and why the local depth pick has to own the self pills.
 
 **⭐ The `Insert` row (2.5.4) — `kind:"insert"`, and it is CARD STATE.** A family whose units carry
 `unitFacts.insert` (the app's `u.ins`) draws one more row after `Ty`, from its distinct values with
@@ -1252,8 +1255,15 @@ carry the same state or its rows come back uncollapsed:
 | param | meaning |
 |---|---|
 | `lineState=73\|80\|86` | ⭐ the H bar / LINE selector — **display state, never a filter** (§2c-7). Collapses H (and W) to that line. `line` (tall filter) and `heightClass` are accepted as aliases |
-| `depthClass` | greys the D/W/H pills whose unit isn't orderable at that depth; drives `depthFamilyOk` |
+| `cardLine=73\|80\|86\|66` | ⭐ the CARD's own `Line` pick (§2c-13a) — `lineState`/`line` wins over it |
+| `depthClass` | greys the D/W/H pills whose unit isn't orderable at that depth; drives `depthFamilyOk`. ⭐ Also carries the `63` state on a `force68` sink card (§2c-13b) |
 | `tier`, `opening`, `programs` | the pool (`ppool`) + the per-pill `off` gates |
+
+⚠️ **A swap query must carry its own PINS, not just the toolbar.** The face is re-picked in JS from the
+whole family pool, so a pin the query relies on (`heightCode`, `variantCore`, `sku`, `widthMm`, `depth`,
+`insert`, `variantCode`) has to reach the server or the family DEFAULT comes straight back — that is
+what made every grid H pill and every Ty pill inert until 2026-07-31. `q` is deliberately **not** a pin
+(the app's search matches a FAMILY and faces its card normally, §P5/§2c-11).
 
 **Supporting fields on the card** (both from schemaVersion 2.5.0, see `export-schema-v2.ts`):
 
@@ -1273,6 +1283,72 @@ width/height/variant (`faceWidthMm` + `faceHeightClass` + `faceVariantCore` rank
 **Card ORDER** is the app's `visibleBlocks` sort — `(available desc, pri, accessory last, label-group,
 special last, family max height desc, FAMS index)` — applied to the whole result before paging, so
 greyed cards sink and a variant stays next to its product.
+
+---
+
+### 2c-13. ⭐⭐ The grid's THREE card-state rows — `Line` (`cardLine`), the `63` chip, and `d63NoClick`
+
+Everything here is **grid-card state**, not navigation and not stored data. It is the grid twin of
+§2c-4 (which is the DRAWER's depth model) and it landed 2026-07-31 from a client report that "depth
+pill clicks do nothing". No contract change, no backfill — the server derives all of it.
+
+#### (a) The `Line` row is CARD state — send it back as `cardLine`
+
+The row was shipped by §2c-11 but is **inert unless the client carries the pick**. In the app it is
+`pickSys` / `pickFE`, which write per-card state, never a navigation target:
+
+| chip | app writes | means |
+|---|---|---|
+| `73` · `80` | `blockSel[id].sys` | the carcase **SYSTEM** — re-faces the card and collapses its H row |
+| `86` | `sys=73` + `cardMod[id].dl='J'` | the 73 system + the `J` door-line suffix; **toggles back to 73** |
+| `66` | `sys=80` + `cardMod[id].dl='Y'` | the 80 system + `Y`, which **REPLACES the whole order code** (§2c-3) |
+| `E` | `cardMod[id].fe` (toggle) | single-piece front — **order code only, never leaves the client** |
+
+**The param.** Send the app's effective line as **`cardLine=73\|80\|86\|66`** on **every** swap of that
+card (not just a Line click) — a later W/H pick otherwise resets it. The server derives both halves
+(`cardSys` / `cardDoorLine`), collapses the H row through `lineHFilter`, and stamps `selected` by the
+app's own rule, so a **toolbar** line `86` still marks the `73` chip while a **per-card** `J` marks
+`86`. A `lineState` / `line` on the same request **wins** over `cardLine` (as in the app).
+
+⚠️ Only the `86` and `66` chips clear `E` — `pickSys` writes `fe:0` in those two arms alone, so
+`73 → E → 80` KEEPS the E. Read `cardLine` back off the row the server just marked rather than
+tracking it yourself. Verified on `F1230`: `73 → 86 → E → 80` walks
+`GF61204 → GF61210 → GF61210 → GF61210E → GF61204E`, H row `[204,217] ↔ [210,224]`.
+
+#### (b) The `63` chip is `pickDepth63` — on a **force68** family it NAVIGATES
+
+The `63` chip is **not part of the depth state row**; the app renders it as its own control,
+`pickDepth63(b.id, d63Cfg(b).force68)`. When `d63Cfg` reports `force68` (Base › Sinks: 63 cm on a sink
+IS the 68 carcase with a door), `pickDepth63` sets `blockSel[id].d = 68`, which **re-faces the card
+onto the d68 twin**. So:
+
+| family | `63` chip | click |
+|---|---|---|
+| `force68` (sinks) | navigation | swap to the d68 twin **and keep sending `depthClass=63`** |
+| every other family | state (§2c-4 shape 4) | local depth state, no fetch |
+
+⚠️ **Keep `depthClass=63` on every later swap while the row still reads 63** — without it the
+swapped-in card comes back with `68` selected and the 63 chip goes dark. Verified:
+`TSP6073 → TSP607368`, `TSP6073B → TSP607368B`; `TSP6080B` + `63` → `TSP608068B` with 63 still lit,
+then `+H73` → `TSP607368B`, still 63. Non-force68 families (`T6073Z2W`, `TK6080BZ2`) are unchanged —
+63 still targets self.
+
+#### (c) `d63NoClick` — a 63 chip that exists but is DEAD
+
+A family whose `familyFacts.label` matches `/appliance door/i` renders its 63 chip as the app's
+`.d63off`: greyed, no handler, no target (630 mm is what the door gives you; there is no separate 63
+code). `d63Cfg` still returns a config, so **the chip is emitted** — as `sku:null`, `off:true`,
+`dead:true`. Render it, never route it. 7 families / 68 units: `F1230`, `F1230_E`,
+`F1231__GF0..GF3`, `XGFRWINE`.
+
+#### (d) ⚠️ The D **state** pills must render the LOCAL pick
+
+The server's `pill.selected` is baked from the **toolbar** depth. On a mixed row (§2c-2) the pills that
+target the card's own sku are per-card state, so a local pick has to own them or nothing on screen
+moves — on `TSP6080` both `58` and `63` target the card itself AND carry no re-cut `code`, so those
+two pills changed literally nothing before this was fixed. **Let the local pick own the SELF pills;
+sibling pills keep the server's answer; read the click guard off the same overridden value** so the
+previously-selected pill becomes clickable again.
 
 ---
 

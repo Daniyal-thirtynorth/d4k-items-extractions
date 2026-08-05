@@ -12,14 +12,17 @@ guide was written, so every line ref in the guide still lands).
 | `a4bfadeb` | a pre-commit-hook fix |
 | `638de925` | a `selected` pill can also be greyed |
 | `54456308` · `05706e6b` | ⭐ **2026-07-31** — the `Insert` row (contract 2.5.4, audit §S) |
+| `47577826` | ⭐ **2026-07-31** — render the local depth pick on the grid D row (audit §T3) |
+| `8016d2c7` | ⭐ **2026-07-31** — wire the `Line` row (`cardLine`) + keep 63 lit on force68 cards (audit §T2/§T3, guide R12/R13) |
 
-**PR #2328 (the first three commits) MERGED to `dev`** 2026-07-31, merge commit `34610156`. The two
-Insert commits landed after that merge and are **not** in a PR yet — open a follow-up when wanted.
+**Merged to `dev`** — PR **#2328** (`34610156`, the first three commits) · **#2329** (`9eadd240`, the
+two Insert commits) · **#2330** (`1f303630`, `47577826`). **⬜ `8016d2c7` is the ONLY commit still
+unmerged** — open the PR; its backend half is released (handoff task 2b).
 
-**Backend:** the first three commits need `D4K-backend` ≥ `b8169728` (on prd and dev). ⚠️ **The Insert
-work needs `dev` ≥ `66c0a3e3`** — it uses two query params (`insert`, `variantCode`) that prd does not
-serve yet, so against prd that row renders but does not swap. Data is on both clusters
-(`unitFacts.insert`, 92 docs).
+**Backend:** the first three commits need `D4K-backend` ≥ `b8169728`; the Insert work ≥ `66c0a3e3`;
+the Line/63 work ≥ `59a7e09f`. ✅ **All of it is on prd** as of 2026-08-05 — `origin/main` @
+`7ca4bc44`, `git log origin/main..dev` empty — so the old "prd does not serve `insert`/`variantCode`
+yet" warning is discharged. Data is on both clusters (`unitFacts.insert`, 92 docs).
 
 > ⚠️ The browser verification below covers the first three commits. The Insert row was verified
 > separately (audit §S): eight picks composing all three axes both ways —
