@@ -1,0 +1,19 @@
+=== GATE 3: FRMAT — "dead where the programme name has no size-table row" ===
+base names with a size row: 33
+programmes whose (normalised) name has NO row  ->  FRMAT dead: 31
+    ['AVENIDA', 'CARRÉ-FS', 'IOS', 'IOS-M', 'KERA', 'KYOTO', 'ROCCA 01', 'ROCCA 02', 'ROCCA 03', 'ROCCA 04', 'ROCCA 05', 'SELVA', 'STONE', 'VALAIS', 'VERVE-FS', 'WAKUU', 'WAKUU-FS']
+
+FRMAT.excludedPrograms: 24 | backend FRMAT_DEAD_PROGRAMS: 9
+book-dead NOT covered by (excludedPrograms | FRMAT_DEAD): 0 []
+covered by us but the book gives them a row       : 2 ['BAHIA', 'BAHIA-C']
+
+-> the 9 hardcoded FRMAT_DEAD_PROGRAMS:
+   SELVA          base=SELVA      row?=False inExcluded=False
+   KYOTO          base=KYOTO      row?=False inExcluded=False
+   VALAIS         base=VALAIS     row?=False inExcluded=False
+   STONE          base=STONE      row?=False inExcluded=False
+   SELVA-A        base=SELVA      row?=False inExcluded=False
+   STONE-A        base=STONE      row?=False inExcluded=False
+   SELVA-C        base=SELVA      row?=False inExcluded=False
+   VALAIS-C       base=VALAIS     row?=False inExcluded=False
+   STONE-C        base=STONE      row?=False inExcluded=False

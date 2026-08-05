@@ -22,3 +22,7 @@ docs/export-v781-min.json
 # parity sweep dumps (regenerate with scripts/parity/*)
 scripts/parity/out/
 scripts/parity/plan*.json
+
+# client-supplied LEICHT 2026 price/type lists (110 MB) — the audit in scripts/book-audit/
+# reads them from here; ask the client for the files rather than committing them
+data-from-client/items-pdfs/

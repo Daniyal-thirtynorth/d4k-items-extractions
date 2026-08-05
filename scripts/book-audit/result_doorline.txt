@@ -1,0 +1,21 @@
+=== GATE 4: doorLineY / doorLineJ ===
+items with doorLineY: 11 | doorLineJ: 498
+
+doorLineY items and their doorLineYCode — does the book carry the base code?
+   MGT601468      Ycode=MGT60146Y        base-in-book=True  Ycode-in-book=False
+   MGT761468      Ycode=MGT76146Y        base-in-book=True  Ycode-in-book=False
+   MGT601908      Ycode=MGT60190Y        base-in-book=True  Ycode-in-book=True
+   MGT751908      Ycode=MGT75190Y        base-in-book=True  Ycode-in-book=False
+   MGT761908      Ycode=MGT76190Y        base-in-book=True  Ycode-in-book=False
+   MGT602048      Ycode=MGT60204Y        base-in-book=True  Ycode-in-book=False
+   MGT752048      Ycode=MGT75204Y        base-in-book=True  Ycode-in-book=False
+   MGT762048      Ycode=MGT76204Y        base-in-book=True  Ycode-in-book=False
+   MGT602178      Ycode=MGT60217Y        base-in-book=True  Ycode-in-book=False
+   MGT752178      Ycode=MGT75217Y        base-in-book=True  Ycode-in-book=False
+   MGT762178      Ycode=MGT76217Y        base-in-book=True  Ycode-in-book=False
+
+legend text:
+   front line 66 cm. GM Glass matt Please mark these article types with Y instead of 8. Example: MGT 60 190 8 = front line 80 cm H Wood veneer MGT 60 190 Y = front line 66 cm no extra charg
+
+doorLineJ: 498/498 base codes present in a book (the J suffix itself is an order marker, never a listed type)
+   codes whose literal "<sku>J" appears in a book: 37  (expected ~0 — J is added on order)

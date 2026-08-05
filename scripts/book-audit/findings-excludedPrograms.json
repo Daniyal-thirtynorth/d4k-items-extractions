@@ -1,0 +1,113 @@
+[
+ {
+  "sku": "TP2060",
+  "missing": [
+   "BOSSA",
+   "BOSSA-FS",
+   "VERVE-FS",
+   "WAKUU-FS",
+   "AVENIDA",
+   "CARR\u00c9-FS"
+  ],
+  "sources": [
+   {
+    "book": "primo",
+    "page": 254,
+    "note": "Not available in AVENIDA, BOSSA, BOSSA-FS, CARR\u00c9-FS, VERVE-FS, WAKUU-FS"
+   }
+  ]
+ },
+ {
+  "sku": "ANPB",
+  "missing": [
+   "BOSSA",
+   "BOSSA-FS",
+   "VERVE-FS",
+   "WAKUU-FS",
+   "AVENIDA",
+   "CARR\u00c9-FS",
+   "BOSSA-C",
+   "BOSSA-FS-C"
+  ],
+  "sources": [
+   {
+    "book": "primo",
+    "page": 254,
+    "note": "Not available in AVENIDA, BOSSA, BOSSA-FS, CARR\u00c9-FS, VERVE-FS, WAKUU-FS"
+   },
+   {
+    "book": "contino",
+    "page": 213,
+    "note": "Not available in BOSSA-C, BOSSA-FS-C"
+   },
+   {
+    "book": "contino",
+    "page": 247,
+    "note": "Not available in BOSSA-C, BOSSA-FS-C"
+   },
+   {
+    "book": "contino",
+    "page": 279,
+    "note": "Not available in BOSSA-C, BOSSA-FS-C"
+   }
+  ]
+ },
+ {
+  "sku": "FRAUSR",
+  "missing": [
+   "IOS-M",
+   "IOS",
+   "AVENIDA",
+   "IOS-M-C",
+   "IOS-C"
+  ],
+  "sources": [
+   {
+    "book": "primo",
+    "page": 363,
+    "note": "Not available in AVENIDA, IOS, IOS-M"
+   },
+   {
+    "book": "primo",
+    "page": 475,
+    "note": "Not available in AVENIDA, IOS, IOS-M"
+   },
+   {
+    "book": "primo",
+    "page": 593,
+    "note": "Not available in AVENIDA, IOS, IOS-M"
+   },
+   {
+    "book": "contino",
+    "page": 159,
+    "note": "Not available in IOS-C, IOS-M-C"
+   },
+   {
+    "book": "contino",
+    "page": 399,
+    "note": "Not available in IOS-C, IOS-M-C"
+   },
+   {
+    "book": "contino",
+    "page": 491,
+    "note": "Not available in IOS-C, IOS-M-C"
+   }
+  ]
+ },
+ {
+  "sku": "HAA30217ZR",
+  "missing": [
+   "CLASSIC-FF-Q",
+   "CLASSIC-FS-Q",
+   "TERMA-Q",
+   "TOPOS-Q"
+  ],
+  "sources": [
+   {
+    "book": "primo",
+    "page": 569,
+    "note": "Not available in AVENIDA, CARR\u00c9-FS, CLASSIC-FF-Q, CLASSIC-FS-Q, IOS, IOS-M, TERMA-Q, TOPOS-Q, VERVE-FS, WAKUU, WAKUU-FS"
+   }
+  ]
+ }
+]

@@ -1,0 +1,10 @@
+=== GATE 1: capabilities.excludedPrograms ===
+   verifiable assertions : 1741 | conditional skipped: 62
+   codes testable        : 1411
+   PASS                  : 1407
+   FAIL                  : 4 (0.28%)
+
+   TP2060          primo    p254   missing ['BOSSA', 'BOSSA-FS', 'VERVE-FS', 'WAKUU-FS', 'AVENIDA', 'CARRÉ-FS']
+   ANPB            primo    p254   missing ['BOSSA', 'BOSSA-FS', 'VERVE-FS', 'WAKUU-FS', 'AVENIDA', 'CARRÉ-FS', 'BOSSA-C', 'BOSSA-FS-C']
+   FRAUSR          primo    p363   missing ['IOS-M', 'IOS', 'AVENIDA', 'IOS-M-C', 'IOS-C']
+   HAA30217ZR      primo    p569   missing ['CLASSIC-FF-Q', 'CLASSIC-FS-Q', 'TERMA-Q', 'TOPOS-Q']

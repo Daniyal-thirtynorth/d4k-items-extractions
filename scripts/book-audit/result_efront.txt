@@ -1,0 +1,9 @@
+=== GATE 2: "E" one-piece front — legend is scoped to TALL UNIT FRONTS ===
+  Tall (the legend population): 683 items | PASS 668 | FAIL 15
+     failing subcats: [('Panels, Fillers & Surrounds', 15)]
+  Wall / Lighting (legend does not describe these): 75 items | PASS 32 | FAIL 43
+     failing subcats: [('Ventilation & Micro', 42), ('Interior+', 1)]
+
+  height >=190.6cm rule on Tall: 609 items | PASS 593 | FAIL 16
+     missing: [('VALAIS-C', 16)]
+     skus: ['GF76204', 'GF76210', 'GF76217', 'GF76224', 'GF91204', 'GF91210', 'GF91217', 'GF91224', 'GF76204E', 'GF76210E', 'GF76217E', 'GF76224E', 'GF91204E', 'GF91210E', 'GF91217E', 'GF91224E']
