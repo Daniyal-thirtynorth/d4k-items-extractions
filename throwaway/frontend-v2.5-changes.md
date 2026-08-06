@@ -1316,16 +1316,40 @@ Two traps if you do make them editable:
 The backend's own authoring UI at `/design-book/admin` has all of these as structured controls; use
 it as the reference for field semantics and validation.
 
-### 7d. *(optional)* the detail drawer's W/H rows
+### 7d. ~~*(optional)* the detail drawer's W/H rows~~ — **DO NOT IMPLEMENT** (checked 2026-08-06)
 
-The drawer does **not** apply `showUnderLine` (0 occurrences in `detail-panel.tsx`). The grid no
-longer needs it — the server collapses grid rows — but the drawer still renders every pill for every
-line. Ship this only if the drawer's W/H rows visibly diverge from the app; the helper already
-exists (`data/caps.ts` exports `showsUnderLine` and `lineNum`). Everything else about the drawer
-stays as it is: `pill.sku` navigation, and a null `pill.sku` IS a dead chip there.
+This step said to ship the drawer's `showUnderLine` collapse "only if the drawer's W/H rows visibly
+diverge from the app". They do not, and they cannot: **the app deliberately does not collapse the
+drawer's rows by line.** Read out of v781, not inferred:
 
-Skip this step entirely if the item-management tab isn't in scope this sprint; nothing in the grid
-depends on it.
+- The Height row inside `openDetail` builds `hlist` straight off `base`, with the app's own comment
+  on the line — `// v111: heights never hidden`. No `lineHFilterB`, no `state.line`.
+- The Width row filters by `hc === u.hc`, `vr` and `ins`. Never by line.
+- **`lineHFilterB` has exactly three call sites and none of them is the drawer**: `hvals`, `hvalsV`
+  and `_selUnit`'s `hd` branch — all family-pool functions feeding the GRID. Next to it sits
+  `function lineHFilter(arr){ return arr; }`, a literal identity no-op called zero times. The
+  collapse only ever existed on the grid side.
+
+So the React drawer rendering every pill for every line **is** parity. `showsUnderLine` belongs in
+`unit-card.tsx` alone. Everything else about the drawer stays as written: `pill.sku` navigation, and
+a null `pill.sku` IS a dead chip there.
+
+⭐ **While confirming that, `openDetail`'s chip builder settled a second question** — and the client
+had this one wrong (fixed on `new-design-v2` @ `af03c2da`):
+
+```js
+const chip=(label,code,sel,ok,title)=> code==null
+  ? `<button class="chip" disabled style="opacity:.3">${label}</button>`
+  : `<button class="chip${sel?' good':''}" ${ok?'':'style="opacity:.4"'} title="${title||''}"
+       onclick="openDetail('${f.id}','${code}')">${label}</button>`;
+```
+
+`code == null` → **disabled**. `ok === false` **with** a code → `opacity:.4` **and it keeps its
+onclick**. So in the drawer, greyed and dead are decided by whether the chip has a TARGET, never by
+whether it is orderable — the same rule the lite UI documents in `optState`, now confirmed from the
+app itself. Disabling `available:false` strands the drawer: sending `programs` exists in order to
+grey those chips, and a chip reading "not in this programme" is exactly the one a planner clicks to
+go and look at the sibling.
 
 ---
 
