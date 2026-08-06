@@ -1402,13 +1402,14 @@ same results from either.
 
 ## Unverified / needs checking — do not invent behaviour here
 
-1. **The `Line` row's CLICK is not modelled.** The row itself is built and shipped (verified:
-   `H60197GAIZ` → `Line [86 · J, E]`), and audit §M's closing paragraph lists "the tall `Line` row
-   click (§L #7)" as still open. Its pills carry `sku: null` and values that mix a carcase SYSTEM
-   (`73`/`80`/`86`/`66`) with front-line suffixes (`J`/`Y`/`E`), and §2c-3 says `J`/`Y`/`E` are
-   ORDER-CODE modifiers, not navigation. **Render the row; leave the click inert** until the app's
-   handler is read out. Do not guess it into `update({line})` — `86` is a 73-*system* line
-   (§M9-2) and the mapping is not one-to-one.
+1. ~~**The `Line` row's CLICK is not modelled.** Render the row; leave the click inert.~~
+   **❌ SUPERSEDED — do NOT follow this. See §T / R12 at the top of this document.**
+   Written before the §T pass read the app's handler out. The click IS modelled now: it is CARD
+   STATE, sent back as **`cardLine=73|80|86|66`** (backend `59a7e09f`, released). `73`/`80` are the
+   carcase system, `86` = 73 + the `J` door line, `66` = 80 + `Y` (which REPLACES the whole order
+   code), and `E` is a single-piece-front suffix that is order-code only. ⚠️ Only the `86`/`66`
+   chips clear `E`. The client implements it — leaving the click inert now would REMOVE working
+   behaviour. This entry is kept only so the contradiction is visible rather than silent.
 2. ~~A `sku:[…]` navigation returns a card with NO `gridRows`.~~ **RESOLVED server-side 2026-07-29**
    — the backend now attaches `gridRows` to ungrouped rows. `items?sku=CTSP6080&full=true&limit=1`
    returns `CTSP6080` itself with all three rows, correctly selected. The FRONTS tier badges, the

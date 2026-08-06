@@ -146,9 +146,14 @@ Current facts:
   deep-link). Both auto-auth via `/design-book/dev-token`.
 - **Self-sufficiency for greying:** whole-card GREY = each list row ships its own `capabilities` (not in
   `LIST_OMIT`) → client-local, no extra call. Pill programme-grey = send `programs=` → backend stamps
-  `available:false`+`programmeExcluded`. **KNOWN GAP:** per-pill greying by the other 7 gates in the DETAIL
-  drawer needs the pill target's caps, but `resolveRefs` does NOT project `capabilities` yet — one-line fix
-  (`capabilities:1` in the projection) makes `?expand=refs` fully self-sufficient.
+  `available:false`+`programmeExcluded`. **~~KNOWN GAP~~ CLOSED (verified 2026-08-06):** `resolveRefs` DOES
+  project `capabilities` (`design-book.service.ts:2791`, alongside `variantCore`/`widthMm`/`heightClass`),
+  so `?expand=refs` is fully self-sufficient and the drawer can gate pills on their TARGET's caps. The
+  **client** half was the real gap and is now done too: the drawer sends `programs=` (its only toolbar
+  input — without it the server resolves every pill against the no-programme baseline and NOTHING greys)
+  and applies `availableFromCaps` against `refs[pill.sku].capabilities` for the other 7 gates. Verified in
+  the browser: `T6080` @BOSSA → W 15/20 `disabled`+struck, 30–120 live, and W 45 still navigates to
+  `T4580`. Landed on `D4K-frontend` `new-design-v2` @ `c9a3ce1f`.
 - **BOSSA = programme id `244`** (PRIMO/P). "Disable width 15/20 in BOSSA" = put `"244"` in the 15/20 pill
   TARGETS' `capabilities.excludedPrograms` (NOT on the parent) — see crud-guide §5.
 - **⭐ CLIENT-UI PARITY PASS (2026-07-24, schemaVersion 2.3.0).** Client kept reporting the grid diverges
