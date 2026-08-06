@@ -151,9 +151,23 @@ Current facts:
   so `?expand=refs` is fully self-sufficient and the drawer can gate pills on their TARGET's caps. The
   **client** half was the real gap and is now done too: the drawer sends `programs=` (its only toolbar
   input — without it the server resolves every pill against the no-programme baseline and NOTHING greys)
-  and applies `availableFromCaps` against `refs[pill.sku].capabilities` for the other 7 gates. Verified in
-  the browser: `T6080` @BOSSA → W 15/20 `disabled`+struck, 30–120 live, and W 45 still navigates to
-  `T4580`. Landed on `D4K-frontend` `new-design-v2` @ `c9a3ce1f`.
+  and applies `availableFromCaps` against `refs[pill.sku].capabilities` for the other 7 gates. Landed on
+  `D4K-frontend` `new-design-v2` @ `c9a3ce1f`.
+  **⚠️ CORRECTED 2026-08-06 — that landing was verified against the WRONG expectation.** It recorded
+  "`T6080` @BOSSA → W 15/20 `disabled`+struck" as the pass condition; both halves are the app's behaviour
+  inverted. `openDetail`'s own chip builder is
+  `code==null ? <button disabled style="opacity:.3"> : <button ${ok?'':'style="opacity:.4"'}
+  onclick="openDetail(…)">` — so a chip dies on a MISSING TARGET, never on being unavailable, and an
+  unavailable one dims to `.4` and **keeps its click**. That is the whole point of sending `programs=`:
+  the greyed chip is the one a planner taps to go and look at the sibling the programme excludes.
+  Two client bugs, both fixed: `CfgChip` disabled on `available===false` (`af03c2da`), and — the reason
+  that first fix measured as a no-op — `gateOption` SYNTHESIZED `crossedOut` from `available`, so every
+  greyed chip arrived already struck and the new `dead = !sku || crossedOut` re-killed exactly the chips
+  it was meant to spare (`bb051c33`). `crossedOut` is a SERVER flag ("exists in this family, not orderable
+  in this configuration") and is 0 occurrences in v781 — never derive it. The rule now lives in
+  `chipIsDead` (`data/caps.ts`) with the app source quoted and tests. Confirmed against D4K-dev, not by
+  reading: `items/T6080?expand=all&programs=244` → W 15 `T1580` and W 20 `T2080`, each
+  `available:false` + `programmeExcluded:true` + **`crossedOut:null` with a real sku**.
 - **BOSSA = programme id `244`** (PRIMO/P). "Disable width 15/20 in BOSSA" = put `"244"` in the 15/20 pill
   TARGETS' `capabilities.excludedPrograms` (NOT on the parent) — see crud-guide §5.
 - **⭐ CLIENT-UI PARITY PASS (2026-07-24, schemaVersion 2.3.0).** Client kept reporting the grid diverges
