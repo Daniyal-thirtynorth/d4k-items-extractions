@@ -1834,3 +1834,97 @@ encodes the insert there (§S / map §2c-11).
 the routine: pick one card per row type, tap every pill, compare the resulting code against the app.
 And run the §3 sanity curls — which now include two of the §2c-10 examples — after any change to face
 selection, not only at release time.
+
+---
+
+## §U — THE VARIANT PICK: `variantCore` IS NOT A DISCRIMINATOR (2026-08-06; no contract change, schemaVersion stays 2.5.4)
+
+Client report: **"clicking the handle colour swatch pills does nothing in our frontend, but it works
+in the v781 HTML"** (screenshot: More Categories › Handles, `ZGR533032` with its 20-swatch `Finish`
+row). §T had just closed the depth/Line/63 clicks; this is the same disease one row further along, and
+it survived every sweep for the same reason §T did — **the sweeps compare RENDERED GRIDS, and the row
+was right. The CLICK was wrong.**
+
+### 1. The client bug — `familyId + variantCore` answers the card you are on
+
+The `Finish` row is `kind:"variant"`, so the dispatcher took the variant route: read the TARGET's
+`variantCore` out of the page `refs` map, then swap by `familyId + variantCore + dims`. But
+`variantCore` is a code STEM, and on these families it is **degenerate**:
+
+```
+GET items?familyId=HDL_MBH_533&limit=30&refs=true
+  → 20 units, distinct variantCore values: {'ZGR'}      ← ZGR533032 … ZGR533307, all one core
+```
+
+So the query resolved to the family FACE — the card already on screen — and because a family-scoped
+query never comes back empty, the relax chain stopped there and the `sku:[…]` last resort never fired.
+A dead click with no error, no request failure, nothing in the console.
+
+**Not a handle quirk.** Measured across Base/Tall/Wall/Handles, the same silent no-op hit
+`XMOD_MU_80_Z` Ty `Z2` (stayed `MU6080Z`), `XMOD_MU_80_SZ` `SZ`/`SZ2`/`S2Z2`, `F67` Ty `2` (stayed
+`DPL1`), `F1102__N12` `DZ` (stayed `HG6020411DZ2`), plus every `Length` / `Orientation` / `Finish` row
+in Handles.
+
+**The fix: route by `variantCode`** — the app's own key (`u.vr`, the `blockVr` the server already
+accepts since §S), which is exactly what `pill.value` carries. The pills come from the same
+`variantOpts` the server faces on, so it always resolves; `selected` comes off the face, so the old
+"target `variantCore` == card's `variantCore`" test is retired with it. The page `refs` map is no
+longer part of a variant click at all (it stays the per-pill capabilities lookup).
+
+### 2. The backend bug the fix exposed — the height pin outranked the picked variant
+
+With the client sending `variantCode`, four Base/Tall families still refused to move. `pinFacePool`
+applied its pins as a **flat filter chain**, so the `heightCode` a swap carries to preserve the card's
+height (§K) filtered the pool BEFORE the variant was considered:
+
+```
+familyId=XAG_Sp_72ec18__N1&widthMm=600&heightCode=154&variantCode=KSZIZ
+  → AHG601546SZ2      ← the card the client was already on; h154 has no KSZIZ unit
+```
+
+That is the app's order inverted. `_selUnit` filters the pool by `blockVr` **first** and only then
+treats the height as a preference, so a Ty pill whose variant lives at another height MOVES the card's
+height. Pins are now **ranked** `sku > variantCode > variantCore > heightCode`, and a pin that would
+empty the pool is dropped **on its own** rather than taking the others down with it (the old code fell
+back to the whole family, losing every pin at once). `variantCode` joined `FacePins`: it was already a
+toolbar input via `selVr`, but only a pin can outrank the height.
+
+### 3. The third bug, found by driving the app itself
+
+Carrying the Ty on other picks had been scoped to insert-family cards on purpose ("the server's
+`faceVariantCore` rank preserves it elsewhere"). It does not — that rank is a tie-break and it loses to
+the height pin. Driven in v781 (`pickVariant('F344','FSUEL'); pickHeight('F344',73)`), the app renders
+**`FSUEL7334`** with both chips lit; ours answered `FS7334`, silently dropping the variant on every H
+and W pick. `variantCode` now rides on **every** swap, like `insert` and `cardLine` — it is card state
+(`blockVr`), and the app never clears it.
+
+### What shipped
+
+| Where | Commit |
+|---|---|
+| `D4K-backend` — ranked face pins + `scripts/check-face-pins.js` | `243df0c3` → PR #3000 (dev→staging) → PR #3001 (staging→main); `origin/main` @ **`1407f197`**, `origin/main..dev` empty |
+| `D4K-frontend` — route by `variantCode`, carry it on every swap | `new-design-v2` @ **`28ac1192`** |
+
+No stored field, no backfill, no contract change. The lite UI needed nothing: its legacy
+`parameters.options` path already resolved through the target and its `gridRows` path goes through
+§T's shared `variantSwap()`.
+
+### Verification
+
+- `D4K-backend/scripts/check-face-pins.js` — 6 cases, **6/6 ok**: the ranked-pin case, the
+  both-exist case, map §2c-10's two examples (`SNK2`+`heightCode=73` → `TSP6073B`, `F674`+`42` →
+  `HGA6042`), §S's sku round-trip (`ZIGSUV90U`), and a Finish pick (`HDL_MBH_533`+`277`).
+- **171 old-route-vs-new-route comparisons** over Base/Tall/Wall/Handles (every non-selected pill of
+  every multi-pill variant row on 60 families per category): **112 answers changed, every one onto the
+  pill's own target or a dimension-preserving sibling, 0 regressions.**
+- In the browser, against the app: `ZGR533032 → 277`, `ZGR411405 → 418`, `ZGR306415 → 7415`, and
+  `FS8034 → Ty FSUEL → H 73 → FSUEL7334` — the app's card, chip for chip.
+
+### The lesson, again
+
+§T said *"zero diffs means the ROWS are right; it says nothing about what a tap does."* This is the
+second report in a week where a row rendered perfectly and its click was inert, and both times the
+cause was a **key that only looks like an identity**: `variantCore` for a Ty pick, `pill.sku` for a
+depth pick. When adding a row, write down which app-side variable the click WRITES (`blockVr`,
+`blockIns`, `blockSel[id].sys`, `blockSel[id].d`) and carry that value as card state on every
+subsequent request — a value the app keeps and we drop is a bug that no grid diff can see.

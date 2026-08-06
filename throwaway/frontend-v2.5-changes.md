@@ -3,13 +3,15 @@
 ## Before you start — what to point at
 
 Everything in this document needs the backend from **`D4K-backend` branch `dev`, commit `b8169728`
-or later** — and the **R11–R15** rules below need `59a7e09f` or later.
+or later** — the **R11–R15** rules below need `59a7e09f` or later, and **R16** needs `243df0c3`
+(released: `origin/main` @ **`1407f197`**, PR #3000 → #3001, 2026-08-06).
 
-**⭐ FULLY RELEASED TO PRD — 2026-07-30, and again 2026-08-05.** Code *and* data, on both clusters:
+**⭐ FULLY RELEASED TO PRD — 2026-07-30, again 2026-08-05, and again 2026-08-06.** Code *and* data,
+on both clusters:
 
-* **code** — `origin/main` @ **`7ca4bc44`** (PR #2982 from `staging`; the 07-30 release was
-  `54c2af2e`). Contains every commit in this document, up to and including §T's `59a7e09f`.
-  `git log origin/main..origin/dev` is empty.
+* **code** — `origin/main` @ **`1407f197`** (PR #3001 from `staging`; the 08-05 release was
+  `7ca4bc44`, the 07-30 one `54c2af2e`). Contains every commit in this document, up to and including
+  §U's `243df0c3`. `git log origin/main..origin/dev` is empty.
 * **data** — the 2.5.x backfills (`unitFacts`, `familyFacts` incl. `rawSub`, `gridHidden`,
   `dupFamilies`, `faceWidthMm`, a re-captured `sectionRank`), verified field-for-field identical on
   both clusters at 18,396 items.
@@ -164,6 +166,11 @@ of these survived four zero-diff sweeps because the sweeps compare **rendered gr
 right and the **clicks** were wrong. All three are implemented in `feat/design-book-v2.5`
 (`47577826` merged, **`8016d2c7` still open**) — this table is the spec if you are re-deriving it.
 
+**⭐ R16 (2026-08-06, audit §U) joins them** — backend `243df0c3`, client `new-design-v2` @
+`28ac1192`. Same shape as §T and found the same way (a client report, not a sweep): the `Finish` /
+`Ty` / `Length` rows rendered perfectly and their clicks did nothing, because they routed by a key
+that only *looks* like an identity.
+
 | # | Change | What it means for the frontend |
 |---|---|---|
 | **R11** | ⭐ **A swap query must carry its own PINS.** The face is re-picked in JS from the whole family pool, and the re-face used to see only the `GridToolbar` — which carries `widthMm`/`depth`/`insert`/`variantCode` but **not `heightCode`, `variantCore` or `sku`** — so the family DEFAULT came straight back. | **Nothing to change if you followed R3** (`familyId` + the pin + the toolbar). But if you saw H pills and Ty pills "do nothing" against an older backend, this was why — not your dispatcher. Server-side fix (`pinFacePool`); the relax chain is unchanged. `q` is deliberately not a pin. |
@@ -171,6 +178,7 @@ right and the **clicks** were wrong. All three are implemented in `feat/design-b
 | **R13** | ⭐ **On a `force68` family (Base › Sinks) the `63` depth chip NAVIGATES** — 63 cm on a sink IS the 68 carcase with a door, so the app's `pickDepth63` moves the face to the d68 twin. Everywhere else `63` is still local state (R3 / map §2c-4 shape 4). | **Send `depthClass=63` on the pick AND on every later swap while the row still reads 63**, or the swapped-in card comes back with `68` selected and your 63 chip goes dark. `TSP6080B` + 63 → `TSP608068B` (63 still lit), then +H73 → `TSP607368B`, still 63. |
 | **R14** | ⭐ **`d63NoClick`** — a family whose label matches `/appliance door/i` ships its `63` pill as `sku:null`, `off:true`, **`dead:true`**. The chip exists in the app too; it simply has no handler. | **Render it, never route it.** Same rule as the single-pill `Finish` row (#2 above): do not drop `dead` pills. 7 families / 68 units (`F1230`, `F1230_E`, `F1231__GF0..GF3`, `XGFRWINE`). |
 | **R15** | ⭐ **The D row's SELF pills must render your LOCAL pick.** The server's `pill.selected` is baked from the **toolbar** depth, so on a mixed row a local pick has to override it. | On `TSP6080` both `58` and `63` target the card itself and carry no re-cut `code` — before this, those two pills changed **nothing on screen**. Let the local pick own the self pills, leave sibling pills on the server's answer, and read the click guard off the same overridden value so the previously-selected pill is clickable again. |
+| **R16** | ⭐⭐ **A Ty / option / `Finish` pick routes by `variantCode`, NEVER by `variantCore`** — and `variantCode` is CARD STATE, so it rides on **every** swap. `variantCore` is a code STEM and is degenerate on whole families: all 20 members of `HDL_MBH_533` are `"ZGR"`, so `familyId+variantCore` returns the card you are on and the relax chain never reaches your `sku` last resort. Dead click, no error. Also `XMOD_MU_80_Z` `Z2`, `F67` `2`, `F1102__N12` `DZ`, and every Handles `Length`/`Orientation`/`Finish` row. | **Send `items?familyId&variantCode=<pill.value>&widthMm=card's&heightCode=card's` (retry w/o width, then w/o height).** `pill.value` IS the app's key (`u.vr`/`blockVr`) — no `refs` lookup, and `selected` comes off the server, so drop the `variantCore == card's` test. **Then keep sending `variantCode=<the Ty row's selected value>` on W/H/D/Line/Insert picks too**, or the next pick re-faces to the family DEFAULT variant: H 73 on `FSUEL8034` gave `FS7334` where the app keeps **`FSUEL7334`**. ⚠️ Needs backend `243df0c3` (ranked face pins, `origin/main` @ `1407f197`) or a Ty whose variant lives at another height still resolves to the height. |
 
 One call proves R12 + R14 together (run against dev 2026-08-05):
 
@@ -189,7 +197,7 @@ GET /design-book/items?familyId=F1230&cardLine=86&groupBy=family&limit=1
 | **R1** "the H bar changes membership **not at all**" | ❌ **WRONG, corrected here (R6).** `lineCardOk(b)` is also a membership gate in the app's `blockVisible` — 22/9/25 Base families vanish at line 73/80/86 (audit §M3). The bar is still not a *unit* filter, but it does hide families. |
 | **R1** per-card client-side re-face on a line pick | ❌ dead — the server re-faces (`lineState`, R6). Delete the effect at `unit-card.tsx:374-384`. |
 | **R2** grid W/H/Ty resolve by `familyId`+dims, never `pill.sku` | ✅ **still true and now stronger** (R3) — but the pill now comes from `gridRows`, and the swap must also carry the toolbar (R4). |
-| **R3** page-level refs map | ⚠️ **mostly dead.** Per-pill greying and Ty selection are server-computed now. The map survives only as the `variantCore` lookup for a Ty click — and it does **not** cover every `gridRows` target (measured below). |
+| **R3** page-level refs map | ⚠️ **mostly dead.** Per-pill greying and Ty selection are server-computed now, and since **R16** a Ty click routes by `pill.value` — so the map is no longer read for a variant swap at all. It survives only as the per-pill `capabilities` lookup for the FRONTS tier badges. |
 | **R4** `showUnderLine` client-side collapse | ❌ **dead on grid cards** — the server collapses (`lineState`). Keep the helper only for the legacy fallback branch. |
 | **R5** whole-card grey via local `availableFromCaps` | ⚠️ **downgraded to a fallback** (R5 here) — a local computation sees one unit and cannot apply `famOkB`/`famOkU`; that left 31 Base cards ungreyed (audit §M5). |
 | **R5** per-pill grey via target caps | ❌ dead on grid cards — `pill.off` / `pill.dead` ship computed. Still needed for the **FRONTS tier badges**, which are NOT part of `gridRows`. |
@@ -302,7 +310,8 @@ a depth pill with `pill.sku === card.sku` is state, no fetch).
 > originally listed are gone. Verified on SNK1: 15 pill targets, 12 in `refs`, and the only 3 absent
 > are `TSP6080` — **the card's own sku** (the D row's self/state pills), which needs no ref entry.
 >
-> A Ty click can therefore rely on `refs[pill.sku].variantCore` in practice. **Keep the `sku:[…]`
+> ~~A Ty click can therefore rely on `refs[pill.sku].variantCore` in practice.~~ **Superseded by R16**
+> — a Ty click reads nothing out of the map now, it routes by `pill.value`. **Keep the `sku:[…]`
 > fallback anyway** as a cheap last resort — it is one line and it covers a card swapped in from a
 > page whose refs you never merged.
 
@@ -637,7 +646,7 @@ Every candidate also carries `groupBy=family&limit=1&grey=true&refs=true` **and 
 |---|---|---|
 | **height** | `items?familyId=…&heightCode=<value>&widthMm=<card's>` | drop `widthMm` |
 | **width** | `items?familyId=…&widthMm=<value×10>&heightCode=<card's>` | drop `heightCode` (**keep the width**) |
-| **variant** | `items?familyId=…&variantCore=<refs[pill.sku].variantCore>&widthMm&heightCode` | drop `widthMm`, then `heightCode`, then fall back to `items?sku=<pill.sku>` |
+| **variant** | ⚠️ **`items?familyId=…&variantCode=<pill.value>&widthMm&heightCode`** — `variantCode`, never `variantCore` (**R16**: `variantCore` is a stem and is degenerate on Finish/Length families, so it answers the card you are on) | drop `widthMm`, then `heightCode`, then fall back to `items?sku=<pill.sku>` |
 | **insert** (2.5.4, §S) | `items?familyId=…&insert=<pill.value>&widthMm=<card's>` | drop `widthMm` |
 | **depth** | `pill.sku === card.sku` ⇒ **no request** (state pill, v2.2 §2c-2); else `items?sku=<pill.sku>` **+ the toolbar, ungrouped** — this is also the whole handler for the all-sibling D row (R3 note, §P) | — |
 | **line** | not modelled — see "unverified" | — |
@@ -656,9 +665,10 @@ const rowPick = (kind: GridRow["kind"]) =>
 const stateQ: ItemsQuery = {
   …,
   insert: rowPick("insert"),
-  // only on insert-family cards: elsewhere the server's faceVariantCore rank already
-  // preserves the variant, and pinning it would change measured behaviour
-  variantCode: rowPick("insert") ? rowPick("variant") : undefined,
+  // R16 — on EVERY card, not just insert families: `faceVariantCore` is a tie-break and loses
+  // to the height pin, so without this an H pick drops the Ty (FSUEL8034 + H73 → FS7334, where
+  // the app keeps FSUEL7334)
+  variantCode: rowPick("variant"),
 };
 
 case "insert":                                   // `insert` AFTER the spread — stateQ holds the OLD pick
@@ -672,18 +682,17 @@ Three traps, all of them things that silently do nothing rather than error:
 
 1. **Do not route it as a variant.** Both pills share one `variantCore` (`ZIGSUV90` and `ZIGSUV90U`
    are each `Drawer`), so `familyId + variantCore` returns the card you are on.
-2. **On these cards, do not route the Ty row by `variantCore` either** — that stem encodes the
-   insert too (`ZIGZUV` = L3/M3 pullout, `ZIGZUVU` = M8), so pairing it with `insert` matches
-   nothing. Send `variantCode` (the Ty pill's own `value`) instead, and clear `variantCode` from
-   the `variantCore` candidates or the two contradict.
+2. **Do not route the Ty row by `variantCore` either** — that stem encodes the insert too
+   (`ZIGZUV` = L3/M3 pullout, `ZIGZUVU` = M8), so pairing it with `insert` matches nothing.
+   ⭐ **R16 generalised this: NO variant row routes by `variantCore` any more, on any card.**
 3. **Both params ride on W and H picks too**, or the next pick resets the card: `M8` then `W20`
    without `insert` lands on `ZIGSUV20` (L3/M3).
 
 Verified in the browser, eight picks composing all three axes in both directions:
 `ZIGSUV90 → M8 → W20 → Pullout → L3/M3 → M8 → W60 → Drawer` walks
-`ZIGSUV90U · ZIGSUV20U · ZIGZUV20U · ZIGZUV20 · ZIGZUV20U · ZIGZUV60U · ZIGSUV60U`. Non-insert cards
-are untouched — a Base Ty swap still sends `familyId=F344&variantCore=FSUEL&widthMm=16&heightCode=80`.
-One family in v781 (`FP_16FRONT`, 92 units).
+`ZIGSUV90U · ZIGSUV20U · ZIGZUV20U · ZIGZUV20 · ZIGZUV20U · ZIGZUV60U · ZIGSUV60U`. One family in
+v781 (`FP_16FRONT`, 92 units). *(A Base Ty swap now sends the same shape —
+`familyId=F344&variantCode=FSUEL&widthMm=16&heightCode=80`, R16.)*
 
 Real answers (all verified):
 
@@ -798,7 +807,7 @@ inputs and the client does **not** need them (§2c-11: "needed only if a client 
 don't type them.
 
 ```diff
-   variantCore?: string; // R2 — Ty/option identity for the selected-pill test
+   variantCore?: string; // legacy `parameters.options` path only — a gridRows Ty pick uses variantCode (R16)
    heightClass?: number; // face height class (73|80|86) — W/Ty swaps + LINE pre-select
    heightCode?: number;  // R7 — the H-ROW key (73/80/86 on line families, cm height elsewhere)
    doorLineYCode?: string;
@@ -894,7 +903,8 @@ The `grey` line below it (`:100`) is already right — leave it:
   if (f.greyDontHide) q.grey = true;   // now ALSO the family-level hide gate (R7)
 ```
 
-`refs=true` (`:103`) stays: the Ty click still reads `variantCore` out of the map (R3's note).
+`refs=true` (`:103`) stays — not for the Ty click any more (R16 routes by `pill.value`), but for the
+FRONTS tier badges, which are not part of `gridRows` and still gate on the target's `capabilities`.
 
 `toSearchParams` already serialises everything — no change.
 
@@ -1023,17 +1033,14 @@ const pickGrid = (row: GridRow, p: GridPill) => {
         { ...stateQ, familyId: famId, widthMm: n * 10 },
       ]);
     case "variant": {
-      // `p.value` is the app's variantCode; the API filters on variantCore, which only the refs
-      // map knows — and it does NOT cover every gridRows target (R3). Fall back to the sku.
-      const vc = pageRefs.get()[p.sku ?? ""]?.variantCore;
+      // R16 — route by the app's OWN key (`u.vr` = `blockVr`), which `p.value` already is. NOT
+      // `variantCore`: it is a code stem, and every member of a Finish/Length family shares one
+      // (all 20 of HDL_MBH_533 are "ZGR"), so that query answers the card you are on.
+      const variantCode = String(p.value);
       return setSwap([
-        ...(vc
-          ? [
-              { ...stateQ, familyId: famId, variantCore: vc, widthMm: active.widthMm, heightCode: active.heightCode },
-              { ...stateQ, familyId: famId, variantCore: vc, heightCode: active.heightCode },
-              { ...stateQ, familyId: famId, variantCore: vc },
-            ]
-          : []),
+        { ...stateQ, familyId: famId, variantCode, widthMm: active.widthMm, heightCode: active.heightCode },
+        { ...stateQ, familyId: famId, variantCode, heightCode: active.heightCode },
+        { ...stateQ, familyId: famId, variantCode },
         // ⚠️ ungrouped, so it is NOT re-faced — but it DOES get gridRows now, and those rows are
         // built for whatever toolbar the request carries, so the toolbar has to ride along (R4).
         ...(p.sku
@@ -1386,7 +1393,8 @@ go and look at the sibling.
 | 20 | Same dialog | `heightCode`, `catalogRank`, `sectionRank`, `familyIndex`, `gridHidden` are all present and editable (Step 7b); `unitFacts` / `familyFacts` / `dupFamilies` are visible but read-only (Step 7c) |
 | 21 | Clear `catalogRank` on a family and save | it becomes `null` (unnumbered → sorts last), **not** `0` and not 999. If the form cannot express "empty", that field is not done |
 | 22 | Click a FRONTS tier badge (`CTSP6080`) with the H bar on 73 | the card keeps full rows (`gridRows` ships on ungrouped lists now) **and** the H row stays `[73]`. A row that springs back to `[73 80 86]` means the sku navigation dropped the toolbar |
-| 23 | Click a Ty pill whose target is off-page | resolves from `refs[pill.sku].variantCore` without the `sku:[…]` last resort firing — the refs map covers `gridRows` targets now |
+| 23 | Click a Ty pill whose target is off-page | resolves from `pill.value` alone (R16) — no `refs` entry needed and the `sku:[…]` last resort never fires |
+| 24 | Click a `Finish` swatch on a Handles card, then a `Ty`/H pill on a cabinet card | `ZGR533032` → `277` swaps the card **and its image**; `FS8034` → Ty `FSUEL` → H `73` lands on **`FSUEL7334`**, not `FS7334` (R16 — the Ty must survive the H pick) |
 
 Ground truth: `d4k-items-extraction/docs/design-book-api-ui-map-v2.md` — **§2c-11** (`gridRows` +
 toolbar inputs), **§2c-12** (membership: `gridHidden`, `dupFamilies`, the family gates, card order),

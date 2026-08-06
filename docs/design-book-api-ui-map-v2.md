@@ -144,9 +144,9 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row | `…/items?widthMm=600` |
 | `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`). ⚠️ **Do NOT use as the grid's toolbar-H filter** — the app's "H All 73 80 86" bar is its LINE selector: pre-select + row collapse, never a hard filter (§2c-7). Valid as a precise API filter, but for a family SWAP prefer **`heightCode`** — `heightClass` is null outside carcase-line families (§2c-10) | Grid filter bar — H row | `…/items?familyId=SNK5&heightClass=73` |
 | `heightCode` | IN | **CARD H pill** — the app's per-unit H-row key `u.hc` (73/80/86 on carcase-line families, the unit's **cm height** everywhere else: 29, 42, 204…). The ONE key that resolves an H pick on any family; **exact, not null-inclusive** (§2c-10) | (internal — grid H pill navigation) | `…/items?familyId=F674&heightCode=42&widthMm=600&groupBy=family` |
-| `variantCore` | IN | **Variant identity** (denormalized, e.g. `TSPATZW`) — resolve a family sibling of a specific Ty/option variant: `familyId + variantCore (+ heightCode/widthMm — `heightCode`, so the height survives on non-line families, §2c-10)`. The grid's option-pill navigation route (§2c-8) | (internal — pill navigation) | `…/items?familyId=SNK5&variantCore=TSPATZ&heightClass=73&groupBy=family` |
+| `variantCore` | IN | **Variant identity** (denormalized, e.g. `TSPATZW`) — resolve a family sibling of a specific Ty/option variant: `familyId + variantCore (+ heightCode/widthMm)`. ⚠️ **NOT the grid's option-pill route any more (§2c-8/§U): it is a code STEM and is degenerate on whole families** — all 20 members of `HDL_MBH_533` are `"ZGR"`, so it answers the card you are on. Use `variantCode`. Kept for the legacy `parameters.options` path and as a face pin | (internal — legacy pill navigation) | `…/items?familyId=SNK5&variantCore=TSPATZ&heightClass=73&groupBy=family` |
 | `insert` | IN | ⭐ **CARD STATE** (2.5.4) — the `Insert` row's pick (`unitFacts.insert`, e.g. `L3/M3` \| `M8`), the app's `blockIns`. Not a filter: it scopes the family pool the FACE is picked from (`insPool`). Send it on **every** swap of an insert-family card, not just the Insert pill, or the next W/Ty pick resets the card to the row's first insert. Inert on families with no insert axis (§2c-11) | (the card's `Insert` row) | `…/items?familyId=FP_16FRONT&insert=M8&widthMm=200&groupBy=family` |
-| `variantCode` | IN | ⭐ **CARD STATE** (2.5.4) — the Ty pick as the app's own VARIANT KEY (`unitFacts.variantCode`, = the Ty pill's `value`), the app's `blockVr`. Scopes the face pick. **Prefer it over `variantCore` whenever the card also has an `insert` axis**: the variantCore stem encodes the insert too (`ZIGZUV` is the L3/M3 pullout, `ZIGZUVU` the M8 one), so the two contradict and nothing matches (§2c-11) | (the card's Ty row, insert-families only) | `…/items?familyId=FP_16FRONT&variantCode=Pullout&insert=M8&groupBy=family` |
+| `variantCode` | IN | ⭐⭐ **CARD STATE** (2.5.4) — the Ty pick as the app's own VARIANT KEY (`unitFacts.variantCode`, = the Ty pill's `value`), the app's `blockVr`. Scopes the face pick, and as a FACE PIN it **outranks `heightCode`** (§2c-13e). **This is THE route for every Ty / option / `Finish` pick, on every card — never `variantCore` (§U)** — and it rides on every OTHER pick of that card too, or the next swap re-faces to the family's default variant | (the card's Ty row) | `…/items?familyId=FP_16FRONT&variantCode=Pullout&insert=M8&groupBy=family` |
 | `depthClass` | IN | **D pill** — nominal depth CLASS in cm (36·48·58·63·68). Ports the app's `depthOk`: matches when the class is in the unit's **`capabilities.depthClasses`** (however the catalog expresses depth — see §2c-2), or the unit has no carcass depth at all (empty/absent → rides every class). **58 and 63 are pass-through** (the app short-circuits them). Carcass = class×10−20. | Grid filter bar — D row | `…/items?depthClass=68` |
 | `depthMm` / `heightMm` | IN | Exact carcass depth / height (mm) — precise, **not** the grid class rows | (precise filter) | `…/items?depthMm=560` |
 | `line` / `tallHeight` | IN | **TALL** two-row height selector (carcase LINE 73/80/86 + dynamic HEIGHT cm). TALL only. Options from `GET tall-heights` (§6b) | Tall toolbar — top + second pill rows | `…/items?zone=Tall&line=80&tallHeight=204` |
@@ -156,7 +156,7 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `groupBy=family` | IN | **Grid card grouping** — one card per family ("N types"); pages by family | Grid — the card grid itself | `…/items?leafId=b_cool%230&groupBy=family` |
 | `full` | IN | Include the detail-only blobs (§3) that `LIST_OMIT` strips | (dev / when the card needs a detail field) | `…/items?q=T6073VE&full=true` |
 | `grey` | IN | **GREY, DON'T HIDE** — skips the `depthClass` HARD-filter so the family's native face returns as a (greyable) card instead of being hidden; the client then greys it via `availableFromCaps` (§2c-6). Depth is the one gate the backend hid rather than greyed; this routes it through the grey path. | Top toolbar — "Grey don't hide" toggle | `…/items?depthClass=68&grey=true` |
-| `refs` | IN | **Pill-target caps map** — attaches a page-level `refs{ sku → {capabilities, variantCore, widthMm, heightClass, …} }` covering every pill's TARGET sku on the returned cards, so the grid can gate pills by the TARGET's caps (not the parent's) without a per-pill detail fetch (§2c), and resolve option-pill variant navigation (§2c-8). The list analogue of detail `expand=refs`. | (no visible control — enables per-pill greying + variant navigation) | `…/items?leafId=b_water%232&refs=true` |
+| `refs` | IN | **Pill-target caps map** — attaches a page-level `refs{ sku → {capabilities, variantCore, widthMm, heightClass, …} }` covering every pill's TARGET sku on the returned cards, so the grid can gate pills by the TARGET's caps (not the parent's) without a per-pill detail fetch (§2c), and resolve legacy option-pill navigation (§2c-8; a `gridRows` variant pick needs no ref since §U). The list analogue of detail `expand=refs`. | (no visible control — enables per-pill greying) | `…/items?leafId=b_water%232&refs=true` |
 
 > **`availableTiers` precedence** (one filter, most-specific wins): `tier` (FRONTS pill) → `programs[]`
 > (picker) → `family` (tab). The tier gate narrows ONLY design-zone cabinet families (Base/Tall/Wall);
@@ -344,7 +344,8 @@ To resolve a pill the client:
 On CLICK, **in the DETAIL drawer** every row navigates (`GET items/{pill.sku}`) — **except a `depth` pill
 that points at the item itself, which must NOT fetch** (full handler: **§2c-4**). ⚠️ **In the GRID the
 W/H/Ty rows must NOT navigate by `pill.sku`** — the stored skus are detail-model (they point at the
-68-depth sibling); resolve through the family instead, and mark SELECTED by label / `variantCore` there —
+68-depth sibling); resolve through the family instead — W/H by dimension, **Ty/option by
+`variantCode` (never `variantCore`, §U)** — and take SELECTED off the server's own `pill.selected` —
 **§2c-8**. The toolbar's own "H 73/80/86" bar is a pre-select, not a filter — **§2c-7**.
 
 
@@ -818,11 +819,22 @@ codes (`…68…`) and a self pill that never shows selected. The rules:
 |---|---|---|
 | **W** | `items?familyId&widthMm=label×10&heightCode=card's` (+`heightClass` when set) `&groupBy=family&limit=1` — retry by dropping the **HEIGHT**, not the width | sku match, else numeric label == card's `widthMm/10` |
 | **H** | `items?familyId&heightCode=label&widthMm=card's&groupBy=family&limit=1` (retry w/o width) — **`heightCode`, not `heightClass`: see §2c-10** | sku match, else numeric label == card's `heightCode` |
-| **Ty / options** | `items?familyId&variantCore=<target's>&heightCode=card's` (+`heightClass`) `&widthMm=card's&groupBy=family&limit=1` (retry w/o width, then w/o height) | target `variantCore` == card's `variantCore` |
-| **Ty / options**, card with an `Insert` row | ⚠️ `items?familyId&variantCode=<pill.value>&insert=card's&widthMm=card's` — **not** `variantCore`, which encodes the insert as well (§2c-11) | target `variantCode` == card's |
+| **Ty / options** | ⚠️ `items?familyId&variantCode=<pill.value>&widthMm=card's&heightCode=card's&groupBy=family&limit=1` (retry w/o width, then w/o height) — **`variantCode`, NEVER `variantCore`: see the box below** | `pill.selected` (server-stamped) |
 | **Insert** (`kind:"insert"`) | `items?familyId&insert=<pill.value>&variantCode=card's&widthMm=card's&groupBy=family&limit=1` (retry w/o width) | `pill.selected` (server-stamped) |
 | **Depth** | unchanged — §2c-4 (state pill vs sibling by `pill.sku`) | by label (§2c-4) |
 | **Programme** | unchanged — `pill.sku` (tier codes, backend-synthesized) | `pill.sku === card.sku` |
+
+⚠️⚠️ **A Ty / option / Finish pick routes by `variantCode`, NEVER by `variantCore`** *(2026-08-06, audit
+§U — client report "the handle colour swatches don't click")*. `variantCore` is a code STEM, and on a
+whole class of families it is degenerate: all 20 members of `HDL_MBH_533` (`ZGR533032` … `ZGR533307`)
+carry `variantCore:"ZGR"`, so `familyId+variantCore` answered the card the user was already on and the
+relax chain never reached the `sku` last resort — a dead click. It is not a handle quirk: `XMOD_MU_80_Z`
+Ty `Z2`, `F67` Ty `2` and `F1102__N12` `DZ` were inert the same way. **`pill.value` IS the app's own key**
+(`u.vr` / `blockVr`), the rows are built from the same `variantOpts` the server faces on, so it always
+resolves; the server marks `selected` off the face, so the old `variantCore == card's` test is retired
+too. The `refs` map is no longer needed for a variant click at all (it is still the per-pill capabilities
+lookup, §2c). Measured over 171 pill picks across Base/Tall/Wall/Handles: 112 answers changed, **every one
+onto the pill's own target or a dimension-preserving sibling, 0 regressions**.
 
 ⚠️ **"Preserve the other dimension" means `heightCode`, not `heightClass`** (§2c-10): `heightClass` is null
 outside carcase-line families, so a W/Ty swap that carries only it silently loses the height —
@@ -831,8 +843,9 @@ did **not** pick: a W pick drops the height keys and keeps `widthMm` (the app's 
 width); an H or Ty pick drops `widthMm` first.
 
 The face rank's `depthMm` ASC tiebreak makes the family query land the **native-depth** unit
-(`TSP6073B`, `TSPA9073TZ`) — no depth math in the client. The target's `variantCore` comes from the
-`?refs=true` map (which projects `variantCore`/`widthMm`/`heightClass`, §2's `refs` row). ⚠️ **Keep that
+(`TSP6073B`, `TSPA9073TZ`) — no depth math in the client. *(Historic: the target's `variantCore` used to
+come from the `?refs=true` map. A variant pick reads nothing out of it since §U — but the map still
+carries each target's `capabilities` for the FRONTS tier badges.)* ⚠️ **Keep that
 map covering swapped-in cards:** a card swapped in after page load brings pill targets the page map has
 never seen — without them the variant SELECTED mark and per-pill greying silently stop working
 (`TSP6073ZW`'s ZW pill rendered unselected). So **every swap query itself passes `refs=true` and merges
@@ -1234,7 +1247,8 @@ server does all of that; what it cannot do is remember which insert you picked.
 
 * **⚠️ Do NOT route this row like a variant row.** Both pills share one `variantCore` (`ZIGSUV90` and
   `ZIGSUV90U` are each `Drawer`), so a `familyId + variantCore` query returns the card you are on.
-* **⚠️ And on these cards do not route the Ty row by `variantCore` either.** That stem encodes the
+* **⚠️ Do not route the Ty row by `variantCore` either** — since §U that is true on EVERY card, and
+  here for a second reason: that stem encodes the
   insert as well — `ZIGZUV` is the L3/M3 pullout, `ZIGZUVU` the M8 one — so pairing it with `insert`
   matches nothing and the Ty pick silently does nothing. Send `variantCode` (the app's own `u.vr`,
   which IS the Ty pill's `value`).
@@ -1265,6 +1279,12 @@ whole family pool, so a pin the query relies on (`heightCode`, `variantCore`, `s
 what made every grid H pill and every Ty pill inert until 2026-07-31. `q` is deliberately **not** a pin
 (the app's search matches a FAMILY and faces its card normally, §P5/§2c-11).
 
+⚠️ **The pins are RANKED — `sku > variantCode > variantCore > heightCode`** (§U, 2026-08-06) — and a pin
+that would empty the pool is dropped **on its own**, not taken down together with the others. That is
+the app's `_selUnit` order: the pool is filtered by `blockVr` first and the height is only a preference
+afterwards, so a Ty pill whose variant exists at another height MOVES the card's height instead of
+being ignored.
+
 **Supporting fields on the card** (both from schemaVersion 2.5.0, see `export-schema-v2.ts`):
 
 | field | why the client cares |
@@ -1286,7 +1306,7 @@ greyed cards sink and a variant stays next to its product.
 
 ---
 
-### 2c-13. ⭐⭐ The grid's THREE card-state rows — `Line` (`cardLine`), the `63` chip, and `d63NoClick`
+### 2c-13. ⭐⭐ The grid's card-state rows — `Line` (`cardLine`), the `63` chip, `d63NoClick`, and the Ty pick (`variantCode`)
 
 Everything here is **grid-card state**, not navigation and not stored data. It is the grid twin of
 §2c-4 (which is the DRAWER's depth model) and it landed 2026-07-31 from a client report that "depth
@@ -1349,6 +1369,25 @@ moves — on `TSP6080` both `58` and `63` target the card itself AND carry no re
 two pills changed literally nothing before this was fixed. **Let the local pick own the SELF pills;
 sibling pills keep the server's answer; read the click guard off the same overridden value** so the
 previously-selected pill becomes clickable again.
+
+#### (e) ⭐ The Ty pick is CARD state too — `variantCode` rides on **every** swap *(2026-08-06, §U)*
+
+`blockVr` is per-card and the app never clears it, so send `variantCode=<the Ty row's selected value>`
+on every swap of that card — not only on a Ty click and not only on insert-family cards. Without it the
+next pick re-faces to the family DEFAULT variant: H `73` on `FSUEL8034` came back `FS7334` where the app
+keeps **`FSUEL7334`** (`pickVariant('F344','FSUEL'); pickHeight('F344',73)` in v781 renders `FSUEL7334`
+with both chips lit — verified against the app, not inferred). The server's `faceVariantCore` rank is a
+tie-break, not a pin, and it loses to the height.
+
+⚠️ **The pins are RANKED — `sku > variantCode > variantCore > heightCode`** (`pinFacePool`), and a pin
+that would empty the pool is dropped **on its own** instead of taking the others with it. That is the
+app's `_selUnit` order: it filters the pool by `blockVr` FIRST and only then treats the height as a
+preference, so a Ty pill whose variant lives at another height **moves the card's height**. A flat filter
+chain had the height winning, and `familyId=XAG_Sp_72ec18__N1&heightCode=154&variantCode=KSZIZ` answered
+`AHG601546SZ2` — the card the client was on — because h154 has no KSZIZ unit. Backend `243df0c3`,
+released to `origin/main` @ `1407f197`; the client change needs it, or a cross-height Ty pick still
+resolves to the height. Regression suite: `D4K-backend/scripts/check-face-pins.js` (6 cases, incl.
+§2c-10's own examples and §S's sku round-trip).
 
 ---
 

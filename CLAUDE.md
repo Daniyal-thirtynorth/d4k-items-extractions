@@ -114,7 +114,7 @@ Current facts:
   the whole `capabilities` object settable at creation; `UpsertItemDto`). Re-ingest = **extractor wins** (no
   merge layer). `.env` currently points at **D4K-dev** (was prod — flip back when done). Migration cleanup:
   `D4K-backend/scripts/strip-legacy-designbook-fields.js`.
-- **Docs (all v2, refreshed to 2.5.4 on 2026-07-31):** `docs/export-schema-v2.ts` (contract) ·
+- **Docs (all v2, contract 2.5.4; click/route material refreshed 2026-08-06 for §U):** `docs/export-schema-v2.ts` (contract) ·
   `docs/export-sample-v2.json` (**15**-item worked sample — `MGT601468` = `doorLineYCode` +
   `heightExtension`; **every item now carries `unitFacts`/`familyFacts` incl. `rawSub` (was missed at
   2.5.3); `L24CD` = `gridHidden`; `ANTSPSAUS` = `dupFamilies`; `ZIGSUV90` = `unitFacts.insert`**) ·
@@ -122,7 +122,9 @@ Current facts:
   `availableFromCaps` + render spec; **§2c-4 DEPTH PILL — selection + when to call `/items/:sku`**;
   **§2c-1 SELECTED — navigation rows vs DEPTH state rows**;
   **§2c-2 the two depth models**; **§2c-3 the WHOLE order-code surface — every `assemble()` input, which
-  rows are plain navigation, `doorLineYCode`, `heightExtension`**; §1b CRUD) ·
+  rows are plain navigation, `doorLineYCode`, `heightExtension`**; **§2c-8 the grid's pill ROUTES — Ty by
+  `variantCode`, NEVER `variantCore`**; **§2c-13 the CARD-STATE rows — `cardLine`, the 63 chip,
+  `d63NoClick`, the local depth pick, and (e) the Ty pick + the RANKED face pins**; §1b CRUD) ·
   **`docs/design-book-crud-guide.md`** (authoring guide: mental model = a card is a FAMILY of sibling items
   linked by pills, the rule lives on the pill TARGET; §3a depthClasses+58/63 quirk + gate-vs-pill-row warning,
   §3b nativeTier/opening/twinTiers, §3c the other 6 gates, §3d master greying table; §4/§4a the depth
@@ -134,7 +136,7 @@ Current facts:
   hide-vs-grey**) · `docs/design-book-item-fields-plain-guide.md` (plain-English field-by-field
   tour + **§3b why the card's buttons ≠ the detail screen's** — hand this to a non-engineer) ·
   **`throwaway/frontend-v2.5-changes.md`** (the React client's `gridRows` implementation guide, against
-  `D4K-frontend` `origin/dev` 25b19af9; v2.2/v2.3 guides in the same folder are already merged there). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
+  `D4K-frontend` `origin/dev` 25b19af9 — **rules R1–R16**, R16 being §U's variant route; v2.2/v2.3 guides in the same folder are already merged there). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
   `export-sample.json`) are kept for diffing but superseded. **Deliberately NOT annotated** (2026-07-21
   decision) — they still describe the v1 model verbatim (`configure.*`, a STORED `selected`/`available`
   boolean, `depthClass` matching pill labels). Don't "fix" them into v2 shape; that destroys their only
@@ -605,12 +607,13 @@ Current facts:
 
 - **⭐⭐ CURRENT HANDOFF: `docs/parity-session-handoff-2026-07-31.md`** — supersedes the 07-28/29/30
   files (kept as history). It carries the live task board, the data ledger for BOTH clusters, the
-  four sanity curls, and eleven traps. **Board as of 2026-08-05: its top three items are CLOSED** —
-  the backend release (`origin/main..dev` empty @ `7ca4bc44`), the frontend follow-up PRs (#2329 +
-  #2330 merged), and the stale `schemaVersion` (both clusters `2.5.4`). **Top of the board now: open
-  the last frontend PR** (`8016d2c7`, the Line row + force68 63 — its backend half is already
-  released), then task 4 (`functionalGroups` per membership) and task 5 (the un-swept v376 Avance
-  line-80 lock).
+  **six** sanity curls (the last two are §U's; all of them are now also
+  `D4K-backend/scripts/check-face-pins.js`), and eleven traps. **Board as of 2026-08-06: its top three
+  items are CLOSED** — the backend release (`origin/main..dev` empty @ `1407f197` after §U), the
+  frontend follow-up PRs (#2329 + #2330 merged), and the stale `schemaVersion` (both clusters
+  `2.5.4`). **Top of the board now: open the last frontend PR** (`8016d2c7`, the Line row + force68
+  63 — its backend half is already released), then task 4 (`functionalGroups` per membership) and
+  task 5 (the un-swept v376 Avance line-80 lock).
 
 - **⭐ §S — THE `Insert` ROW; E2 IS TEN BUCKETS AT ZERO (2026-07-31, audit §S, map §2c-11,
   schemaVersion **2.5.4** — the FIRST contract change since 2.5.3, additive).** The last non-app-bug
@@ -713,6 +716,52 @@ Current facts:
   **⭐ RELEASED: `git log origin/main..dev` is EMPTY, `origin/main` @ `7ca4bc44` (PR #2982 from
   staging).** Handoff task 1 is closed; both clusters are level on code AND data.
 
+- **⭐⭐ §U — THE VARIANT PICK: `variantCore` IS NOT AN IDENTITY (2026-08-06, audit §U, map §2c-8 +
+  §2c-13e, client guide R16; one backend commit + one client commit, NO contract change,
+  schemaVersion stays 2.5.4, nothing to backfill).** Client report: "the handle colour swatch pills
+  don't click in our frontend, they work in the v781 HTML" (More Categories › Handles, `ZGR533032`).
+  Same shape as §T and invisible to the sweeps for the same reason — **the ROW was right, the CLICK
+  was wrong.** Three causes, in the order they surfaced:
+  1. **The client routed a `kind:"variant"` pick by `variantCore`, which is a code STEM and is
+     DEGENERATE on whole families.** All 20 members of `HDL_MBH_533` (`ZGR533032`…`ZGR533307`) carry
+     `variantCore:"ZGR"`, so `familyId+variantCore` resolved to the family FACE — the card already on
+     screen — and because a family-scoped query never comes back empty the relax chain stopped there
+     and the `sku:[…]` last resort never fired. Dead click, no error, nothing on the wire. **Not a
+     handle quirk:** `XMOD_MU_80_Z` Ty `Z2`, `XMOD_MU_80_SZ` `SZ`/`SZ2`/`S2Z2`, `F67` Ty `2`,
+     `F1102__N12` `DZ` and every Handles `Length`/`Orientation`/`Finish` row were inert too. Fix:
+     route by **`variantCode`** = the app's own `u.vr`/`blockVr`, which `pill.value` already IS; the
+     row's pills come from the same `variantOpts` the server faces on, so it always resolves, and
+     `selected` comes off the face (the old `variantCore == card's` test is retired). A variant click
+     no longer reads the `refs` map at all.
+  2. **The backend's face pins were a FLAT filter chain, so the HEIGHT outranked the picked VARIANT.**
+     `pinFacePool` filtered by the `heightCode` a swap carries to preserve the card's height (§K)
+     before the variant was considered — the app's `_selUnit` order inverted, since it filters the
+     pool by `blockVr` FIRST and only then treats the height as a preference (so a Ty pill whose
+     variant lives at another height MOVES the height). `familyId=XAG_Sp_72ec18__N1&heightCode=154&
+     variantCode=KSZIZ` answered `AHG601546SZ2`, the card the client was on, because h154 has no
+     KSZIZ unit. Pins are now **RANKED `sku > variantCode > variantCore > heightCode`**, and one that
+     would empty the pool is dropped **on its own** instead of taking the others with it (the old
+     code fell back to the whole family and lost every pin at once). `variantCode` joined `FacePins`
+     — it was already a toolbar input via `selVr`, but only a pin can outrank the height.
+  3. **`variantCode` is CARD STATE and must ride on EVERY swap**, not only insert-family cards. It
+     had been scoped there on the theory that `faceVariantCore` preserves the variant elsewhere; that
+     rank is a tie-break and loses to the height pin. Driven in the app itself
+     (`pickVariant('F344','FSUEL'); pickHeight('F344',73)` → **`FSUEL7334`**, both chips lit), ours
+     answered `FS7334` — every H and W pick was silently dropping the Ty.
+  **Verification:** `D4K-backend/scripts/check-face-pins.js` (NEW — 6 assertions: the ranked-pin case,
+  map §2c-10's two examples, §S's sku round-trip, a Finish pick; exits non-zero on any miss) · **171
+  old-route-vs-new-route comparisons** over Base/Tall/Wall/Handles → 112 answers changed, **every one
+  onto the pill's own target or a dimension-preserving sibling, 0 regressions** · in the browser
+  `ZGR533032→277`, `ZGR411405→418`, `ZGR306415→7415`, and `FS8034 → FSUEL → H73 → FSUEL7334` matching
+  the app chip for chip. Lite UI needed nothing (§T's shared `variantSwap()` already covers it).
+  **⭐ RELEASED:** backend `243df0c3` → PR #3000 (dev→staging) → PR #3001 (staging→main),
+  `origin/main` @ **`1407f197`**, `origin/main..dev` empty; client `new-design-v2` @ **`28ac1192`**.
+  ⚠️ **The lesson, twice in a week:** a key that only LOOKS like an identity (`variantCore` for a Ty
+  pick, `pill.sku` for a depth pick) renders a perfect row and a dead click. When adding a row, write
+  down which app variable the click WRITES (`blockVr`, `blockIns`, `blockSel[id].sys`,
+  `blockSel[id].d`) and carry that value as card state on every later request — a value the app keeps
+  and we drop is a bug no grid diff can see.
+
 - **⭐ `schemaVersion` on the catalog META doc (2026-08-05).** `GET /design-book/stats` had reported
   `2.2.0` since the 2026-07-17 ingest. The meta doc is written ONLY by ingest (`meta: catalog.meta`),
   so every contract bump that ships as a FIELD BACKFILL rather than a re-ingest leaves it behind.
@@ -739,6 +788,11 @@ Current facts:
   integration gap. ⚠️ `npm install` in that repo needs `--legacy-peer-deps` (React 16/17-vs-18 peer
   conflict). ⚠️ **The repo is at `/Users/apple/Documents/thirtynorth/react-apps/D4K-frontend`, NOT
   under `node-js/`.**
+  **⭐ A FOURTH client change is on `new-design-v2`, pushed 2026-08-06:** **`28ac1192`** — §U/R16,
+  route a grid variant pick by `variantCode` and carry it on every swap. ⚠️ It sits on
+  **`new-design-v2`**, not `feat/design-book-v2.5` (that branch had moved on; the rebase picked up
+  `347e892b` "Show the handle on the finish card, not its colour" — someone else in the same file,
+  no conflict).
   **⭐ THREE PRs are now merged to `dev`** (checked 2026-08-05): **#2328** (`34610156`) the v2.5 client ·
   **#2329** (`9eadd240`) the §S Insert row — `kind:"insert"` + the `insert`/`variantCode` card-state
   params · **#2330** (`1f303630`) `47577826` "render the local depth pick on the grid D row" (§T3).

@@ -242,9 +242,15 @@ GET /design-book/items?familyId=F1230&cardLine=86&groupBy=family&limit=1
       → GF61210, H row [210,224], Line row marks 86            # §T3
       →   Line ['73','80','86*','E'] · H ['210*','224'] · W ['46','61*','76','91']
       →   D ['58*','63 dead']   ← the same response proves d63NoClick
+GET /design-book/items?familyId=XAG_Sp_72ec18__N1&widthMm=600&heightCode=154&variantCode=KSZIZ&groupBy=family&limit=1
+      → AHG601906KSZIZ  (AHG601546SZ2 means the pins are not ranked)   # §U
+GET /design-book/items?familyId=HDL_MBH_533&variantCode=277&groupBy=family&limit=1
+      → ZGR533277       (ZGR533032 means a variant pick is still routing by variantCore)  # §U
 ```
 
-Both were run against D4K-dev on 2026-08-05 and returned exactly the above.
+The first five were run against D4K-dev on 2026-08-05 and returned exactly the above; the two §U
+curls on 2026-08-06. ⭐ **All of it, plus §2c-10's own examples, is now one script:**
+`node D4K-backend/scripts/check-face-pins.js [baseUrl]` — 6 assertions, exit 1 on any miss.
 
 ### TASK 2 — ✅ DONE, and TASK 2b — the one PR still open
 
@@ -273,6 +279,7 @@ merge before the backend that reads it, or the row renders but does not swap.
 | — | **§T — the pill CLICKS** (3 backend commits, map §2c-13) | ✅ 07-31 — `pinFacePool`, `pickDepth63`/force68, `d63NoClick` + `cardLine` + the local depth pick. No contract change |
 | **1** | ⭐ ~~release backend `dev` → prd~~ | ✅ **closed 2026-08-05** — `git log origin/main..dev` EMPTY, `origin/main` @ `7ca4bc44` (PR #2982 from staging). Shipped §T as well as the original 3 |
 | **2** | ⭐ ~~open the frontend follow-up PR~~ | ✅ **closed 2026-08-05** — PR **#2329** (`9eadd240`, the Insert wiring) and **#2330** (`1f303630`, `47577826` the local depth pick) are both on `dev` |
+| — | **§U — the VARIANT pick** (map §2c-13e, guide R16) | ✅ **2026-08-06** — `variantCore` is degenerate on Finish/Length families, so every swatch/Ty click was a no-op; routes by `variantCode` now, the face pins are RANKED, and `variantCode` rides on every swap. Backend `243df0c3` → `origin/main` @ `1407f197`; client `new-design-v2` @ `28ac1192`. No contract change |
 | **2b** | ⭐ **open the LAST frontend PR — `8016d2c7`** | ⬜ **open — the top item.** The one commit still on `feat/design-book-v2.5`: "wire the Line row and keep 63 lit on force68 cards" (guide R12 + R13, the client half of backend `59a7e09f`). Its backend half is RELEASED, so it is unblocked |
 | **3** | `GET /design-book/stats` reported `schemaVersion "2.2.0"` | ✅ **closed 2026-08-05 — BOTH clusters at `2.5.4`.** `D4K-backend/scripts/backfill-meta-schema-version.js <x.y.z> [--apply]` (dry-run default, idempotent, one field). The meta doc is written ONLY by ingest, so every contract bump that ships as a field backfill leaves it behind — **re-run this after every bump.** Nothing gates on it (two reads, both reporting) so it was cosmetic; data-only, no release |
 | **4** | ⭐ **Design-Tasks sidebar — `functionalGroups` per MEMBERSHIP** (§O5, T1's 144 diffs) | ⬜ deferred by decision. Sidebar says 87, grid returns 91 (app 87/87). Extractor + export + contract + backfill; the taxonomy has NEVER been swept |
@@ -291,7 +298,7 @@ codes from families it deleted, because `CODE_INDEX` is built before the splice)
 
 ## 2. What shipped today (all committed + pushed)
 
-### `D4K-backend` — ✅ all of this is on `origin/main` @ **`7ca4bc44`** (`origin/main..dev` empty, 08-05)
+### `D4K-backend` — ✅ all of this is on `origin/main` @ **`1407f197`** (`origin/main..dev` empty, 08-06)
 
 | commit | what |
 |---|---|
@@ -302,6 +309,7 @@ codes from families it deleted, because `CODE_INDEX` is built before the splice)
 | `66e47346` | **§T1** — `pinFacePool`: `repickFaces` was discarding a swap's own pins, so every grid H and Ty pill was inert; + the D state row renders the local pick; + shared `variantSwap()` |
 | `c82543fb` | **§T2** — the `63` chip is `pickDepth63`, not `pickCardDepth`; `force68` (sinks) moves the FACE to the d68 twin |
 | `59a7e09f` | **§T3** — `d63NoClick` (dead 63 chip), the `Line` row as card state (`cardLine`), lite-UI wiring |
+| `243df0c3` | **§U** — RANK the face pins (`sku > variantCode > variantCore > heightCode`, each dropped alone if it empties the pool): the height was outranking the picked variant, which is the app's `_selUnit` order inverted. + `scripts/check-face-pins.js`. Released 08-06 via PR #3000 (dev→staging) → #3001 (staging→main) |
 
 ⚠️ Unrelated project commits rode the same branch (`79dbb8c3` cors + categories status, `5004d9a5`
 new file type, `6df0ad62` room-scan files, and three merges) — they are not design-book work.
@@ -315,6 +323,12 @@ new file type, `6df0ad62` room-scan files, and three merges) — they are not de
 | `05706e6b` | **§S** — `kind:"insert"` + `insert`/`variantCode` carried in `stateQ` — **merged** via PR #2329 (`9eadd240`) |
 | `47577826` | **§T3** — render the local depth pick on the grid D row — **merged** via PR #2330 (`1f303630`) |
 | `8016d2c7` | **§T3 · R12+R13** — wire the `Line` row (`cardLine`) and keep 63 lit on force68 cards — ⬜ **NOT merged, task 2b** |
+
+⭐ On branch **`new-design-v2`** (not `feat/design-book-v2.5`):
+
+| commit | what |
+|---|---|
+| `28ac1192` | **§U · R16** — route a grid variant pick by `variantCode`, never `variantCore`, and carry it on every swap. Pushed 08-06 |
 
 ### `d4k-items-extraction` — branch `main` @ **`61e70f7`**
 
