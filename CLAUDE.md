@@ -840,6 +840,81 @@ Current facts:
   service method so SSE is a controller change) and rate limits / budgets (D6 — per-turn token usage
   IS recorded on every exchange, so a limit can be set later from real numbers).
 
+- **⭐⭐ Deactivated items still showed in the Design Book (2026-08-21) — REAL bug, shipped to `main`
+  as `db7bb872` / PRs #3042→#3043→#3044.** Client deactivated `HSSCUS` (Sensor switch); it moved to the
+  admin **Inactive** tab and its card stayed on the CONTROL & SWITCH shelf.
+  `buildItemFilter` (`design-book.service.ts:2671`) read `if (query.active !== undefined) filter.active
+  = query.active;` — filter applied ONLY when the caller named a state. The admin table always names one
+  (that IS its Active/Inactive tabs, which is why that screen looked right); no catalogue caller does,
+  and the frontend sends no `active` at all, so the grid ran unfiltered. Now `filter.active =
+  query.active ?? true`. All three list paths share `buildItemFilter`, so one line covers `GET items`,
+  `items/by-section` and the family pool.
+  ⚠️ **One sibling does NOT route through it** — the "More categories" badge recount in
+  `getFunctionalCategories()` was deliberately written to match the old unfiltered behaviour. Fixed in
+  the same commit (`active: { $ne: false }`), else the badge counts what the shelf no longer shows.
+  ⚠️ **`GET items` caps `limit` server-side.** The first version of `scripts/check-inactive-hidden.js`
+  scanned pages with `limit=2000`, got 0 rows back, and printed **OK against the broken build**. Any
+  check that pages is a check that can pass vacuously — the rewrite asserts one sku at a time.
+  ⚠️ **An import switches deactivated items back ON** — `normalizeItemDoc` writes `active: item.active
+  !== false` and clears `deactivatedAt`; export files carry no per-item `active`, so it resolves to
+  `true`. A hand-made deactivation expires silently at the next import. NOT fixed: the right behaviour
+  is a product call. Logged in the client feedback doc §6.
+  Verified end to end against the dev DB in both directions: shelf 5→4, gone from category/by-section/
+  search, Lighting badge 39→38, admin Inactive tab unaffected. `HSSCUS` restored afterwards — note the
+  restore PATCH stamps `catalogVersion: manual` + a fresh `lastSeenAt`, which the next import overwrites.
+  `dev-token` exists on dev ONLY; staging/prod return nothing, so those are verifiable by branch content
+  only — read the file out of the branch, never trust commit-ancestry alone.
+  ⚠️ **zsh ate the path, twice.** `git show "origin/$b:src/..."` inside a loop makes zsh read `:s` as a
+  history modifier and silently strips everything after the colon — it reports code ABSENT from every
+  branch. Build the ref in two steps: `ref="origin/$b"; ref="$ref:$path"`.
+
+- **⭐ SEARCH NOW FINDS AN ORDER CODE (2026-08-21) — the client rejected the "not a bug" answer,
+  and they were right to.** They re-sent the `T506636` screenshot ("No units match these filters")
+  after §5 D of the feedback doc explained it was an order code. The explanation was correct and
+  was not the deliverable. **`orderCodeBases()` in `design-book.service.ts`** peels the five
+  mutations `assemble()` (v781 `:2419`) can apply — the depth class spliced INTO the digit run
+  (`pre+dig+<36|48|68>+fn`), a trailing `E` or `J`, a leading `V`, `P1`/`C1` — in every combination,
+  and `buildItemFilter`'s `q` branch matches the peeled codes as EXACT skus alongside the existing
+  substring regex. Over-peeling is free (no such article exists, so it matches nothing); the only
+  mutation not peeled is line-66, which REPLACES the code (`u.Yc`) — all 11 of those ARE stored
+  skus, so the plain match already found them. `searchRank` scores a peeled article `1`, so it
+  cannot arrive buried under the substring noise.
+  **⭐ THE FACE PIN IS HALF THE FIX.** Finding the family is not finding the code: `q=T506636`
+  returned the right card faced on **`T6047`** (the family default) — a designer who typed T506636
+  and is shown "T6047 · Floor unit" files the same bug again. `pinFacePool` gained a `search`
+  pin, ranked LAST and with **no fallback**. ⚠️ Plain `q` is still NOT a pin (§P5) and the two
+  guards that keep it that way are the whole design: an ordinary term peels to an EMPTY list (every
+  parity term — `TSP`, `HWS`, `63`, `toe kick` — does, asserted by name in the check), and a term
+  the family HOLDS wins outright, so the d68 twin `TSP608068` keeps facing itself instead of the
+  `TSP6080` it peels to.
+  **⚠️ Deliberate divergence from v781, like the book exclusions.** The app's own search is
+  `b.units.some(u => u.c.includes(q))` — `T506636` finds nothing there either. Invisible to the
+  sweeps: the plans only ever drive `q: ''|'HWS'|'TSP'`.
+  Verified against D4K-dev: `T506636`/`T506648` → the `T5066` card faced `T5066`; `H60146IZ4E` and
+  `H6014636IZ4` → `H60146IZ4`; `P1T3080S` → `T3080S`; and unchanged — `q=TSP` **31 families** (the
+  app's number), `q=HWS` 5, `q=63` top three still `CMU6063SZ · AMU6063T · AMO6063T`.
+  `scripts/check-order-code-search.js` (NEW, pure function, no Mongo) + `check-search-rank.js` +
+  `check-grid-gates.js` (77,760 + 51,840 combos identical) + `check-face-pins.js` 6/6.
+  **⭐ RELEASED 2026-08-21:** `b417a178` → PR #3048 (`dev`, `e11fe46f`) → #3049 (`dev`→`staging`,
+  `3203a3f1`) → #3050 (`staging`→`main`, **`3daa6300`**); `origin/main..origin/dev` empty, and both
+  `orderCodeBases` and the check script were READ OUT OF `origin/main`, not trusted from history.
+  ⚠️ #3050 also promoted `b0d2bfe4` (another developer's chat-unread change, already queued on
+  `dev`) — confirmed with the user first, the same call as 2026-08-21's `3661ce70`.
+  **⚠️ NOT A BUG — an ENHANCEMENT we chose.** The item genuinely does not exist and v781 finds
+  nothing for it either; the feedback doc's original "not a bug" answer was correct. We diverged
+  because OUR app is what handed the designer a code it could not then find. Rollback +
+  the reasoning, so the call can be re-made without redoing the analysis:
+  **`docs/order-code-search-rollback-2026-08-21.md`**.
+  ⚠️ **The zsh `:s` trap bit AGAIN** while verifying — `git show "$ref:src/…"` inside a `&&` chain
+  silently became `origin/maink-order-code-search.js` and grep found nothing, which reads as "the
+  code never landed". Build the whole ref in ONE assignment (`p="origin/main:path"`), not `$var:path`.
+  **Considered and REJECTED:** gating the depth peel on `capabilities.depthClasses`. `T506648`
+  returns the `T5066` card whether or not 48 exists on it, and the card's own D row then shows which
+  depths do — gating would return NOTHING for a near-miss, which is the behaviour being removed.
+  **Still open (product call):** the card comes back on its NATIVE depth with no pill pre-selected,
+  so an order code identifies the ARTICLE, not the CONFIGURATION. Restoring the pills (depth pick,
+  the `E`/`J` line chips, `P1`/`C1`) is client card state — feedback doc §6.
+
 - **⭐⭐ The client's "design book" report (2026-08-20) — three real defects, one false alarm. All
   fixed in the CLIENTS; no contract change, no re-ingest, schemaVersion stays 2.5.4.**
   Filed against `T6080ZISWH` / `C1TK6080BZ` with screenshots of the book beside the live site.
