@@ -52,7 +52,8 @@ Current facts:
   `parseCanon(c)=/^([A-Z]+)(\d+)([A-Z0-9]*)$/` → `pre+dig+<class>+fn` (`T6080IS2IZ` @36 → `T608036IS2IZ`).
   Those codes are **synthesized, never stored units** (like the P1/C1 prefixes), so the export now ships them
   **on the pill**: `depth:[{label,sku,code,alteration?}]` — 4,858 pills over 2,348 items; 58 and the 63
-  alteration keep the base code (63 = base + `ANTSP63US`·`MPRU`… in the clipboard, per `d63Set`). Absent on
+  alteration keep the base code (63 = base + `ANTSP63US`·`MPRU`… in the clipboard, per `d63Set` — **which**
+  set is decided by the cabinet's category, map §2c-4). Absent on
   real sibling-navigation depth rows and on width/height/programme/options, where the order code IS `sku`.
   **⚠️ `pill.code` is DISPLAY/COPY ONLY — never fetch, route or build an image from it.** Unlike the P1/C1
   prefixes (which the backend DOES synthesize on read), the re-cut depth codes resolve to nothing:
@@ -136,7 +137,11 @@ Current facts:
   hide-vs-grey**) · `docs/design-book-item-fields-plain-guide.md` (plain-English field-by-field
   tour + **§3b why the card's buttons ≠ the detail screen's** — hand this to a non-engineer) ·
   **`throwaway/frontend-v2.5-changes.md`** (the React client's `gridRows` implementation guide, against
-  `D4K-frontend` `origin/dev` 25b19af9 — **rules R1–R16**, R16 being §U's variant route; v2.2/v2.3 guides in the same folder are already merged there). v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
+  `D4K-frontend` `origin/dev` 25b19af9 — **rules R1–R16**, R16 being §U's variant route; v2.2/v2.3 guides in the same folder are already merged there) ·
+  **`docs/lio-agent-requirements.md`** (⭐ LIO — the catalog assistant: the requirements R1–R9, the
+  decisions D1–D12, the implementation status, the model comparison and the four defects driving it
+  found; the client contract is map **§10** (the reason API) + **§11** (the one ask endpoint)).
+  v1 docs (`export-schema.ts`, `design-book-api-ui-map.md`,
   `export-sample.json`) are kept for diffing but superseded. **Deliberately NOT annotated** (2026-07-21
   decision) — they still describe the v1 model verbatim (`configure.*`, a STORED `selected`/`available`
   boolean, `depthClass` matching pill labels). Don't "fix" them into v2 shape; that destroys their only
@@ -761,6 +766,182 @@ Current facts:
   down which app variable the click WRITES (`blockVr`, `blockIns`, `blockSel[id].sys`,
   `blockSel[id].d`) and carry that value as card state on every later request — a value the app keeps
   and we drop is a bug no grid diff can see.
+
+- **⭐⭐ LIO — the catalog ASSISTANT, first cut built + driven end to end (2026-08-10). NO contract
+  change, schemaVersion stays 2.5.4, nothing to backfill; ONE new API filter (`sinkSizeInch`).**
+  Spec + status: **`docs/lio-agent-requirements.md`**; client contract: **map §10 + §11**. Code is on
+  D4K-backend branch **`feat/design-book-lio-agent`** (cut from `dev` @ `ff4f3b3f`), **not released**.
+  **ONE endpoint answers every question** — `POST /design-book/lio/ask`; "show all cooktop units in
+  80 cm" and "why is Avance unavailable?" are the same call and the agent classifies the question
+  itself (no mode flag, no second endpoint). Async job + poll (Heroku's 30 s router), job state in
+  Mongo, one document = the job + the R9 exchange record + the flag. Plain OpenAI SDK, Responses API,
+  6 tools, terminal `answer` tool. New: `src/design-book/lio/*`, `GET items/:sku/availability`
+  (the reason API, map §10), `unitGates()`/`cardGates()` in `design-book.grid-rows.ts`.
+  **The catalog rules are NOT re-derived by the model** — availability comes from the gate functions,
+  rows/membership from the grid; the model turns language into API calls and results into prose.
+  **Two guarantees are enforced in CODE, not by the prompt** (`applyAnswer`): the agent's `filters`
+  are validated against `QueryItemsDto` and **re-executed by us** (`resultSummary` is OUR run, never
+  the model's claim; an invalid set bounces back with the validation errors for one repair round),
+  and every code-shaped token in the answer is checked against the collection (non-negotiable 2).
+  Read-only is structural: every tool routes to a `GET`-shaped service method, so no prompt can
+  reach a write.
+  **⭐ FOUR DEFECTS FOUND BY DRIVING IT — three were OURS, and none was visible from reading the
+  code.** A benchmark that runs the real endpoint (`scripts/compare-lio-models.js`, the six canned
+  panel prompts) found all of them:
+  1. **A model that researches past its budget lost a turn it had already solved.** gpt-4.1 read the
+     availability reason on round 0, then spent all 8 rounds hunting an alternative programme, and
+     the loop turned that into a hard failure. The LAST round now forces
+     `tool_choice: {type:'function', name:'answer'}`. 13/16 → 16/16.
+  2. **A reasoning-only round was treated as fatal.** The gpt-5 family routinely returns a round
+     carrying a reasoning item and NO call and NO text; the loop threw "the assistant returned
+     nothing" on a turn whose search had already succeeded. It now carries that output forward and
+     continues, bounded by the round budget + (1). gpt-5.4-mini 12/16 → 16/16.
+  3. **⭐ "Find a sink cabinet for a 36 inch sink" — one of the six SHIPPED prompts — was
+     CONFIDENTLY WRONG.** It answered "13 types at 900 mm, the closest standard width", because
+     `sinkFitment` was on the item but there was no way to SEARCH it, so the model converted inches
+     to millimetres. The catalog states fitment itself and it does not track width that way: a
+     **900 mm sink cabinet takes a 33″ sink; 36″ starts at 1000 mm** (350 units / 11 types have
+     `sinkFitment.maxSinkSizeInch >= 36`). Fixed at the root with **`GET items?sinkSizeInch=NN`**
+     (`>= NN`, not null-inclusive; `QueryItemsDto` + `buildItemFilter`, additive) and the same
+     warning in the tool schema. ⚠️ **The lesson: when the model has no tool for a question it will
+     not say "I can't" — it will find a plausible substitute and state it as fact.** Every canned
+     prompt needs a tool that answers it EXACTLY; a near-miss axis is worse than a missing one.
+  4. **Prompt caching was defeated by our own prompt.** The volatile toolbar/focus/curated pairs were
+     interpolated into `instructions`, so the prefix changed every request and a turn re-sends the
+     whole conversation up to 8 times. `LIO_SYSTEM_PROMPT` is now a CONSTANT and the volatile half
+     moved into the user message (`lioContextBlock`) — measured **50-90 % of input tokens served
+     from cache**.
+  **Model: `gpt-5.5`** (env `OPENAI_LIO_MODEL`, `OPENAI_LIO_REASONING_EFFORT` default `low`).
+  Measured, not guessed: gpt-4o · gpt-4.1 · gpt-5.4-mini · gpt-5.5 · gpt-5.6-sol all scored 16/16
+  once (1) and (2) were fixed, so the suite does not separate them; at ~10-13 k input tokens a turn,
+  mostly cached, cost is of the order of a cent, so quality wins over a mini. `gpt-5.4-mini` is the
+  switch if volume ever changes that. Every exchange stores the `model` that answered → A/B is a
+  config flip. ⚠️ **`OPENAI_API_KEY` was already in `.env`** (unused by TS before this).
+  **Verified live on D4K-dev:** all six panel prompts in the panel's own toolbar state (8 runs,
+  26/26) · the R8/R9 teach loop end to end (flag → admin queue → correction → the SAME question now
+  answers with the taught wording) · PDFs (the 1,033-page price book refused; a 13-page PDF read as
+  PAGE IMAGES, and the code it found was looked up in the LIVE catalog rather than repeated).
+  **Regression evidence that the grid is untouched:** `scripts/check-grid-gates.js` re-states the
+  pre-refactor `unitAvailable`/`cardAvailable` as an oracle — **identical over 77,760 + 51,840
+  combinations**; `scripts/check-lio.js` (filter whitelist · invented-code guard · PDF page count);
+  `check-face-pins.js` 6/6. The `design-book.service.ts` diff is **302 insertions / 0 deletions**.
+  ⚠️ **Traps for the next session:** `tier:"ALL"` is NOT an API value — FRONTS All / H All mean OMIT
+  the axis, and the client's `context` must follow that · the accessories prompt answers with
+  `itemSkus` + `filters:null` (R3's fixed-handful exception), so a client that only re-runs
+  `filters` renders nothing for it · with `groupBy=family` a `sinkSizeInch` card FACES its default
+  width (600 mm) while the fitting member is the 1000 mm sibling — membership-vs-face, §I ·
+  **port 8000 already had a server on it** (someone else's), so the whole session ran on 8001 ·
+  the comparison runner passes its label as `OPENAI_LIO_MODEL`, so a label that is not a model id
+  scores 0/16 (that is the harness lying, not the agent) · a benchmark case must have ONE right
+  answer — "find all TALL dishwasher fronts" was dropped because the catalog has BOTH `b_water#2`
+  (Base › Dishwasher Fronts) and `t_water#0` (Tall › Dishwasher), so a model that asked to broaden
+  was right and the test was wrong.
+  **Not built (by decision):** streaming (D5 — poll ships first; keep generation behind the one
+  service method so SSE is a controller change) and rate limits / budgets (D6 — per-turn token usage
+  IS recorded on every exchange, so a limit can be set later from real numbers).
+
+- **⭐⭐ Deactivated items still showed in the Design Book (2026-08-21) — REAL bug, shipped to `main`
+  as `db7bb872` / PRs #3042→#3043→#3044.** Client deactivated `HSSCUS` (Sensor switch); it moved to the
+  admin **Inactive** tab and its card stayed on the CONTROL & SWITCH shelf.
+  `buildItemFilter` (`design-book.service.ts:2671`) read `if (query.active !== undefined) filter.active
+  = query.active;` — filter applied ONLY when the caller named a state. The admin table always names one
+  (that IS its Active/Inactive tabs, which is why that screen looked right); no catalogue caller does,
+  and the frontend sends no `active` at all, so the grid ran unfiltered. Now `filter.active =
+  query.active ?? true`. All three list paths share `buildItemFilter`, so one line covers `GET items`,
+  `items/by-section` and the family pool.
+  ⚠️ **One sibling does NOT route through it** — the "More categories" badge recount in
+  `getFunctionalCategories()` was deliberately written to match the old unfiltered behaviour. Fixed in
+  the same commit (`active: { $ne: false }`), else the badge counts what the shelf no longer shows.
+  ⚠️ **`GET items` caps `limit` server-side.** The first version of `scripts/check-inactive-hidden.js`
+  scanned pages with `limit=2000`, got 0 rows back, and printed **OK against the broken build**. Any
+  check that pages is a check that can pass vacuously — the rewrite asserts one sku at a time.
+  ⚠️ **An import switches deactivated items back ON** — `normalizeItemDoc` writes `active: item.active
+  !== false` and clears `deactivatedAt`; export files carry no per-item `active`, so it resolves to
+  `true`. A hand-made deactivation expires silently at the next import. NOT fixed: the right behaviour
+  is a product call. Logged in the client feedback doc §6.
+  Verified end to end against the dev DB in both directions: shelf 5→4, gone from category/by-section/
+  search, Lighting badge 39→38, admin Inactive tab unaffected. `HSSCUS` restored afterwards — note the
+  restore PATCH stamps `catalogVersion: manual` + a fresh `lastSeenAt`, which the next import overwrites.
+  `dev-token` exists on dev ONLY; staging/prod return nothing, so those are verifiable by branch content
+  only — read the file out of the branch, never trust commit-ancestry alone.
+  ⚠️ **zsh ate the path, twice.** `git show "origin/$b:src/..."` inside a loop makes zsh read `:s` as a
+  history modifier and silently strips everything after the colon — it reports code ABSENT from every
+  branch. Build the ref in two steps: `ref="origin/$b"; ref="$ref:$path"`.
+
+- **⭐ SEARCH NOW FINDS AN ORDER CODE (2026-08-21) — the client rejected the "not a bug" answer,
+  and they were right to.** They re-sent the `T506636` screenshot ("No units match these filters")
+  after §5 D of the feedback doc explained it was an order code. The explanation was correct and
+  was not the deliverable. **`orderCodeBases()` in `design-book.service.ts`** peels the five
+  mutations `assemble()` (v781 `:2419`) can apply — the depth class spliced INTO the digit run
+  (`pre+dig+<36|48|68>+fn`), a trailing `E` or `J`, a leading `V`, `P1`/`C1` — in every combination,
+  and `buildItemFilter`'s `q` branch matches the peeled codes as EXACT skus alongside the existing
+  substring regex. Over-peeling is free (no such article exists, so it matches nothing); the only
+  mutation not peeled is line-66, which REPLACES the code (`u.Yc`) — all 11 of those ARE stored
+  skus, so the plain match already found them. `searchRank` scores a peeled article `1`, so it
+  cannot arrive buried under the substring noise.
+  **⭐ THE FACE PIN IS HALF THE FIX.** Finding the family is not finding the code: `q=T506636`
+  returned the right card faced on **`T6047`** (the family default) — a designer who typed T506636
+  and is shown "T6047 · Floor unit" files the same bug again. `pinFacePool` gained a `search`
+  pin, ranked LAST and with **no fallback**. ⚠️ Plain `q` is still NOT a pin (§P5) and the two
+  guards that keep it that way are the whole design: an ordinary term peels to an EMPTY list (every
+  parity term — `TSP`, `HWS`, `63`, `toe kick` — does, asserted by name in the check), and a term
+  the family HOLDS wins outright, so the d68 twin `TSP608068` keeps facing itself instead of the
+  `TSP6080` it peels to.
+  **⚠️ Deliberate divergence from v781, like the book exclusions.** The app's own search is
+  `b.units.some(u => u.c.includes(q))` — `T506636` finds nothing there either. Invisible to the
+  sweeps: the plans only ever drive `q: ''|'HWS'|'TSP'`.
+  Verified against D4K-dev: `T506636`/`T506648` → the `T5066` card faced `T5066`; `H60146IZ4E` and
+  `H6014636IZ4` → `H60146IZ4`; `P1T3080S` → `T3080S`; and unchanged — `q=TSP` **31 families** (the
+  app's number), `q=HWS` 5, `q=63` top three still `CMU6063SZ · AMU6063T · AMO6063T`.
+  `scripts/check-order-code-search.js` (NEW, pure function, no Mongo) + `check-search-rank.js` +
+  `check-grid-gates.js` (77,760 + 51,840 combos identical) + `check-face-pins.js` 6/6.
+  **⭐ RELEASED 2026-08-21:** `b417a178` → PR #3048 (`dev`, `e11fe46f`) → #3049 (`dev`→`staging`,
+  `3203a3f1`) → #3050 (`staging`→`main`, **`3daa6300`**); `origin/main..origin/dev` empty, and both
+  `orderCodeBases` and the check script were READ OUT OF `origin/main`, not trusted from history.
+  ⚠️ #3050 also promoted `b0d2bfe4` (another developer's chat-unread change, already queued on
+  `dev`) — confirmed with the user first, the same call as 2026-08-21's `3661ce70`.
+  **⚠️ NOT A BUG — an ENHANCEMENT we chose.** The item genuinely does not exist and v781 finds
+  nothing for it either; the feedback doc's original "not a bug" answer was correct. We diverged
+  because OUR app is what handed the designer a code it could not then find. Rollback +
+  the reasoning, so the call can be re-made without redoing the analysis:
+  **`docs/order-code-search-rollback-2026-08-21.md`**.
+  ⚠️ **The zsh `:s` trap bit AGAIN** while verifying — `git show "$ref:src/…"` inside a `&&` chain
+  silently became `origin/maink-order-code-search.js` and grep found nothing, which reads as "the
+  code never landed". Build the whole ref in ONE assignment (`p="origin/main:path"`), not `$var:path`.
+  **Considered and REJECTED:** gating the depth peel on `capabilities.depthClasses`. `T506648`
+  returns the `T5066` card whether or not 48 exists on it, and the card's own D row then shows which
+  depths do — gating would return NOTHING for a near-miss, which is the behaviour being removed.
+  **Still open (product call):** the card comes back on its NATIVE depth with no pill pre-selected,
+  so an order code identifies the ARTICLE, not the CONFIGURATION. Restoring the pills (depth pick,
+  the `E`/`J` line chips, `P1`/`C1`) is client card state — feedback doc §6.
+
+- **⭐⭐ The client's "design book" report (2026-08-20) — three real defects, one false alarm. All
+  fixed in the CLIENTS; no contract change, no re-ingest, schemaVersion stays 2.5.4.**
+  Filed against `T6080ZISWH` / `C1TK6080BZ` with screenshots of the book beside the live site.
+  1. **63 cm ordered one code.** The book has emitted the cabinet PLUS its alteration codes since
+     v580; we shipped `alteration:true` on the pill and never acted on it, so a 63 pick produced an
+     order the factory cannot build. The recipe was written down here three times and never said
+     WHICH codes — that gap is now the mode table in **map §2c-4** (Tall→`ANHST63`, Base›Sinks→
+     `ANTSP63US`·`MPRU`(+`ANSVVO275` on `variantCode:"Doors"`), Base›Cooktops→`ANTSP63US`, else
+     `ANTST63`), plus the sink's NATIVE-depth set and the §2c-4 shape **4b**: on a `force68` sink the
+     63 pill is a NAVIGATION and an alteration at once, so the pick must be held by sku or the swap
+     onto the d68 twin eats it.
+  2. **Accessories rendered as one pile.** v2 flattening dropped the tabs; the grouping is
+     recoverable from the code prefix exactly as the book does it (`cutSys`). Rule + tab order now in
+     map **"Appendix — Rebuilding the accessory TABS"**. **Do not add tabs back to the export** — the
+     prefix is the source of truth there too.
+  3. **Mat colours missing.** Not catalogue data and cannot be made into it here — `finishes[]` is a
+     PRICE dimension and the book hardcodes 160/161/286 against two prefixes. Mirrored client-side,
+     documented as deliberately absent (same appendix section).
+  4. **"The cabinets in your categories are not related" — FALSE ALARM, do not re-investigate.**
+     Live `leafId=b_store#2` returns 100 items, every one `Base / Function Cabinets`; the export
+     agrees and every section name we ship is lifted from their own v781 HTML. The screenshot was the
+     **`q=63` search**, misread as a category. What was real underneath: the search matched any sku
+     SUBSTRING, so `FS8634` / `T3R308636` outranked `ANTSP63US`. Fixed in D4K-backend by RANKING
+     rather than filtering (`searchRank`), so no partial-code hit is lost.
+  ⚠️ **The live dev DB was NOT stale** — `schemaVersion 2.5.4`, 18,396 items, identical to
+  `docs/export-v781-fresh.json`. Check that before blaming ingest: `GET /design-book/dev-token` is
+  unguarded on dev and gives an hour's bearer token for exactly this kind of question.
 
 - **⭐ `schemaVersion` on the catalog META doc (2026-08-05).** `GET /design-book/stats` had reported
   `2.2.0` since the 2026-07-17 ingest. The meta doc is written ONLY by ingest (`meta: catalog.meta`),

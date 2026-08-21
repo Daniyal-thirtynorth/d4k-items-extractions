@@ -142,6 +142,7 @@ cm×10) · **H** row (`heightClass` 73/80/86) · **GREY, DON'T HIDE** toggle (UI
 | `tier` | IN | **FRONTS pill** (P·P1·A·C·C1) | Top toolbar — "FRONTS" pill group | `…/items?tier=P1` |
 | `opening` | IN | **OPENING toggle** (P1 \| C1) — a **toolbar input, NOT a card filter** (§P2). It re-faces the card (`ppool` pools by opening), greys via the `openOk` gate, and prefixes the displayed order code (`P1`/`C1`); it removes a card only when a `byProgramme` family has NOTHING at that opening (the app's `blockVisible` line 1). It used to match `availableTiers`, which hid 17 of 17 families on Base › Accessories & Surround at P1 | Top toolbar — "OPENING" pill | `…/items?opening=P1` |
 | `widthMm` | IN | **W pill** (cm×10 → mm) | Grid filter bar — W row | `…/items?widthMm=600` |
+| `sinkSizeInch` | IN | ⭐ **NEW (2026-08-10)** — "which cabinets take an NN inch sink?". Matches `sinkFitment.maxSinkSizeInch >= NN` (the card's **"Max Sink Size: NN″"** line), `$gte` because a bigger cabinet still takes a smaller sink; NOT null-inclusive — an item with no fitment data is not an answer to "what fits my sink". ⚠️ **It is NOT a width in disguise**: a **900 mm sink cabinet takes a 33″ sink and 36″ starts at 1000 mm**, so converting inches to a cabinet width returns the wrong cards (that is exactly the wrong answer LIO gave before this filter existed — §11). With `groupBy=family` the matching cards still FACE their default width, so the card may read 600 mm while the member that fits is the 1000 mm sibling (membership-vs-face, §2c-9) | "+ Add Sink" popup / LIO | `…/items?sinkSizeInch=36` → 350 units / 11 types |
 | `heightClass` | IN | **H pill** (73·80·86 coarse bucket, not `heightMm`). ⚠️ **Do NOT use as the grid's toolbar-H filter** — the app's "H All 73 80 86" bar is its LINE selector: pre-select + row collapse, never a hard filter (§2c-7). Valid as a precise API filter, but for a family SWAP prefer **`heightCode`** — `heightClass` is null outside carcase-line families (§2c-10) | Grid filter bar — H row | `…/items?familyId=SNK5&heightClass=73` |
 | `heightCode` | IN | **CARD H pill** — the app's per-unit H-row key `u.hc` (73/80/86 on carcase-line families, the unit's **cm height** everywhere else: 29, 42, 204…). The ONE key that resolves an H pick on any family; **exact, not null-inclusive** (§2c-10) | (internal — grid H pill navigation) | `…/items?familyId=F674&heightCode=42&widthMm=600&groupBy=family` |
 | `variantCore` | IN | **Variant identity** (denormalized, e.g. `TSPATZW`) — resolve a family sibling of a specific Ty/option variant: `familyId + variantCore (+ heightCode/widthMm)`. ⚠️ **NOT the grid's option-pill route any more (§2c-8/§U): it is a code STEM and is degenerate on whole families** — all 20 members of `HDL_MBH_533` are `"ZGR"`, so it answers the card you are on. Use `variantCode`. Kept for the legacy `parameters.options` path and as a face pin | (internal — legacy pill navigation) | `…/items?familyId=SNK5&variantCore=TSPATZ&heightClass=73&groupBy=family` |
@@ -418,7 +419,8 @@ both self; `chosen`=58 maps to a sibling again → `native` = 68 (63 is the alte
 Notes:
 - **58 and 63 carry the BASE code.** `assemble()` maps depth 63 → 58; the app expresses 63 cm as base
   cabinet **+ alteration codes** in the clipboard (`d63Set` → `ANTSP63US` · `MPRU` · `ANSVVO275` for
-  door sinks / `ANHST63` tall / `ANTST63`), not in the code itself.
+  door sinks / `ANHST63` tall / `ANTST63`), not in the code itself. Which set applies is decided by
+  the cabinet's category — the mode table in §2c-4.
 - **Zero selected pills is legal** — when the row offers neither the chosen class nor 58, the app draws
   no highlighted chip either. Never fall back to "select the first pill".
 - **Group `options` by `.group` before counting** — `options` is one flat array, so a row is everything
@@ -504,14 +506,14 @@ exhaustively 2026-07-21; this table is the whole surface.
 | input | driven by | code mutation | in the export as |
 |---|---|---|---|
 | depth `u.d` | **Depth pill row** | `pre + dig + <class> + fn` | `parameters.depth[].code` (§2c-2) |
-| depth 63 | Depth pill row | none — clipboard set `[code, ANTSP63US, MPRU, …]` | `alteration:true` on the pill; recipe documented |
+| depth 63 | Depth pill row | none — clipboard set `[code, ANTSP63US, MPRU, …]` | `alteration:true` on the pill; **which** codes = the mode table in §2c-4 |
 | open `P1` / `C1` | Programme pill row **and** toolbar | `c = 'P1'+c` / `'C1'+c` | the pill's `sku` already holds the synthesized code; gate = `capabilities.openP1/openC1` |
 | handle `V` | card band + toolbar (**no pill row**) | `c = 'V'+c` | derive from `capabilities.handleFree` |
 | front `E` | card band + toolbar (**no pill row**) | `c = c+'E'` | derive from `capabilities.onePieceFront` |
 | door-line `J` | card band + toolbar (**no pill row**) | `c = c+'J'` | derive from `capabilities.doorLineJ` |
 | **door-line `Y`** | card band + toolbar (**no pill row**) | **`return u.Yc`** — replaces the WHOLE code | **`item.doorLineYCode`** — see below |
 | **height `217+`** | chip appended to the **Height row** | none — opens the 217 cm unit, clipboard `[code217, MPHVERL]` | **`item.heightExtension`** — see below |
-| sinks (implicit) | no control at all | none — clipboard `[code, MPRU, (ANSVVO275)]` | recipe documented; fires for every Base/Sinks unit |
+| sinks (implicit) | no control at all | none — clipboard `[code, MPRU, (ANSVVO275)]` | fires for every Base/Sinks unit; `sinkNativeCodes`, §2c-4 |
 
 **Width, Height and all 16 coded/option rows are plain navigation** — the full v781 set is
 `Ty · Runner · Unit depth · Set · Length · Insert · Thickness · Finish · Lighting · Variant · Edge finish ·
@@ -641,6 +643,7 @@ for the *why*, this section for the *what to write*.
 | 2 | `pill.sku === item.sku` + `pill.code` ≠ sku | **same unit, re-cut order code** (model A, `u.d`) | set local depth state | ❌ **NO** |
 | 3 | `pill.sku === item.sku`, no `code` / `code === sku` | same unit, native class or a code-less class | set local depth state | ❌ **NO** |
 | 4 | `pill.alteration === true` (the `63`) | same unit + alteration codes in the clipboard | set local depth state, add `d63Set` codes | ❌ **NO** |
+| 4b | `pill.alteration === true` **and** `pill.sku !== item.sku` | ⭐ a **Base › Sinks** 63 — `force68`, so it is shape 1 AND an alteration at once | navigate **and** remember the 63, keyed by `pill.sku` | ✅ **YES** |
 
 Shapes 2–4 change **nothing on the server**. The item, its `capabilities`, its image, its price group and
 every other row are unchanged — only the displayed/copied order code and the effective carcass mm move.
@@ -689,12 +692,41 @@ function onDepthPillClick(item, pill) {
   setCardDepth(item.sku, pill.label);                        // shapes 2-4 → NO fetch
   setOrderCode(pill.code ?? item.sku);                       // display / Copy button only
   setEffectiveDepthMm(Number(pill.label) * 10 - 20);         // carcass mm at that class
-  if (pill.alteration) addClipboardCodes(d63Set(item));      // 63 → ANTSP63US · MPRU · …
+  if (pill.alteration) addClipboardCodes(d63Set(item));      // 63 → see the mode table below
 }
 ```
 
 `openItem(sku)` is the same call the grid makes for any other pill — pass the toolbar's `programs=` and
 `priceProgram=` through so the new unit comes back with its programme greying already stamped (§3).
+
+#### ⭐ `d63Set` — WHICH codes ride along (the part the recipe never said)
+
+The export ships one flag, `alteration:true`, and every earlier version of this recipe stopped at
+"add `d63Set` codes" without saying what they are. They are not one set: the book picks by the
+cabinet's own shelf, `d63Cfg` (v781 `:2339`), and the client has to derive the same thing from
+`category` + `subcategory`, which the item already carries.
+
+| the cabinet | mode | codes ordered ALONGSIDE it |
+|---|---|---|
+| `category: Tall` | `tall` | `ANHST63` |
+| `Base` › `Sinks` | `sink` | `ANTSP63US` · `MPRU` — plus `ANSVVO275` when `unitFacts.variantCode === "Doors"` |
+| `Base` › `Cooktops & Downdrafts` | `cooktop` | `ANTSP63US` |
+| anything else | `base` | `ANTST63` |
+
+`ANSVVO275` drops a door sink's top hinge, which a deep basin would otherwise foul — a pullout or
+waste-bin sink has no hinge to move, hence the `variantCode` test rather than "it is a sink".
+
+**The same rule minus the depth package is what a sink orders at its NATIVE depth** (58/68):
+`[code, MPRU]`, plus `ANSVVO275` on a door sink. So the two are exclusive — deriving both and
+concatenating orders `MPRU` twice.
+
+⚠️ **The alteration codes are SKUS and the depth code is not.** `ANTSP63US` resolves through
+`GET items/:sku`; the re-cut `pill.code` 400s (above). Anything that stores a code — a clipboard
+that resolves rows to pictures, a saved list — must take the sku, never `pill.code`.
+
+**Shipped** in D4K-frontend `src/views/design-book/data/order-code.ts` (`depth63Mode`,
+`depth63Codes`, `sinkNativeCodes`, `companionCodes`), fed to `orderCodeLines` and to both copy
+handlers. Held by SKU, not as a boolean, so the 4b sink navigation cannot lose it.
 
 Note a **GREY** depth pill is still clickable (§2c) — greying gates *availability*, not navigation, so a
 grey shape-1 pill still fetches.
@@ -1632,7 +1664,7 @@ Unchanged from v1.
 | `configure.optionRows[]` (`{label, options[]}`) | `parameters.options[]` (flattened `{group, label, sku, swatch?}`) | one entry per pill, `group` = row label |
 | `configure.*[].available/selected/crossedOut/value/unit` | — (derived) | selected = `sku===item.sku` **except on `depth`, where it is by LABEL** (§2c-1); dead = `sku==null`; grey = `availableFromCaps(...)` |
 | `programmeAvailability {excluded, programmes[]}` | `capabilities.excludedPrograms[]` | the programme rule; backend reads it in `annotateProgrammeExclusions` |
-| `accessoryPanel.tabs[].cards[]` | `alterations[]` · `accessories[]` · `companions[]` (sku codes) | hydrated to cards via `refs` |
+| `accessoryPanel.tabs[].cards[]` | `alterations[]` · `accessories[]` · `companions[]` (sku codes) | hydrated to cards via `refs`; **the TABS are the client's to rebuild — §3** |
 | `accessoryPanel.tabs[].swatches/visibleSideCombos/options` | `finishInterior.swatches/visibleSideCombos/optionCodes` | Vero interior finish |
 | `relatedGroups[]` | `companions[]` | planned-together / opening-support / complete-this-cabinet |
 | `specification {…}` | `priceGroupRef` · `frontModifiers` · `carcaseLine` · `weightKg` · `volumeM3` · dims | flattened onto the item |
@@ -1644,6 +1676,122 @@ Unchanged from v1.
 | (new, 2.1) | **`parameters.depth[].code`** | the re-cut ORDER CODE at that depth class — §2c-1 |
 | (new, 2.2) | **`doorLineYCode`** | order code for door-line Y — the one modifier that replaces the whole code — §2c-3 |
 | (new, 2.2) | **`heightExtension`** | the `217+` chip on the Height row (230/244/250 cm via the 217 unit + `MPHVERL`) — §2c-3 |
+
+### ⭐ Rebuilding the accessory TABS (2026-08-20)
+
+Flattening `accessoryPanel.tabs[]` into three sku lists dropped the GROUPING but not the
+information it was built from, and the difference matters on screen: a drawer offers four cutlery
+systems that **cannot be mixed**, and rendering all 25 codes as one list hides the choice the
+designer is making. The client filed exactly this — *"on ours it's arranged by the category, on
+yours it's all together"* — against `T6080ZISWH`.
+
+The system is in the code's PREFIX, which is how the book does it too (`cutSys`, v781 `:6002`):
+
+| prefix | tab | | prefix | tab |
+|---|---|---|---|---|
+| `EBF` | Q-Box | | `CB` | Combo |
+| `BFA` · `BFC` | Plastic | | `HBF` | Beech |
+| `LBF` | L-Box oak | | *(none of these)* | Other |
+| `LBN` | L-Box walnut | | `ARE` · `CBRM` · `WFA` | Mats |
+
+Tab order is the book's chapter-90 order — Q-Box, Plastic, L-Box oak, L-Box walnut, Combo, Beech —
+then `Other`, then `Mats`. `companions[]` leads as **Compatible Accessories**, and `alterations[]`
+is **always last**. Empty tabs are not drawn.
+
+**Shipped** in D4K-frontend `src/views/design-book/data/accessory-groups.ts`. **No contract change**
+— do not add tabs back to the export: the prefix is the source of truth in the book as well, and a
+stored grouping would be a second copy of it to keep in sync.
+
+#### Mat colours are NOT catalogue data
+
+The book shows the anti-slip mat in **160 · 161** and the combo non-slip in **286**. Nothing here
+can supply that: `finishes[]` on `ARE6058` is `[{finishCode:"1", price:1200}]` — a **price**
+dimension, not a swatch list — the API sends no colour on an accessory `ref`, and the book itself
+hardcodes the three codes against the two prefixes (v781 `:5440`). So the client mirrors the
+constant (`accessoryColours`, same file) and it is deliberately absent from the contract. If a real
+per-accessory colour ever lands in the source data, that is the moment to export it and delete the
+mirror.
+
+## 10. ⭐ `GET /design-book/items/:sku/availability` — WHY is this greyed or missing? (2026-08-10)
+
+The reason behind a greyed or absent card, in one call. Built for LIO (§11), but it is an ordinary
+endpoint and the client may use it directly — e.g. behind a "why?" affordance on a greyed card.
+
+**Request:** every `GET items` filter (send the toolbar the grid was drawn in, or the answer is
+about a different screen) **plus** three axes no grid query carries — `front` (0|1, the one-piece /
+Full-E chip), `handle` (`V` = handle-free), `doorline` (`J`|`Y`). They live only on this endpoint
+because the grid does not read them, so accepting them on `GET items` would be a filter that
+silently does nothing.
+
+**Response:**
+
+| field | meaning |
+|---|---|
+| `visible` | would the card be DRAWN at all — the family/membership hides |
+| `available` | is it orderable, i.e. NOT greyed (the card rule, `cardAvailable`) |
+| `unit.gates` | the **eight** gates one by one: `progOk · tierOk · depthOk · handleOk · frontOk · openOk · antosoOk · doorOk` |
+| `family` | `gridOk` (the `gridHidden` artifacts) · `depthFamOk` · `lineFamOk` · `openFamOk` · `antosoFamOk` · `famOkB` · `famOkU` |
+| `reasons[]` | one per FAILED gate: `{layer:'unit'\|'family', gate, control, hides, message}` — `control` names the toolbar control to change ("PROGRAMME", "FRONTS", "D", "LINE / H", "SUSPENDED", "OPENING", "DOOR LINE"), `hides` says whether the card disappears or merely greys, and `message` is a sentence a dealer can read |
+
+⚠️ **Two layers, and neither answers for the other.** A unit gate says the code is not orderable
+(the card greys); a family hide says no card is drawn at all. Both are read from the SAME functions
+that render the grid — `unitGates` / `cardGates` are the gate-by-gate form of `unitAvailable` /
+`cardAvailable`, **not a second copy of the rules** (a second copy is exactly how the FRMAT blanket
+bug shipped, §Q2) — so an explanation can never disagree with the card on screen.
+
+```
+GET items/T1580/availability?programs=244
+→ visible:true, available:false, unit.gates.progOk:false,
+  reasons:[{layer:"unit", gate:"progOk", control:"PROGRAMME", hides:false,
+            message:"T1580 is not orderable in the selected programme — pick a different programme…"}]
+```
+
+## 11. ⭐⭐ `POST /design-book/lio/ask` — LIO, the catalog assistant (2026-08-10)
+
+**ONE endpoint answers every question.** "Show all cooktop units in 80 cm" and "why is Avance
+unavailable?" are the same call — there is no mode flag, no search endpoint and no separate
+"why is this unavailable" endpoint for the client to choose between. LIO classifies the question
+itself. Full requirements + implementation status: **`docs/lio-agent-requirements.md`**.
+
+**Async, because Heroku's router kills a request that has not answered in 30 s:** `POST lio/ask`
+returns `{exchangeId, threadId, status:"queued"}`; poll `GET lio/exchanges/:id` (~1 s) until
+`status` is `done` or `failed`.
+
+| endpoint | who | what |
+|---|---|---|
+| `POST lio/ask` | any user | The question. Multipart-capable for PDFs (`files`, ≤ 30 pages) |
+| `GET lio/exchanges/:id` | owner + admin | Poll: job status, answer, filters, the tool calls behind it |
+| `GET lio/threads/:threadId` | owner + admin | The whole conversation, oldest first |
+| `POST lio/exchanges/:id/flag` | any user | "This answer is wrong" — the ONLY write a non-admin has |
+| `GET lio/flags` · `PATCH lio/flags/:id` | **admin** | The review queue; a correction becomes a curated Q&A pair |
+| `GET/POST/PATCH/DELETE lio/knowledge` | **admin** | The teaching area (curated Q&A pairs) |
+
+**Always send `context`** — the focused `sku` / `familyId` plus the live toolbar, using
+`GET items` parameter names verbatim. The same code is available in one toolbar state and greyed
+in another, and "why is THIS unavailable?" has no referent without it. Extra keys are ignored.
+
+⚠️ **`FRONTS All` / `H All` mean NO filter — OMIT them.** `tier:"ALL"` is not a value the API
+accepts; send the axis only when a real pill is lit. Suspended off → `antoso:false`, D 58 →
+`depthClass:58`.
+
+**Reading the answer — two shapes, told apart by `mode`:**
+- `prose` → render `answer` in the chat panel.
+- `query` / `both` → `answer` is the sentence and **`filters` is a `GET items` filter set:
+  RE-RUN IT THROUGH YOUR EXISTING GRID PATH.** LIO never returns cards — that keeps ONE route from
+  query to rendered cards (with its refs map, card state, click dispatcher and section bucketing)
+  and stops the answer going stale against a toolbar the user changed while the job ran.
+  `resultSummary` is what the BACKEND saw running those same filters (count + the skus the sentence
+  names), so the prose and the grid cannot disagree.
+- ⚠️ **`itemSkus` is the third case.** When the answer is a fixed handful with no filter that
+  expresses it — "show compatible accessories for TK6080SZ2" returns **76 codes with
+  `filters:null`** — the ids ride on `itemSkus`. **A client that only re-runs `filters` renders
+  nothing for that prompt.** Handle both.
+
+**What LIO cannot do, by construction:** it is READ-ONLY over the catalog (every tool routes to a
+`GET`-shaped service method — there is no create/update/delete/ingest tool for a prompt to reach),
+it never re-derives a catalog rule (availability comes from §10, membership and rows from the
+grid), and no sku reaches an answer unless it came back from the API (every code-shaped token in
+the text is checked against the collection before the answer is stored).
 
 ---
 
