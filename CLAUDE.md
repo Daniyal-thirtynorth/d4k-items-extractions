@@ -927,13 +927,16 @@ Current facts:
   `createItem` stamps no `ingestBatchId`, so a brand-new code has nothing pinned. One clause fixes it
   (`ingestBatchId: { $exists: true, $ne: batchId }`); nobody has hit it, left out on purpose. §2d of the
   analysis doc.
-  **⚠️ NOT RELEASED as of writing** — backend branch `feat/design-book-manual-overrides`
-  (**PR #3096 → `dev`**: `35a88a84` the layer · `d081fc22` the override guard · `8a81ef07`
-  `fix-hand-merges.js` · `d330f804` its third pass), frontend `feat/design-book-manual-overrides`
-  (**PR #2470 → `dev`**: `5c02969ca` — the `pinned` chip in the admin item list's Family column + the
-  unpin confirm). **The pins are already written on both clusters and do nothing until the backend
-  ships** — an import before that release ignores them. ⚠️ **dev and prd have diverged**: the `ZGRS*`
-  merge exists only on prd (the client's call, accepted).
+  **⭐ RELEASED 2026-09-04.** Backend `feat/design-book-manual-overrides` (`35a88a84` the layer ·
+  `d081fc22` the override guard · `8a81ef07` `fix-hand-merges.js` · `d330f804` its third pass ·
+  `2429b3d3` the no-republish pin) → PR #3096 (`dev`) → #3097 (`dev`→`staging`) → #3098
+  (`staging`→`main`), **`origin/main` @ `2ea87129`**, `origin/main..origin/dev` empty. Frontend
+  `5c02969ca` (the `pinned` chip + unpin confirm) → #2470 → #2471 → #2472, **`origin/main` @
+  `339bb1296`**. Both verified by READING the code out of `origin/main`, not from commit ancestry
+  (and building each `git show` ref in ONE assignment — the zsh `:s` trap, third time this project).
+  Nothing else rode along: `main..staging` was exactly the 8 backend / 4 frontend files.
+  ⚠️ **dev and prd have diverged** on data: the `ZGRS*` merge exists only on prd (the client's call,
+  accepted).
 
 - **⭐⭐ THE LAYER RUN AGAINST A REAL IMPORT — and two beliefs it disproved (2026-09-04). No code
   change to the layer itself; one script fix (`d330f804`).** The override layer had only ever been
@@ -982,6 +985,29 @@ Current facts:
      takes **72 s**, so the first grid request after an ingest (cold `poolByFamily`) can sit for
      minutes, and several concurrent ones serialise behind each other. Not a bug; do not go hunting one.
      Verify post-ingest data with the raw driver, not by waiting on `GET items?groupBy=family`.
+
+- **⭐ THE PRD SWEEP — six unpinned hand edits, four of a kind dev never had (2026-09-04, after the
+  release).** Dev's sweep was clean, so prd's was assumed clean too. It was not: `fix-hand-merges.js`
+  found **6** items whose hand edit was still unpinned, and none was an artifact —
+  `ZGRS430` (`kind` cabinet→part, `availableTiers` `[P]`→`[P,P1]`), `ZGRS435` (`kind`),
+  `ZGRS422PZ2` (a name typo fix: *"Handle screws for"* → *"Handle screws for **Handle**"*),
+  **`HSSCUS` (`active: false` — the client's own 2026-08-20 deactivation of the Sensor switch)**, and
+  `AHS`/`AHS2` (the option buttons, the same case as dev). The four `ZGRS*`/`HSSCUS` ones are edits
+  dev simply never received. All 6 pinned; re-run reports 0; every pinned value verified equal to the
+  live value (a pin that disagrees with the document would mean the re-apply wrote the wrong thing).
+  prd now: 18,396 items, 18,395 active, **1 inactive (HSSCUS, still off)**, 11 pinned.
+  **⭐ `active` IS PINNED WITHOUT THE ROUND-TRIP (`2429b3d3`), and that is not a nicety.** The sweep
+  pins a pre-existing edit by re-applying it — catalogue value back, human's value forward — because
+  a pin can only record a CHANGE. For grid data the intermediate state is invisible. For `active` it
+  is not: the export asserts `active: true` on all 18,396 items, so round-tripping a deactivated item
+  **republishes it to the live shelf for the width of one write**. `NO_ROUNDTRIP_FIELDS` writes the
+  pin directly instead — the stored value is already the one to pin, so the document does not change
+  and `mergeOverrides` would have recorded exactly the same thing. Verified: `HSSCUS` came out
+  `active=false` having never been true. ⚠️ `active` is NOT in `RESERVED_ITEM_FIELDS` (only
+  `deactivatedAt` is), so `patchItem` genuinely would have written it — the guard is needed, not
+  theoretical.
+  ⚠️ Both prd runs went through `MONGO_URI_OVERRIDE=<uri>` with the URI parsed out of `.env` line 3
+  and asserted to end in `D4K-prd` before connecting; `.env` still points at D4K-dev.
   Docs: map **§1** (the summary field) + **§1b** (the 4th endpoint, and "extractor wins" now has one
   exception) · crud-guide **§6a** · the analysis doc's UPDATE block · the client-feedback doc §6.
 
