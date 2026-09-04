@@ -55,6 +55,7 @@ on. "Disable width-15 in BOSSA" is stored on `T1580`, not on `T6080`. See §5.
 | `POST` | `/design-book/items` | **Create** one item | `sku` required. **409** if it already exists (use PATCH). |
 | `PATCH` | `/design-book/items/:sku` | **Edit** one item | Replaces only the top-level fields you send; the rest stay. URL `sku` wins. **404** if missing. |
 | `DELETE` | `/design-book/items/:sku` | **Delete** one item | Soft by default (`active:false`, kept for history). `?hard=true` removes it. **404** if missing. |
+| `DELETE` | `/design-book/items/:sku/overrides` | **Unpin** one item's manual edits | All of them, or one `?field=`. The stored VALUES stay — this hands the field back to the catalogue, it does not undo your edit. §6a. |
 
 All return the stored item (with built `imageUrl`). `POST /design-book/ingest` (bulk) uses the same write
 path, so bulk and manual never disagree on shape.
@@ -628,12 +629,73 @@ POST /design-book/items
 
 ---
 
+## 6a. ⭐ Manual overrides — why your edit survives the 2027 catalogue
+
+Ingest is **extractor-wins**: it `$set`s the whole exported document per sku. So until this existed,
+an afternoon spent arranging the book into the cards you want was gone at the next import, with
+nothing on screen to say so.
+
+**What happens now.** Every manual write — `PATCH`, and the soft delete — compares what you sent
+against what is stored and records the fields that actually CHANGED on `item.manualOverrides`. The
+ingest merges that record back over the freshly-written document.
+
+**Four rules worth knowing before you author a lot:**
+
+1. **CHANGED, not sent.** The editor reads the whole item and PATCHes the whole item back. If every
+   key it sent were pinned, one edit would freeze that item against every future catalogue — the
+   opposite of the point. Only a value that differs from the stored one pins. (Key ORDER is ignored,
+   so a round-tripped block does not read as edited; array order is NOT ignored, because a pill row's
+   order is meaning.)
+2. **A pin cannot record what is already true.** Re-asserting the family an item is already in is not
+   a change, so it pins nothing. A merge you made before this shipped is therefore NOT protected —
+   to pin it, re-apply it: back to the catalogue's family, then forward again. `D4K-backend/scripts/
+   fix-hand-merges.js` finds them (report-only without `--apply`) and does exactly that.
+   ⚠️ **And a merge is only HALF the edit.** Joining two items into one card is one job; giving that
+   card its option buttons (§4f — `familyFacts.variantLabel`/`variantOrder`, each item's
+   `unitFacts.variantCode`, `dupFamilies`) is a different set of fields. Pinning only `familyId`
+   keeps the items together and lets the import strip the buttons back off. The script's third pass
+   covers every other field a hand-touched item differs from the catalogue on; it skips four where
+   the stored value is a lossy round-trip rather than an edit (`capabilities`, `carcaseLine`,
+   `gridHidden`, `description` — the form drops null/empty members and coerces scalars, and pinning
+   that would freeze the degraded value forever).
+3. **A pin never resurrects a dropped code.** The re-apply runs before the missing→inactive sweep, so
+   an item the new catalogue no longer carries still goes inactive. The import summary reports it:
+   `summary.items.manualOverrides.staleSkus`, alongside `staleFamilyIds` — a merge whose target
+   family no longer exists. **Read those two lists after every import**; nothing surfaces them in a UI.
+4. **A deactivation is a manual edit too.** Switching an item off used to be undone by the next
+   import (the export asserts `active: true` on all 18,396 items). It is pinned now, like any
+   other edit.
+5. **A field the export does not carry needs no pin.** The import `$set`s the exported document, so
+   it overwrites the keys that document HAS and no others — anything absent survives untouched.
+   That is why the backend-computed face fields (`variantCore`, `faceVariantCore`, `faceHeightClass`,
+   `faceWidthMm`) come through an import unchanged and there is **no backfill to re-run afterwards**.
+   Measured over a real 18,396-item import on D4K-dev: 18,396 updated, 0 deactivated, all four face
+   fields identical before and after.
+
+⚠️ One thing an import DOES take back: `catalogVersion`, which is re-stamped from the export. So the
+`manual` marker on an item you edited disappears at the next import — `manualOverrides` is the
+durable record that a human touched it, and it is what the admin chip reads.
+
+**Seeing and clearing it.** The admin item list shows a **`pinned`** chip in the Family column on any
+row with overrides; its tooltip lists the fields held. Clicking it unpins — the values stay exactly as
+they are, and the catalogue owns them again from the next import on. Same thing over HTTP:
+`DELETE /design-book/items/:sku/overrides` (add `?field=familyId` for one).
+
+⚠️ **Still open:** an item you CREATE by hand is deactivated by the next import regardless. The sweep
+that does it (`{ ingestBatchId: { $ne: batchId }, active: true }`) is a separate write that never
+reads the document, and a new code has nothing pinned. Edits to existing codes are safe; brand-new
+codes are not. See `docs/manual-edits-vs-catalog-import-2026-08-27.md` §2d.
+
+---
+
 ## 7. Gotchas — read before authoring a lot
 
 - **The rule lives on the pill TARGET, not the parent** (§0, §5).
-- **Re-ingest overwrites manual edits — the extractor wins.** A fresh `POST ingest` upserts every item by sku
-  and deactivates manual-only skus not in the export. Author on skus the extractor doesn't emit, or re-apply
-  after each ingest.
+- **⭐ Your edits now SURVIVE a re-ingest — but only the fields you actually changed** (§6a). A fresh
+  `POST ingest` still `$set`s every item from the export; the difference is that the fields a human
+  changed are put back on top afterwards. Two things this does NOT cover: a hand-CREATED sku is still
+  deactivated by the missing→inactive sweep (it has nothing pinned, and the sweep never reads the
+  document), and a merge made BEFORE this existed is unpinned — re-apply it to pin it (§6a).
 - **Unknown fields → 400.** Only §2 fields at the top level; a typo fails the whole request.
 - **`excludedPrograms` uses programme IDS, not names** (`"244"`, not `"BOSSA"`). Get ids from `GET /design-book/programs?q=<name>`.
 - **Only the PROGRAMME gate greys server-side.** `GET items/:sku?programs=<ids>` sets `available:false` +
@@ -698,4 +760,9 @@ to watch pills/cards grey.
 - **Worked sample:** `docs/export-sample-v2.json`.
 - **Programme ids:** `GET /design-book/programs` (BOSSA = `244` / `247` FS / `744` Contino / `747` FS-C).
 - **Backend:** `D4K-backend/src/design-book/` — `design-book.controller.ts`, `design-book.service.ts`
-  (`createItem`/`patchItem`/`deleteItem`/`normalizeItemDoc`/`annotateProgrammeExclusions`), `dto/upsert-item.dto.ts`.
+  (`createItem`/`patchItem`/`deleteItem`/`clearOverrides`/`mergeOverrides`/`reapplyManualOverrides`/
+  `normalizeItemDoc`/`annotateProgrammeExclusions`), `dto/upsert-item.dto.ts`.
+- **Manual overrides — the checks:** `D4K-backend/scripts/check-manual-overrides.js` (what gets pinned,
+  pure) · `check-manual-overrides-e2e.js` (drives the real `ingestCatalog()` against a scratch database)
+  · `fix-hand-merges.js` (pin the merges made before pins existed). The analysis that led to it:
+  `docs/manual-edits-vs-catalog-import-2026-08-27.md`.

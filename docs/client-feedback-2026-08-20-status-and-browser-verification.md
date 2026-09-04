@@ -876,16 +876,27 @@ behind, and the loose ends around everything else.
 
 ### Decisions someone should make
 
-- **Should a hand-made deactivation survive the next catalogue import?** Right
-  now it does not. Every imported item is written with `active: item.active !==
-  false`, and export files carry no per-item `active`, so every item in the file
-  comes back **on** and its `deactivatedAt` is wiped. An admin who switches an
-  item off has no way to know their change expires at the next import. Two honest
-  options: mark why an item was switched off and let the import re-activate only
-  the ones its own missing-item sweep switched off, or leave it as is and say
-  plainly in the admin panel that the catalogue wins. The first is a small change
-  — one extra field on the item and one condition in the import — but it is a
-  product call, so it is not built.
+- **~~Should a hand-made deactivation survive the next catalogue import?~~
+  ANSWERED AND BUILT (2026-09-02).** It does now. The question was put as a
+  product call and the answer turned out to be forced by a bigger one: the client
+  had by then hand-merged cards on production — including all five members of one
+  "Handle screws" card folded into another — and none of it survived an import
+  either. Deactivation was the same bug wearing a smaller hat, so both are fixed
+  by one rule: **a manual write records the fields it CHANGED on the item, and the
+  import puts them back.** The chosen policy is *the human wins for fields a human
+  touched, the catalogue wins everywhere else* — what most admin tools do, and
+  what the client already assumed was true.
+
+  One correction to the paragraph this replaces: it said export files "carry no
+  per-item `active`". They do — `docs/export-v781-fresh.json` asserts `active:
+  true` on all 18,396 items. The effect was the same, but it matters to the fix,
+  because you cannot solve it by treating an absent field as "leave alone".
+
+  Full behaviour: CRUD guide §6a. Analysis it came from:
+  `docs/manual-edits-vs-catalog-import-2026-08-27.md`. **Still open in that
+  document:** an item an admin CREATES by hand is deactivated by the next import
+  regardless — that sweep is a separate write which never reads the document, and
+  a brand-new code has nothing pinned (§2d there).
 
 - **The unranked search path.** As explained in §1, only requests with
   `groupBy=family` get ranked. The other path sorts in the database by category,

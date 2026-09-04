@@ -868,6 +868,123 @@ Current facts:
   history modifier and silently strips everything after the colon — it reports code ABSENT from every
   branch. Build the ref in two steps: `ref="origin/$b"; ref="$ref:$path"`.
 
+- **⭐⭐ A HAND EDIT NOW SURVIVES A CATALOGUE IMPORT (2026-09-02). NO contract change,
+  schemaVersion stays 2.5.4, nothing to re-ingest — one new service-owned FIELD + one new route.**
+  Ingest is extractor-wins (`$set` of the whole exported document per sku), so every manual edit was
+  undone by the next import. Fine for a typo; not fine for the reason the bulk-merge feature exists —
+  an afternoon arranging the book into the cards the client wants was gone the day the 2027 catalogue
+  lands, with nothing on screen to say so. The analysis is `docs/manual-edits-vs-catalog-import-2026-08-27.md`
+  (option A); this is that option built, with two deliberate departures from its sketch.
+  **`Item.manualOverrides: Record<string, value>`** — `patchItem` and the soft delete record the fields
+  they CHANGED; `reapplyManualOverrides` merges them back with `$mergeObjects` after the bulk upsert.
+  1. **⭐ CHANGED, not SENT — the whole design rests on this.** The doc proposed recording "the keys
+     `patchItem` is writing". The authoring form reads the item with `expand=all` and PATCHes the WHOLE
+     record back, so that would pin ~40 fields on the first edit and freeze the item against every
+     future catalogue — the opposite of the intent. `sameJson` compares each value against the stored
+     one; key ORDER is ignored (a round-tripped block is not an edit), array order is NOT (a pill row's
+     order is meaning).
+  2. **Values, not just names**, so the re-apply is ONE `updateMany` instead of an `omit()` per op
+     inside the ingest loop.
+  3. **⭐ ORDER IS LOAD-BEARING: after the bulk upsert, BEFORE the missing→inactive sweep.** Late enough
+     to beat the export, early enough that a pin cannot resurrect a code this catalogue drops.
+  4. **The import reports the pins a human must then look at** — `summary.items.manualOverrides.staleSkus`
+     (pinned item, code not in this upload) and `.staleFamilyIds` (a merge whose target family is gone),
+     capped at 50. ⚠️ `staleFamilyIds` is computed BEFORE the pins go back on — afterwards a merged item
+     carries its own target and every merge reads as live. ⚠️ **Nothing surfaces these in a UI** — there
+     is no ingest screen at all, `POST ingest` is run by hand, so whoever runs the 2027 import must read
+     the response.
+  5. **The soft delete had the same bug alone** and is fixed by the same rule (CLAUDE.md's own note said
+     "NOT fixed: the right behaviour is a product call" — it is answered: *the human wins for fields a
+     human touched, the catalogue wins everywhere else*). ⚠️ And one correction to that note: export
+     files DO carry `active: true`, on all 18,396 items — it is not an absent field defaulting to true,
+     which matters because you cannot fix it by treating absent as "leave alone".
+  6. **`DELETE /design-book/items/:sku/overrides?field=`** unpins, all or one. Values stay — unpinning
+     hands the field back to the catalogue from the next import on, it does not undo the edit.
+     `manualOverrides` is in `RESERVED_ITEM_FIELDS` and NOT in `UpsertItemDto`, so no body can set it.
+  **⭐ THE WRINKLE NOTHING PREDICTED: a pin can only record a CHANGE, so a merge made BEFORE this
+  existed cannot be pinned by re-asserting it.** Re-applying it — back to the catalogue's family, then
+  forward again — is what pins it. **Both clusters were swept and repaired**: dev 1 hand merge, **prd 6**
+  (`AHS` + five `ZGRS*` — the client had folded a whole "Handle screws" card into another), all pinned
+  via `scripts/fix-hand-merges.js` (report-only without `--apply`, idempotent, writes through the real
+  `patchItem`). Two of them had also left their family with **two default `faceForTiers` faces** —
+  editing `familyId` by hand does not clear the joiner's face the way the merge tool does — and fixing
+  that is what made the pending `faceWidthMm` backfill CORRECT rather than merely a write: with one
+  face per family, the default width is the face's, not whichever unit sorted first. All three
+  `backfill-face-*` then ran on both clusters (0 · 0 · 1 each) and re-run clean.
+  ⚠️ **`backfill-face-height-class.js` and `-variant-core.js` did NOT honour `MONGO_URI_OVERRIDE`** —
+  only `-width-mm.js` did — so running them "for prd" silently hit dev, or meant editing `.env`. All
+  three carry the same line now.
+  **Checks:** `scripts/check-manual-overrides.js` (pure — the whole-form PATCH pins one field, pins
+  accumulate and replace, key order ignored / array order not) · `scripts/check-manual-overrides-e2e.js`
+  (boots a Nest context on a SCRATCH database and drives the real `ingestCatalog()`: merge and
+  deactivation survive · an unpinned field still takes the catalogue's value · a pin does not resurrect
+  a dropped code · both stale reports fire · unpin releases). Verified live through the real admin UI on
+  D4K-dev: merged `ZGR378306` → `HDL_MBH_375`, pin chip listed exactly the 4 fields that differed
+  (category/section identical between the two, correctly NOT pinned), unpinned, restored — Handles back
+  to 134 cards, `familyFacts` byte-identical to the export, 0 pins left.
+  **⚠️ STILL OPEN — a hand-CREATED item is deactivated by the next import regardless.** That sweep is a
+  separate write which never reads the document (`{ ingestBatchId: { $ne: batchId }, active: true }`) and
+  `createItem` stamps no `ingestBatchId`, so a brand-new code has nothing pinned. One clause fixes it
+  (`ingestBatchId: { $exists: true, $ne: batchId }`); nobody has hit it, left out on purpose. §2d of the
+  analysis doc.
+  **⚠️ NOT RELEASED as of writing** — backend branch `feat/design-book-manual-overrides`
+  (**PR #3096 → `dev`**: `35a88a84` the layer · `d081fc22` the override guard · `8a81ef07`
+  `fix-hand-merges.js` · `d330f804` its third pass), frontend `feat/design-book-manual-overrides`
+  (**PR #2470 → `dev`**: `5c02969ca` — the `pinned` chip in the admin item list's Family column + the
+  unpin confirm). **The pins are already written on both clusters and do nothing until the backend
+  ships** — an import before that release ignores them. ⚠️ **dev and prd have diverged**: the `ZGRS*`
+  merge exists only on prd (the client's call, accepted).
+
+- **⭐⭐ THE LAYER RUN AGAINST A REAL IMPORT — and two beliefs it disproved (2026-09-04). No code
+  change to the layer itself; one script fix (`d330f804`).** The override layer had only ever been
+  driven against a 3-item catalogue, so the whole export was ingested into D4K-dev through the real
+  `ingestCatalog()`. **18,396 seen / 18,396 updated / 0 inserted / 0 deactivated in 117 s**, with
+  `manualOverrides: {items: 2, reapplied: 2, staleSkus: [], staleFamilyIds: []}` — the re-apply is an
+  `updateMany` scoped to pinned docs, so it is size-independent in practice as well as on paper. The
+  merge and its option row came out byte-intact. That closes the "never run against a real import"
+  caveat.
+  1. **⭐ A MERGE IS ONLY HALF A HAND EDIT, and `fix-hand-merges.js` pinned only the half it was named
+     after.** The authoring guide's flow (`docs/guide-add-option-buttons-to-a-card.md`) is *merge, then
+     give the card its option buttons* — `familyFacts.variantLabel`/`variantOrder`, each item's
+     `unitFacts.variantCode`, and `dupFamilies`. On D4K-dev the `AHS`/`AHS2` card was pinned on
+     `familyId`+`faceForTiers` and on nothing else, so an import would have kept the two items together
+     and **stripped the `Set · 2 Rails / 3 Rails` row off the card** — half-undone, which is exactly the
+     failure the merge pass re-applies both of its fields together to avoid. Same root cause as that
+     one: *a pin can only record a CHANGE*, and the sweep only re-applied `familyId`. Third pass added —
+     every other field on which a `catalogVersion: manual` item differs from the catalogue, re-applied
+     through the real `patchItem`. Dev now pins 5 fields on `AHS`, 3 on `AHS2`.
+  2. **⭐⭐ `$set` OF THE EXPORTED DOCUMENT ONLY OVERWRITES THE KEYS THE EXPORT HAS.** `normalizeItemDoc`
+     is a passthrough — it adds no defaults — so **a field absent from the export survives an import
+     untouched**, and needs no pin. Two long-standing notes in this file are wrong because of it:
+     - **The face fields do NOT need re-backfilling after an ingest.** `variantCore`,
+       `faceVariantCore`, `faceHeightClass` and `faceWidthMm` are backend-computed and appear on **0 of
+       18,396** exported items, so the import cannot reach them. Measured across the run: 18,396 /
+       18,313 / 7,605 / 17,407 before, identical after. Together with the earlier finding that
+       `repickFaces()` decides the face in JS for 1,637 of 1,643 families, **the post-import backfill
+       step does not exist** — the ops list for an import is: read the response.
+     - Same for `parameters` and `functionalGroups` where the export omits them (11 items carry a
+       `functionalGroups` the export lacks; all 11 survived).
+  3. **⚠️ `catalogVersion: 'manual'` DOES NOT SURVIVE — `manualOverrides` is the durable marker.** The
+     import re-stamps `catalogVersion` from the export, so after one run dev's "manual" count went 7 → 0
+     while the 2 pinned items stayed pinned. Consequence: `fix-hand-merges.js`'s third pass is scoped to
+     `catalogVersion: manual` and therefore **cannot find an unpinned hand edit after an import has run
+     over it** — it is a one-off for edits made before the layer existed, which is all it is for. The
+     admin chip reads `manualOverrides`, which is right.
+  4. **⚠️ NEW, OPEN — the authoring form's PATCH round-trip is lossy, and pins make that permanent.**
+     The form drops null and empty members and coerces scalars (`carcaseLine` `"80"` → `80`,
+     `capabilities` minus its null keys, `description` minus an empty `bullets`, `gridHidden` absent →
+     `false`). Before pins that was self-healing — the next import put the export's value back. Now a
+     harmless edit can PIN the degraded value and freeze it against every future catalogue.
+     `fix-hand-merges.js` skips those four (`ARTIFACT_FIELDS`, `--pin-all` overrides) so the one-off
+     sweep does not freeze them, but **`patchItem` itself does not**, and the real fix is in the form.
+     Seen on 4 of dev's 7 hand-touched items.
+  5. **⚠️ The dev Atlas cluster reads at about 1 MB/s from here** — a full scan of the 82 MB collection
+     takes **72 s**, so the first grid request after an ingest (cold `poolByFamily`) can sit for
+     minutes, and several concurrent ones serialise behind each other. Not a bug; do not go hunting one.
+     Verify post-ingest data with the raw driver, not by waiting on `GET items?groupBy=family`.
+  Docs: map **§1** (the summary field) + **§1b** (the 4th endpoint, and "extractor wins" now has one
+  exception) · crud-guide **§6a** · the analysis doc's UPDATE block · the client-feedback doc §6.
+
 - **⭐ SEARCH NOW FINDS AN ORDER CODE (2026-08-21) — the client rejected the "not a bug" answer,
   and they were right to.** They re-sent the `T506636` screenshot ("No units match these filters")
   after §5 D of the feedback doc explained it was an order code. The explanation was correct and

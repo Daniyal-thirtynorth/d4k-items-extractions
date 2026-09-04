@@ -58,6 +58,14 @@ hand-authored item and an extracted one are byte-identical. Anything absent from
 | `file` (multipart) | IN | Catalog-export upload control | Admin · Catalog import | `curl -F file=@docs/export-v781.json …/ingest` |
 | `summary.items` / `programmes` / `categories` | OUT | Import result counts | Admin · import result toast/log | `POST …/ingest` → `summary.items` |
 | `summary.catalogVersion` / `schemaVersion` | OUT | Version line of the import (`schemaVersion` = `"2.2.0"`) | Admin · import result | `POST …/ingest` → `summary.schemaVersion` |
+| **`summary.items.manualOverrides`** | OUT | **the hand edits this import put back** — `{items, reapplied, staleSkus[], staleFamilyIds[]}` | Admin · import result | `POST …/ingest` → `summary.items.manualOverrides` |
+
+⭐ **An import no longer destroys hand edits.** Every manual write records the fields it CHANGED on
+`item.manualOverrides`, and the ingest merges them back over the freshly-`$set` document — after the
+bulk upsert, **before** the missing→inactive sweep, so a pin cannot resurrect a code this catalog
+drops. The two lists in the summary are the pins a human then has to look at: **`staleSkus`** = a
+pinned item whose code is not in this upload, **`staleFamilyIds`** = a hand merge whose target family
+no longer exists. Both are capped at 50. See §1b and the CRUD guide §6.
 
 ---
 
@@ -81,11 +89,26 @@ hand**, field-for-field the same as the extractor writes. They all funnel throug
 | `POST /design-book/items` | **Create** one item from a JSON body. `sku` required. | **409** if the sku already exists (use PATCH to edit) | `POST …/items -d '{"sku":"TK6080BZ2", …}'` |
 | `PATCH /design-book/items/:sku` | **Edit** — top-level `$set` **MERGE**: only the fields present in the body are replaced; omitted fields are left untouched. A body `sku` is ignored (comes from the URL). | **404** if the item does not exist | `PATCH …/items/TK6080BZ2 -d '{"name":"…"}'` |
 | `DELETE /design-book/items/:sku?hard=` | **Delete** — SOFT by default (`active:false`, kept for history). `?hard=true` removes the document. | **404** if the item does not exist | `DELETE …/items/TK6080BZ2` (soft) · `…?hard=true` (hard) |
+| **`DELETE /design-book/items/:sku/overrides?field=`** | **Unpin** — drop the manual-override record, all of it or one named `?field=`. The stored VALUES are untouched: this hands the field back to the catalog from the next import on, it does not undo the edit. | **404** if the item does not exist · **400** if `?field=` is not pinned | `DELETE …/items/TK6080BZ2/overrides` · `…/overrides?field=familyId` |
 
-All three return the stored item with its **built `imageUrl`** (`meta.imageUrlTemplate ⊕ sku`; never
-stored). Re-activating via `PATCH {active:true}` clears the `deactivatedAt` stamp. ⚠️ A manual item
-absent from a later `POST ingest` upload is deactivated by the missing→inactive sweep (**the extractor
-wins, by design**) — hand-authored items that must survive re-ingest need to be in the export too.
+All four return the stored item with its **built `imageUrl`** (`meta.imageUrlTemplate ⊕ sku`; never
+stored). Re-activating via `PATCH {active:true}` clears the `deactivatedAt` stamp.
+
+⭐ **"The extractor wins" now has one exception, and it is the point of the CRUD surface.** A field a
+human CHANGED is pinned on `item.manualOverrides` and re-applied after every import (§1). Everything
+else is still extractor-wins. Three things follow:
+
+- **Changed, not sent.** The authoring form reads the item with `expand=all` and PATCHes the whole
+  record back; pinning every key it carries would freeze the item against every future catalog. The
+  value is compared against the stored one first (key ORDER ignored, array order not), so only a real
+  edit pins.
+- **A pin cannot record what is already true.** Re-asserting the family an item is already in changes
+  nothing, so it pins nothing. To pin a merge someone made BEFORE this existed, re-apply it — back to
+  the catalog's family, then forward again (`D4K-backend/scripts/fix-hand-merges.js` does exactly that).
+- ⚠️ **A hand-CREATED item is still deactivated by the missing→inactive sweep.** That sweep is a
+  separate write that never reads the document (`{ ingestBatchId: { $ne: batchId }, active: true }`),
+  and `createItem` stamps no `ingestBatchId`. A pin does not help — a new code has nothing pinned
+  unless someone later edited it. Open; see `docs/manual-edits-vs-catalog-import-2026-08-27.md` §2d.
 
 ### The DTO field surface (`UpsertItemDto`) — the whole item is authorable
 
@@ -115,6 +138,10 @@ stays free ("customize anything" inside the known surface). `PatchItemDto` = `Pa
 | `engineering[]` | `[{key,ok}]` | Engineering 🟢/🔴 flags (+ drives the `suspended` grid filter) |
 | `functionalGroups[]` | object[] | which "Design Tasks" leaves this item appears in |
 | `active` | boolean | deactivate (the only settable lifecycle field) |
+
+**Not in the DTO, and deliberately:** `manualOverrides` is service-owned (it is in
+`RESERVED_ITEM_FIELDS`, so an export body cannot set it either). It is READ on every item — the admin
+list shows a `pinned` chip from it — and written only as a side effect of PATCH / soft delete.
 
 ---
 
@@ -1702,15 +1729,41 @@ is **always last**. Empty tabs are not drawn.
 — do not add tabs back to the export: the prefix is the source of truth in the book as well, and a
 stored grouping would be a second copy of it to keep in sync.
 
-#### Mat colours are NOT catalogue data
+#### Accessory colours are NOT catalogue data
 
 The book shows the anti-slip mat in **160 · 161** and the combo non-slip in **286**. Nothing here
 can supply that: `finishes[]` on `ARE6058` is `[{finishCode:"1", price:1200}]` — a **price**
 dimension, not a swatch list — the API sends no colour on an accessory `ref`, and the book itself
-hardcodes the three codes against the two prefixes (v781 `:5440`). So the client mirrors the
+hardcodes the three codes against the two prefixes (v781 `:5332`). So the client mirrors the
 constant (`accessoryColours`, same file) and it is deliberately absent from the contract. If a real
 per-accessory colour ever lands in the source data, that is the moment to export it and delete the
 mirror.
+
+**⭐ 2026-08-31 — the row belongs on FIVE prefixes, not two (client report: "add Walnut colors"
+on the L-Box walnut tab).** It is not decoration on a set: the book prints, under every L-Box
+drawer-set table, *"Every set contains an anti slip mat either in colour KF 160 silver grey or in
+KF 161 carbon and in the size of the respective drawer. **Please indicate the colour of the anti
+slip mat in your planning system.**"* (90.10-11 oak, 90.14-15 walnut) — the mat is INSIDE the set,
+so it has no card of its own and the set's card is the only place that choice can be stated. The
+same 160/161 pair is the `KF = Plastic coloured` line on the plastic cutlery trays (90.24). So:
+
+| prefix | colours | why |
+|---|---|---|
+| `ARE` | 160 · 161 | the anti-slip mat itself |
+| `CBRM` | 286 | combo non-slip, black only |
+| `LBFS` · `LBNS` | 160 · 161 | L-Box oak / walnut drawer SETS — the mat is in the set |
+| `BFA` (covers `BFAN`) | 160 · 161 | plastic cutlery trays, `KF = Plastic coloured` |
+
+⚠️ **Not** `BFC` (the book says "Plastic anthracite" — one colour), **not** a loose L-Box component
+(`LBN58`, `LBNC1`, `LBFK58` — no mat), **not** `WFA` (wool felt, one way).
+⚠️ **This DELIBERATELY DIVERGES FROM v781**, which draws the row on the two mat prefixes only, and
+so hides on every set a choice the book requires on the order. Same call as the book-exclusion
+fixes: where the book and the app disagree, the book is upstream of the app and wins.
+Shipped in D4K-frontend `accessoryColours` (`src/views/design-book/data/accessory-groups.ts`) with
+tests; still no contract change, and the swatch image is the existing `swatchUrl(code)`.
+**Still not modelled:** the pick is DISPLAY only, exactly as in the book's own app — the colour is
+not part of the sku, so Copy writes the code alone and the designer states the colour in their
+planning system. Making it a real per-card selection that rides on the order is a product call.
 
 ## 10. ⭐ `GET /design-book/items/:sku/availability` — WHY is this greyed or missing? (2026-08-10)
 
