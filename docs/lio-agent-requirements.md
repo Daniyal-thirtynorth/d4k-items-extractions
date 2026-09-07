@@ -138,9 +138,15 @@ null`** — R3's explicit exception, an answer that is a fixed handful with no f
 it. A client that only re-runs `filters` will render nothing for it, so it must handle `itemSkus`
 too.
 
-**Not built yet:** **R8a** — a PDF on a curated Q&A pair, asked for by the client 2026-08-19 and
-spec'd below (~80 lines, no new dependency); streaming (D5 — poll ships first); rate limits /
-budgets (D6 — per-turn token usage IS recorded on every exchange so a limit can be set later).
+**⭐ R8a IS BUILT (2026-09-07)** — a curated pair may carry a PDF; see the block under R8a below
+for what shipped and the two defects driving it found. Backend branch
+`feat/design-book-lio-knowledge-files`, cut from `dev` @ `b63110e8`, **not released**.
+
+⚠️ Correction to the header above: the first cut is **not** "on branch `feat/design-book-lio-agent`,
+not released" any more — it was merged and is on `origin/dev` AND `origin/main` (commit `6b81a3d7`).
+
+**Not built yet:** streaming (D5 — poll ships first); rate limits / budgets (D6 — per-turn token
+usage IS recorded on every exchange so a limit can be set later).
 
 ## 0. What it is
 
@@ -344,6 +350,77 @@ Two things decide whether it works:
   and 5 × 30 pages of vision on every question is the one real cost risk. Walk the pairs in rank
   order and attach until a running total reaches `MAX_PDF_PAGES` — reuse that number rather than
   inventing a second limit.
+
+### ⭐ R8a — WHAT SHIPPED (2026-09-07), and the two defects that only appeared when it was driven
+
+Built as specified above, all reuse, no new dependency, and **no change to any existing response
+shape**. What the spec did not predict is below it.
+
+| File (D4K-backend `src/design-book/lio/`) | Change |
+|---|---|
+| `lio-files.ts` | **NEW.** `uploadPdfs` / `countPdfPages` / the three caps / `LioFile` / `LIO_FILES_PROP` / `lioOpenAI()`, moved out of `lio.service.ts` so a question and a pair share ONE upload path. `lio.service.ts` re-exports `countPdfPages` for `scripts/check-lio.js`. |
+| `schema/lio-knowledge.schema.ts` | `files[]`, the same sub-document the exchange uses — both now take it from `LIO_FILES_PROP`, so they cannot drift. |
+| `dto/lio-knowledge.dto.ts` | Multipart-safe: `tags` accepts `a,b` or a JSON array; `removeFileIds` takes a document off a pair. |
+| `lio.controller.ts` | `POST`/`PATCH knowledge` gain `FilesInterceptor` + `@ApiConsumes`, same 4-file cap as `ask`. |
+| `lio-knowledge.service.ts` | Uploads on create; on update an upload ADDS and `removeFileIds` takes away, resolved against the stored list so replacing a PDF is one atomic write and a text-only edit never disturbs the documents. |
+| `lio.service.ts` | The wiring: retrieved pairs' files join the `input_file` list, `dedupeFiles` sends a document once if the user attached it too. |
+| `lio.prompt.ts` | Names each attached document under its pair, so an instruction ties to its evidence. |
+
+**⭐ DEFECT 1 — a document rode on questions that matched NOTHING.** `retrieve()` falls back to the
+whole store when the text search misses and the store is small ("so a small store is always in
+play"). That is right for the TEXT and wrong for a PDF: measured, a question about the price book
+was handed the showroom-handover PDF and answered about it. A fallback pair costs a few hundred
+tokens; attaching its document costs a vision pass over up to 30 pages, on every unrelated
+question. `retrieve()` now stamps **`matched`**, and only a genuine text hit contributes its
+document — the fallback still injects the pair's TEXT. This is the same cost risk the spec flagged
+for `RETRIEVE_LIMIT`, arriving from a direction the spec did not look at.
+
+**⭐ DEFECT 2 — the invented-code guard could be defeated by looking the code up.** The spec says
+"the invented-code guard already covers the new input for free". It did not. `collectSeenSkus`
+walked the whole stored tool call — `{name, args, resultSummary}` — so `get_item("ZZQQ9911XX")`
+returning `{error: "No item found"}` still left the code in `args`, where it counted as *proven
+real*, and the answer printed it. **A model could launder any invented code by asking about it
+first.** Pre-existing (R4), but R8a is what makes a PDF full of code-shaped strings an everyday
+input. The proof set is now tool RESULTS only, plus the client's focused sku. Reproduced, fixed,
+re-driven: the same question now answers "the sheet's Phantom unit line is not in the live
+catalog" without printing the code, and a REAL code read out of a PDF (`T6080ZISWH`) is still named
+with the catalog's dimensions beating the sheet's.
+
+**Checks:** `scripts/check-lio.js` grew two — `filesWithinPageBudget` (rank order wins, an
+unreadable page count is never free, the same document on two pairs is sent once) and
+`collectSeenSkus` (args never prove a code, results do). 6/6. `check-grid-gates.js` identical over
+77,760 + 51,840 combinations; `check-face-pins.js` 6/6.
+
+**⭐ The page budget was then driven LIVE, with a control** — it is the spec's "one real cost risk"
+and a pure check cannot show that the cap is what does the dropping. Two pairs both matching one
+question, each carrying a manual whose only distinguishing fact sits on **page 7**, asked for both
+facts in one question:
+
+| Pages across the two pairs | Answer |
+|---|---|
+| 20 + 20 = 40 (over the 30 budget) | "The ALPHA transport code is QX-7741. I don't see a BETA transport code in the attached pages." |
+| 10 + 10 = 20 (inside it) | "The ALPHA transport code is QX-7741. The BETA transport code is RM-2298." |
+
+Same pairs, same question, same build — so the cap is what drops the second document, not some
+"only the first pair ever attaches" bug, and the fact being on page 7 of 20 also shows the vision
+pass reads the whole document rather than its first page. Both pairs are retrieved and inject their
+TEXT in both runs; only the document is budgeted.
+
+**Verified live on D4K-dev**, real model, real catalog: a pair carrying a one-page checklist made
+the answer state four points and a revision number **that appear nowhere but inside the PDF** while
+the exchange itself carried no files · an unrelated question got the pair's text and NOT its
+document · both caps refuse a PDF on a pair in the same words they refuse one on a question (the
+1,033-page price book on size, a 42-page file on pages) · a text-only edit left the document alone,
+a second upload appended, `removeFileIds` removed · non-negotiable 5 held with a document written
+to contradict the catalog · query mode unchanged (7 cooktop cards at 80 cm). Test pairs and the
+three uploaded files were deleted afterwards; the store is back to its one pre-existing pair.
+
+**⚠️ Known gap, left out by decision:** deleting a pair — or detaching a document with
+`removeFileIds` — does NOT delete the PDF from the OpenAI Files API. Pairs are deleted rarely and
+the files are a few MB, so the orphans are cheap, and a remote call in the delete path is a failure
+mode the local delete does not need. ⚠️ They ARE real though: the account already holds 7 orphaned
+`user_data` files from earlier LIO sessions (`o1.pdf` ×4, `design-book-guide.pdf` ×2). Add the
+cleanup if the authoring screen ever makes deletion routine; sweep the account by hand until then.
 
 **Attach the PDF; do not extract its text** — the same reasoning as D4. The pages are laid out, and
 the P1 / suspended / depth markers are vector drawings with no glyphs, so extraction loses exactly
