@@ -840,6 +840,47 @@ Current facts:
   service method so SSE is a controller change) and rate limits / budgets (D6 — per-turn token usage
   IS recorded on every exchange, so a limit can be set later from real numbers).
 
+- **⭐ LIO leftovers L1 + L2 (2026-09-15) — `docs/lio-leftovers.md` has the full status.**
+  **Merged to `dev` 2026-09-15:** backend PR #3125 (`caaa2bd4`), frontend PR #2496 (`5b33e9f49`),
+  both rebased onto current `dev` first. **Live on staging + main the same day** (frontend #2497 →
+  #2498 @ `1a907fad4`, backend #3127 → #3128 @ `4ed677fd`); the follow-up fix was confirmed in the
+  chunks served by `dev.`/`staging.`/`www.dash4kitchen.com`. No contract change, nothing to
+  backfill.
+  **Then, same day, released to `main`** (frontend #2502 → #2503 @ `e2081395b`, backend #3132 →
+  #3133 @ `f249628e`; each promoted only these commits, both read back out of `origin/main`):
+  - **Frontend #2501 (`aa900803`):** a Search | Ask LIO switch in the box. Outside a conversation,
+    a typed question used to substring-filter the grid down to nothing.
+  - **Backend #3131 (`a9955864`):** a prompt fix. "These" with no card open means the greyed cards
+    on screen, and a curated note's codes are never the subject of an answer. Dev's one test note
+    had made LIO blame T1580. Benchmark 60/60.
+  **L1 — "items WITH X".** `GET items?references=` (exact codes, ≤ 200, over `accessories` incl.
+  `accessories.variants.sku`, `alterations`, `companions`) + `referencesFamily=<familyId>` (every
+  code on one card, expanded from the cached pool) + `referencesIn` (needed: `MPRU` is an accessory
+  on 1,626 units AND a companion on 1,596). Face pinned to the matched `memberSkus` (else 42/48
+  `LBNS30581` families front the 60 cm cabinet). Unindexed on purpose: ~400 ms measured. LIO
+  benchmark **41/41**. ⚠️ `q` searches sku + card LABEL only — "L-Box in walnut" is a SUBCATEGORY,
+  and the L-Box sets are `kind:"cabinet"`; that, not the filter, is what LIO tripped on first.
+  **L2 — follow-ups keep their thread.** While a conversation is open the box is a CHAT box: typing
+  keeps the answer and its cards and does not filter the grid (`gridFilters`). A grid move or a ✕
+  resets. One question at a time: `busy` includes the gap between the ask returning and the first
+  poll, which let a follow-up drop the previous answer. Verified in the real client both ways. ⚠️ An automation tab is `visibilityState:"hidden"` and TanStack Query
+  stops polling there — fire `visibilitychange` on `window`, not `document`.
+  Also: `DEFAULT_MODEL` pinned to `gpt-5.5-2026-04-23`. The CORS allow-list is `localhost:3000/3001`
+  (+8000), so a local frontend on any other port cannot reach a local backend.
+  **L3 — the other kinds of question (same branch).** A 40-question probe through the real endpoint
+  found 11 confident wrong answers, all the same failure: no tool answered the question exactly,
+  so LIO used a stand-in. New `GET items` filters: `handedLR`, `applianceCategory` +
+  `applianceNicheInch`, `text` (whole-word over name + description; NOT `q`), `engineeringYes/No`,
+  `available` (the grid's own `cardAvailable`, filtered before the total). `get_item` now carries
+  sizes + each depth's order code, planning notes, modifications, weight/volume, toe kick, variant,
+  System Builder sets, and resolves built order codes. Unknown programme names ("ROCCA"; the real
+  names are "ROCCA 01"…) now bounce instead of silently meaning *no programme*. ⚠️ Two traps
+  found by driving it: (1) a PLAIN COUNT INCLUDES GREYED CARDS — Tall @ROCCA 01 is 279 cards =
+  118 live + 161 greyed; (2) the printed Engineering "Opening P1" (3,457) disagrees with the P1 gate
+  (1,501, overlap 1,091), so LIO may filter engineering on `tipSoftclose` ONLY. ⚠️ And one I caused:
+  order-code peeling is free in a search but NOT in a lookup — `buildsCode()` must replay
+  `assemble()` with the item's own capabilities, or `P1T6080` comes back "confirmed".
+
 - **⭐⭐ Deactivated items still showed in the Design Book (2026-08-21) — REAL bug, shipped to `main`
   as `db7bb872` / PRs #3042→#3043→#3044.** Client deactivated `HSSCUS` (Sensor switch); it moved to the
   admin **Inactive** tab and its card stayed on the CONTROL & SWITCH shelf.

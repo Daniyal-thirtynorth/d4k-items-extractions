@@ -59,7 +59,8 @@ question itself. It returns a job id (D5); `GET /design-book/lio/exchanges/:id` 
 the existing `scripts/check-face-pins.js` is **6/6**.
 
 **Config:** `OPENAI_API_KEY` (already present in `.env`), optional `OPENAI_LIO_MODEL` (default
-**`gpt-5.5`** — must stay vision-capable, R4) and optional `OPENAI_LIO_REASONING_EFFORT` (default
+**`gpt-5.5-2026-04-23`** since 2026-09-15 — pinned in code too, so an environment without the
+variable no longer follows the `gpt-5.5` alias; must stay vision-capable, R4) and optional `OPENAI_LIO_REASONING_EFFORT` (default
 `low`, sent only to the gpt-5 / o-series models). `openai@^7` is the one new dependency.
 
 ### The model pick, and prompt caching (2026-08-10)
